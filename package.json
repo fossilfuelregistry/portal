@@ -9,6 +9,7 @@
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
     "@apollo/client": "3.3",
+    "@babel/core": "^7.17.8",
     "@babel/eslint-parser": "^7.17.0",
     "@babel/preset-react": "^7.16.7",
     "@turf/bbox": "^6.5.0",

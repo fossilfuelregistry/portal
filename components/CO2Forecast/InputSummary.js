@@ -10,6 +10,9 @@ import { Col, Row } from "antd"
 import { DownloadOutlined } from "@ant-design/icons"
 import useCsvDataTranslator from "lib/useCsvDataTranslator"
 import useCO2CostConverter from "lib/useCO2CostConverter"
+import {formatCsvNumber} from "lib/numberFormatter"
+
+import useNumberFormatter from "lib/useNumberFormatter"
 
 const DEBUG = false
 
@@ -21,6 +24,7 @@ function InputSummary( { dataset = [] } ) {
 
 	const costPerTonCO2 = useSelector( redux => redux.co2CostPerTon )
 	const { currentUnit, costMultiplier } = useCO2CostConverter()
+	const numberFormatter = useNumberFormatter()
 
 
 
@@ -45,12 +49,12 @@ function InputSummary( { dataset = [] } ) {
 	const csvData = settings.supportedFuels.map( fuel => (
 		{
 			fuel,
-			scope1_low: totalsInCO2OrCost[ fuel ]?.scope1[ 0 ],
-			scope1_mid: totalsInCO2OrCost[ fuel ]?.scope1[ 1 ],
-			scope1_high: totalsInCO2OrCost[ fuel ]?.scope1[ 2 ],
-			scope3_low: totalsInCO2OrCost[ fuel ]?.scope3[ 0 ],
-			scope3_mid: totalsInCO2OrCost[ fuel ]?.scope3[ 1 ],
-			scope3_high: totalsInCO2OrCost[ fuel ]?.scope3[ 2 ],
+			scope1_low: formatCsvNumber(totalsInCO2OrCost[ fuel ]?.scope1[ 0 ]),
+			scope1_mid: formatCsvNumber(totalsInCO2OrCost[ fuel ]?.scope1[ 1 ]),
+			scope1_high: formatCsvNumber(totalsInCO2OrCost[ fuel ]?.scope1[ 2 ]),
+			scope3_low: formatCsvNumber(totalsInCO2OrCost[ fuel ]?.scope3[ 0 ]),
+			scope3_mid: formatCsvNumber(totalsInCO2OrCost[ fuel ]?.scope3[ 1 ]),
+			scope3_high: formatCsvNumber(totalsInCO2OrCost[ fuel ]?.scope3[ 2 ]),
 		} )
 	)
 
@@ -96,9 +100,9 @@ function InputSummary( { dataset = [] } ) {
 					) ) }
 					<tr className="total subheader">
 						<td>{ getText( 'totals' ) }</td>
-						<td align="right">{ _( sumOfCO2( totals, 0 ) ) * costMultiplier }</td>
-						<td align="right">{ _( sumOfCO2( totals, 1 ) ) * costMultiplier }</td>
-						<td align="right">{ _( sumOfCO2( totals, 2 ) ) * costMultiplier }</td>
+						<td align="right">{ numberFormatter(_( sumOfCO2( totals, 0 ) ) * costMultiplier ) }</td>
+						<td align="right">{ numberFormatter(_( sumOfCO2( totals, 1 ) ) * costMultiplier ) }</td>
+						<td align="right">{ numberFormatter(_( sumOfCO2( totals, 2 ) ) * costMultiplier ) }</td>
 					</tr>
 				</tbody>
 			</table>

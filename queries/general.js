@@ -37,3 +37,16 @@ query sources {
     nodes { description name namePretty sourceId url documentUrl latestCurationAt }
   }
 }`
+
+export const SQL_co2costs = gql`
+query co2Costs {
+  co2Costs {
+    nodes {
+      costPerTon
+      currency
+      source
+      year
+    }
+  }
+}
+`

@@ -10,8 +10,8 @@ import { DownloadOutlined } from "@ant-design/icons"
 import HelpModal from "../HelpModal"
 import useText from "lib/useText"
 import useCsvDataTranslator from "lib/useCsvDataTranslator"
-
 import useCO2CostConverter from "lib/useCO2CostConverter"
+import { formatCsvNumber } from "lib/numberFormatter"
 
 const DEBUG = true
 
@@ -22,12 +22,12 @@ const _csvFormatter = s => {
 	return [ 'oil', 'gas', 'coal' ].map( fuel => ( {
 		scenario: s.name,
 		fuel,
-		scope1_low: s.total[ fuel ].scope1[ 0 ],
-		scope1_mid: s.total[ fuel ].scope1[ 1 ],
-		scope1_high: s.total[ fuel ].scope1[ 2 ],
-		scope3_low: s.total[ fuel ].scope3[ 0 ],
-		scope3_mid: s.total[ fuel ].scope3[ 1 ],
-		scope3_high: s.total[ fuel ].scope3[ 2 ]
+		scope1_low: formatCsvNumber(s.total[ fuel ].scope1[ 0 ]),
+		scope1_mid: formatCsvNumber(s.total[ fuel ].scope1[ 1 ]),
+		scope1_high: formatCsvNumber(s.total[ fuel ].scope1[ 2 ]),
+		scope3_low: formatCsvNumber(s.total[ fuel ].scope3[ 0 ]),
+		scope3_mid: formatCsvNumber(s.total[ fuel ].scope3[ 1 ]),
+		scope3_high: formatCsvNumber(s.total[ fuel ].scope3[ 2 ]),
 	} ) )
 }
 

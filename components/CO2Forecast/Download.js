@@ -3,6 +3,7 @@ import React from "react";
 import { sumOfCO2 } from "./calculate";
 import { useSelector } from "react-redux";
 import useCsvDataTranslator from "lib/useCsvDataTranslator"
+import {formatCsvNumber} from "lib/numberFormatter"
 
 
 export default function Download( { data, filename, fuel, children } ) {
@@ -28,7 +29,13 @@ export default function Download( { data, filename, fuel, children } ) {
 			return _d;
 		} );
 
-	const translatedData = datas.map( generateCsvTranslation );
+	const translatedData = datas
+	.map(d => ({
+		...d,
+		co2: formatCsvNumber(d.co2),
+		volume: formatCsvNumber(d.volume),
+	}))
+	.map( generateCsvTranslation );
 
 	return (
 		<div className="download">

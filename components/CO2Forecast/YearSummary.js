@@ -10,6 +10,7 @@ import { Col, Row } from "antd"
 import HelpModal from "../HelpModal"
 import useCsvDataTranslator from "lib/useCsvDataTranslator"
 import useCO2CostConverter from "lib/useCO2CostConverter"
+import {formatCsvNumber} from "lib/numberFormatter"
 
 
 const DEBUG = true
@@ -48,12 +49,12 @@ export default function YearSummary( { dataset = [] } ) {
 
 
 	csvData = [ {
-		scope1_low: totalsInCO2OrCurrency.scope1[ 0 ],
-		scope1_mid: totalsInCO2OrCurrency.scope1[ 1 ],
-		scope1_high: totalsInCO2OrCurrency.scope1[ 2 ],
-		scope3_low: totalsInCO2OrCurrency.scope3[ 0 ],
-		scope3_mid: totalsInCO2OrCurrency.scope3[ 1 ],
-		scope3_high: totalsInCO2OrCurrency.scope3[ 2 ]
+		scope1_low: formatCsvNumber(totalsInCO2OrCurrency.scope1[ 0 ]),
+		scope1_mid: formatCsvNumber(totalsInCO2OrCurrency.scope1[ 1 ]),
+		scope1_high: formatCsvNumber(totalsInCO2OrCurrency.scope1[ 2 ]),
+		scope3_low: formatCsvNumber(totalsInCO2OrCurrency.scope3[ 0 ]),
+		scope3_mid: formatCsvNumber(totalsInCO2OrCurrency.scope3[ 1 ]),
+		scope3_high: formatCsvNumber(totalsInCO2OrCurrency.scope3[ 2 ])
 	} ]
 	DEBUG && console.info( { csvData } )
 

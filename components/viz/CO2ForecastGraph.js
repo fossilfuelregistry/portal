@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react"
+import React, { /*useCallback, */ useMemo } from "react"
 import { Group } from '@visx/group'
 import { AreaStack, LinePath } from '@visx/shape'
 import { AxisBottom, AxisRight } from '@visx/axis'
@@ -10,15 +10,16 @@ import { withParentSize } from "@visx/responsive"
 import useText from "lib/useText"
 import { combineOilAndGasAndCoal, sumOfCO2 } from "../CO2Forecast/calculate"
 import { useSelector } from "react-redux"
-import FileSaver from 'file-saver'
-import CsvDownloader, { toCsv } from "react-csv-downloader"
+// import FileSaver from 'file-saver'
+import CsvDownloader /*, { toCsv } */ from "react-csv-downloader"
 import settings from 'settings'
 import getConfig from "next/config"
-import { saveSvgAsPng } from "save-svg-as-png"
+// import { saveSvgAsPng } from "save-svg-as-png"
 import useCsvDataTranslator from "lib/useCsvDataTranslator"
 import { DownloadOutlined } from "@ant-design/icons"
+import { formatCsvNumber } from "../../lib/numberFormatter"
 
-const DEBUG = false
+const DEBUG = true
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
@@ -103,7 +104,7 @@ function CO2ForecastGraphBase( {
 		range: [ height - 30, 0 ],
 		domain: [ 0, maxCO2 ],
 	} )
-
+/*
 	const handleMenuClick = useCallback( async e => {
 
 		const _csv = async() => {
@@ -156,30 +157,44 @@ function CO2ForecastGraphBase( {
 				break
 			default:
 		}
-	}, [] )
+	}, [] )*/
 
 	if( !( maxCO2 > 0 ) ) return null // JSON.stringify( maxCO2 )
 
 
-	const csvData = [ ...productionData ]
+	const csvData = productionData.map(p=>({
+		year: p.year, 
+		oil: formatCsvNumber(p.oil),
+		coal: formatCsvNumber(p.coal),
+		gas: formatCsvNumber(p.gas),
+	}))
+
 	projectionData.forEach( d => {
 		const y = csvData.find( dp => dp.year === d.year )
 		if( y )
-			y.co2 = d.co2
+			y.co2 = formatCsvNumber(d.co2)
 		else
-			csvData.push( d )
+			csvData.push( { year: d.year, co2: formatCsvNumber(d.co2) } )
 	} )
 	projProdData.forEach( d => {
 		const y = csvData.find( dp => dp.year === d.year )
 		if( y ) {
-			y.oil_p = d.oil_p
-			y.oil_c = d.oil_c
-			y.gas_p = d.gas_p
-			y.gas_c = d.gas_c
-			y.coal_p = d.coal_p
-			y.coal_c = d.coal_c
+			y.oil_p =  formatCsvNumber( d.oil_p )
+			y.oil_c =  formatCsvNumber( d.oil_c )
+			y.gas_p =  formatCsvNumber( d.gas_p )
+			y.gas_c =  formatCsvNumber( d.gas_c )
+			y.coal_p = formatCsvNumber(  d.coal_p )
+			y.coal_c = formatCsvNumber(  d.coal_c )
 		} else
-			csvData.push( d )
+			csvData.push( {
+				year: formatCsvNumber( d.year ),
+				oil_p: formatCsvNumber( d.oil_p ),
+				oil_c: formatCsvNumber( d.oil_c ),
+				gas_p: formatCsvNumber( d.gas_p ),
+				gas_c: formatCsvNumber( d.gas_c ),
+				coal_p: formatCsvNumber( d.coal_p ),
+				coal_c: formatCsvNumber( d.coal_c ),
+			} )
 	} )
 
 	const translatedCsvData = csvData.map( generateCsvTranslation )

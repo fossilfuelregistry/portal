@@ -43,7 +43,7 @@ function ScopeBarsBase( { totals = [], parentWidth, parentHeight } ) {
 				color={ "#2a1faf" }
 				x={ 0 }
 				y={ 0 }
-				width={ 80 }
+				width={ 60 }
 			/>
 
 			<text x={ 40 } y={ textY } fontSize="14" fontWeight="bold" textAnchor="middle" fill="#000000">
@@ -62,7 +62,7 @@ function ScopeBarsBase( { totals = [], parentWidth, parentHeight } ) {
 				color={ "#1b8d98" }
 				x={ colWidth }
 				y={ 0 }
-				width={ 80 }
+				width={ 60 }
 			/>
 
 			<text x={ 170 } y={ textY } fontSize="14" fontWeight="bold" textAnchor="middle" fill="#000000">
@@ -81,7 +81,7 @@ function ScopeBarsBase( { totals = [], parentWidth, parentHeight } ) {
 				color={ primary }
 				x={ 2 * colWidth }
 				y={ 0 }
-				width={ 80 }
+				width={ 60 }
 			/>
 
 			<text x={ 300 } y={ textY } fontSize="14" fontWeight="bold" textAnchor="middle" fill="#000000">
