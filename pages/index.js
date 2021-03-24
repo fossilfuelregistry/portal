@@ -1,88 +1,52 @@
-import {
-  Form,
-  Select,
-  InputNumber,
-  DatePicker,
-  Switch,
-  Slider,
-  Button,
-} from 'antd'
+import { useContext, useState } from "react"
+import { Button } from 'antd'
+import NavigDrawer from "../components/navigation/NavigDrawer"
+import I18nContext from "../components/i18nContext"
 
-const FormItem = Form.Item
-const Option = Select.Option
+async function geti18nTexts( locale ) {
 
-export default function Home() {
-  return (
-    <div style={{ marginTop: 100 }}>
-      <Form layout="horizontal">
-        <FormItem
-          label="Input Number"
-          labelCol={{ span: 8 }}
-          wrapperCol={{ span: 8 }}
-        >
-          <InputNumber
-            size="large"
-            min={1}
-            max={10}
-            style={{ width: 100 }}
-            defaultValue={3}
-            name="inputNumber"
-          />
-          <a href="#">Link</a>
-        </FormItem>
+	const formData = new URLSearchParams()
+	formData.append( 'api_token', process.env.POEDITOR_API_TOKEN )
+	formData.append( 'id', process.env.POEDITOR_PROJECT_ID )
+	formData.append( 'language', locale )
 
-        <FormItem
-          label="Switch"
-          labelCol={{ span: 8 }}
-          wrapperCol={{ span: 8 }}
-        >
-          <Switch defaultChecked name="switch" />
-        </FormItem>
+	const res = await fetch( `https://api.poeditor.com/v2/terms/list`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded'
+		},
+		body: formData
+	} )
+	const data = await res.json()
+	const fullTerms = data?.result?.terms ?? []
+	let terms = {}
+	fullTerms.forEach( term => terms[ term.term ] = term.translation.content )
+	return terms
+}
 
-        <FormItem
-          label="Slider"
-          labelCol={{ span: 8 }}
-          wrapperCol={{ span: 8 }}
-        >
-          <Slider defaultValue={70} />
-        </FormItem>
+export default function Home( props ) {
+	const i18n = useContext( I18nContext )
+	const [ visible, setVisible ] = useState( false )
+	const showDrawer = () => {
+		setVisible( true )
+	}
+	const onClose = () => {
+		setVisible( false )
+	}
 
-        <FormItem
-          label="Select"
-          labelCol={{ span: 8 }}
-          wrapperCol={{ span: 8 }}
-        >
-          <Select
-            size="large"
-            defaultValue="lucy"
-            style={{ width: 192 }}
-            name="select"
-          >
-            <Option value="jack">jack</Option>
-            <Option value="lucy">lucy</Option>
-            <Option value="disabled" disabled>
-              disabled
-            </Option>
-            <Option value="yiminghe">yiminghe</Option>
-          </Select>
-        </FormItem>
+	return (
+		<div style={{ marginTop: 100 }}>
+			<Button type="primary" onClick={showDrawer}>
+				Open
+			</Button>
+			<NavigDrawer visible={visible} onClose={onClose}/>
+		</div>
+	)
+}
 
-        <FormItem
-          label="DatePicker"
-          labelCol={{ span: 8 }}
-          wrapperCol={{ span: 8 }}
-        >
-          <DatePicker name="startDate" />
-        </FormItem>
-        <FormItem style={{ marginTop: 48 }} wrapperCol={{ span: 8, offset: 8 }}>
-          <Button size="large" type="primary" htmlType="submit">
-            OK
-          </Button>
-          <Button size="large" style={{ marginLeft: 8 }}>
-            Cancel
-          </Button>
-        </FormItem>
-      </Form>
-    </div>
-  )
+export async function getStaticProps( { locale, preview = false } ) {
+	const texts = ( await geti18nTexts( locale ) ) || []
+	return {
+		props: { texts, preview }
+	}
 }
