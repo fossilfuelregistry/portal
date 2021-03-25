@@ -2,6 +2,10 @@ import { useContext, useState } from "react"
 import { Button } from 'antd'
 import NavigDrawer from "../components/navigation/NavigDrawer"
 import I18nContext from "../components/i18nContext"
+import { CgMenu } from 'react-icons/cg'
+import getConfig from 'next/config'
+
+const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
 async function geti18nTexts( locale ) {
 
@@ -35,11 +39,23 @@ export default function Home( props ) {
 	}
 
 	return (
-		<div style={{ marginTop: 100 }}>
-			<Button type="primary" onClick={showDrawer}>
-				Open
-			</Button>
+		<div className="navigation">
+			<CgMenu onClick={showDrawer}/>
 			<NavigDrawer visible={visible} onClose={onClose}/>
+
+			<style jsx>{`
+              .navigation {
+                padding: 40px;
+                font-size: 32px;
+              }
+
+              @media (max-width: ${theme[ '@screen-sm' ]}) {
+                .navigation {
+                  padding: 16px 24px;
+                }
+              }
+			`}</style>
+
 		</div>
 	)
 }

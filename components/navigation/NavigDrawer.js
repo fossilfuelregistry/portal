@@ -8,7 +8,7 @@ const NavigDrawer = ( { visible, onClose } ) => {
 	return (
 		<div style={{ marginTop: 100 }}>
 			<Drawer
-				title="Basic NavigDrawer"
+				title={"GFFR"}
 				placement="left"
 				closable={true}
 				onClose={onClose}
