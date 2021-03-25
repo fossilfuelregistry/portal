@@ -1,0 +1,9 @@
+@font-face {
+    font-family: "sommet-rounded";
+    src: url("sommet-rounded-700.woff2") format("woff2"),
+    url("sommet-rounded-700.woff") format("woff"),
+    url("sommet-rounded-700.ot") format("opentype");
+    font-display: auto;
+    font-style: normal;
+    font-weight: 700;
+}

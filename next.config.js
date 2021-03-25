@@ -36,6 +36,9 @@ module.exports = withLess( {
 				use: 'null-loader',
 			} )
 		}
+
+		config.resolve.modules.push( path.resolve( './' ) )
+
 		return config
 	},
 	i18n: {
