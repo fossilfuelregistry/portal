@@ -1,9 +1,9 @@
-import { useContext } from "react"
+import { useStore, textsSelector } from 'lib/zustandProvider'
+import Link from 'next/link'
 import { Drawer, } from 'antd'
-import I18nContext from "../i18nContext"
 
 const NavigDrawer = ( { visible, onClose } ) => {
-	const i18n = useContext( I18nContext )
+	const texts = useStore( textsSelector )
 
 	return (
 		<div style={{ marginTop: 100 }}>
@@ -14,8 +14,8 @@ const NavigDrawer = ( { visible, onClose } ) => {
 				onClose={onClose}
 				visible={visible}
 			>
-				<p>{i18n.oil}</p>
-				<p>{i18n.gas}</p>
+				<Link href="/wells">{texts?.oil}</Link>
+				<p>{texts?.gas}</p>
 			</Drawer>
 		</div>
 	)
