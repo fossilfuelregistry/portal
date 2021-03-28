@@ -2,7 +2,7 @@ import TopNavigation from "components/navigation/TopNavigation"
 import getConfig from 'next/config'
 import { ipLocationSelector, useStore } from "lib/zustandProvider"
 import dynamic from 'next/dynamic'
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
@@ -23,13 +23,18 @@ export default function Wells( props ) {
 		},
 		[ ipLocation ] )
 
+	const handleOnMove = useCallback( center => {
+		set_lat( center.lat )
+		set_lng( center.lng )
+	}, [ set_lat, set_lng ] )
+
 	return (
 		<>
 			<div className="page">
 				<TopNavigation/>
 
 				<div className="map">
-					<MapWithNoSSR lat={lat} lng={lng}/>
+					<MapWithNoSSR lat={lat} lng={lng} onMove={handleOnMove}/>
 				</div>
 
 				<style jsx>{`

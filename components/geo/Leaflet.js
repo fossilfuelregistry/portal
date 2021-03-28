@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import Head from "next/head"
 import Spinner from "./Spinner"
 
-const DEBUG = true
+const DEBUG = false
 
 const loadScript = ( scriptId, srcUrl, callback ) => {
 	const existingScript = document.getElementById( 'scriptId' )
@@ -10,9 +10,11 @@ const loadScript = ( scriptId, srcUrl, callback ) => {
 		const script = document.createElement( 'script' )
 		script.src = srcUrl
 		script.id = scriptId
+		DEBUG && console.log( '...', scriptId )
 		document.body.appendChild( script )
 		script.onload = () => {
 			if( callback ) {
+				DEBUG && console.log( '<<<', scriptId )
 				callback()
 			}
 		}
@@ -20,7 +22,7 @@ const loadScript = ( scriptId, srcUrl, callback ) => {
 	if( existingScript && callback ) callback()
 }
 
-export default function Leaflet( { lat, lng } ) {
+export default function Leaflet( { lat, lng, onMove } ) {
 	if( lat === 0 && lng === 0 ) return null
 	const domRef = useRef()
 	const mapRef = useRef()
@@ -31,19 +33,33 @@ export default function Leaflet( { lat, lng } ) {
 	}, [] )
 
 	useEffect( () => {
-			if( loaded === 1 ) {
-				loadScript( 'esti-script', 'https://unpkg.com/esri-leaflet/dist/esri-leaflet.js', () => set_loaded( l => l + 1 ) )
-				return
+			DEBUG && console.log( { loaded } )
+			switch( loaded ) {
+				case 1:
+					loadScript( 'esti-script', 'https://unpkg.com/esri-leaflet/dist/esri-leaflet.js', () => set_loaded( l => l + 1 ) )
+					return
+				case 2:
+					loadScript( 'heat-script', 'https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js', () => set_loaded( l => l + 1 ) )
+					return
+				case 3:
+					loadScript( 'heatmap-script', 'https://unpkg.com/esri-leaflet-heatmap@2.0.0', () => set_loaded( l => l + 1 ) )
+					return
+				default:
 			}
-			if( loaded < 2 || !domRef.current ) return
+			if( !domRef.current || typeof mapRef.current === 'object' ) return
+
 			mapRef.current = window.L.map( 'map' ).setView( [ lat, lng ], 13 )
 			window.L.esri.basemapLayer( "Topographic", { detectRetina: true } ).addTo( mapRef.current )
+
+			mapRef.current.on( 'moveend', event => {
+					DEBUG && console.log( { event, center: mapRef.current.getCenter() } )
+					onMove?.( mapRef.current.getCenter() )
+				}
+			)
 		},
 		[ domRef.current, loaded ] )
 
-	if( loaded < 2 ) return (
-		<Spinner/>
-	)
+	if( loaded < 4 ) return <Spinner/>
 
 	return (
 		<div className="gffr-map">
