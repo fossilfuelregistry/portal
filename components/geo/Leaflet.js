@@ -22,7 +22,7 @@ const loadScript = ( scriptId, srcUrl, callback ) => {
 	if( existingScript && callback ) callback()
 }
 
-export default function Leaflet( { center, onMove } ) {
+export default function Leaflet( { center, onMove, onMap } ) {
 	const domRef = useRef()
 	const mapRef = useRef()
 	const [ loaded, set_loaded ] = useState( 0 )
@@ -35,31 +35,37 @@ export default function Leaflet( { center, onMove } ) {
 		DEBUG && console.log( { loaded } )
 		switch( loaded ) {
 			case 1:
-				loadScript( 'esti-script', 'https://unpkg.com/esri-leaflet/dist/esri-leaflet.js', () => set_loaded( l => l + 1 ) )
+				loadScript( 'leaflet-providers', '/js/leaflet-providers.js', () => set_loaded( l => l + 1 ) )
 				return
 			case 2:
-				loadScript( 'heat-script', 'https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js', () => set_loaded( l => l + 1 ) )
+				loadScript( 'leaflet-heat', '/js/leaflet-heat.js', () => set_loaded( l => l + 1 ) )
 				return
 			case 3:
-				loadScript( 'heatmap-script', 'https://unpkg.com/esri-leaflet-heatmap@2.0.0', () => set_loaded( l => l + 1 ) )
+				if( !domRef.current || typeof mapRef.current === 'object' ) return
+
+				mapRef.current = window.L.map( 'map' ).setView( [ /*center.lat, center.lng*/ 55.008553008410345,  -121.55560433864595 ], 12 )
+
+				window.L.tileLayer(
+					'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+					{ attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community' }
+				).addTo( mapRef.current )
+
+
+				mapRef.current.on( 'moveend', event => {
+					DEBUG && console.log( { event, center: mapRef.current.getCenter() } )
+					onMove?.( mapRef.current.getCenter(), mapRef.current.getBounds() )
+				} )
+
+				onMap?.( mapRef.current )
 				return
 			default:
 		}
-		if( !domRef.current || typeof mapRef.current === 'object' ) return
-
-		mapRef.current = window.L.map( 'map' ).setView( [ center.lat, center.lng ], 12 )
-		window.L.esri.basemapLayer( "Topographic", { detectRetina: true } ).addTo( mapRef.current )
-
-		mapRef.current.on( 'moveend', event => {
-			DEBUG && console.log( { event, center: mapRef.current.getCenter() } )
-			onMove?.( mapRef.current.getCenter(), mapRef.current.getBounds() )
-		} )
 	},
 	[ domRef.current, loaded ] )
 
 	if( center?.lat === 0 && center?.lng === 0 ) return null
 
-	if( loaded < 4 ) return <Spinner/>
+	if( loaded < 3 ) return <Spinner/>
 
 	return (
 		<div className="gffr-map">
