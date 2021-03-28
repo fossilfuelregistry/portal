@@ -22,8 +22,7 @@ const loadScript = ( scriptId, srcUrl, callback ) => {
 	if( existingScript && callback ) callback()
 }
 
-export default function Leaflet( { lat, lng, onMove } ) {
-	if( lat === 0 && lng === 0 ) return null
+export default function Leaflet( { center, onMove } ) {
 	const domRef = useRef()
 	const mapRef = useRef()
 	const [ loaded, set_loaded ] = useState( 0 )
@@ -33,31 +32,32 @@ export default function Leaflet( { lat, lng, onMove } ) {
 	}, [] )
 
 	useEffect( () => {
-			DEBUG && console.log( { loaded } )
-			switch( loaded ) {
-				case 1:
-					loadScript( 'esti-script', 'https://unpkg.com/esri-leaflet/dist/esri-leaflet.js', () => set_loaded( l => l + 1 ) )
-					return
-				case 2:
-					loadScript( 'heat-script', 'https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js', () => set_loaded( l => l + 1 ) )
-					return
-				case 3:
-					loadScript( 'heatmap-script', 'https://unpkg.com/esri-leaflet-heatmap@2.0.0', () => set_loaded( l => l + 1 ) )
-					return
-				default:
-			}
-			if( !domRef.current || typeof mapRef.current === 'object' ) return
+		DEBUG && console.log( { loaded } )
+		switch( loaded ) {
+			case 1:
+				loadScript( 'esti-script', 'https://unpkg.com/esri-leaflet/dist/esri-leaflet.js', () => set_loaded( l => l + 1 ) )
+				return
+			case 2:
+				loadScript( 'heat-script', 'https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js', () => set_loaded( l => l + 1 ) )
+				return
+			case 3:
+				loadScript( 'heatmap-script', 'https://unpkg.com/esri-leaflet-heatmap@2.0.0', () => set_loaded( l => l + 1 ) )
+				return
+			default:
+		}
+		if( !domRef.current || typeof mapRef.current === 'object' ) return
 
-			mapRef.current = window.L.map( 'map' ).setView( [ lat, lng ], 13 )
-			window.L.esri.basemapLayer( "Topographic", { detectRetina: true } ).addTo( mapRef.current )
+		mapRef.current = window.L.map( 'map' ).setView( [ center.lat, center.lng ], 12 )
+		window.L.esri.basemapLayer( "Topographic", { detectRetina: true } ).addTo( mapRef.current )
 
-			mapRef.current.on( 'moveend', event => {
-					DEBUG && console.log( { event, center: mapRef.current.getCenter() } )
-					onMove?.( mapRef.current.getCenter() )
-				}
-			)
-		},
-		[ domRef.current, loaded ] )
+		mapRef.current.on( 'moveend', event => {
+			DEBUG && console.log( { event, center: mapRef.current.getCenter() } )
+			onMove?.( mapRef.current.getCenter(), mapRef.current.getBounds() )
+		} )
+	},
+	[ domRef.current, loaded ] )
+
+	if( center?.lat === 0 && center?.lng === 0 ) return null
 
 	if( loaded < 4 ) return <Spinner/>
 
@@ -75,7 +75,8 @@ export default function Leaflet( { lat, lng, onMove } ) {
                 width: 100vw;
                 height: 80vh;
               }
-			`}</style>
+			`}
+			</style>
 
 		</div>
 	)

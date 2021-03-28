@@ -3,6 +3,12 @@ import { StoreProvider } from 'lib/zustandProvider'
 import { useHydrate } from 'lib/store'
 import 'assets/app.less'
 import { getUserIP } from "lib/getUserIp"
+import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client'
+
+const client = new ApolloClient( {
+	uri: process.env.NEXT_PUBLIC_BACKEND_URL + '/graphql',
+	cache: new InMemoryCache()
+} )
 
 function GFFR( { Component, pageProps } ) {
 
@@ -18,15 +24,17 @@ function GFFR( { Component, pageProps } ) {
 				return api.json()
 			} )
 			.then( ipLocation => {
-				store.setState( { ipLocation } )
+				store.setState( { ipLocation: { lat: ipLocation.lat, lng: ipLocation.lon } } )
 			} )
 			.catch( e => console.log( e.message ) )
 	}, [] )
 
 	return (
-		<StoreProvider store={store}>
-			<Component {...pageProps} />
-		</StoreProvider>
+		<ApolloProvider client={client}>
+			<StoreProvider store={store}>
+				<Component {...pageProps} />
+			</StoreProvider>
+		</ApolloProvider>
 	)
 }
 

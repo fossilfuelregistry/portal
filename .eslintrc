@@ -1,0 +1,122 @@
+{
+  "env": {
+    "browser": true,
+    "node": true,
+    "es6": true
+  },
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
+  "plugins": [
+    "babel",
+    "jsx-a11y",
+    "react",
+    "react-hooks",
+    "eslint-plugin-import",
+    "eslint-plugin-simple-import-sort"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:jsx-a11y/strict"
+  ],
+  "rules": {
+    "indent": [
+      "error",
+      "tab",
+      {
+        "SwitchCase": 1
+      }
+    ],
+    "semi": "off",
+    "babel/semi": [
+      "off"
+    ],
+    "no-console": "off",
+    "space-in-parens": [
+      2,
+      "always"
+    ],
+    "array-bracket-spacing": [
+      2,
+      "always"
+    ],
+    "object-curly-spacing": [
+      2,
+      "always"
+    ],
+    "computed-property-spacing": [
+      2,
+      "always"
+    ],
+    "react/boolean-prop-naming": "error",
+    "react/no-array-index-key": "error",
+    "react/no-set-state": "error",
+    "react/no-typos": "error",
+    "react/no-this-in-sfc": "error",
+    "react/no-unsafe": "error",
+    "react/no-unused-prop-types": "error",
+    "react/no-unused-state": "error",
+    "react/prefer-stateless-function": "warn",
+    "react/require-default-props": "error",
+    "react/self-closing-comp": "error",
+    "react/sort-prop-types": "warn",
+    "react/style-prop-object": "error",
+    "react/prop-types": "off",
+    "react/void-dom-elements-no-children": "error",
+    "react/jsx-child-element-spacing": "warn",
+    "react/jsx-closing-bracket-location": "error",
+    "react/jsx-closing-tag-location": "error",
+    "react/jsx-filename-extension": [
+      "warn",
+      {
+        "extensions": [
+          ".js"
+        ]
+      }
+    ],
+    "react/jsx-first-prop-new-line": [
+      "error",
+      "multiline-multiprop"
+    ],
+    "react/jsx-handler-names": "error",
+    "react/jsx-one-expression-per-line": "off",
+    "react/jsx-fragments": "off",
+    "react/jsx-no-bind": "off",
+    "react/jsx-boolean-value": "off",
+    "react/jsx-pascal-case": "error",
+    "react/jsx-props-no-multi-spaces": "error",
+    "react/jsx-sort-default-props": "error",
+    "react/jsx-sort-props": "off",
+    "react/react-in-jsx-scope": "off",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
+    "jsx-a11y/label-has-for": "off",
+    "jsx-a11y/no-static-element-interactions": "off",
+    "jsx-a11y/click-events-have-key-events": "off",
+    "jsx-a11y/label-has-associated-control": [
+      "error",
+      {
+        "controlComponents": [
+          "Select",
+          "Input",
+          "TextArea",
+          "Textarea"
+        ],
+        "depth": 3
+      }
+    ],
+    "simple-import-sort/sort": "off",
+    "sort-imports": "off",
+    "import/first": "error",
+    "import/newline-after-import": "error",
+    "import/no-duplicates": "error"
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  }
+}
