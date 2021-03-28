@@ -11,7 +11,8 @@ export default function Home( props ) {
 			<style jsx>{`
               @media (max-width: ${theme[ '@screen-sm' ]}) {
               }
-			`}</style>
+			`}
+			</style>
 
 		</div>
 	)

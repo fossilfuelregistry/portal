@@ -43,7 +43,7 @@ export default function Leaflet( { center, onMove, onMap } ) {
 			case 3:
 				if( !domRef.current || typeof mapRef.current === 'object' ) return
 
-				mapRef.current = window.L.map( 'map' ).setView( [ /*center.lat, center.lng*/ 55.008553008410345,  -121.55560433864595 ], 12 )
+				mapRef.current = window.L.map( 'map' ).setView( [ center.lat, center.lng ], 12 )
 
 				window.L.tileLayer(
 					'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
