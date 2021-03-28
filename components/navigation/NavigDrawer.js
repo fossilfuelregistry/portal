@@ -8,14 +8,14 @@ const NavigDrawer = ( { visible, onClose } ) => {
 	return (
 		<div style={{ marginTop: 100 }}>
 			<Drawer
-				title={"GFFR"}
+				title={<Link href="/">GFFR</Link>}
 				placement="left"
 				closable={true}
 				onClose={onClose}
 				visible={visible}
 			>
-				<Link href="/wells">{texts?.oil}</Link>
-				<p>{texts?.gas}</p>
+				<Link href="/wells">{texts?.oil_production}</Link>
+				<p>...</p>
 			</Drawer>
 		</div>
 	)

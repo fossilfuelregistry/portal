@@ -33,9 +33,10 @@ export default function TopNavigation( props ) {
 
 			<style jsx>{`
               .navigation {
-                padding: 40px;
+                padding: 28px 40px;
                 font-size: 32px;
                 line-height: 1;
+                height: 100px;
               }
 
               @media (max-width: ${theme[ '@screen-sm' ]}) {
