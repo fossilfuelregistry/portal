@@ -4,17 +4,17 @@ import dynamic from "next/dynamic"
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
-const GlobeNoSSR = dynamic( () => import( "react-globe.gl" ),
+const GlobeNoSSR = dynamic( () => import( "components/geo/GlobeNoSSR" ),
 	{ ssr: false } )
 
 export default function Home( props ) {
 	return (
 		<div className="page">
+
 			<TopNavigation/>
-			<GlobeNoSSR
-				backgroundColor="#ffffff"
-				globeImageUrl="//unpkg.com/three-globe/example/img/earth-day.jpg"
-			/>
+
+			<GlobeNoSSR/>
+
 			<style jsx>{`
               @media (max-width: ${theme[ '@screen-sm' ]}) {
               }
