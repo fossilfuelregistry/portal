@@ -25,7 +25,7 @@ export default function TopNavigation( props ) {
 					<img src="/SVG/gffr-logo.svg" alt="GFFR Logo" height={40}/>
 				</Col>
 				<Col>
-					<h4>Global Fossil Fuel Reserve</h4>
+					<h4>Global Fossil Fuel Registry</h4>
 				</Col>
 			</Row>
 
@@ -44,7 +44,8 @@ export default function TopNavigation( props ) {
                   padding: 16px 24px;
                 }
               }
-			`}</style>
+			`}
+			</style>
 
 		</div>
 	)
