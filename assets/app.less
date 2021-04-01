@@ -1,6 +1,13 @@
 @import "../node_modules/antd/lib/style/themes/default.less";
 @import "antd-custom.less";
 
+.content-block {
+  padding: 12px 40px;
+  @media (max-width: @screen-sm) {
+    padding: 8px 24px;
+  }
+}
+
 h1, h2, h3, h4, h5 {
   margin: 0 !important;
   font-family: sommet-rounded, sans-serif;
