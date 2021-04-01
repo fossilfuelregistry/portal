@@ -57,6 +57,7 @@ export default function GlobeNoSSR( { year, dataKeyName = 'production' } ) {
 	return (
 		<Globe
 			width={window.innerWidth - 40}
+			height={window.innerWidth - 40}
 			backgroundColor="#ffffff"
 			globeImageUrl="//unpkg.com/three-globe/example/img/earth-day.jpg"
 			polygonsData={polygons}

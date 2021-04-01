@@ -23,19 +23,7 @@ export default function Home() {
 			<TopNavigation/>
 
 			<div className="content-block globe-controls">
-				<Row gutter={4}>
-					<Col xs={24} md={8}>
-						<Radio.Group
-							options={[
-								{ label: 'PRODUCTION', value: 'production' },
-								{ label: 'RESERVES', value: 'reserves' },
-							]}
-							onChange={handleChangeKeyName}
-							value={dataKeyName}
-							optionType="button"
-							buttonStyle="solid"
-						/>
-					</Col>
+				<Row gutter={[ 4, 12 ]}>
 					<Col xs={24} md={16}>
 						<Slider
 							trackStyle={{ height: '12px' }}
@@ -46,6 +34,18 @@ export default function Home() {
 							max={2021}
 							onChange={set_year}
 							value={year}
+						/>
+					</Col>
+					<Col xs={24} md={8} style={{ textAlign: 'center' }}>
+						<Radio.Group
+							options={[
+								{ label: 'PRODUCTION', value: 'production' },
+								{ label: 'RESERVES', value: 'reserves' },
+							]}
+							onChange={handleChangeKeyName}
+							value={dataKeyName}
+							optionType="button"
+							buttonStyle="solid"
 						/>
 					</Col>
 				</Row>
