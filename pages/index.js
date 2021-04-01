@@ -1,7 +1,7 @@
 import TopNavigation from "components/navigation/TopNavigation"
 import getConfig from 'next/config'
 import dynamic from "next/dynamic"
-import { Slider } from "antd"
+import { Col, Slider, Radio, Row } from "antd"
 import { useCallback, useState } from "react"
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
@@ -11,8 +11,10 @@ const GlobeNoSSR = dynamic( () => import( "components/geo/GlobeNoSSR" ),
 
 export default function Home() {
 	const [ year, set_year ] = useState( 2019 )
-	const handleChange = useCallback( event => {
-		set_year( event )
+	const [ dataKeyName, set_dataKeyName ] = useState( 'production' )
+
+	const handleChangeKeyName = useCallback( event => {
+		set_dataKeyName( event.target.value )
 	}, [] )
 
 	return (
@@ -21,20 +23,37 @@ export default function Home() {
 			<TopNavigation/>
 
 			<div className="content-block globe-controls">
-				<Slider
-					trackStyle={{ height: '12px' }}
-					railStyle={{ height: '12px' }}
-					handleStyle={{ height: '22px', width: '22px' }}
-					tooltipVisible={true}
-					min={2010}
-					max={2021}
-					onChange={handleChange}
-					value={year}
-				/>
+				<Row gutter={4}>
+					<Col xs={24} md={8}>
+						<Radio.Group
+							options={[
+								{ label: 'PRODUCTION', value: 'production' },
+								{ label: 'RESERVES', value: 'reserves' },
+							]}
+							onChange={handleChangeKeyName}
+							value={dataKeyName}
+							optionType="button"
+							buttonStyle="solid"
+						/>
+					</Col>
+					<Col xs={24} md={16}>
+						<Slider
+							trackStyle={{ height: '12px' }}
+							railStyle={{ height: '12px' }}
+							handleStyle={{ height: '22px', width: '22px' }}
+							tooltipVisible={true}
+							min={1970}
+							max={2021}
+							onChange={set_year}
+							value={year}
+						/>
+					</Col>
+				</Row>
+
 			</div>
 
 			<div className="content-block">
-				<GlobeNoSSR year={year}/>
+				<GlobeNoSSR year={year} dataKeyName={dataKeyName}/>
 			</div>
 
 			<style jsx>{`

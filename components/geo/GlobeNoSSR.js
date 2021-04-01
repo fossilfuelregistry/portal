@@ -4,22 +4,29 @@ import Spinner from "./Spinner"
 import { useCallback, useEffect, useRef, useState } from "react"
 
 
-export default function GlobeNoSSR( { year } ) {
+export default function GlobeNoSSR( { year, dataKeyName = 'production' } ) {
 
 	const { data }
-		= useQuery( gql`{ neCountries { nodes { isoA2 countryProductionsByIso3166 { nodes { production year id } } id geometry } } } `, {} )
+		= useQuery( gql`
+		{ neCountries { nodes { 
+			id geometry isoA2
+			countryProductionsByIso3166 { nodes { production year id } } 
+			countryReservesByIso3166 { nodes { id year volume } }
+		} } } `, {} )
 
 	const [ polygons, set_polygons ] = useState( [] )
 	const [ duration, set_duration ] = useState( 3000 )
+	const lastDataKeyName = useRef( dataKeyName )
 	const lastYear = useRef( year )
 	const countries = data?.neCountries?.nodes
 
 	useEffect( () => {
-		if( year !== lastYear.current ) {
-			set_duration( 300 )
+		if( year !== lastYear.current || dataKeyName!== lastDataKeyName.current ) {
+			set_duration( 400 )
 			lastYear.current = year
+			lastDataKeyName.current = dataKeyName
 		}
-	}, [ year ] )
+	}, [ year, dataKeyName ] )
 
 	useEffect( () => {
 		if( countries?.length > 0 )
@@ -31,15 +38,25 @@ export default function GlobeNoSSR( { year } ) {
 	}, [ countries ] )
 
 	const getAltitude = useCallback( country => {
-		const production = country.countryProductionsByIso3166?.nodes?.find( p => p.year === year )?.production ?? 1
-		return Math.sqrt( production ) / 250
-	}, [ year ] )
+		let data
+		switch( dataKeyName ) {
+			case 'production':
+				data = country.countryProductionsByIso3166?.nodes?.find( p => p.year === year )?.production ?? 1
+				return Math.sqrt( data ) / 250
+			case 'reserves':
+				data = country.countryReservesByIso3166?.nodes?.find( p => p.year === year )?.volume ?? 1
+				return Math.sqrt( data ) / 50
+			default:
+				return 0
+		}
+	}, [ year, dataKeyName ] )
 
 	if( polygons.length < 10 )
 		return <Spinner/>
 
 	return (
 		<Globe
+			width={window.innerWidth - 40}
 			backgroundColor="#ffffff"
 			globeImageUrl="//unpkg.com/three-globe/example/img/earth-day.jpg"
 			polygonsData={polygons}
