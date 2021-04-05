@@ -12,6 +12,7 @@
     "antd": "^4.14.1",
     "babel-eslint": "^10.1.0",
     "babel-plugin-import": "^1.7.0",
+    "bizcharts": "^4.1.9",
     "graphql": "^15.5.0",
     "isomorphic-unfetch": "^3.1.0",
     "less": "4.1.1",

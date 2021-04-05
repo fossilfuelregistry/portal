@@ -3,8 +3,7 @@ import { useQuery, gql } from "@apollo/client"
 import Spinner from "./Spinner"
 import { useCallback, useEffect, useRef, useState } from "react"
 
-
-export default function GlobeNoSSR( { year, dataKeyName = 'production' } ) {
+export default function GlobeNoSSR( { year, dataKeyName = 'production', onGlobeReady } ) {
 
 	const { data }
 		= useQuery( gql`
@@ -60,6 +59,7 @@ export default function GlobeNoSSR( { year, dataKeyName = 'production' } ) {
 			height={window.innerWidth - 40}
 			backgroundColor="#ffffff"
 			globeImageUrl="//unpkg.com/three-globe/example/img/earth-day.jpg"
+			onGlobeReady={onGlobeReady}
 			polygonsData={polygons}
 			polygonAltitude={getAltitude}
 			polygonCapColor={() => 'rgba(20, 0, 0, 0.5)'}
