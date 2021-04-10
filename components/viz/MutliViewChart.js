@@ -1,13 +1,4 @@
-import { useEffect, useState } from "react"
-import {
-	Chart,
-	Area,
-	Line,
-	Point,
-	Tooltip,
-	Axis,
-	View
-} from 'bizcharts'
+import { Area, Axis, Chart, Tooltip, View } from 'bizcharts'
 
 const data = [
 	{ year: 1988, co2: [ 14.3, 27.7 ] },
@@ -41,31 +32,27 @@ const data = [
 	{ year: 2017, co2: [ 10.8, 17.8 ] },
 	{ year: 2018, co2: [ 11, 19.5 ] },
 	{ year: 2019, co2: [ 12, 20.1 ] },
-	{ year: 2020, co2: [ 12, 22 ] },
-]
-
-const dataFuture = [
-	{ year: 2020, co2: [ 12, 22 ] },
-	{ year: 2021, co2: [ 12, 22 ] },
-	{ year: 2022, co2: [ 14.5, 21.8 ] },
-	{ year: 2023, co2: [ 15.5, 22.6 ] },
-	{ year: 2024, co2: [ 16.7, 24.7 ] },
-	{ year: 2025, co2: [ 16.5, 25.0 ] },
-	{ year: 2026, co2: [ 17.8, 25.7 ] },
-	{ year: 2027, co2: [ 13.5, 24.8 ] },
-	{ year: 2028, co2: [ 10.5, 21.4 ] },
-	{ year: 2029, co2: [ 9.2, 23.8 ] },
-	{ year: 2030, co2: [ 11.6, 21.8 ] },
-	{ year: 2031, co2: [ 10.7, 23.7 ] },
-	{ year: 2032, co2: [ 11.0, 23.3 ] },
-	{ year: 2033, co2: [ 11.6, 23.7 ] },
-	{ year: 2034, co2: [ 11.8, 20.7 ] },
-	{ year: 2035, co2: [ 12.6, 22.4 ] },
-	{ year: 2036, co2: [ 13.6, 19.6 ] },
-	{ year: 2037, co2: [ 11.4, 22.6 ] },
-	{ year: 2038, co2: [ 13.2, 25.0 ] },
-	{ year: 2039, co2: [ 14.2, 21.6 ] },
-	{ year: 2040, co2: [ 13.1, 17.1 ] },
+	{ year: 2020, co2: [ 12, 20.1 ], co2_proj: [ 12, 22 ] },
+	{ year: 2021, co2_proj: [ 12, 22 ] },
+	{ year: 2022, co2_proj: [ 14.5, 21.8 ] },
+	{ year: 2023, co2_proj: [ 15.5, 22.6 ] },
+	{ year: 2024, co2_proj: [ 16.7, 24.7 ] },
+	{ year: 2025, co2_proj: [ 16.5, 25.0 ] },
+	{ year: 2026, co2_proj: [ 17.8, 25.7 ] },
+	{ year: 2027, co2_proj: [ 13.5, 24.8 ] },
+	{ year: 2028, co2_proj: [ 10.5, 21.4 ] },
+	{ year: 2029, co2_proj: [ 9.2, 23.8 ] },
+	{ year: 2030, co2_proj: [ 11.6, 21.8 ] },
+	{ year: 2031, co2_proj: [ 10.7, 23.7 ] },
+	{ year: 2032, co2_proj: [ 11.0, 23.3 ] },
+	{ year: 2033, co2_proj: [ 11.6, 23.7 ] },
+	{ year: 2034, co2_proj: [ 11.8, 20.7 ] },
+	{ year: 2035, co2_proj: [ 12.6, 22.4 ] },
+	{ year: 2036, co2_proj: [ 13.6, 19.6 ] },
+	{ year: 2037, co2_proj: [ 11.4, 22.6 ] },
+	{ year: 2038, co2_proj: [ 13.2, 25.0 ] },
+	{ year: 2039, co2_proj: [ 14.2, 21.6 ] },
+	{ year: 2040, co2_proj: [ 13.1, 17.1 ] },
 ]
 
 const averages = [
@@ -127,7 +114,7 @@ const averagesFuture = [
 	{ year: 2040, co2: 14.4 },
 ]
 
-export default function MultiViewChart( { future } ) {
+export default function MultiViewChart() {
 	const scale = {
 		co2: {
 			sync: true,
@@ -138,26 +125,23 @@ export default function MultiViewChart( { future } ) {
 		year: {
 			type: 'linear',
 			nice: true,
-			min: future ? 2021 : 1988,
-			max: future ? 2040 : 2020,
-			ticks: future ? [ 2020, 2030, 2040 ] : [ 1990, 2000, 2010 ]
+			min: 1988,
+			max: 2040,
+			ticks: [ 1990, 2000, 2010, 2020, 2030, 2040 ]
 		},
 	}
 	return (
 		<Chart scale={scale} height={400} data={data} autoFit>
 			<Tooltip shared/>
 			<Axis name="co2" visible={false}/>
-			<Axis name="year" label={{ style: { textAlign: future ? 'start' : 'end' } }}/>
-			<View data={future ? dataFuture : data} scale={{ co2: { alias: 'co2' } }}>
-				<Area position="year*co2" color={future ? '#e9ba70' : undefined}/>
-			</View>
-			<View data={future ? averagesFuture : averages} scale={{ co2: { alias: 'co2' } }}>
-				<Line position="year*co2" color={future ? '#cf7e00' : undefined}/>
-				<Point
+			<Axis name="year" label={{ style: { textAlign: 'end' } }}/>
+			<View data={data}>
+				<Area
 					position="year*co2"
-					size={3}
-					shape="circle"
-					color={future ? '#e54700' : undefined}
+				/>
+				<Area
+					position="year*co2_proj"
+					color={'#ffb542'}
 				/>
 			</View>
 		</Chart>

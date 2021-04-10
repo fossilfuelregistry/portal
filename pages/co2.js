@@ -20,7 +20,6 @@ export default function Wells( props ) {
 
 				<div className="table">
 					<div className="table-cell" style={{ width: '50%' }}><MultiView/></div>
-					<div className="table-cell" style={{ width: '50%' }}><MultiView future={true}/></div>
 				</div>
 
 				<style jsx>{`

@@ -9,7 +9,7 @@ export default function GlobeNoSSR( { year, dataKeyName = 'production', onGlobeR
 		= useQuery( gql`
 		{ neCountries { nodes { 
 			id geometry isoA2
-			countryProductionsByIso3166 { nodes { production year id } } 
+			countryProductionsByIso3166 { nodes { volume year id } } 
 			countryReservesByIso3166 { nodes { id year volume } }
 		} } } `, {} )
 
@@ -40,7 +40,7 @@ export default function GlobeNoSSR( { year, dataKeyName = 'production', onGlobeR
 		let data
 		switch( dataKeyName ) {
 			case 'production':
-				data = country.countryProductionsByIso3166?.nodes?.find( p => p.year === year )?.production ?? 1
+				data = country.countryProductionsByIso3166?.nodes?.find( p => p.year === year )?.volume ?? 1
 				return Math.sqrt( data ) / 250
 			case 'reserves':
 				data = country.countryReservesByIso3166?.nodes?.find( p => p.year === year )?.volume ?? 1
