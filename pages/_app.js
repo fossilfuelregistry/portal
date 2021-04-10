@@ -3,7 +3,8 @@ import { StoreProvider } from 'lib/zustandProvider'
 import { useHydrate } from 'lib/store'
 import 'assets/app.less'
 import { getUserIP } from "lib/getUserIp"
-import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client'
+import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client'
+import { ConfigProvider } from "antd"
 
 const client = new ApolloClient( {
 	uri: process.env.NEXT_PUBLIC_BACKEND_URL + '/graphql',
@@ -32,7 +33,9 @@ function GFFR( { Component, pageProps } ) {
 	return (
 		<ApolloProvider client={client}>
 			<StoreProvider store={store}>
-				<Component {...pageProps} />
+				<ConfigProvider componentSize={'large'}>
+					<Component {...pageProps} />
+				</ConfigProvider>
 			</StoreProvider>
 		</ApolloProvider>
 	)

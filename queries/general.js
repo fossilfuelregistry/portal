@@ -15,3 +15,18 @@ query conversions {
     }
   }
 }`
+
+export const GQL_countries = gql`
+query countries {
+  neCountries(orderBy: NAME_ASC) {
+    nodes {
+      isoA2
+      name
+    }
+  }
+}`
+
+export const GQL_fossilFuelTypes = gql`
+query fossilFuelTypes {
+	fossilFuelTypes { nodes }
+}`

@@ -1,6 +1,8 @@
 import React from 'react'
 import { LoadingOutlined } from "@ant-design/icons"
-import * as styleVariables from '!!../less-variable-loader!antd-custom.less'
+import getConfig from "next/config"
+
+const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
 export default function Loader( { withoutPosition } ) {
 	return (
@@ -12,7 +14,7 @@ export default function Loader( { withoutPosition } ) {
 				transform: "translate(-50%,-50%)"
 			}}
 		>
-			<LoadingOutlined spin style={{ fontSize: 50, color: styleVariables[ 'primary-color' ] }}/>
+			<LoadingOutlined spin style={{ fontSize: 50, color: theme[ '@primary-color' ] }}/>
 		</div>
 	)
 }
