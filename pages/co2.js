@@ -51,10 +51,14 @@ export default function Co2() {
 								{allSources.map( source => (
 									<Col xs={6} key={source.sourceId}>
 										<Checkbox
-											checked={selectedSources[ source.sourceId ]}
+											checked={selectedSources[ source.sourceId ]?.enabled}
 											onChange={
 												e => set_selectedSources(
-													s => ( { ...s, [ source.sourceId ]: e.target.checked } )
+													s => {
+														let srcs = [ ...s ]
+														srcs[ source.sourceId ] = { ...source, enabled: e.target.checked }
+														return srcs
+													}
 												)
 											}
 										>

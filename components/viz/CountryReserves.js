@@ -25,7 +25,7 @@ export default function CountryReserves( { country, fossilFuelType, sources, gra
 
 	const { data: reservesData, loading: loadingReserves, error: errorLoadingReserves }
 		= useQuery( GQL_countryReservesByIso,
-			{ variables: { iso3166: country?.toLowerCase() }, skip: !country } )
+			{ variables: { iso3166: country }, skip: !country } )
 
 	const reserves = reservesData?.countryReserves?.nodes ?? []
 
@@ -57,31 +57,35 @@ export default function CountryReserves( { country, fossilFuelType, sources, gra
 
 	const scaleValues = { sync: true, nice: true }
 
-	const data = reserves
-		.filter( r => r.fossilFuelType === fossilFuelType && grades?.[ r.grade ] === true && sources[ r.sourceId ] )
-		.map( r => {
-			scaleValues.min = scaleValues.min ? Math.min( scaleValues.min, r.volume ) : r.volume
-			scaleValues.max = scaleValues.max ? Math.max( scaleValues.max, r.volume ) : r.volume
-			const point = { year: r.year }
-			if( r.projection || r.year > 2015 ) {
-				point.co2_proj = r.volume
-				point.span_proj = [ r.volume * 0.9, r.volume * 1.15 ]
-			} else {
-				point.co2 = r.volume
-				point.span = [ r.volume * 0.9, r.volume * 1.15 ]
-			}
-			return point
-		} )
+	DEBUG && console.log( 'CountryReserves', { fossilFuelType, firstYear, lastYear, grades, sources, scaleValues } )
+
+	const datasets = sources.filter( s => s?.enabled ).map( source => {
+		console.log( source )
+		return {
+			source,
+			data: reserves
+				.filter( r => r.fossilFuelType === fossilFuelType && grades?.[ r.grade ] === true && source.sourceId === r.sourceId )
+				.map( r => {
+					scaleValues.min = scaleValues.min ? Math.min( scaleValues.min, r.volume ) : r.volume
+					scaleValues.max = scaleValues.max ? Math.max( scaleValues.max, r.volume ) : r.volume
+					const point = { year: r.year }
+					if( r.projection || r.year > 2005 ) {
+						point[ 'co2_' + source.name + '_projection' ] = r.volume
+						point[ 'co2_span_' + source.name + '_projection' ] = [ r.volume * 0.9, r.volume * 1.15 ]
+					} else {
+						point[ 'co2_' + source.name ] = r.volume
+						point[ 'co2_span_' + source.name ] = [ r.volume * 0.9, r.volume * 1.15 ]
+					}
+					return point
+				} )
+		}
+	} )
 
 	const interval = scaleValues.max - scaleValues.min
 	scaleValues.min -= interval * 0.1
 	scaleValues.max += interval * 0.1
 
 	const scale = {
-		co2: scaleValues,
-		co2_proj: scaleValues,
-		span: scaleValues,
-		span_proj: scaleValues,
 		year: {
 			type: 'linear',
 			nice: true,
@@ -91,27 +95,49 @@ export default function CountryReserves( { country, fossilFuelType, sources, gra
 		}
 	}
 
-	if( !firstYear || !lastYear || !fossilFuelType || !data.length > 0 )
+	datasets.forEach( dataset => {
+		scale[ 'co2_' + dataset.source.name ] = scaleValues
+		scale[ 'co2_span_' + dataset.source.name ] = scaleValues
+		scale[ 'co2_' + dataset.source.name + '_projection' ] = scaleValues
+		scale[ 'co2_span_' + dataset.source.name + '_projection' ] = scaleValues
+	} )
+
+	if( !firstYear || !lastYear || !fossilFuelType || !datasets?.[ 0 ]?.data?.length > 0 )
 		return <Alert message={texts?.make_selections} type="info" showIcon/>
 
-	DEBUG && console.log( 'CountryReserves', { fossilFuelType, firstYear, lastYear, grades, sources, scaleValues, data } )
-
 	return (
-		<Chart scale={scale} height={400} data={data} autoFit forceUpdate>
+		<Chart scale={scale} height={400} autoFit forceUpdate>
 			<Tooltip shared/>
 
-			<View data={data}>
-				<Area position="year*span"/>
-				<Area position="year*span_proj" color={'#ffb542'}/>
-			</View>
+			{datasets.map( dataset => {
+				DEBUG && console.log( 'CountryReserves', { scaleValues, dataset } )
+				return (
+					<>
+						<View data={dataset.data}>
+							<Area
+								position={"year*" + 'co2_span_' + dataset.source.name}
+							/>
+							<Area
+								position={"year*" + 'co2_span_' + dataset.source.name + '_projection'}
+								color={'#ffb542'}
+							/>
 
-			<View data={data}>
-				<Line position="year*co2"/>
-				<Point position="year*co2" size={3} shape="circle"/>
+							<Line position={"year*" + 'co2_' + dataset.source.name}/>
+							<Point position={"year*" + 'co2_' + dataset.source.name} size={3} shape="circle"/>
 
-				<Line position="year*co2_proj" color={'#ee6c32'}/>
-				<Point position="year*co2_proj" size={3} shape="circle" color={'#e54700'}/>
-			</View>
+							<Line
+								position={"year*" + 'co2_' + dataset.source.name + '_projection'}
+								color={'#ee6c32'}
+							/>
+							<Point
+								position={"year*" + 'co2_' + dataset.source.name + '_projection'}
+								size={3}
+								shape="circle" color={'#e54700'}
+							/>
+						</View>
+					</>
+				)
+			} )}
 		</Chart>
 	)
 }
