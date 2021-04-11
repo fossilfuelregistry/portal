@@ -35,7 +35,7 @@ const useUnitConversionGraphImpl = () => {
 
 	const co2FromReserve = ( datapoint, unit, conversion ) => {
 		try {
-			console.log( 'Path to ', unit, graph.current.shortestPath( unit, 'kgco2e' ) )
+			//console.log( 'Path to ', unit, graph.current.shortestPath( unit, 'kgco2e' ) )
 			const oilCO2 = conversion.find( c => c.toUnit === 'kgco2e' && c.fossilFuelType === 'oil' )
 			const gasCO2 = conversion.find( c => c.toUnit === 'kgco2e' && c.fossilFuelType === 'gas' )
 			let gj = datapoint
