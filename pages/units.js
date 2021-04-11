@@ -23,9 +23,21 @@ export default function Units() {
 			return { id: unitName, label: unitName, font: '26px' }
 		} ) )
 
+		const colors = {
+			oil: '#d415ff',
+			gas: '#3ee88c',
+			null: '#a5a5a5'
+		}
 		// create an array with edges
 		const edges = new DataSet( conversion.map( conv => {
-			return { from: conv.fromUnit, to: conv.toUnit, arrows: 'middle', font: { bold: true } }
+			return {
+				from: conv.fromUnit,
+				to: conv.toUnit,
+				arrows: 'to',
+				font: { align: "middle", size: 18 },
+				color: colors[ conv.fossilFuelType ?? 'null' ],
+				width: 4
+			}
 		} ) )
 
 		// create a network
@@ -33,8 +45,7 @@ export default function Units() {
 			nodes: nodes,
 			edges: edges,
 		}
-		const options = {}
-		const network = new Network( domRef.current, data, options )
+		const network = new Network( domRef.current, data, { physics: true } )
 	}, [ domRef.current ] )
 
 	return (
