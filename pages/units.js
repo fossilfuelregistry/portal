@@ -1,14 +1,15 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 import { DataSet, Network } from 'vis-network/standalone/umd/vis-network.min'
 import TopNavigation from "components/navigation/TopNavigation"
-import { conversionsSelector, useStore } from "lib/zustandProvider"
+import { GQL_conversions } from "../queries/general"
+import { useQuery } from "@apollo/client"
 
 const DEBUG = false
 
 export default function Units() {
-	const conversion = useStore( conversionsSelector )
+	const { data } = useQuery( GQL_conversions )
+	const conversion = data?.conversionConstants?.nodes ?? []
 
-	const [ map, set_map ] = useState()
 	const domRef = useRef()
 
 	useEffect( () => {

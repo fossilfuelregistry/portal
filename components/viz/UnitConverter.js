@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { singletonHook } from 'react-singleton-hook'
 import Graph from 'graph-data-structure'
 import { client } from "pages/_app"
@@ -7,6 +7,7 @@ import { GQL_conversions } from "queries/general"
 const init = { loading: true }
 
 const useUnitConversionGraphImpl = () => {
+	const [ conversion, set_conversion ] = useState( [] )
 	const graph = useRef()
 
 	useEffect( () => {
@@ -14,6 +15,7 @@ const useUnitConversionGraphImpl = () => {
 		const asyncEffect = async() => {
 			const q = await client.query( { query: GQL_conversions } )
 			const conversion = q?.data?.conversionConstants?.nodes ?? []
+			set_conversion( conversion )
 
 			// Find unique units
 			const _allUnits = {}
@@ -33,7 +35,7 @@ const useUnitConversionGraphImpl = () => {
 		asyncEffect()
 	}, [] )
 
-	const co2FromReserve = ( datapoint, unit, conversion ) => {
+	const co2FromReserve = ( datapoint, unit ) => {
 		try {
 			//console.log( 'Path to ', unit, graph.current.shortestPath( unit, 'kgco2e' ) )
 			const oilCO2 = conversion.find( c => c.toUnit === 'kgco2e' && c.fossilFuelType === 'oil' )

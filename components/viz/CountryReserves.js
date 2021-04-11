@@ -4,14 +4,13 @@ import { useQuery } from "@apollo/client"
 import GraphQLStatus from "components/GraphQLStatus"
 import { GQL_countryReservesByIso } from "queries/country"
 import { Alert } from "antd"
-import { conversionsSelector, textsSelector, useStore } from "lib/zustandProvider"
+import { textsSelector, useStore } from "lib/zustandProvider"
 import { useUnitConversionGraph } from "./UnitConverter"
 import { GQL_sources } from "queries/general"
 
 const DEBUG = false
 
 export default function CountryReserves( { country, fossilFuelType, sources, grades, onGrades, onSources } ) {
-	const conversion = useStore( conversionsSelector )
 	const { co2FromReserve } = useUnitConversionGraph()
 	const texts = useStore( textsSelector )
 	const [ limits, set_limits ] = useState()
@@ -65,7 +64,7 @@ export default function CountryReserves( { country, fossilFuelType, sources, gra
 					.filter( r => r.fossilFuelType === fossilFuelType && grades?.[ r.grade ] === true && source.sourceId === r.sourceId )
 					.map( r => {
 						const point = { year: r.year }
-						const co2 = co2FromReserve( r.volume, r.unit, conversion )
+						const co2 = co2FromReserve( r.volume, r.unit )
 						scaleValues.min = scaleValues.min ? Math.min( scaleValues.min, co2.value ) : co2.value
 						scaleValues.max = scaleValues.max ? Math.max( scaleValues.max, co2.value ) : co2.value
 						if( r.projection || r.year > 2005 ) {
