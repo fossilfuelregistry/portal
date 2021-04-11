@@ -45,7 +45,7 @@ export default function Units() {
 
 			<style jsx>{`
               .network {
-                height: 80vw;
+                height: 80vh;
               }
 			`}
 			</style>
