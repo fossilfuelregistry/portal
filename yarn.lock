@@ -2924,6 +2924,11 @@ graceful-fs@^4.1.11, graceful-fs@^4.1.15, graceful-fs@^4.1.2:
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.6.tgz#ff040b2b0853b23c3d31027523706f1885d76bee"
   integrity sha512-nTnJ528pbqxYanhpDYsi4Rd8MAeaBA67+RZ10CM1m3bTAVFEDcd5AuA4a6W5YkGZ1iNXHzZz8T6TBKLeBuNriQ==
 
+graph-data-structure@^1.13.0:
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/graph-data-structure/-/graph-data-structure-1.13.0.tgz#78daac4b6b0dac7b096d709c48579590097f3fbd"
+  integrity sha512-ZTmwnno/Fk1cozBeW1cgWpKtCw8qaVxhaboQYxrNa7RmOQPW4NAF7GkDripLl20Vzu2BH12ED0uaqo9ayjjH7Q==
+
 graphql-tag@^2.12.0:
   version "2.12.3"
   resolved "https://registry.yarnpkg.com/graphql-tag/-/graphql-tag-2.12.3.tgz#ac47bf9d51c67c68ada8a33fd527143ed15bb647"
@@ -5027,6 +5032,11 @@ react-refresh@0.8.3:
   resolved "https://registry.yarnpkg.com/react-refresh/-/react-refresh-0.8.3.tgz#721d4657672d400c5e3c75d063c4a85fb2d5d68f"
   integrity sha512-X8jZHc7nCMjaCqoU+V2I0cOhNW+QMBwSUkeXnTi8IPe6zaRWfn60ZzvFDZqWPfmSJfjub7dDW1SP0jaHWLu/hg==
 
+react-singleton-hook@^3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/react-singleton-hook/-/react-singleton-hook-3.1.1.tgz#5fcdd91bb09fcdaba30eeb8af22a68077bbe614b"
+  integrity sha512-OKsg1WhixObLoH2xpkxXjmeYE8VlIolHlbvmb7yOs+5qeIUtYYTJ9pADEsplVsbplpe+lnqRGP5vtnxgbV4naA==
+
 react@^17.0.2:
   version "17.0.2"
   resolved "https://registry.yarnpkg.com/react/-/react-17.0.2.tgz#d0b5cc516d29eb3eee383f75b62864cfb6800037"
@@ -6093,11 +6103,6 @@ validate-npm-package-license@^3.0.1:
   dependencies:
     spdx-correct "^3.0.0"
     spdx-expression-parse "^3.0.0"
-
-vis-data@^7.1.2:
-  version "7.1.2"
-  resolved "https://registry.yarnpkg.com/vis-data/-/vis-data-7.1.2.tgz#b7d076ac79cb54f7c5e9c80f5b03b93cc8cc1fda"
-  integrity sha512-RPSegFxEcnp3HUEJSzhS2vBdbJ2PSsrYYuhRlpHp2frO/MfRtTYbIkkLZmPkA/Sg3pPfBlR235gcoKbtdm4mbw==
 
 vis-network@^9.0.4:
   version "9.0.4"

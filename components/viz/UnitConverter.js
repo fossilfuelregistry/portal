@@ -1,39 +1,51 @@
-import React from "react"
+import { useEffect, useRef } from 'react'
+import { singletonHook } from 'react-singleton-hook'
+import Graph from 'graph-data-structure'
+import { client } from "pages/_app"
+import { GQL_conversions } from "queries/general"
 
-let oilCO2, gasCO2
+const init = { loading: true }
 
-function _init( conversion ) {
-	if( !( conversion?.length > 0 ) ) return false
-	if( oilCO2?.factor && gasCO2?.factor ) return true
+const useUnitConversionGraphImpl = () => {
+	const graph = useRef()
 
-	if( !oilCO2 )
-		oilCO2 = conversion.find( c => c.toUnit === 'kgco2e' && c.fossilFuelType === 'oil' )
-	if( !gasCO2 )
-		gasCO2 = conversion.find( c => c.toUnit === 'kgco2e' && c.fossilFuelType === 'gas' )
-	//console.log( { conversion, oilCO2, gasCO2 } )
-	return true
-}
+	useEffect( () => {
 
-export function co2FromReserve( datapoint, unit, conversion ) {
-	if( !_init( conversion ) ) throw new Error( 'Conversion factors are not initialized.' )
-	//console.log( { conversion, oilCO2, gasCO2 } )
+		const asyncEffect = async() => {
+			const q = await client.query( { query: GQL_conversions } )
+			const conversion = q?.data?.conversionConstants?.nodes ?? []
 
-	let gj = datapoint
+			// Find unique units
+			const _allUnits = {}
+			conversion.forEach( u => {
+				_allUnits[ u.fromUnit ] = true
+				_allUnits[ u.toUnit ] = true
+			} )
 
-	return { value: gj * oilCO2.factor, range: [ gj * oilCO2.low, gj * oilCO2.high ] }
-}
+			graph.current = Graph()
 
+			Object.keys( _allUnits ).forEach( u => graph.current.addNode( u ) )
 
-class UnitConverter extends React.Component {
-	state = {}
+			conversion.forEach( conv => {
+				graph.current.addEdge( conv.fromUnit, conv.toUnit )
+			} )
+		}
+		asyncEffect()
+	}, [] )
 
-	constructor() {
-		super();
+	const co2FromReserve = ( datapoint, unit, conversion ) => {
+		try {
+			console.log( 'Path to ', unit, graph.current.shortestPath( unit, 'kgco2e' ) )
+			const oilCO2 = conversion.find( c => c.toUnit === 'kgco2e' && c.fossilFuelType === 'oil' )
+			const gasCO2 = conversion.find( c => c.toUnit === 'kgco2e' && c.fossilFuelType === 'gas' )
+			let gj = datapoint
+			return { value: gj * oilCO2.factor, range: [ gj * oilCO2.low, gj * oilCO2.high ] }
+		} catch( e ) {
+			throw new Error( "While looking for " + unit + " -> kgco2e conversion:\n" + e.message )
+		}
 	}
 
-	render() {
-		return null
-	}
+	return { co2FromReserve }
 }
 
-export let unitConverter = new UnitConverter();
+export const useUnitConversionGraph = singletonHook( init, useUnitConversionGraphImpl )

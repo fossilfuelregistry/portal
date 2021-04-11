@@ -5,13 +5,14 @@ import GraphQLStatus from "components/GraphQLStatus"
 import { GQL_countryReservesByIso } from "queries/country"
 import { Alert } from "antd"
 import { conversionsSelector, textsSelector, useStore } from "lib/zustandProvider"
-import { co2FromReserve } from "./UnitConverter"
+import { useUnitConversionGraph } from "./UnitConverter"
 import { GQL_sources } from "queries/general"
 
-const DEBUG = true
+const DEBUG = false
 
 export default function CountryReserves( { country, fossilFuelType, sources, grades, onGrades, onSources } ) {
 	const conversion = useStore( conversionsSelector )
+	const { co2FromReserve } = useUnitConversionGraph()
 	const texts = useStore( textsSelector )
 	const [ limits, set_limits ] = useState()
 
@@ -54,28 +55,33 @@ export default function CountryReserves( { country, fossilFuelType, sources, gra
 
 	DEBUG && console.log( 'CountryReserves', { fossilFuelType, firstYear, lastYear, grades, sources, scaleValues } )
 
-	const datasets = sources.filter( s => s?.enabled ).map( source => {
-		console.log( source )
-		return {
-			source,
-			data: reserves
-				.filter( r => r.fossilFuelType === fossilFuelType && grades?.[ r.grade ] === true && source.sourceId === r.sourceId )
-				.map( r => {
-					const point = { year: r.year }
-					const co2 = co2FromReserve( r.volume, r.unit, conversion )
-					scaleValues.min = scaleValues.min ? Math.min( scaleValues.min, co2.value ) : co2.value
-					scaleValues.max = scaleValues.max ? Math.max( scaleValues.max, co2.value ) : co2.value
-					if( r.projection || r.year > 2005 ) {
-						point[ 'co2_' + source.name + '_projection' ] = co2.value
-						point[ 'co2_span_' + source.name + '_projection' ] = co2.range
-					} else {
-						point[ 'co2_' + source.name ] = co2.value
-						point[ 'co2_span_' + source.name ] = co2.range
-					}
-					return point
-				} )
-		}
-	} )
+	let datasets
+	try{
+		datasets = sources.filter( s => s?.enabled ).map( source => {
+			DEBUG && console.log( source )
+			return {
+				source,
+				data: reserves
+					.filter( r => r.fossilFuelType === fossilFuelType && grades?.[ r.grade ] === true && source.sourceId === r.sourceId )
+					.map( r => {
+						const point = { year: r.year }
+						const co2 = co2FromReserve( r.volume, r.unit, conversion )
+						scaleValues.min = scaleValues.min ? Math.min( scaleValues.min, co2.value ) : co2.value
+						scaleValues.max = scaleValues.max ? Math.max( scaleValues.max, co2.value ) : co2.value
+						if( r.projection || r.year > 2005 ) {
+							point[ 'co2_' + source.name + '_projection' ] = co2.value
+							point[ 'co2_span_' + source.name + '_projection' ] = co2.range
+						} else {
+							point[ 'co2_' + source.name ] = co2.value
+							point[ 'co2_span_' + source.name ] = co2.range
+						}
+						return point
+					} )
+			}
+		} )
+	} catch( e ) {
+		return <Alert message="Error during unit conversion" description={e.message} showIcon type="error"/>
+	}
 
 	const interval = scaleValues.max - scaleValues.min
 	scaleValues.min -= interval * 0.1
