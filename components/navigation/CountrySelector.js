@@ -3,9 +3,10 @@ import { GQL_countries } from "queries/general"
 import GraphQLStatus from "../GraphQLStatus"
 import { textsSelector, useStore } from "../../lib/zustandProvider"
 import { Select } from "antd"
+import { useRouter } from "next/router"
 
 export default function CountrySelector( { onChange } ) {
-
+	const router = useRouter()
 	const texts = useStore( textsSelector )
 	const { data: countriesData, loading: loadingCountries, error: errorLoadingCountries }
 		= useQuery( GQL_countries )
@@ -19,6 +20,8 @@ export default function CountrySelector( { onChange } ) {
 		<Select
 			showSearch
 			style={{ minWidth: 200, width: '100%' }}
+			defaultValue={router.query.country ? { value: router.query.country } : undefined}
+			labelInValue={true}
 			placeholder={texts?.country + '...'}
 			optionFilterProp="children"
 			onChange={onChange}

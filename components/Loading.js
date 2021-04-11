@@ -4,7 +4,7 @@ import getConfig from "next/config"
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
-export default function Loader( { withoutPosition } ) {
+export default function Loading( { withoutPosition } ) {
 	return (
 		<div
 			style={{

@@ -1,19 +1,27 @@
-import { Area, Axis, Chart, Line, Point, Tooltip, View } from 'bizcharts'
+import { Area, Chart, Line, Point, Tooltip, View } from 'bizcharts'
 import { useQuery } from "@apollo/client"
-import { GQL_conversions } from "queries/general"
+import { GQL_conversions, GQL_sources } from "queries/general"
 import GraphQLStatus from "../GraphQLStatus"
 import { GQL_countryReservesByIso } from "queries/country"
 import { useEffect, useState } from "react"
+import { Alert } from "antd"
+import { textsSelector, useStore } from "../../lib/zustandProvider"
 
 const DEBUG = true
 
-export default function CountryReserves( { country, fossilFuelType, grades, onGrades } ) {
+export default function CountryReserves( { country, fossilFuelType, sources, grades, onGrades, onSources } ) {
+	const texts = useStore( textsSelector )
 	const [ limits, set_limits ] = useState()
 
 	const { data: conversionsData, loading: loadingConversions, error: errorLoadingConversions }
 		= useQuery( GQL_conversions )
 
-	const conversion = conversionsData?.data
+	const conversion = conversionsData?.conversions?.nodes ?? []
+
+	const { data: sourcesData, loading: loadingSources, error: errorLoadingSources }
+		= useQuery( GQL_sources )
+
+	const allSources = sourcesData?.sources?.nodes ?? []
 
 	const { data: reservesData, loading: loadingReserves, error: errorLoadingReserves }
 		= useQuery( GQL_countryReservesByIso,
@@ -22,39 +30,58 @@ export default function CountryReserves( { country, fossilFuelType, grades, onGr
 	const reserves = reservesData?.countryReserves?.nodes ?? []
 
 	useEffect( () => {
-		if( !( reserves?.length > 0 ) ) return
+		DEBUG && console.log( 'useEffect reserves.length', { allSources } )
+		if( !( reserves?.length > 0 ) || !( allSources?.length > 0 ) ) return
 		const newLimits = reserves.reduce( ( limits, r ) => {
-			limits[ 0 ] = ( limits[ 0 ] === undefined || r.year < limits[ 0 ] ) ? r.year : limits[ 0 ]
-			limits[ 1 ] = ( limits[ 1 ] === undefined || r.year > limits[ 1 ] ) ? r.year : limits[ 1 ]
-			limits[ 2 ] = Object.assign( { [ r.grade ]: true }, limits[ 2 ] ?? {} )
+			limits.firstYear = ( limits.firstYear === undefined || r.year < limits.firstYear ) ? r.year : limits.firstYear
+			limits.lastYear = ( limits.lastYear === undefined || r.year > limits.lastYear ) ? r.year : limits.lastYear
+			limits.grades = Object.assign( { [ r.grade ]: false }, limits.grades ?? {} )
+			limits.sources[ r.sourceId ] = allSources.find( s => s.sourceId === r.sourceId )
 			return limits
-		}, [] )
+		}, { sources: [] } )
 
+		DEBUG && console.log( { newLimits } )
 		set_limits( newLimits )
-		onGrades && onGrades( newLimits[ 2 ] )
+		onGrades && onGrades( newLimits.grades )
+		onSources && onSources( newLimits.sources )
 	}, [ reserves.length ] )
 
+	if( loadingSources || errorLoadingSources )
+		return <GraphQLStatus loading={loadingSources} error={errorLoadingSources}/>
 	if( loadingConversions || errorLoadingConversions )
 		return <GraphQLStatus loading={loadingConversions} error={errorLoadingConversions}/>
-
 	if( loadingReserves || errorLoadingReserves )
 		return <GraphQLStatus loading={loadingReserves} error={errorLoadingReserves}/>
 
-	const [ firstYear, lastYear ] = limits ?? []
+	const { firstYear, lastYear } = limits ?? {}
+
+	const scaleValues = { sync: true, nice: true }
+
+	const data = reserves
+		.filter( r => r.fossilFuelType === fossilFuelType && grades?.[ r.grade ] === true && sources[ r.sourceId ] )
+		.map( r => {
+			scaleValues.min = scaleValues.min ? Math.min( scaleValues.min, r.volume ) : r.volume
+			scaleValues.max = scaleValues.max ? Math.max( scaleValues.max, r.volume ) : r.volume
+			const point = { year: r.year }
+			if( r.projection || r.year > 2015 ) {
+				point.co2_proj = r.volume
+				point.span_proj = [ r.volume * 0.9, r.volume * 1.15 ]
+			} else {
+				point.co2 = r.volume
+				point.span = [ r.volume * 0.9, r.volume * 1.15 ]
+			}
+			return point
+		} )
+
+	const interval = scaleValues.max - scaleValues.min
+	scaleValues.min -= interval * 0.1
+	scaleValues.max += interval * 0.1
 
 	const scale = {
-		co2: {
-			sync: true,
-			nice: true,
-			tickInterval: 5,
-			min: 0, max: 30,
-		},
-		co2_proj: {
-			sync: true,
-			nice: true,
-			tickInterval: 5,
-			min: 0, max: 30,
-		},
+		co2: scaleValues,
+		co2_proj: scaleValues,
+		span: scaleValues,
+		span_proj: scaleValues,
 		year: {
 			type: 'linear',
 			nice: true,
@@ -64,36 +91,21 @@ export default function CountryReserves( { country, fossilFuelType, grades, onGr
 		}
 	}
 
-	const data = reserves
-		.filter( r => r.fossilFuelType === fossilFuelType && grades?.[ r.grade ] === true )
-		.map( r => {
-			const point = { year: r.year }
-			if( r.projection ) point.co2_proj = r.volume
-			else point.co2 = r.volume
-			return point
-		} )
+	if( !firstYear || !lastYear || !fossilFuelType || !data.length > 0 )
+		return <Alert message={texts?.make_selections} type="info" showIcon/>
 
-	DEBUG && console.log( 'CountryReserves', fossilFuelType, firstYear, lastYear, grades, reserves.length, data.length )
+	DEBUG && console.log( 'CountryReserves', { fossilFuelType, firstYear, lastYear, grades, sources, scaleValues, data } )
 
 	return (
-		<Chart scale={scale} height={400} data={data} autoFit>
+		<Chart scale={scale} height={400} data={data} autoFit forceUpdate>
 			<Tooltip shared/>
 
 			<View data={data}>
-				<Axis name="year" visible={false}/>
-				<Axis name="co2" visible={false}/>
-				<Axis name="co2_proj" visible={false}/>
-				<Area
-					position="year*co2"
-				/>
-				<Area
-					position="year*co2_proj"
-					color={'#ffb542'}
-				/>
+				<Area position="year*span"/>
+				<Area position="year*span_proj" color={'#ffb542'}/>
 			</View>
 
 			<View data={data}>
-				<Axis name="co2" visible={false}/>
 				<Line position="year*co2"/>
 				<Point position="year*co2" size={3} shape="circle"/>
 
