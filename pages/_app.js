@@ -6,7 +6,7 @@ import { getUserIP } from "lib/getUserIp"
 import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client'
 import { ConfigProvider } from "antd"
 
-const client = new ApolloClient( {
+export const client = new ApolloClient( {
 	uri: process.env.NEXT_PUBLIC_BACKEND_URL + '/graphql',
 	cache: new InMemoryCache()
 } )

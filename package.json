@@ -25,6 +25,8 @@
     "react-dom": "^17.0.2",
     "react-globe.gl": "^2.18.0",
     "react-icons": "^4.2.0",
+    "vis-data": "^7.1.2",
+    "vis-network": "^9.0.4",
     "zustand": "^3.3.3"
   },
   "license": "MIT",

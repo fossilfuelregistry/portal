@@ -1,7 +1,7 @@
 import { useQuery } from "@apollo/client"
 import { GQL_countries } from "queries/general"
 import GraphQLStatus from "../GraphQLStatus"
-import { textsSelector, useStore } from "../../lib/zustandProvider"
+import { textsSelector, useStore } from "lib/zustandProvider"
 import { Select } from "antd"
 import { useRouter } from "next/router"
 import { useEffect, useRef } from "react"
