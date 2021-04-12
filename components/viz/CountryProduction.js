@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { Area, Chart, Line, Point, Tooltip, View } from 'bizcharts'
 import { useQuery } from "@apollo/client"
 import GraphQLStatus from "components/GraphQLStatus"
-import { GQL_countryReservesByIso } from "queries/country"
+import { GQL_countryProductionByIso } from "queries/country"
 import { Alert } from "antd"
 import { textsSelector, useStore } from "lib/zustandProvider"
 import { useUnitConversionGraph } from "./UnitConverter"
@@ -10,7 +10,7 @@ import { GQL_sources } from "queries/general"
 
 const DEBUG = false
 
-export default function CountryReserves( { country, fossilFuelType, sources, grades, onGrades, onSources } ) {
+export default function CountryProduction( { country, fossilFuelType, sources, grades, onGrades, onSources } ) {
 	const { co2FromVolume } = useUnitConversionGraph()
 	const texts = useStore( textsSelector )
 	const [ limits, set_limits ] = useState()
@@ -20,16 +20,16 @@ export default function CountryReserves( { country, fossilFuelType, sources, gra
 
 	const allSources = sourcesData?.sources?.nodes ?? []
 
-	const { data: reservesData, loading: loadingReserves, error: errorLoadingReserves }
-		= useQuery( GQL_countryReservesByIso,
+	const { data: productionData, loading: loadingProduction, error: errorLoadingProduction }
+		= useQuery( GQL_countryProductionByIso,
 			{ variables: { iso3166: country }, skip: !country } )
 
-	const reserves = reservesData?.countryReserves?.nodes ?? []
+	const production = productionData?.countryProductions?.nodes ?? []
 
 	useEffect( () => {
-		DEBUG && console.log( 'useEffect reserves.length', { allSources } )
-		if( !( reserves?.length > 0 ) || !( allSources?.length > 0 ) ) return
-		const newLimits = reserves.reduce( ( limits, r ) => {
+		DEBUG && console.log( 'useEffect Production.length', { allSources } )
+		if( !( production?.length > 0 ) || !( allSources?.length > 0 ) ) return
+		const newLimits = production.reduce( ( limits, r ) => {
 			limits.firstYear = ( limits.firstYear === undefined || r.year < limits.firstYear ) ? r.year : limits.firstYear
 			limits.lastYear = ( limits.lastYear === undefined || r.year > limits.lastYear ) ? r.year : limits.lastYear
 			limits.grades = Object.assign( { [ r.grade ]: false }, limits.grades ?? {} )
@@ -41,18 +41,18 @@ export default function CountryReserves( { country, fossilFuelType, sources, gra
 		set_limits( newLimits )
 		onGrades && onGrades( newLimits.grades )
 		onSources && onSources( newLimits.sources )
-	}, [ reserves.length ] )
+	}, [ production.length ] )
 
 	if( loadingSources || errorLoadingSources )
 		return <GraphQLStatus loading={loadingSources} error={errorLoadingSources}/>
-	if( loadingReserves || errorLoadingReserves )
-		return <GraphQLStatus loading={loadingReserves} error={errorLoadingReserves}/>
+	if( loadingProduction || errorLoadingProduction )
+		return <GraphQLStatus loading={loadingProduction} error={errorLoadingProduction}/>
 
 	const { firstYear, lastYear } = limits ?? {}
 
 	const scaleValues = { sync: true, nice: true }
 
-	DEBUG && console.log( 'CountryReserves', { fossilFuelType, firstYear, lastYear, grades, sources, scaleValues } )
+	DEBUG && console.log( 'CountryProduction', { fossilFuelType, firstYear, lastYear, grades, sources, scaleValues } )
 
 	let datasets
 	try{
@@ -60,7 +60,7 @@ export default function CountryReserves( { country, fossilFuelType, sources, gra
 			DEBUG && console.log( source )
 			return {
 				source,
-				data: reserves
+				data: production
 					.filter( r => r.fossilFuelType === fossilFuelType && grades?.[ r.grade ] === true && source.sourceId === r.sourceId )
 					.map( r => {
 						const point = { year: r.year }
@@ -85,6 +85,8 @@ export default function CountryReserves( { country, fossilFuelType, sources, gra
 	const interval = scaleValues.max - scaleValues.min
 	scaleValues.min -= interval * 0.1
 	scaleValues.max += interval * 0.1
+
+	DEBUG && console.log( 'CountryProduction', { datasets, production } )
 
 	const scale = {
 		year: {
@@ -123,7 +125,7 @@ export default function CountryReserves( { country, fossilFuelType, sources, gra
 			<Tooltip shared/>
 
 			{datasets.map( dataset => {
-				DEBUG && console.log( 'CountryReserves', { scaleValues, dataset } )
+				DEBUG && console.log( 'CountryProduction', { scaleValues, dataset } )
 				return (
 					<View data={dataset.data} key={dataset.source.name}>
 						<Area

@@ -15,7 +15,9 @@ const NavigDrawer = ( { visible, onClose } ) => {
 				visible={visible}
 			>
 				<h4 className="item"><Link href="/wells">{texts?.wells}</Link></h4>
-				<h4 className="item"><Link href="/co2">{texts?.co2_totals}</Link></h4>
+				<h4 className="item"><Link href="/country_production">{texts?.country_production}</Link></h4>
+				<h4 className="item"><Link href="/country_reserves">{texts?.country_reserves}</Link></h4>
+				<h4 className="item"><Link href="/co2">{texts?.co2_forecast}</Link></h4>
 				<p>...</p>
 			</Drawer>
 

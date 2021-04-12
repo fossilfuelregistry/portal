@@ -40,7 +40,7 @@ const useUnitConversionGraphImpl = () => {
 		asyncEffect()
 	}, [] )
 
-	const co2FromReserve = ( datapoint, unit ) => {
+	const co2FromVolume = ( datapoint, unit ) => {
 		try {
 			const path = graph.current.shortestPath( unit, 'kgco2e' )
 			//console.log( 'Path to ', { unit, path, conversion } )
@@ -59,7 +59,7 @@ const useUnitConversionGraphImpl = () => {
 		}
 	}
 
-	return { co2FromReserve }
+	return { co2FromVolume }
 }
 
 export const useUnitConversionGraph = singletonHook( init, useUnitConversionGraphImpl )

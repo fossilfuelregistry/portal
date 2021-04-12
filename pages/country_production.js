@@ -2,10 +2,10 @@ import { useState } from "react"
 import TopNavigation from "components/navigation/TopNavigation"
 import getConfig from 'next/config'
 //import dynamic from 'next/dynamic'
-import CountryReserves from "components/viz/CountryReserves"
-import CountrySelector from "../components/navigation/CountrySelector"
+import CountryProduction from "components/viz/CountryProduction"
+import CountrySelector from "components/navigation/CountrySelector"
 import { Checkbox, Col, Row } from "antd"
-import FossilFuelTypeSelector from "../components/navigation/FossilFuelTypeSelector"
+import FossilFuelTypeSelector from "components/navigation/FossilFuelTypeSelector"
 import { useRouter } from "next/router"
 
 const DEBUG = false
@@ -13,7 +13,7 @@ const DEBUG = false
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 //const MultiView = dynamic( () => import( "components/viz/MutliViewChart" ), { ssr: false } )
 
-export default function Co2() {
+export default function CountryProductionPage() {
 	const router = useRouter()
 	const [ country, set_country ] = useState()
 	const [ fossilFuelType, set_fossilFuelType ] = useState()
@@ -89,7 +89,7 @@ export default function Co2() {
 						</Col>
 
 						<Col xs={24}>
-							<CountryReserves
+							<CountryProduction
 								country={country}
 								fossilFuelType={fossilFuelType}
 								sources={selectedSources}

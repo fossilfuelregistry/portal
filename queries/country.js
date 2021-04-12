@@ -17,3 +17,22 @@ query countryReserves($iso3166: String!) {
     }
   }
 }`
+
+export const GQL_countryProductionByIso = gql`
+query countryProductions($iso3166: String!) {
+  countryProductions(
+  	condition: { iso3166: $iso3166 }
+  	orderBy: YEAR_ASC
+  ) {
+    nodes {
+      iso3166
+      fossilFuelType
+      grade
+      sourceId
+      unit
+      volume
+      year
+      projection
+    }
+  }
+}`

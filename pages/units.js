@@ -25,8 +25,8 @@ export default function Units() {
 		} ) )
 
 		const colors = {
-			oil: '#d415ff',
-			gas: '#3ee88c',
+			oil: '#1999ff',
+			gas: '#ffa031',
 			null: '#a5a5a5'
 		}
 		// create an array with edges
