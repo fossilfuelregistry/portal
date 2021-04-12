@@ -14,12 +14,17 @@ const useUnitConversionGraphImpl = () => {
 
 		const asyncEffect = async() => {
 			const q = await client.query( { query: GQL_conversions } )
-			const conversion = q?.data?.conversionConstants?.nodes ?? []
+			const constants = q?.data?.conversionConstants?.nodes ?? []
+			const conversion = {}
+			constants.forEach( c => {
+				if( !conversion[ c.fromUnit ] ) conversion[ c.fromUnit ] = {}
+				conversion[ c.fromUnit ][ c.toUnit ] = { factor: c.factor, low: c.low, high: c.high }
+			} )
 			set_conversion( conversion )
 
 			// Find unique units
 			const _allUnits = {}
-			conversion.forEach( u => {
+			constants.forEach( u => {
 				_allUnits[ u.fromUnit ] = true
 				_allUnits[ u.toUnit ] = true
 			} )
@@ -28,7 +33,7 @@ const useUnitConversionGraphImpl = () => {
 
 			Object.keys( _allUnits ).forEach( u => graph.current.addNode( u ) )
 
-			conversion.forEach( conv => {
+			constants.forEach( conv => {
 				graph.current.addEdge( conv.fromUnit, conv.toUnit )
 			} )
 		}
@@ -37,11 +42,18 @@ const useUnitConversionGraphImpl = () => {
 
 	const co2FromReserve = ( datapoint, unit ) => {
 		try {
-			//console.log( 'Path to ', unit, graph.current.shortestPath( unit, 'kgco2e' ) )
-			const oilCO2 = conversion.find( c => c.toUnit === 'kgco2e' && c.fossilFuelType === 'oil' )
-			const gasCO2 = conversion.find( c => c.toUnit === 'kgco2e' && c.fossilFuelType === 'gas' )
-			let gj = datapoint
-			return { value: gj * oilCO2.factor, range: [ gj * oilCO2.low, gj * oilCO2.high ] }
+			const path = graph.current.shortestPath( unit, 'kgco2e' )
+			//console.log( 'Path to ', { unit, path, conversion } )
+			let factor = 1, low = 1, high = 1
+			for( let step = 1; step < path.length; step++ ) {
+				const from = path[ step - 1 ]
+				const to = path[ step ]
+				factor *= conversion[ from ][ to ].factor
+				low *= conversion[ from ][ to ].low ?? conversion[ from ][ to ].factor
+				high *= conversion[ from ][ to ].high ?? conversion[ from ][ to ].factor
+				//console.log( { from, to, factor, low, high } )
+			}
+			return { value: datapoint * factor / 1e9, range: [ datapoint * low / 1e9, datapoint * high / 1e9 ] }
 		} catch( e ) {
 			throw new Error( "While looking for " + unit + " -> kgco2e conversion:\n" + e.message )
 		}

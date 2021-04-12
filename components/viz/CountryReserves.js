@@ -67,7 +67,7 @@ export default function CountryReserves( { country, fossilFuelType, sources, gra
 						const co2 = co2FromReserve( r.volume, r.unit )
 						scaleValues.min = scaleValues.min ? Math.min( scaleValues.min, co2.value ) : co2.value
 						scaleValues.max = scaleValues.max ? Math.max( scaleValues.max, co2.value ) : co2.value
-						if( r.projection || r.year > 2005 ) {
+						if( r.projection ) {
 							point[ 'co2_' + source.name + '_projection' ] = co2.value
 							point[ 'co2_span_' + source.name + '_projection' ] = co2.range
 						} else {
