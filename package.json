@@ -9,6 +9,7 @@
   "dependencies": {
     "@ant-design/icons": "^4.6.2",
     "@apollo/client": "^3.3.13",
+    "@visx/visx": "^1.7.4",
     "@zeit/next-less": "^1.0.1",
     "antd": "^4.14.1",
     "babel-eslint": "^10.1.0",

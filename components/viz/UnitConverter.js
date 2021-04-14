@@ -40,7 +40,7 @@ const useUnitConversionGraphImpl = () => {
 		asyncEffect()
 	}, [] )
 
-	const co2FromVolume = ( datapoint, unit ) => {
+	const co2FromVolume = ( datapoint, unit, log ) => {
 		try {
 			const path = graph.current.shortestPath( unit, 'kgco2e' )
 			//console.log( 'Path to ', { unit, path, conversion } )
@@ -51,9 +51,12 @@ const useUnitConversionGraphImpl = () => {
 				factor *= conversion[ from ][ to ].factor
 				low *= conversion[ from ][ to ].low ?? conversion[ from ][ to ].factor
 				high *= conversion[ from ][ to ].high ?? conversion[ from ][ to ].factor
-				//console.log( { from, to, factor, low, high } )
+				if( log ) console.log( { from, to, factor, low, high } )
 			}
-			return { value: datapoint * factor / 1e9, range: [ datapoint * low / 1e9, datapoint * high / 1e9 ] }
+			return {
+				value: Math.round( 10 * datapoint * factor / 1e9 ) / 10,
+				range: [ datapoint * low / 1e9, datapoint * high / 1e9 ]
+			}
 		} catch( e ) {
 			throw new Error( "While looking for " + unit + " -> kgco2e conversion:\n" + e.message )
 		}
