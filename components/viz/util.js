@@ -2,8 +2,10 @@ const DEBUG = true
 
 export function filteredCombinedDataSet( table, fossilFuelTypes, sources, grades, projection, co2FromVolume ) {
 
-	let currentYear = 0
-	const datasetValues = table
+	const dataset = []
+	let point = { gas: 0, oil: 0, gas_projection: 0, oil_projection: 0 }
+
+	table
 		.filter( r => {
 			if( !fossilFuelTypes.includes( r.fossilFuelType ) ) return false
 			if( !grades?.[ r.grade ] === true ) return false
@@ -11,42 +13,30 @@ export function filteredCombinedDataSet( table, fossilFuelTypes, sources, grades
 			if( projection !== null && projection !== r.projection ) return false
 			return true
 		} )
-		.map( r => {
-			const point = { year: r.year, fuel: r.fossilFuelType }
-			currentYear = Math.min( currentYear, r.year )
-			//if( r.year === 2019 ) console.log( r.year )
-			const co2 = co2FromVolume( r.volume, r.unit, false /*r.year === 2019*/ )
+		.forEach( r => {
+			if( point.year && point.year !== r.year ) {
+				dataset.push( point )
+				point = { year: r.year, gas1: 0, oil1: 0, oil3: 0, gas3: 0, gas_projection: 0, oil_projection: 0 }
+			}
+			point.year = r.year
+			if( r.year === 2010 ) console.log( r.year )
+			const co2 = co2FromVolume( r, r.year === 2010 )
+			//console.log( { r, co2 } )
 			if( r.projection ) {
-				point[ r.fossilFuelType + '_projection' ] = co2.value
-				point[ r.fossilFuelType  + '_projection_span' ] = co2.range
+				point[ r.fossilFuelType + '_projection' ] += co2.scope3 + co2.scope1
+				point[ r.fossilFuelType + '_projection_span' ] += co2.range
 			} else {
-				point[ r.fossilFuelType  ] = co2.value
-				point[ r.fossilFuelType  + '_span' ] = co2.range
+				point[ r.fossilFuelType + '1' ] += co2.scope1
+				point[ r.fossilFuelType + '3' ] += co2.scope3
+				point[ r.fossilFuelType + '_span' ] += co2.range
 			}
 			return point
 		} )
-
-	const dataset = []
-	let currentValue = {
-		year: 0,
-		empty: true
-	}
-
-	datasetValues.forEach( value => {
-		if( value.year !== currentValue.year ) {
-			if( !currentValue.empty ) {
-				dataset.push( currentValue )
-			}
-			currentValue = value
-		} else {
-			currentValue = { ...currentValue, ...value }
-		}
-	} )
+	dataset.push( point )
 
 	DEBUG && console.log( 'filteredCombinedDataSet',
 		{
-			fossilFuelTypes, sources, grades, in: table.length,
-			filtered: datasetValues.length, combined: dataset.length
+			fossilFuelTypes, sources, grades, in: table.length, combined: dataset.length, dataset
 		} )
 
 	return dataset

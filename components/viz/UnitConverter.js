@@ -9,6 +9,8 @@ const init = { loading: true }
 const useUnitConversionGraphImpl = () => {
 	const [ conversion, set_conversion ] = useState( [] )
 	const graph = useRef()
+	const graphOil = useRef()
+	const graphGas = useRef()
 
 	useEffect( () => {
 
@@ -18,10 +20,17 @@ const useUnitConversionGraphImpl = () => {
 			const conversion = {}
 			constants.forEach( c => {
 				if( !conversion[ c.fromUnit ] ) conversion[ c.fromUnit ] = {}
-				conversion[ c.fromUnit ][ c.toUnit ] = { factor: c.factor, low: c.low, high: c.high }
+				if( !conversion[ c.fromUnit ][ c.toUnit ] ) conversion[ c.fromUnit ][ c.toUnit ] = {
+					oil: { factor: 1 },
+					gas: {}
+				}
+				if( !c.fossilFuelType || c.fossilFuelType === 'oil' )
+					conversion[ c.fromUnit ][ c.toUnit ][ 'oil' ] = { factor: c.factor, low: c.low, high: c.high }
+				if( !c.fossilFuelType || c.fossilFuelType === 'gas' )
+					conversion[ c.fromUnit ][ c.toUnit ][ 'gas' ] = { factor: c.factor, low: c.low, high: c.high }
 			} )
 			set_conversion( conversion )
-
+			//console.log( { conversion } )
 			// Find unique units
 			const _allUnits = {}
 			constants.forEach( u => {
@@ -30,32 +39,78 @@ const useUnitConversionGraphImpl = () => {
 			} )
 
 			graph.current = Graph()
+			graphOil.current = Graph()
+			graphGas.current = Graph()
 
 			Object.keys( _allUnits ).forEach( u => graph.current.addNode( u ) )
 
 			constants.forEach( conv => {
 				graph.current.addEdge( conv.fromUnit, conv.toUnit )
 			} )
+			constants.filter( c => c.fossilFuelType !== 'gas' ).forEach( conv => {
+				graphOil.current.addEdge( conv.fromUnit, conv.toUnit )
+			} )
+			constants.filter( c => c.fossilFuelType !== 'oil' ).forEach( conv => {
+				graphGas.current.addEdge( conv.fromUnit, conv.toUnit )
+			} )
+			// console.log( {
+			// 	all: graph.current?.serialize(),
+			// 	oil: graphOil.current?.serialize(),
+			// 	gas: graphGas.current?.serialize(),
+			// 	conversion
+			// } )
 		}
 		asyncEffect()
 	}, [] )
 
-	const co2FromVolume = ( datapoint, unit, log ) => {
+	const co2FromVolume = ( { volume, unit, fossilFuelType }, log ) => {
 		try {
-			const path = graph.current.shortestPath( unit, 'kgco2e' )
+
+			// Scope 1
+
+			const path1 = ( fossilFuelType === 'oil' )
+				? graphOil.current.shortestPath( unit, 'kgco2e_1' )
+				: graphGas.current.shortestPath( unit, 'kgco2e_1' )
+
+			//console.log( 'Path to ', { unit, path, conversion } )
+			let factor1 = 1, low1 = 1, high1 = 1
+			for( let step = 1; step < path1.length; step++ ) {
+				const from = path1[ step - 1 ]
+				const to = path1[ step ]
+				const { factor: stepFactor, low: stepLow, high: stepHigh } =
+					conversion[ from ][ to ][ fossilFuelType ]
+
+				factor1 *= stepFactor
+				low1 *= stepLow ?? stepFactor
+				high1 *= stepHigh ?? stepFactor
+				if( log ) console.log( 'SCOPE 1', { from, to, factor1, low1, high1, volume, value: 1e-9 * volume * factor1 } )
+			}
+
+			// Scope 3
+
+			const path = ( fossilFuelType === 'oil' )
+				? graphOil.current.shortestPath( unit, 'kgco2e' )
+				: graphGas.current.shortestPath( unit, 'kgco2e' )
+
 			//console.log( 'Path to ', { unit, path, conversion } )
 			let factor = 1, low = 1, high = 1
 			for( let step = 1; step < path.length; step++ ) {
 				const from = path[ step - 1 ]
 				const to = path[ step ]
-				factor *= conversion[ from ][ to ].factor
-				low *= conversion[ from ][ to ].low ?? conversion[ from ][ to ].factor
-				high *= conversion[ from ][ to ].high ?? conversion[ from ][ to ].factor
-				if( log ) console.log( { from, to, factor, low, high } )
+				const { factor: stepFactor, low: stepLow, high: stepHigh } =
+					conversion[ from ][ to ][ fossilFuelType ]
+
+				factor *= stepFactor
+				low *= stepLow ?? stepFactor
+				high *= stepHigh ?? stepFactor
+				if( log ) console.log( 'SCOPE 3', { from, to, factor, low, high, volume, value: 1e-9 * volume * factor } )
 			}
+
+
 			return {
-				value: Math.round( 10 * datapoint * factor / 1e9 ) / 10,
-				range: [ datapoint * low / 1e9, datapoint * high / 1e9 ]
+				scope1: volume * factor1 / 1e9,
+				scope3: volume * factor / 1e9,
+				range: [ volume * low / 1e9, volume * high / 1e9 ]
 			}
 		} catch( e ) {
 			throw new Error( "While looking for " + unit + " -> kgco2e conversion:\n" + e.message )
