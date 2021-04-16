@@ -1,11 +1,13 @@
 const DEBUG = true
 
-export function filteredCombinedDataSet( table, fossilFuelTypes, sources, grades, projection, co2FromVolume ) {
+export function filteredCombinedDataSet( production, reserves, fossilFuelTypes, sources, grades, projection, co2FromVolume ) {
 
 	const dataset = []
 	let point = { gas: 0, oil: 0, gas_projection: 0, oil_projection: 0 }
 
-	table
+	if( production?.length < 2 ) return
+
+	production
 		.filter( r => {
 			if( !fossilFuelTypes.includes( r.fossilFuelType ) ) return false
 			if( !grades?.[ r.grade ] === true ) return false
@@ -32,11 +34,27 @@ export function filteredCombinedDataSet( table, fossilFuelTypes, sources, grades
 			}
 			return point
 		} )
+
 	dataset.push( point )
+
+	// Now try to merge reserves into the dataset.
+	let index = 0
+	dataset.forEach( data => {
+		// console.log( index, reserves.length, data.year + '-' + reserves[ index ]?.year, data )
+		if( data.year < reserves[ index ]?.year ) return
+
+		while( reserves[ index ]?.year < data.year && index< reserves.length ) index++
+
+		while( reserves[ index ]?.year === data.year  && index< reserves.length ) {
+			const reserve = reserves[ index ]
+			data[ 'reserves_' + reserve.fossilFuelType ] = co2FromVolume( reserve, false )
+			index++
+		}
+	} )
 
 	DEBUG && console.log( 'filteredCombinedDataSet',
 		{
-			fossilFuelTypes, sources, grades, in: table.length, combined: dataset.length, dataset
+			fossilFuelTypes, sources, grades, in: production.length, combined: dataset.length, dataset
 		} )
 
 	return dataset

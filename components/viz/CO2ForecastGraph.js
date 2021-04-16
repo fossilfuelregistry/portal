@@ -1,7 +1,8 @@
 import React, { useCallback } from "react"
 import { Group } from '@visx/group'
-import { AreaStack, Bar } from '@visx/shape'
-import { AxisBottom, AxisLeft } from '@visx/axis'
+import { AreaStack, Bar, LinePath } from '@visx/shape'
+import { AxisBottom, AxisLeft, AxisRight } from '@visx/axis'
+import { curveLinear } from '@visx/curve'
 import { scaleLinear } from '@visx/scale'
 import { defaultStyles, TooltipWithBounds, withTooltip } from '@visx/tooltip'
 import { localPoint } from '@visx/event'
@@ -11,9 +12,11 @@ import { textsSelector, useStore } from "lib/zustandProvider"
 
 const DEBUG = false
 
-const getX = ( d ) => d.year
-const getY0 = ( d ) => d[ 0 ]
-const getY1 = ( d ) => d[ 1 ]
+const getX = d => d.year
+const getY0 = d => d[ 0 ]
+const getY1 = d => d[ 1 ]
+const getOilReservesCO2 = d => ( d.reserves_oil?.scope1 ?? 0 ) + ( d.reserves_oil?.scope3 ?? 0 )
+const getGasReservesCO2 = d => ( d.reserves_gas?.scope1 ?? 0 ) + ( d.reserves_gas?.scope3 ?? 0 )
 
 function CO2ForecastGraphBase( {
 	data,
@@ -30,15 +33,20 @@ function CO2ForecastGraphBase( {
 		range: [ 0, parentWidth - margin.left ],
 		domain: [ 2010, 2040 ],
 	} )
-	const maxCO2 = max( data,
-		d => {
-			return ( d.oil1 ?? 0 ) + ( d.gas1 ?? 0 ) + ( d.oil3 ?? 0 ) + ( d.gas3 ?? 0 )
-		}
-	)
-	console.log( 'maxCO2', maxCO2 )
+
+	const maxCO2 = max( data, d => ( d.oil1 ?? 0 ) + ( d.gas1 ?? 0 ) + ( d.oil3 ?? 0 ) + ( d.gas3 ?? 0 ) )
+	const maxReservesCO2 = max( data, d =>
+		( d.reserves_gas?.scope1 ?? 0 ) + ( d.reserves_gas?.scope3 ?? 0 ) + ( d.reserves_oil?.scope1 ?? 0 ) + ( d.reserves_oil?.scope3 ?? 0 ) )
+	//console.log( { maxCO2, maxReservesCO2 } )
+
 	const yScale = scaleLinear( {
 		range: [ height - 30, 0 ],
 		domain: [ 0, maxCO2 ],
+	} )
+
+	const reservesScale = scaleLinear( {
+		range: [ height - 30, 0 ],
+		domain: [ 0, maxReservesCO2 ],
 	} )
 
 	// tooltip handler
@@ -88,6 +96,13 @@ function CO2ForecastGraphBase( {
 						scale={yScale}
 						numTicks={parentWidth > 520 ? 8 : 4}
 						tickFormat={x => x.toFixed( 1 ).toString()}
+					/>
+
+					<AxisRight
+						scale={reservesScale}
+						numTicks={parentWidth > 520 ? 8 : 4}
+						tickFormat={x => x.toFixed( 1 ).toString()}
+						left={parentWidth - 80}
 					/>
 
 					<AreaStack
@@ -147,6 +162,30 @@ function CO2ForecastGraphBase( {
 								)
 							} )}
 					</AreaStack>
+
+					<LinePath
+						curve={curveLinear}
+						data={data}
+						defined={d => d.year >= 2010 && getOilReservesCO2( d ) > 0}
+						x={d => xScale( getX( d ) ) ?? 0}
+						y={d => reservesScale( getOilReservesCO2( d ) ) ?? 0}
+						stroke={'#935050'}
+						strokeWidth={2}
+						strokeOpacity={1}
+						shapeRendering="geometricPrecision"
+					/>
+					<LinePath
+						curve={curveLinear}
+						data={data}
+						defined={d => d.year >= 2010 && getGasReservesCO2( d ) > 0}
+						x={d => xScale( getX( d ) ) ?? 0}
+						y={d => reservesScale( getGasReservesCO2( d ) ) ?? 0}
+						stroke={'#799350'}
+						strokeWidth={2}
+						strokeOpacity={1}
+						shapeRendering="geometricPrecision"
+					/>
+
 				</Group>
 
 				<Bar

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react"
 import { useQuery } from "@apollo/client"
 import GraphQLStatus from "components/GraphQLStatus"
-import { GQL_countryProductionByIso } from "queries/country"
+import { GQL_countryProductionByIso, GQL_countryReservesByIso } from "queries/country"
 import { Alert, notification } from "antd"
 import { textsSelector, useStore } from "lib/zustandProvider"
 import { useUnitConversionGraph } from "./UnitConverter"
@@ -30,10 +30,16 @@ function CO2Forecast( {
 
 	const production = productionData?.countryProductions?.nodes ?? []
 
+	const { data: reservesData, loading: loadingReserves, error: errorLoadingReserves }
+		= useQuery( GQL_countryReservesByIso,
+			{ variables: { iso3166: country }, skip: !country } )
+
+	const reserves = reservesData?.countryReserves?.nodes ?? []
+
 	let co2
 	const sourceIds = sources.map( s => s?.sourceId )
 	try {
-		co2 = filteredCombinedDataSet( production, [ 'oil', 'gas' ], sourceIds, grades, null, co2FromVolume )
+		co2 = filteredCombinedDataSet( production, reserves, [ 'oil', 'gas' ], sourceIds, grades, null, co2FromVolume )
 	} catch( e ) {
 		notification.warning( {
 			message: "Error during data extraction",
@@ -62,6 +68,8 @@ function CO2Forecast( {
 		return <GraphQLStatus loading={loadingSources} error={errorLoadingSources}/>
 	if( loadingProduction || errorLoadingProduction )
 		return <GraphQLStatus loading={loadingProduction} error={errorLoadingProduction}/>
+	if( loadingReserves || errorLoadingReserves )
+		return <GraphQLStatus loading={loadingReserves} error={errorLoadingReserves}/>
 
 	const { firstYear, lastYear } = limits ?? {}
 

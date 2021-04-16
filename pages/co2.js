@@ -118,7 +118,7 @@ export default function CO2ForecastPage() {
 						<Col xs={24} sm={12} md={8} lg={5}>
 							<div style={{ marginLeft: 20 }}>
 								<h3>Projection</h3>
-								<Radio.Group onChange={set_projection} value={projection}>
+								<Radio.Group onChange={e => set_projection( e.target.value )} value={projection}>
 									<Radio style={radioStyle} value={'auth'}>
 										Authority
 									</Radio>
