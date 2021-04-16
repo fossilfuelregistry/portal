@@ -17,6 +17,8 @@ const getY0 = d => d[ 0 ]
 const getY1 = d => d[ 1 ]
 const getOilReservesCO2 = d => ( d.reserves_oil?.scope1 ?? 0 ) + ( d.reserves_oil?.scope3 ?? 0 )
 const getGasReservesCO2 = d => ( d.reserves_gas?.scope1 ?? 0 ) + ( d.reserves_gas?.scope3 ?? 0 )
+const getStable = d => ( d.stableGas ?? 0 ) + ( d.stableOil ?? 0 )
+const getDecline = d => ( d.declineGas ?? 0 ) + ( d.declineOil ?? 0 )
 
 function CO2ForecastGraphBase( {
 	data,
@@ -82,7 +84,7 @@ function CO2ForecastGraphBase( {
 	)
 
 	return (
-		<div>
+		<div className="graph">
 			<svg width={'100%'} height={height}>
 				<Group left={margin.left} top={0}>
 					<AxisBottom
@@ -108,7 +110,7 @@ function CO2ForecastGraphBase( {
 					<AreaStack
 						keys={[ 'oil_projection', 'gas_projection' ]}
 						data={data}
-						defined={d => d.data.year >= 2010}
+						defined={d => ( getY0( d ) > 0 || getY1( d ) > 0 ) && d.data.year >= 2010}
 						x={d => {
 							const x = xScale( getX( d.data ) ) ?? 0
 							//console.log( { d, x } )
@@ -136,7 +138,7 @@ function CO2ForecastGraphBase( {
 					<AreaStack
 						keys={[ 'oil1', 'gas1', 'oil3', 'gas3' ]}
 						data={data}
-						defined={d => d.data.year >= 2010}
+						defined={d => ( getY0( d ) > 0 || getY1( d ) > 0 ) && d.data.year >= 2010}
 						x={d => {
 							const x = xScale( getX( d.data ) ) ?? 0
 							//console.log( { d, x } )
@@ -170,10 +172,11 @@ function CO2ForecastGraphBase( {
 						x={d => xScale( getX( d ) ) ?? 0}
 						y={d => reservesScale( getOilReservesCO2( d ) ) ?? 0}
 						stroke={'#935050'}
-						strokeWidth={2}
+						strokeWidth={3}
 						strokeOpacity={1}
 						shapeRendering="geometricPrecision"
 					/>
+
 					<LinePath
 						curve={curveLinear}
 						data={data}
@@ -181,7 +184,33 @@ function CO2ForecastGraphBase( {
 						x={d => xScale( getX( d ) ) ?? 0}
 						y={d => reservesScale( getGasReservesCO2( d ) ) ?? 0}
 						stroke={'#799350'}
-						strokeWidth={2}
+						strokeWidth={3}
+						strokeOpacity={1}
+						shapeRendering="geometricPrecision"
+					/>
+
+					<LinePath
+						curve={curveLinear}
+						className="projection stable"
+						data={data}
+						defined={d => d.year >= 2010 && d.stableOil > 0}
+						x={d => xScale( getX( d ) ) ?? 0}
+						y={d => yScale( getStable( d ) ) ?? 0}
+						stroke={'#535353'}
+						strokeWidth={3}
+						strokeOpacity={1}
+						shapeRendering="geometricPrecision"
+					/>
+
+					<LinePath
+						curve={curveLinear}
+						className="projection decline"
+						data={data}
+						defined={d => d.year >= 2010 && d.declineOil > 0}
+						x={d => xScale( getX( d ) ) ?? 0}
+						y={d => yScale( getDecline( d ) ) ?? 0}
+						stroke={'#535353'}
+						strokeWidth={3}
 						strokeOpacity={1}
 						shapeRendering="geometricPrecision"
 					/>
@@ -194,7 +223,6 @@ function CO2ForecastGraphBase( {
 					width={parentWidth - margin.left}
 					height={height - margin.top}
 					fill="transparent"
-					rx={14}
 					onTouchStart={handleTooltip}
 					onTouchMove={handleTooltip}
 					onMouseMove={handleTooltip}
@@ -238,6 +266,15 @@ function CO2ForecastGraphBase( {
 					</TooltipWithBounds>
 				</div>
 			)}
+
+			<style jsx>{`
+				:global(path.projection) {
+					stroke: #333333;
+					stroke-width: 3;
+					stroke-dasharray: 8;
+				}
+			`}
+			</style>
 		</div> )
 }
 

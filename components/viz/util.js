@@ -38,55 +38,46 @@ export function filteredCombinedDataSet( production, reserves, fossilFuelTypes, 
 	dataset.push( point )
 
 	// Now try to merge reserves into the dataset.
+
 	let index = 0
 	dataset.forEach( data => {
 		// console.log( index, reserves.length, data.year + '-' + reserves[ index ]?.year, data )
 		if( data.year < reserves[ index ]?.year ) return
 
-		while( reserves[ index ]?.year < data.year && index< reserves.length ) index++
+		while( reserves[ index ]?.year < data.year && index < reserves.length ) index++
 
-		while( reserves[ index ]?.year === data.year  && index< reserves.length ) {
+		while( reserves[ index ]?.year === data.year && index < reserves.length ) {
 			const reserve = reserves[ index ]
 			data[ 'reserves_' + reserve.fossilFuelType ] = co2FromVolume( reserve, false )
 			index++
 		}
 	} )
 
+	// Projected production curves
+
+	let lastProduction
+	let decline
+	let lastData
+	dataset.forEach( data => {
+		if( data.oil3 > 0 || data.gas3 > 0 ) {
+			lastProduction = data
+			decline = { ...data }
+		} else if( lastProduction ) {
+			lastData.stableOil = ( lastProduction.oil1 + lastProduction.oil3 )
+			lastData.stableGas = ( lastProduction.gas1 + lastProduction.gas3 )
+			lastData.declineOil = decline.oil1 + decline.oil3
+			lastData.declineGas = decline.gas1 +decline.gas3
+			decline.oil1 *= 0.8
+			decline.oil3 *= 0.8
+			decline.gas1 *= 0.8
+			decline.gas3 *= 0.8
+		}
+		lastData = data
+	} )
+
 	DEBUG && console.log( 'filteredCombinedDataSet',
-		{
-			fossilFuelTypes, sources, grades, in: production.length, combined: dataset.length, dataset
-		} )
+		{ fossilFuelTypes, sources, grades, in: production.length, combined: dataset.length, dataset }
+	)
 
 	return dataset
 }
-
-/*
-	const dataset = []
-	let currentValue = {
-		co2: 0,
-		co2_span: [ 0, 0 ],
-		co2_projection: 0,
-		co2_projection_span: [ 0, 0 ],
-		year: 0,
-		empty: true
-	}
-
-	datasetValues.forEach( value => {
-		if( value.year !== currentValue.year ) {
-			if( !currentValue.empty ) {
-				dataset.push( currentValue )
-			}
-			currentValue = value
-			if( !currentValue.co2_span ) currentValue.co2_span = [ 0, 0 ]
-			if( !currentValue.co2_projection_span ) currentValue.co2_projection_span = [ 0, 0 ]
-		} else {
-			currentValue.co2 += value.co2
-			currentValue.co2_span[ 0 ] += value.co2_span?.[ 0 ]
-			currentValue.co2_span[ 1 ] += value.co2_span?.[ 1 ]
-			currentValue.co2_projection += value.co2_projection
-			currentValue.co2_projection_span[ 0 ] += value.co2_projection_span?.[ 0 ]
-			currentValue.co2_projection_span[ 1 ] += value.co2_projection_span?.[ 1 ]
-		}
-	} )
-
- */
