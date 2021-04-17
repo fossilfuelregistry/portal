@@ -18,13 +18,13 @@ const getY0 = d => d[ 0 ]
 const getY1 = d => d[ 1 ]
 const getOilReservesCO2 = d => d.reserves.oil.scope1.co2 + d.reserves.oil.scope3.co2
 const getGasReservesCO2 = d => d.reserves.gas.scope1.co2 + d.reserves.gas.scope3.co2
-const getStable = d => getCO2( d.future.stable )
-const getDecline = d => getCO2( d.future.decline )
+const getStable = d => getCO2( d.future.stable.production )
+const getDecline = d => getCO2( d.future.decline.production )
 
 //#008080,#70a494,#b4c8a8,#f6edbd,#edbb8a,#de8a5a,#ca562c
 
 function CO2ForecastGraphBase( {
-	data,
+	data, projection,
 	parentWidth,
 	tooltipLeft, tooltipTop, tooltipData,
 	hideTooltip, showTooltip
@@ -49,6 +49,11 @@ function CO2ForecastGraphBase( {
 		console.log( { maxValues } )
 		return maxValues
 	}, [ data ] )
+
+	const getFutureReserve = useCallback( ( d, fuel ) => {
+		//console.log( d.year, d, d.future[ projection ].reserves.oil.co2 )
+		return getFuelCO2( d.future[ projection ].reserves[ fuel ] )
+	}, [ projection ] )
 
 	const productionScale = scaleLinear( {
 		range: [ height - 30, 0 ],
@@ -188,28 +193,25 @@ function CO2ForecastGraphBase( {
 
 					<LinePath
 						curve={curveLinear}
+						className="reserves oil"
 						data={data}
 						defined={d => d.year >= 2010 && getOilReservesCO2( d ) > 0}
 						x={d => yearScale( getYear( d ) ) ?? 0}
 						y={d => reservesScale( getOilReservesCO2( d ) ) ?? 0}
-						stroke={'#935050'}
-						strokeWidth={3}
-						strokeOpacity={1}
 						shapeRendering="geometricPrecision"
 					/>
 
 					<LinePath
 						curve={curveLinear}
+						className="reserves gas"
 						data={data}
 						defined={d => d.year >= 2010 && getGasReservesCO2( d ) > 0}
 						x={d => yearScale( getYear( d ) ) ?? 0}
 						y={d => reservesScale( getGasReservesCO2( d ) ) ?? 0}
-						stroke={'#799350'}
-						strokeWidth={3}
-						strokeOpacity={1}
 						shapeRendering="geometricPrecision"
 					/>
 
+					{projection === 'stable' &&
 					<LinePath
 						curve={curveLinear}
 						className="projection stable"
@@ -217,12 +219,10 @@ function CO2ForecastGraphBase( {
 						defined={d => d.year >= 2010 && getStable( d ) > 0}
 						x={d => yearScale( getYear( d ) ) ?? 0}
 						y={d => productionScale( getStable( d ) ) ?? 0}
-						stroke={'#535353'}
-						strokeWidth={3}
-						strokeOpacity={1}
 						shapeRendering="geometricPrecision"
-					/>
+					/>}
 
+					{projection === 'decline' &&
 					<LinePath
 						curve={curveLinear}
 						className="projection decline"
@@ -230,9 +230,26 @@ function CO2ForecastGraphBase( {
 						defined={d => d.year >= 2010 && getDecline( d ) > 0}
 						x={d => yearScale( getYear( d ) ) ?? 0}
 						y={d => productionScale( getDecline( d ) ) ?? 0}
-						stroke={'#535353'}
-						strokeWidth={3}
-						strokeOpacity={1}
+						shapeRendering="geometricPrecision"
+					/>}
+
+					<LinePath
+						curve={curveLinear}
+						className="projection reserves oil"
+						data={data}
+						defined={d => d.year >= 2010 && getFutureReserve( d, 'oil' ) > 0}
+						x={d => yearScale( getYear( d ) ) ?? 0}
+						y={d => reservesScale( getFutureReserve( d, 'oil' ) ) ?? 0}
+						shapeRendering="geometricPrecision"
+					/>
+
+					<LinePath
+						curve={curveLinear}
+						className="projection reserves gas"
+						data={data}
+						defined={d => d.year >= 2010 && getFutureReserve( d, 'gas' ) > 0}
+						x={d => yearScale( getYear( d ) ) ?? 0}
+						y={d => reservesScale( getFutureReserve( d, 'gas' ) ) ?? 0}
 						shapeRendering="geometricPrecision"
 					/>
 
@@ -303,6 +320,18 @@ function CO2ForecastGraphBase( {
                 stroke: #333333;
                 stroke-width: 3;
                 stroke-dasharray: 8;
+              }
+
+              :global(path.reserves) {
+                stroke-width: 3;
+              }
+
+              :global(path.reserves.oil) {
+                stroke: #b1663d;
+              }
+
+              :global(path.reserves.gas) {
+                stroke: #4382b3;
               }
 			`}
 			</style>

@@ -13,7 +13,7 @@ const DEBUG = false
 
 
 function CO2Forecast( {
-	country, sources, grades, onGrades, onSources
+	country, sources, grades, onGrades, onSources, projection
 } ) {
 	const { co2FromVolume } = useUnitConversionGraph()
 	const texts = useStore( textsSelector )
@@ -81,7 +81,7 @@ function CO2Forecast( {
 
 	DEBUG && console.log( 'CountryProduction', { firstYear, lastYear, grades, sources } )
 
-	return <CO2ForecastGraph data={co2}/>
+	return <CO2ForecastGraph data={co2} projection={projection}/>
 }
 
 export default CO2Forecast

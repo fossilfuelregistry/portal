@@ -21,7 +21,7 @@ export default function CO2ForecastPage() {
 	const [ country, set_country ] = useState()
 	const [ grades, set_grades ] = useState( {} )
 	const [ estimate, set_estimate ] = useState( 2 )
-	const [ projection, set_projection ] = useState( 'stable' )
+	const [ projection, set_projection ] = useState( 'decline' )
 	const [ allSources, set_allSources ] = useState( [] )
 	const [ selectedSources, set_selectedSources ] = useState( [] )
 
@@ -125,7 +125,7 @@ export default function CO2ForecastPage() {
 									<Radio style={radioStyle} value={'stable'}>
 										Stable
 									</Radio>
-									<Radio style={radioStyle} value={'declining'}>
+									<Radio style={radioStyle} value={'decline'}>
 										Declining
 									</Radio>
 								</Radio.Group>
@@ -137,6 +137,7 @@ export default function CO2ForecastPage() {
 								country={country}
 								sources={selectedSources}
 								grades={grades}
+								projection={projection}
 								onGrades={set_grades}
 								onSources={set_allSources}
 							/>
