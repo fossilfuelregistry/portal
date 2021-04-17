@@ -18,6 +18,7 @@ const getY0 = d => d[ 0 ]
 const getY1 = d => d[ 1 ]
 const getOilReservesCO2 = d => d.reserves.oil.scope1.co2 + d.reserves.oil.scope3.co2
 const getGasReservesCO2 = d => d.reserves.gas.scope1.co2 + d.reserves.gas.scope3.co2
+const getAuth = d => getCO2( d.projection )
 const getStable = d => getCO2( d.future.stable.production )
 const getDecline = d => getCO2( d.future.decline.production )
 
@@ -62,7 +63,7 @@ function CO2ForecastGraphBase( {
 
 	const reservesScale = scaleLinear( {
 		range: [ height - 30, 0 ],
-		domain: [ 0, maxCO2.reserves ],
+		domain: [ 0, maxCO2.reserves * 0.7 ],
 	} )
 
 	// tooltip handler
@@ -233,6 +234,17 @@ function CO2ForecastGraphBase( {
 						shapeRendering="geometricPrecision"
 					/>}
 
+					{projection === 'auth' &&
+					<LinePath
+						curve={curveLinear}
+						className="projection auth"
+						data={data}
+						defined={d => d.year >= 2010 && getAuth( d ) > 0}
+						x={d => yearScale( getYear( d ) ) ?? 0}
+						y={d => productionScale( getAuth( d ) ) ?? 0}
+						shapeRendering="geometricPrecision"
+					/>}
+
 					<LinePath
 						curve={curveLinear}
 						className="projection reserves oil"
@@ -324,6 +336,10 @@ function CO2ForecastGraphBase( {
 
               :global(path.reserves) {
                 stroke-width: 3;
+              }
+
+              :global(path.projection.reserves) {
+                stroke-dasharray: 4;
               }
 
               :global(path.reserves.oil) {

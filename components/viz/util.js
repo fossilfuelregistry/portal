@@ -16,6 +16,16 @@ const emptyPoint = {
 		gas: { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } }
 	},
 	future: {
+		auth: {
+			production: {
+				oil: { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } },
+				gas: { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } }
+			},
+			reserves: {
+				oil: { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } },
+				gas: { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } }
+			}
+		},
 		stable: {
 			production: {
 				oil: { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } },
@@ -51,9 +61,9 @@ const _addCO2 = ( datapoint, fuel, deltaCO2 ) => {
 
 const _accumulate = ( datapoint, production ) => {
 	datapoint.gas.scope1.co2 += production.gas.scope1.co2
-	datapoint.gas.scope3.co2 +=  production.gas.scope3.co2
-	datapoint.oil.scope1.co2 +=  production.oil.scope1.co2
-	datapoint.oil.scope3.co2 +=  production.oil.scope3.co2
+	datapoint.gas.scope3.co2 += production.gas.scope3.co2
+	datapoint.oil.scope1.co2 += production.oil.scope1.co2
+	datapoint.oil.scope3.co2 += production.oil.scope3.co2
 }
 
 const _diff = ( datapoint, production ) => {
@@ -158,6 +168,9 @@ export function filteredCombinedDataSet( production, reserves, fossilFuelTypes, 
 			lastProduction = data
 			decline = clone( emptyPoint )
 			decline.future.decline.production = clone( data.production )
+			data.future.auth.reserves = clone( data.reserves )
+			data.future.stable.reserves = clone( data.reserves )
+			data.future.decline.reserves = clone( data.reserves )
 		} else if( lastProduction ) {
 			lastData.future.stable.production = clone( lastProduction.production )
 			lastData.future.decline.production = clone( decline.future.decline.production )
@@ -170,19 +183,35 @@ export function filteredCombinedDataSet( production, reserves, fossilFuelTypes, 
 			decline.future.decline.production.gas.scope3.range[ 0 ] *= 0.8
 			decline.future.decline.production.gas.scope3.range[ 1 ] *= 0.8
 
+			_accumulate( sumOfProjectedProduction.auth.production, lastData.projection )
 			_accumulate( sumOfProjectedProduction.stable.production, lastData.future.stable.production )
 			_accumulate( sumOfProjectedProduction.decline.production, lastData.future.decline.production )
 
-			lastData.future.stable.reserves = _diff( lastProduction.reserves, sumOfProjectedProduction.stable.production )
-			lastData.future.decline.reserves = _diff( lastProduction.reserves, sumOfProjectedProduction.decline.production )
+			data.future.auth.reserves = _diff( lastProduction.reserves, sumOfProjectedProduction.auth.production )
+			data.future.stable.reserves = _diff( lastProduction.reserves, sumOfProjectedProduction.stable.production )
+			data.future.decline.reserves = _diff( lastProduction.reserves, sumOfProjectedProduction.decline.production )
 
-			if( data.year === 2022 ) console.log( { data, lastData, lastProduction, decline, sumOfProjectedProduction } )
+			if( data.year === 2022 ) console.log( {
+				data,
+				lastData,
+				lastProduction,
+				decline,
+				sumOfProjectedProduction
+			} )
 		}
 		lastData = data
 	} )
 
 	DEBUG && console.log( 'filteredCombinedDataSet',
-		{ fossilFuelTypes, sources, grades, in: production.length, combined: dataset.length, dataset, sumOfProjectedProduction }
+		{
+			fossilFuelTypes,
+			sources,
+			grades,
+			in: production.length,
+			combined: dataset.length,
+			dataset,
+			sumOfProjectedProduction
+		}
 	)
 
 	return dataset
