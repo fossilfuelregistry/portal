@@ -1,4 +1,4 @@
-import React, { useCallback } from "react"
+import React, { useCallback, useMemo } from "react"
 import { Group } from '@visx/group'
 import { AreaStack, Bar, LinePath } from '@visx/shape'
 import { AxisBottom, AxisLeft, AxisRight } from '@visx/axis'
@@ -9,16 +9,19 @@ import { localPoint } from '@visx/event'
 import { bisector, max } from 'd3-array'
 import { withParentSize } from "@visx/responsive"
 import { textsSelector, useStore } from "lib/zustandProvider"
+import { getCO2, getFuelCO2, getFuelScopeCO2 } from "./util"
 
 const DEBUG = false
 
-const getX = d => d.year
+const getYear = d => d.year
 const getY0 = d => d[ 0 ]
 const getY1 = d => d[ 1 ]
-const getOilReservesCO2 = d => ( d.reserves_oil?.scope1 ?? 0 ) + ( d.reserves_oil?.scope3 ?? 0 )
-const getGasReservesCO2 = d => ( d.reserves_gas?.scope1 ?? 0 ) + ( d.reserves_gas?.scope3 ?? 0 )
-const getStable = d => ( d.stableGas ?? 0 ) + ( d.stableOil ?? 0 )
-const getDecline = d => ( d.declineGas ?? 0 ) + ( d.declineOil ?? 0 )
+const getOilReservesCO2 = d => d.reserves.oil.scope1.co2 + d.reserves.oil.scope3.co2
+const getGasReservesCO2 = d => d.reserves.gas.scope1.co2 + d.reserves.gas.scope3.co2
+const getStable = d => getCO2( d.future.stable )
+const getDecline = d => getCO2( d.future.decline )
+
+//#008080,#70a494,#b4c8a8,#f6edbd,#edbb8a,#de8a5a,#ca562c
 
 function CO2ForecastGraphBase( {
 	data,
@@ -31,24 +34,30 @@ function CO2ForecastGraphBase( {
 	const margin = { left: 30, top: 10 }
 
 	// scales
-	const xScale = scaleLinear( {
+	const yearScale = scaleLinear( {
 		range: [ 0, parentWidth - margin.left ],
 		domain: [ 2010, 2040 ],
 	} )
 
-	const maxCO2 = max( data, d => ( d.oil1 ?? 0 ) + ( d.gas1 ?? 0 ) + ( d.oil3 ?? 0 ) + ( d.gas3 ?? 0 ) )
-	const maxReservesCO2 = max( data, d =>
-		( d.reserves_gas?.scope1 ?? 0 ) + ( d.reserves_gas?.scope3 ?? 0 ) + ( d.reserves_oil?.scope1 ?? 0 ) + ( d.reserves_oil?.scope3 ?? 0 ) )
-	//console.log( { maxCO2, maxReservesCO2 } )
+	const maxCO2 = useMemo( () => {
+		let maxValues = {}
+		Object.keys( data[ 0 ] ).forEach( key => {
+			if( key === 'future' ) return
+			if( key === 'year' ) return
+			maxValues[ key ] = max( data, d => getCO2( d[ key ] ) )
+		} )
+		console.log( { maxValues } )
+		return maxValues
+	}, [ data ] )
 
-	const yScale = scaleLinear( {
+	const productionScale = scaleLinear( {
 		range: [ height - 30, 0 ],
-		domain: [ 0, maxCO2 ],
+		domain: [ 0, maxCO2.production ],
 	} )
 
 	const reservesScale = scaleLinear( {
 		range: [ height - 30, 0 ],
-		domain: [ 0, maxReservesCO2 ],
+		domain: [ 0, maxCO2.reserves ],
 	} )
 
 	// tooltip handler
@@ -56,32 +65,34 @@ function CO2ForecastGraphBase( {
 		//console.log( 'bisectDate', d )
 		return d.year
 	} ).left
-	const getValue = d => {
-		//console.log( 'getValue', d )
-		return d.oil1
+
+	const getProductionCO2 = d => {
+		return getCO2( d.production )
 	}
 
 	const handleTooltip = useCallback(
 		event => {
 			const l = localPoint( event )
 			const { x } = l || { x: 0 }
-			const x0 = xScale.invert( x )
+			const x0 = yearScale.invert( x )
 			const index = bisectDate( data, x0, 1 )
 			const d0 = data[ index - 1 ]
 			const d1 = data[ index ]
 			let d = d0
-			if( d1 && getX( d1 ) ) {
-				d = x0.valueOf() - getX( d0 ).valueOf() > getX( d1 ).valueOf() - x0.valueOf() ? d1 : d0
+			if( d1 && getYear( d1 ) ) {
+				d = x0.valueOf() - getYear( d0 ).valueOf() > getYear( d1 ).valueOf() - x0.valueOf() ? d1 : d0
 			}
 			//console.log( { d, v: getValue( d ), y: yScale( getValue( d ) ) } )
 			showTooltip( {
 				tooltipData: d,
 				tooltipLeft: x,
-				tooltipTop: yScale( getValue( d ) ),
+				tooltipTop: productionScale( getProductionCO2( d ) ),
 			} )
 		},
-		[ showTooltip, yScale, xScale ],
+		[ showTooltip, productionScale, yearScale ],
 	)
+
+	const tip = tooltipData
 
 	return (
 		<div className="graph">
@@ -89,13 +100,13 @@ function CO2ForecastGraphBase( {
 				<Group left={margin.left} top={0}>
 					<AxisBottom
 						top={height - 22}
-						scale={xScale}
+						scale={yearScale}
 						numTicks={parentWidth > 520 ? 8 : 4}
 						tickFormat={x => `${x.toFixed( 0 )}`}
 					/>
 
 					<AxisLeft
-						scale={yScale}
+						scale={productionScale}
 						numTicks={parentWidth > 520 ? 8 : 4}
 						tickFormat={x => x.toFixed( 1 ).toString()}
 					/>
@@ -109,15 +120,19 @@ function CO2ForecastGraphBase( {
 
 					<AreaStack
 						keys={[ 'oil_projection', 'gas_projection' ]}
-						data={data}
+						data={data.map( d => ( {
+							oil_projection: getFuelCO2( d.projection.oil ),
+							gas_projection: getFuelCO2( d.projection.gas ),
+							year: d.year
+						} ) )}
 						defined={d => ( getY0( d ) > 0 || getY1( d ) > 0 ) && d.data.year >= 2010}
 						x={d => {
-							const x = xScale( getX( d.data ) ) ?? 0
+							const x = yearScale( getYear( d.data ) ) ?? 0
 							//console.log( { d, x } )
 							return x
 						}}
-						y0={d => yScale( getY0( d ) ) ?? 0}
-						y1={d => yScale( getY1( d ) ) ?? 0}
+						y0={d => productionScale( getY0( d ) ) ?? 0}
+						y1={d => productionScale( getY1( d ) ) ?? 0}
 					>
 						{( { stacks, path } ) =>
 							stacks.map( stack => {
@@ -137,15 +152,21 @@ function CO2ForecastGraphBase( {
 
 					<AreaStack
 						keys={[ 'oil1', 'gas1', 'oil3', 'gas3' ]}
-						data={data}
+						data={data.map( d => ( {
+							oil1: getFuelScopeCO2( d.production.oil.scope1 ),
+							oil3: getFuelScopeCO2( d.production.oil.scope3 ),
+							gas1: getFuelScopeCO2( d.production.gas.scope1 ),
+							gas3: getFuelScopeCO2( d.production.gas.scope3 ),
+							year: d.year
+						} ) )}
 						defined={d => ( getY0( d ) > 0 || getY1( d ) > 0 ) && d.data.year >= 2010}
 						x={d => {
-							const x = xScale( getX( d.data ) ) ?? 0
+							const x = yearScale( getYear( d.data ) ) ?? 0
 							//console.log( { d, x } )
 							return x
 						}}
-						y0={d => yScale( getY0( d ) ) ?? 0}
-						y1={d => yScale( getY1( d ) ) ?? 0}
+						y0={d => productionScale( getY0( d ) ) ?? 0}
+						y1={d => productionScale( getY1( d ) ) ?? 0}
 					>
 						{( { stacks, path } ) =>
 							stacks.map( stack => {
@@ -169,7 +190,7 @@ function CO2ForecastGraphBase( {
 						curve={curveLinear}
 						data={data}
 						defined={d => d.year >= 2010 && getOilReservesCO2( d ) > 0}
-						x={d => xScale( getX( d ) ) ?? 0}
+						x={d => yearScale( getYear( d ) ) ?? 0}
 						y={d => reservesScale( getOilReservesCO2( d ) ) ?? 0}
 						stroke={'#935050'}
 						strokeWidth={3}
@@ -181,7 +202,7 @@ function CO2ForecastGraphBase( {
 						curve={curveLinear}
 						data={data}
 						defined={d => d.year >= 2010 && getGasReservesCO2( d ) > 0}
-						x={d => xScale( getX( d ) ) ?? 0}
+						x={d => yearScale( getYear( d ) ) ?? 0}
 						y={d => reservesScale( getGasReservesCO2( d ) ) ?? 0}
 						stroke={'#799350'}
 						strokeWidth={3}
@@ -193,9 +214,9 @@ function CO2ForecastGraphBase( {
 						curve={curveLinear}
 						className="projection stable"
 						data={data}
-						defined={d => d.year >= 2010 && d.stableOil > 0}
-						x={d => xScale( getX( d ) ) ?? 0}
-						y={d => yScale( getStable( d ) ) ?? 0}
+						defined={d => d.year >= 2010 && getStable( d ) > 0}
+						x={d => yearScale( getYear( d ) ) ?? 0}
+						y={d => productionScale( getStable( d ) ) ?? 0}
 						stroke={'#535353'}
 						strokeWidth={3}
 						strokeOpacity={1}
@@ -206,9 +227,9 @@ function CO2ForecastGraphBase( {
 						curve={curveLinear}
 						className="projection decline"
 						data={data}
-						defined={d => d.year >= 2010 && d.declineOil > 0}
-						x={d => xScale( getX( d ) ) ?? 0}
-						y={d => yScale( getDecline( d ) ) ?? 0}
+						defined={d => d.year >= 2010 && getDecline( d ) > 0}
+						x={d => yearScale( getYear( d ) ) ?? 0}
+						y={d => productionScale( getDecline( d ) ) ?? 0}
 						stroke={'#535353'}
 						strokeWidth={3}
 						strokeOpacity={1}
@@ -230,7 +251,7 @@ function CO2ForecastGraphBase( {
 				/>
 
 			</svg>
-			{tooltipData && (
+			{tip && (
 				<div>
 					<TooltipWithBounds
 						key={Math.random()}
@@ -239,27 +260,37 @@ function CO2ForecastGraphBase( {
 						style={{
 							...defaultStyles,
 							minWidth: 60,
-							backgroundColor: 'rgba(0,0,0,0.9)',
-							color: 'white'
+							backgroundColor: 'rgba(0,0,0,0.7)',
+							color: 'white',
+							lineHeight: 1.2
 						}}
 					>
+						<h4 style={{ color: 'white' }}>{tip.year}</h4>
 						<table>
 							<tbody>
 								<tr>
-									<td>{texts?.oil} 1</td>
-									<td align="right">{tooltipData.oil1?.toFixed( 1 )}</td>
+									<td>{texts?.production} {texts?.oil} 1&nbsp;</td>
+									<td align="right">{getFuelScopeCO2( tip.production.oil.scope1 )?.toFixed( 1 )}</td>
 								</tr>
 								<tr>
-									<td>{texts?.gas} 1</td>
-									<td align="right">{tooltipData.gas1?.toFixed( 1 )}</td>
+									<td>{texts?.production} {texts?.oil} 3&nbsp;</td>
+									<td align="right">{getFuelScopeCO2( tip.production.oil.scope3 )?.toFixed( 1 )}</td>
 								</tr>
 								<tr>
-									<td>{texts?.oil} 3</td>
-									<td align="right">{tooltipData.oil3?.toFixed( 1 )}</td>
+									<td>{texts?.production} {texts?.gas} 1&nbsp;</td>
+									<td align="right">{getFuelScopeCO2( tip.production.gas.scope1 )?.toFixed( 1 )}</td>
 								</tr>
 								<tr>
-									<td>{texts?.gas} 3</td>
-									<td align="right">{tooltipData.gas3?.toFixed( 1 )}</td>
+									<td>{texts?.production} {texts?.gas} 3&nbsp;</td>
+									<td align="right">{getFuelScopeCO2( tip.production.gas.scope3 )?.toFixed( 1 )}</td>
+								</tr>
+								<tr>
+									<td>{texts?.reserves} {texts?.oil}&nbsp;</td>
+									<td align="right">{getFuelCO2( tip.reserves.oil )?.toFixed( 1 )}</td>
+								</tr>
+								<tr>
+									<td>{texts?.reserves} {texts?.gas}&nbsp;</td>
+									<td align="right">{getFuelCO2( tip.reserves.gas )?.toFixed( 1 )}</td>
 								</tr>
 							</tbody>
 						</table>
@@ -268,42 +299,14 @@ function CO2ForecastGraphBase( {
 			)}
 
 			<style jsx>{`
-				:global(path.projection) {
-					stroke: #333333;
-					stroke-width: 3;
-					stroke-dasharray: 8;
-				}
+              :global(path.projection) {
+                stroke: #333333;
+                stroke-width: 3;
+                stroke-dasharray: 8;
+              }
 			`}
 			</style>
 		</div> )
 }
 
 export default withParentSize( withTooltip( CO2ForecastGraphBase ) )
-
-//#008080,#70a494,#b4c8a8,#f6edbd,#edbb8a,#de8a5a,#ca562c
-/*
-			<Group top={0} left={0}>
-				<LinePath
-					curve={curveLinear}
-					data={data}
-					x={d => xScale( getX( d ) ) ?? 0}
-					y={d => yScale( getY( d ) ) ?? 0}
-					stroke={'#935050'}
-					strokeWidth={1.5}
-					strokeOpacity={1}
-					shapeRendering="geometricPrecision"
-				/>
-				<AreaClosed
-					data={data}
-					x={d => xScale( getX( d ) ) ?? 0}
-					y={d => yScale( getY( d ) ) ?? 0}
-					yScale={yScale}
-					strokeWidth={1}
-					stroke="url(#area-gradient)"
-					fill={'#a1a35e'}
-					fillOpacity={0.1}
-					curve={curveLinear}
-				/>
-			</Group>
-
- */
