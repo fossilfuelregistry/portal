@@ -29,7 +29,7 @@ export default function CountrySelector( { onChange } ) {
 	return (
 		<Select
 			showSearch
-			style={{ minWidth: 200, width: '100%' }}
+			style={{ minWidth: 120, width: '100%' }}
 			defaultValue={router.query.country ? { value: router.query.country } : undefined}
 			labelInValue={true}
 			placeholder={texts?.country + '...'}

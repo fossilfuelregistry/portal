@@ -34,7 +34,7 @@ export default function CO2ForecastPage() {
 				<div className="co2">
 					<Row gutter={[ 12, 12 ]}>
 
-						<Col xs={24} sm={12} md={8} lg={6}>
+						<Col xs={12} lg={6}>
 							<h3>Country</h3>
 							<CountrySelector
 								country={country}
@@ -48,7 +48,7 @@ export default function CO2ForecastPage() {
 							/>
 						</Col>
 
-						<Col xs={24} sm={12} md={8} lg={4}>
+						<Col xs={12} lg={4}>
 							<h3>Data source</h3>
 							<Row gutter={[ 12, 12 ]}>
 								{allSources.map( source => (
@@ -75,7 +75,7 @@ export default function CO2ForecastPage() {
 							</Row>
 						</Col>
 
-						<Col xs={24} sm={12} md={8} lg={3}>
+						<Col xs={12} lg={3}>
 							<h3>Grades</h3>
 							<Row gutter={[ 12, 12 ]}>
 								{Object.keys( grades ).map( grade => (
@@ -95,7 +95,24 @@ export default function CO2ForecastPage() {
 							</Row>
 						</Col>
 
-						<Col xs={24} sm={12} md={8} lg={6}>
+						<Col xs={12} lg={5}>
+							<div>
+								<h3>Projection</h3>
+								<Radio.Group onChange={e => set_projection( e.target.value )} value={projection}>
+									<Radio style={radioStyle} value={'auth'}>
+										Authority
+									</Radio>
+									<Radio style={radioStyle} value={'stable'}>
+										Stable
+									</Radio>
+									<Radio style={radioStyle} value={'decline'}>
+										Declining
+									</Radio>
+								</Radio.Group>
+							</div>
+						</Col>
+
+						<Col xs={24} lg={6}>
 							<h3>Estimates</h3>
 							<Slider
 								trackStyle={{ height: '12px' }}
@@ -134,23 +151,6 @@ export default function CO2ForecastPage() {
 							/>
 						</Col>
 
-						<Col xs={24} sm={12} md={8} lg={5}>
-							<div style={{ marginLeft: 20 }}>
-								<h3>Projection</h3>
-								<Radio.Group onChange={e => set_projection( e.target.value )} value={projection}>
-									<Radio style={radioStyle} value={'auth'}>
-										Authority
-									</Radio>
-									<Radio style={radioStyle} value={'stable'}>
-										Stable
-									</Radio>
-									<Radio style={radioStyle} value={'decline'}>
-										Declining
-									</Radio>
-								</Radio.Group>
-							</div>
-						</Col>
-
 						<Col xs={24}>
 							<CO2Forecast
 								country={country}
@@ -171,7 +171,13 @@ export default function CO2ForecastPage() {
                   .co2 {
                     padding: 0 40px;
                   }
-
+				  
+				  @media (max-width: ${theme[ '@screen-sm' ]}) {
+                  	.co2 {
+                    	padding: 0 18px;
+                  	}
+				  }
+				  
                   h3 {
                     margin-bottom: 12px !important;
                   }
