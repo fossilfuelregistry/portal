@@ -1,9 +1,9 @@
-import { useStore, textsSelector } from 'lib/zustandProvider'
 import Link from 'next/link'
 import { Drawer, } from 'antd'
+import useText from "lib/useText"
 
 const NavigDrawer = ( { visible, onClose } ) => {
-	const texts = useStore( textsSelector )
+	const { getText } = useText()
 
 	return (
 		<div className="menu">
@@ -14,17 +14,17 @@ const NavigDrawer = ( { visible, onClose } ) => {
 				onClose={onClose}
 				visible={visible}
 			>
-				<h4 className="item"><Link href="/wells">{texts?.wells}</Link></h4>
-				<h4 className="item"><Link href="/country_production">{texts?.country_production}</Link></h4>
-				<h4 className="item"><Link href="/country_reserves">{texts?.country_reserves}</Link></h4>
-				<h4 className="item"><Link href="/co2">{texts?.co2_forecast}</Link></h4>
+				<h4 className="item"><Link href="/wells">{getText( 'wells' )}</Link></h4>
+				<h4 className="item"><Link href="/country_production">{getText( 'country_production' )}</Link></h4>
+				<h4 className="item"><Link href="/country_reserves">{getText( 'country_reserves' )}</Link></h4>
+				<h4 className="item"><Link href="/co2">{getText( 'co2_forecast' )}</Link></h4>
 				<p>...</p>
 			</Drawer>
 
 			<style jsx>{`
               .menu {
                 margin-top: 100px;
-                fort-family: 
+                fort-family:
               }
 
               .item {

@@ -3,11 +3,11 @@ import { useQuery } from "@apollo/client"
 import GraphQLStatus from "components/GraphQLStatus"
 import { GQL_countryProductionByIso, GQL_countryReservesByIso } from "queries/country"
 import { Alert, notification } from "antd"
-import { textsSelector, useStore } from "lib/zustandProvider"
 import { useUnitConversionGraph } from "./UnitConverter"
 import { GQL_sources } from "queries/general"
 import { dataSetEstimateFutures, filteredCombinedDataSet } from "./util"
 import CO2ForecastGraph from "./CO2ForecastGraph"
+import useText from "lib/useText"
 
 const DEBUG = false
 
@@ -16,7 +16,7 @@ function CO2Forecast( {
 	country, sources, grades, onGrades, onSources, projection, estimate, estimate_prod
 } ) {
 	const { co2FromVolume } = useUnitConversionGraph( estimate )
-	const texts = useStore( textsSelector )
+	const { getText } = useText()
 	const [ limits, set_limits ] = useState()
 
 	const { data: sourcesData, loading: loadingSources, error: errorLoadingSources }
@@ -81,7 +81,7 @@ function CO2Forecast( {
 
 	// Don't try to render a chart until all data looks good
 	if( !firstYear || !lastYear || !co2?.length > 0 )
-		return <Alert message={texts?.make_selections} type="info" showIcon/>
+		return <Alert message={getText( 'make_selections' )} type="info" showIcon/>
 
 	DEBUG && console.log( 'CountryProduction', { firstYear, lastYear, grades, sources } )
 

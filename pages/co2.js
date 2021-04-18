@@ -5,6 +5,7 @@ import CountrySelector from "components/navigation/CountrySelector"
 import { Checkbox, Col, Radio, Row, Slider } from "antd"
 import { useRouter } from "next/router"
 import CO2Forecast from "components/viz/CO2Forecast"
+import useText from "lib/useText"
 
 const DEBUG = false
 
@@ -18,6 +19,7 @@ const radioStyle = {
 
 export default function CO2ForecastPage() {
 	const router = useRouter()
+	const { getText } = useText()
 	const [ country, set_country ] = useState()
 	const [ grades, set_grades ] = useState( {} )
 	const [ estimate, set_estimate ] = useState( 2 )
@@ -35,7 +37,7 @@ export default function CO2ForecastPage() {
 					<Row gutter={[ 12, 12 ]}>
 
 						<Col xs={12} lg={6}>
-							<h3>Country</h3>
+							<h3>{getText( 'country' )}</h3>
 							<CountrySelector
 								country={country}
 								onChange={c => {
@@ -49,7 +51,7 @@ export default function CO2ForecastPage() {
 						</Col>
 
 						<Col xs={12} lg={4}>
-							<h3>Data source</h3>
+							<h3>{getText( 'data_source' )}</h3>
 							<Row gutter={[ 12, 12 ]}>
 								{allSources.map( source => (
 									<Col xs={24} key={source?.sourceId}>
@@ -76,7 +78,7 @@ export default function CO2ForecastPage() {
 						</Col>
 
 						<Col xs={12} lg={3}>
-							<h3>Grades</h3>
+							<h3>{getText( 'grades' )}</h3>
 							<Row gutter={[ 12, 12 ]}>
 								{Object.keys( grades ).map( grade => (
 									<Col xs={24} key={grade}>
@@ -97,23 +99,23 @@ export default function CO2ForecastPage() {
 
 						<Col xs={12} lg={5}>
 							<div>
-								<h3>Projection</h3>
+								<h3>{getText( 'projection' )}</h3>
 								<Radio.Group onChange={e => set_projection( e.target.value )} value={projection}>
 									<Radio style={radioStyle} value={'auth'}>
-										Authority
+										{getText( 'authority' )}
 									</Radio>
 									<Radio style={radioStyle} value={'stable'}>
-										Stable
+										{getText( 'stable' )}
 									</Radio>
 									<Radio style={radioStyle} value={'decline'}>
-										Declining
+										{getText( 'declining' )}
 									</Radio>
 								</Radio.Group>
 							</div>
 						</Col>
 
 						<Col xs={24} lg={6}>
-							<h3>Estimates</h3>
+							<h3>{getText( 'estimates' )}</h3>
 							<Slider
 								trackStyle={{ height: '12px' }}
 								railStyle={{ height: '12px' }}
@@ -125,9 +127,9 @@ export default function CO2ForecastPage() {
 								min={0}
 								max={4}
 								marks={{
-									0: 'Low' ,
-									2: 'Reserves',
-									4: 'High'
+									0: getText( 'low' ) ,
+									2: getText( 'reserves' ),
+									4: getText( 'high' )
 								}}
 								onChange={set_estimate}
 							/>
@@ -143,9 +145,9 @@ export default function CO2ForecastPage() {
 								min={0}
 								max={4}
 								marks={{
-									0: 'Low' ,
-									2: 'Production',
-									4: 'High'
+									0: getText( 'low' ) ,
+									2: getText( 'production' ),
+									4: getText( 'high' )
 								}}
 								onChange={set_estimate_prod}
 							/>

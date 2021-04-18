@@ -8,8 +8,8 @@ import { defaultStyles, TooltipWithBounds, withTooltip } from '@visx/tooltip'
 import { localPoint } from '@visx/event'
 import { bisector, max } from 'd3-array'
 import { withParentSize } from "@visx/responsive"
-import { textsSelector, useStore } from "lib/zustandProvider"
 import { getCO2, getFuelCO2, getFuelScopeCO2, makeEstimate } from "./util"
+import useText from "lib/useText"
 
 const DEBUG = false
 
@@ -21,7 +21,7 @@ function CO2ForecastGraphBase( {
 	tooltipLeft, tooltipTop, tooltipData,
 	hideTooltip, showTooltip
 } ) {
-	const texts = useStore( textsSelector )
+	const { getText } = useText()
 	const height = 500
 	const margin = { left: 0, top: 10 }
 
@@ -304,27 +304,27 @@ function CO2ForecastGraphBase( {
 					<table>
 						<tbody>
 							<tr>
-								<td>{texts?.production} {texts?.oil} 1&nbsp;</td>
+								<td>{getText( 'production' )} {getText( 'oil' )} 1&nbsp;</td>
 								<td align="right">{getFuelScopeCO2( tip.production.oil.scope1, estimate_prod )?.toFixed( 1 )}</td>
 							</tr>
 							<tr>
-								<td>{texts?.production} {texts?.oil} 3&nbsp;</td>
+								<td>{getText( 'production' )} {getText( 'oil' )} 3&nbsp;</td>
 								<td align="right">{getFuelScopeCO2( tip.production.oil.scope3, estimate_prod )?.toFixed( 1 )}</td>
 							</tr>
 							<tr>
-								<td>{texts?.production} {texts?.gas} 1&nbsp;</td>
+								<td>{getText( 'production' )} {getText( 'gas' )} 1&nbsp;</td>
 								<td align="right">{getFuelScopeCO2( tip.production.gas.scope1, estimate_prod )?.toFixed( 1 )}</td>
 							</tr>
 							<tr>
-								<td>{texts?.production} {texts?.gas} 3&nbsp;</td>
+								<td>{getText( 'production' )} {getText( 'gas' )} 3&nbsp;</td>
 								<td align="right">{getFuelScopeCO2( tip.production.gas.scope3, estimate_prod )?.toFixed( 1 )}</td>
 							</tr>
 							<tr>
-								<td>{texts?.reserves} {texts?.oil}&nbsp;</td>
+								<td>{getText( 'reserves' )} {getText( 'oil' )}&nbsp;</td>
 								<td align="right">{getFuelCO2( tip.reserves.oil, estimate )?.toFixed( 1 )}</td>
 							</tr>
 							<tr>
-								<td>{texts?.reserves} {texts?.gas}&nbsp;</td>
+								<td>{getText( 'reserves' )} {getText( 'gas' )}&nbsp;</td>
 								<td align="right">{getFuelCO2( tip.reserves.gas, estimate )?.toFixed( 1 )}</td>
 							</tr>
 						</tbody>
@@ -334,19 +334,19 @@ function CO2ForecastGraphBase( {
 					<table>
 						<tbody>
 							<tr>
-								<td>{texts?.production} {texts?.oil}&nbsp;</td>
+								<td>{getText( 'production' )} {getText( 'oil' )}&nbsp;</td>
 								<td align="right">{getFuelCO2( tip.future[ projection ].production.oil, estimate_prod )?.toFixed( 1 )}</td>
 							</tr>
 							<tr>
-								<td>{texts?.production} {texts?.gas}&nbsp;</td>
+								<td>{getText( 'production' )} {getText( 'gas' )}&nbsp;</td>
 								<td align="right">{getFuelCO2( tip.future[ projection ].production.gas, estimate_prod )?.toFixed( 1 )}</td>
 							</tr>
 							<tr>
-								<td>{texts?.reserves} {texts?.oil}&nbsp;</td>
+								<td>{getText( 'reserves' )} {getText( 'oil' )}&nbsp;</td>
 								<td align="right">{getFuelCO2( tip.future[ projection ].reserves.oil, estimate )?.toFixed( 1 )}</td>
 							</tr>
 							<tr>
-								<td>{texts?.reserves} {texts?.gas}&nbsp;</td>
+								<td>{getText( 'reserves' )} {getText( 'gas' )}&nbsp;</td>
 								<td align="right">{getFuelCO2( tip.future[ projection ].reserves.gas, estimate )?.toFixed( 1 )}</td>
 							</tr>
 						</tbody>
@@ -356,19 +356,19 @@ function CO2ForecastGraphBase( {
 					<table>
 						<tbody>
 							<tr>
-								<td>{texts?.production} {texts?.oil}&nbsp;</td>
+								<td>{getText( 'production' )} {getText( 'oil' )}&nbsp;</td>
 								<td align="right">{getFuelCO2( tip.projection.oil, estimate_prod )?.toFixed( 1 )}</td>
 							</tr>
 							<tr>
-								<td>{texts?.production} {texts?.gas}&nbsp;</td>
+								<td>{getText( 'production' )} {getText( 'gas' )}&nbsp;</td>
 								<td align="right">{getFuelCO2( tip.projection.gas, estimate_prod )?.toFixed( 1 )}</td>
 							</tr>
 							<tr>
-								<td>{texts?.reserves} {texts?.oil}&nbsp;</td>
+								<td>{getText( 'reserves' )} {getText( 'oil' )}&nbsp;</td>
 								<td align="right">{getFuelCO2( tip.future[ projection ].reserves.oil, estimate )?.toFixed( 1 )}</td>
 							</tr>
 							<tr>
-								<td>{texts?.reserves} {texts?.gas}&nbsp;</td>
+								<td>{getText( 'reserves' )} {getText( 'gas' )}&nbsp;</td>
 								<td align="right">{getFuelCO2( tip.future[ projection ].reserves.gas, estimate )?.toFixed( 1 )}</td>
 							</tr>
 						</tbody>
