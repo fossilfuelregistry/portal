@@ -21,6 +21,7 @@ export default function CO2ForecastPage() {
 	const [ country, set_country ] = useState()
 	const [ grades, set_grades ] = useState( {} )
 	const [ estimate, set_estimate ] = useState( 2 )
+	const [ estimate_prod, set_estimate_prod ] = useState( 2 )
 	const [ projection, set_projection ] = useState( 'decline' )
 	const [ allSources, set_allSources ] = useState( [] )
 	const [ selectedSources, set_selectedSources ] = useState( [] )
@@ -102,16 +103,34 @@ export default function CO2ForecastPage() {
 								handleStyle={{ height: '22px', width: '22px' }}
 								tooltipVisible={false}
 								value={estimate}
+								dots={false}
+								step={0.1}
 								min={0}
 								max={4}
-								marks={[
-									{ number: 0, label: 'Low' },
-									{ number: 1 },
-									{ number: 2, label: 'Mid' },
-									{ number: 3 },
-									{ number: 4, label: 'High' },
-								]}
+								marks={{
+									0: 'Low' ,
+									2: 'Reserves',
+									4: 'High'
+								}}
 								onChange={set_estimate}
+							/>
+							<br/>
+							<Slider
+								trackStyle={{ height: '12px' }}
+								railStyle={{ height: '12px' }}
+								handleStyle={{ height: '22px', width: '22px' }}
+								tooltipVisible={false}
+								value={estimate_prod}
+								dots={false}
+								step={0.1}
+								min={0}
+								max={4}
+								marks={{
+									0: 'Low' ,
+									2: 'Production',
+									4: 'High'
+								}}
+								onChange={set_estimate_prod}
 							/>
 						</Col>
 
@@ -137,6 +156,8 @@ export default function CO2ForecastPage() {
 								country={country}
 								sources={selectedSources}
 								grades={grades}
+								estimate={estimate}
+								estimate_prod={estimate_prod}
 								projection={projection}
 								onGrades={set_grades}
 								onSources={set_allSources}

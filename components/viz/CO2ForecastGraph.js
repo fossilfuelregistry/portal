@@ -9,23 +9,14 @@ import { localPoint } from '@visx/event'
 import { bisector, max } from 'd3-array'
 import { withParentSize } from "@visx/responsive"
 import { textsSelector, useStore } from "lib/zustandProvider"
-import { getCO2, getFuelCO2, getFuelScopeCO2 } from "./util"
+import { getCO2, getFuelCO2, getFuelScopeCO2, makeEstimate } from "./util"
 
 const DEBUG = false
-
-const getYear = d => d.year
-const getY0 = d => d[ 0 ]
-const getY1 = d => d[ 1 ]
-const getOilReservesCO2 = d => d.reserves.oil.scope1.co2 + d.reserves.oil.scope3.co2
-const getGasReservesCO2 = d => d.reserves.gas.scope1.co2 + d.reserves.gas.scope3.co2
-const getAuth = d => getCO2( d.projection )
-const getStable = d => getCO2( d.future.stable.production )
-const getDecline = d => getCO2( d.future.decline.production )
 
 //#008080,#70a494,#b4c8a8,#f6edbd,#edbb8a,#de8a5a,#ca562c
 
 function CO2ForecastGraphBase( {
-	data, projection,
+	data, projection, estimate, estimate_prod,
 	parentWidth,
 	tooltipLeft, tooltipTop, tooltipData,
 	hideTooltip, showTooltip
@@ -34,6 +25,17 @@ function CO2ForecastGraphBase( {
 	const height = 500
 	const margin = { left: 30, top: 10 }
 
+	const getYear = d => d.year
+	const getY0 = d => d[ 0 ]
+	const getY1 = d => d[ 1 ]
+	const getOilReservesCO2 = d => makeEstimate( d.reserves.oil.scope1, estimate )
+		+ makeEstimate( d.reserves.oil.scope3, estimate )
+	const getGasReservesCO2 = d => makeEstimate( d.reserves.gas.scope1, estimate )
+		+ makeEstimate( d.reserves.gas.scope3, estimate )
+	const getAuth = d => getCO2( d.projection, estimate_prod )
+	const getStable = d => getCO2( d.future.stable.production, estimate_prod )
+	const getDecline = d => getCO2( d.future.decline.production, estimate_prod )
+	console.log( 'GRAPH', { estimate_prod, estimate } )
 	// scales
 	const yearScale = scaleLinear( {
 		range: [ 0, parentWidth - margin.left ],
@@ -45,7 +47,7 @@ function CO2ForecastGraphBase( {
 		Object.keys( data[ 0 ] ).forEach( key => {
 			if( key === 'future' ) return
 			if( key === 'year' ) return
-			maxValues[ key ] = max( data, d => getCO2( d[ key ] ) )
+			maxValues[ key ] = max( data, d => getCO2( d[ key ], 2 ) )
 		} )
 		console.log( { maxValues } )
 		return maxValues
@@ -53,8 +55,8 @@ function CO2ForecastGraphBase( {
 
 	const getFutureReserve = useCallback( ( d, fuel ) => {
 		//console.log( d.year, d, d.future[ projection ].reserves.oil.co2 )
-		return getFuelCO2( d.future[ projection ].reserves[ fuel ] )
-	}, [ projection ] )
+		return getFuelCO2( d.future[ projection ].reserves[ fuel ], estimate )
+	}, [ projection, estimate ] )
 
 	const productionScale = scaleLinear( {
 		range: [ height - 30, 0 ],
@@ -66,15 +68,10 @@ function CO2ForecastGraphBase( {
 		domain: [ 0, maxCO2.reserves * 0.7 ],
 	} )
 
-	// tooltip handler
 	const bisectDate = bisector( d => {
 		//console.log( 'bisectDate', d )
 		return d.year
 	} ).left
-
-	const getProductionCO2 = d => {
-		return getCO2( d.production )
-	}
 
 	const handleTooltip = useCallback(
 		event => {
@@ -92,13 +89,22 @@ function CO2ForecastGraphBase( {
 			showTooltip( {
 				tooltipData: d,
 				tooltipLeft: x,
-				tooltipTop: productionScale( getProductionCO2( d ) ),
+				tooltipTop: productionScale( getCO2( d.production ) ?? getCO2( d.future[ projection ].production ) ),
 			} )
 		},
 		[ showTooltip, productionScale, yearScale ],
 	)
 
 	const tip = tooltipData
+	if( !( maxCO2.production > 0 ) ) return null // JSON.stringify( maxCO2 )
+
+	const productionData = data.map( d => ( {
+		oil1: getFuelScopeCO2( d.production.oil.scope1, estimate_prod ),
+		oil3: getFuelScopeCO2( d.production.oil.scope3, estimate_prod ),
+		gas1: getFuelScopeCO2( d.production.gas.scope1, estimate_prod ),
+		gas3: getFuelScopeCO2( d.production.gas.scope3, estimate_prod ),
+		year: d.year
+	} ) )
 
 	return (
 		<div className="graph">
@@ -127,8 +133,8 @@ function CO2ForecastGraphBase( {
 					<AreaStack
 						keys={[ 'oil_projection', 'gas_projection' ]}
 						data={data.map( d => ( {
-							oil_projection: getFuelCO2( d.projection.oil ),
-							gas_projection: getFuelCO2( d.projection.gas ),
+							oil_projection: getFuelCO2( d.projection.oil, estimate_prod ),
+							gas_projection: getFuelCO2( d.projection.gas, estimate_prod ),
 							year: d.year
 						} ) )}
 						defined={d => ( getY0( d ) > 0 || getY1( d ) > 0 ) && d.data.year >= 2010}
@@ -158,13 +164,7 @@ function CO2ForecastGraphBase( {
 
 					<AreaStack
 						keys={[ 'oil1', 'gas1', 'oil3', 'gas3' ]}
-						data={data.map( d => ( {
-							oil1: getFuelScopeCO2( d.production.oil.scope1 ),
-							oil3: getFuelScopeCO2( d.production.oil.scope3 ),
-							gas1: getFuelScopeCO2( d.production.gas.scope1 ),
-							gas3: getFuelScopeCO2( d.production.gas.scope3 ),
-							year: d.year
-						} ) )}
+						data={productionData}
 						defined={d => ( getY0( d ) > 0 || getY1( d ) > 0 ) && d.data.year >= 2010}
 						x={d => {
 							const x = yearScale( getYear( d.data ) ) ?? 0
@@ -249,7 +249,7 @@ function CO2ForecastGraphBase( {
 						curve={curveLinear}
 						className="projection reserves oil"
 						data={data}
-						defined={d => d.year >= 2010 && getFutureReserve( d, 'oil' ) > 0}
+						defined={d => d.year >= 2018 && getFutureReserve( d, 'oil' ) > 0}
 						x={d => yearScale( getYear( d ) ) ?? 0}
 						y={d => reservesScale( getFutureReserve( d, 'oil' ) ) ?? 0}
 						shapeRendering="geometricPrecision"
@@ -259,7 +259,7 @@ function CO2ForecastGraphBase( {
 						curve={curveLinear}
 						className="projection reserves gas"
 						data={data}
-						defined={d => d.year >= 2010 && getFutureReserve( d, 'gas' ) > 0}
+						defined={d => d.year >= 2018 && getFutureReserve( d, 'gas' ) > 0}
 						x={d => yearScale( getYear( d ) ) ?? 0}
 						y={d => reservesScale( getFutureReserve( d, 'gas' ) ) ?? 0}
 						shapeRendering="geometricPrecision"
@@ -295,6 +295,8 @@ function CO2ForecastGraphBase( {
 						}}
 					>
 						<h4 style={{ color: 'white' }}>{tip.year}</h4>
+
+						{tip.production.oil.scope1.co2 > 0 &&
 						<table>
 							<tbody>
 								<tr>
@@ -322,7 +324,30 @@ function CO2ForecastGraphBase( {
 									<td align="right">{getFuelCO2( tip.reserves.gas )?.toFixed( 1 )}</td>
 								</tr>
 							</tbody>
-						</table>
+						</table>}
+
+						{tip.production.oil.scope1.co2 <= 0 &&
+						<table>
+							<tbody>
+								<tr>
+									<td>{texts?.production} {texts?.oil}&nbsp;</td>
+									<td align="right">{getFuelCO2( tip.future[ projection ].production.oil )?.toFixed( 1 )}</td>
+								</tr>
+								<tr>
+									<td>{texts?.production} {texts?.gas}&nbsp;</td>
+									<td align="right">{getFuelCO2( tip.future[ projection ].production.gas )?.toFixed( 1 )}</td>
+								</tr>
+								<tr>
+									<td>{texts?.reserves} {texts?.oil}&nbsp;</td>
+									<td align="right">{getFuelCO2( tip.future[ projection ].reserves.oil )?.toFixed( 1 )}</td>
+								</tr>
+								<tr>
+									<td>{texts?.reserves} {texts?.gas}&nbsp;</td>
+									<td align="right">{getFuelCO2( tip.future[ projection ].reserves.gas )?.toFixed( 1 )}</td>
+								</tr>
+							</tbody>
+						</table>}
+
 					</TooltipWithBounds>
 				</div>
 			)}

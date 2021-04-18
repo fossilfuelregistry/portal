@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { useQuery } from "@apollo/client"
 import GraphQLStatus from "components/GraphQLStatus"
 import { GQL_countryProductionByIso, GQL_countryReservesByIso } from "queries/country"
@@ -6,16 +6,16 @@ import { Alert, notification } from "antd"
 import { textsSelector, useStore } from "lib/zustandProvider"
 import { useUnitConversionGraph } from "./UnitConverter"
 import { GQL_sources } from "queries/general"
-import { filteredCombinedDataSet } from "./util"
+import { dataSetEstimateFutures, filteredCombinedDataSet } from "./util"
 import CO2ForecastGraph from "./CO2ForecastGraph"
 
 const DEBUG = false
 
 
 function CO2Forecast( {
-	country, sources, grades, onGrades, onSources, projection
+	country, sources, grades, onGrades, onSources, projection, estimate, estimate_prod
 } ) {
-	const { co2FromVolume } = useUnitConversionGraph()
+	const { co2FromVolume } = useUnitConversionGraph( estimate )
 	const texts = useStore( textsSelector )
 	const [ limits, set_limits ] = useState()
 
@@ -36,16 +36,20 @@ function CO2Forecast( {
 
 	const reserves = reservesData?.countryReserves?.nodes ?? []
 
-	let co2
 	const sourceIds = sources.map( s => s?.sourceId )
-	try {
-		co2 = filteredCombinedDataSet( production, reserves, [ 'oil', 'gas' ], sourceIds, grades, null, co2FromVolume )
-	} catch( e ) {
-		notification.warning( {
-			message: "Error during data extraction",
-			description: <pre>{e.message}<br/>{e.stack}</pre>
-		} )
-	}
+	const co2 = useMemo( () => {
+		let co2 = []
+		try {
+			co2 = filteredCombinedDataSet( production, reserves, [ 'oil', 'gas' ], sourceIds, grades, null, co2FromVolume )
+			dataSetEstimateFutures( co2 )
+		} catch( e ) {
+			notification.warning( {
+				message: "Error during data extraction",
+				description: <pre>{e.message}<br/>{e.stack}</pre>
+			} )
+		}
+		return co2
+	}, [ production, reserves, sources, grades ] )
 
 	useEffect( () => {
 		DEBUG && console.log( 'useEffect Production.length', { allSources } )
@@ -81,7 +85,7 @@ function CO2Forecast( {
 
 	DEBUG && console.log( 'CountryProduction', { firstYear, lastYear, grades, sources } )
 
-	return <CO2ForecastGraph data={co2} projection={projection}/>
+	return <CO2ForecastGraph data={co2} projection={projection} estimate={estimate} estimate_prod={estimate_prod}/>
 }
 
 export default CO2Forecast
