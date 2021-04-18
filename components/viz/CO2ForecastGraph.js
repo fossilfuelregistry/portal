@@ -35,7 +35,7 @@ function CO2ForecastGraphBase( {
 	const getAuth = d => getCO2( d.projection, estimate_prod )
 	const getStable = d => getCO2( d.future.stable.production, estimate_prod )
 	const getDecline = d => getCO2( d.future.decline.production, estimate_prod )
-	console.log( 'GRAPH', { estimate_prod, estimate } )
+	DEBUG && console.log( 'GRAPH', { estimate_prod, estimate } )
 	// scales
 	const yearScale = scaleLinear( {
 		range: [ 0, parentWidth - margin.left ],

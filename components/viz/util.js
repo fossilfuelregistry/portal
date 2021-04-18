@@ -1,6 +1,6 @@
 import clone from 'clone'
 
-const DEBUG = true
+const DEBUG = false
 
 const emptyPoint = {
 	production: {
@@ -59,19 +59,23 @@ const _addCO2 = ( datapoint, fuel, deltaCO2 ) => {
 	//console.log( fuel, datapoint[ fuel ], deltaCO2 )
 }
 
-const _accumulate = ( datapoint, production ) => {
-	datapoint.gas.scope1.co2 += production.gas.scope1.co2
-	datapoint.gas.scope3.co2 += production.gas.scope3.co2
-	datapoint.oil.scope1.co2 += production.oil.scope1.co2
-	datapoint.oil.scope3.co2 += production.oil.scope3.co2
-	datapoint.gas.scope1.range[ 0 ] += production.gas.scope1.range[ 0 ]
-	datapoint.gas.scope1.range[ 1 ] += production.gas.scope1.range[ 1 ]
-	datapoint.gas.scope3.range[ 0 ] += production.gas.scope3.range[ 0 ]
-	datapoint.gas.scope3.range[ 1 ] += production.gas.scope3.range[ 1 ]
-	datapoint.oil.scope1.range[ 0 ] += production.oil.scope1.range[ 0 ]
-	datapoint.oil.scope1.range[ 1 ] += production.oil.scope1.range[ 1 ]
-	datapoint.oil.scope3.range[ 0 ] += production.oil.scope3.range[ 0 ]
-	datapoint.oil.scope3.range[ 1 ] += production.oil.scope3.range[ 1 ]
+const _accumulate = ( datapoint, production, estimate_prod ) => {
+	const prodOil1 = makeEstimate( production.oil.scope1, estimate_prod )
+	const prodOil3 = makeEstimate( production.oil.scope3, estimate_prod )
+	const prodGas1 = makeEstimate( production.gas.scope1, estimate_prod )
+	const prodGas3 = makeEstimate( production.gas.scope3, estimate_prod )
+	datapoint.gas.scope1.co2 += prodGas1
+	datapoint.gas.scope3.co2 += prodGas3
+	datapoint.oil.scope1.co2  += prodOil1
+	datapoint.oil.scope3.co2  += prodOil3
+	datapoint.gas.scope1.range[ 0 ] += prodGas1
+	datapoint.gas.scope1.range[ 1 ] += prodGas1
+	datapoint.gas.scope3.range[ 0 ] +=  prodGas3
+	datapoint.gas.scope3.range[ 1 ] +=  prodGas3
+	datapoint.oil.scope1.range[ 0 ] += prodOil1
+	datapoint.oil.scope1.range[ 1 ] += prodOil1
+	datapoint.oil.scope3.range[ 0 ] +=  prodOil3
+	datapoint.oil.scope3.range[ 1 ] +=  prodOil3
 }
 
 const _diff = ( datapoint, production ) => {
@@ -200,12 +204,12 @@ export function filteredCombinedDataSet( production, reserves, fossilFuelTypes, 
 			dataset
 		}
 	)
-	console.log( JSON.stringify( dataset.find( d => d.year === 2018 )?.production, null, 2 ) )
+	DEBUG && console.log( JSON.stringify( dataset.find( d => d.year === 2018 )?.production, null, 2 ) )
 
 	return dataset
 }
 
-export function dataSetEstimateFutures( dataset ) {
+export function dataSetEstimateFutures( dataset, estimate, estimate_prod ) {
 
 	let lastProductionYear
 	let declinedValues
@@ -223,28 +227,28 @@ export function dataSetEstimateFutures( dataset ) {
 		} else if( lastProductionYear ) {
 			lastData.future.stable.production = clone( lastProductionYear.production )
 			lastData.future.decline.production = clone( declinedValues.future.decline.production )
-			declinedValues.future.decline.production.oil.scope1.co2 *= 0.8
-			declinedValues.future.decline.production.oil.scope3.co2 *= 0.8
-			declinedValues.future.decline.production.oil.scope1.range[ 0 ] *= 0.8
-			declinedValues.future.decline.production.oil.scope1.range[ 1 ] *= 0.8
-			declinedValues.future.decline.production.oil.scope3.range[ 0 ] *= 0.8
-			declinedValues.future.decline.production.oil.scope3.range[ 1 ] *= 0.8
-			declinedValues.future.decline.production.gas.scope1.co2 *= 0.8
-			declinedValues.future.decline.production.gas.scope3.co2 *= 0.8
-			declinedValues.future.decline.production.gas.scope1.range[ 0 ] *= 0.8
-			declinedValues.future.decline.production.gas.scope1.range[ 1 ] *= 0.8
-			declinedValues.future.decline.production.gas.scope3.range[ 0 ] *= 0.8
-			declinedValues.future.decline.production.gas.scope3.range[ 1 ] *= 0.8
+			declinedValues.future.decline.production.oil.scope1.co2 *= 0.9
+			declinedValues.future.decline.production.oil.scope3.co2 *= 0.9
+			declinedValues.future.decline.production.oil.scope1.range[ 0 ] *= 0.9
+			declinedValues.future.decline.production.oil.scope1.range[ 1 ] *= 0.9
+			declinedValues.future.decline.production.oil.scope3.range[ 0 ] *= 0.9
+			declinedValues.future.decline.production.oil.scope3.range[ 1 ] *= 0.9
+			declinedValues.future.decline.production.gas.scope1.co2 *= 0.9
+			declinedValues.future.decline.production.gas.scope3.co2 *= 0.9
+			declinedValues.future.decline.production.gas.scope1.range[ 0 ] *= 0.9
+			declinedValues.future.decline.production.gas.scope1.range[ 1 ] *= 0.9
+			declinedValues.future.decline.production.gas.scope3.range[ 0 ] *= 0.9
+			declinedValues.future.decline.production.gas.scope3.range[ 1 ] *= 0.9
 
-			_accumulate( sumOfProjectedProduction.auth.production, lastData.projection )
-			_accumulate( sumOfProjectedProduction.stable.production, lastData.future.stable.production )
-			_accumulate( sumOfProjectedProduction.decline.production, lastData.future.decline.production )
+			_accumulate( sumOfProjectedProduction.auth.production, lastData.projection, estimate_prod )
+			_accumulate( sumOfProjectedProduction.stable.production, lastData.future.stable.production, estimate_prod )
+			_accumulate( sumOfProjectedProduction.decline.production, lastData.future.decline.production, estimate_prod )
 
 			dataYear.future.auth.reserves = _diff( lastProductionYear.reserves, sumOfProjectedProduction.auth.production )
 			dataYear.future.stable.reserves = _diff( lastProductionYear.reserves, sumOfProjectedProduction.stable.production )
 			dataYear.future.decline.reserves = _diff( lastProductionYear.reserves, sumOfProjectedProduction.decline.production )
 
-			if( dataYear.year === 2018 ) {
+			if( DEBUG && dataYear.year === 2030 ) {
 				console.log( {
 					lastData,
 					lastProduction: lastProductionYear,

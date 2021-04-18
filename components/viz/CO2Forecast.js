@@ -41,7 +41,6 @@ function CO2Forecast( {
 		let co2 = []
 		try {
 			co2 = filteredCombinedDataSet( production, reserves, [ 'oil', 'gas' ], sourceIds, grades, null, co2FromVolume )
-			dataSetEstimateFutures( co2 )
 		} catch( e ) {
 			notification.warning( {
 				message: "Error during data extraction",
@@ -84,6 +83,8 @@ function CO2Forecast( {
 		return <Alert message={texts?.make_selections} type="info" showIcon/>
 
 	DEBUG && console.log( 'CountryProduction', { firstYear, lastYear, grades, sources } )
+
+	dataSetEstimateFutures( co2, estimate, estimate_prod )
 
 	return <CO2ForecastGraph data={co2} projection={projection} estimate={estimate} estimate_prod={estimate_prod}/>
 }
