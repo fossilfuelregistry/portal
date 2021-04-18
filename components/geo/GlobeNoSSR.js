@@ -8,7 +8,7 @@ export default function GlobeNoSSR( { year, dataKeyName = 'production', onGlobeR
 	const { data }
 		= useQuery( gql`
 		{ neCountries { nodes { 
-			id geometry isoA2, name
+			id geometry isoA2 name popEst
 			countryProductionsByIso3166 { nodes { volume year id } } 
 			countryReservesByIso3166 { nodes { id year volume } }
 		} } } `, {} )

@@ -2,9 +2,9 @@ import TopNavigation from "components/navigation/TopNavigation"
 import getConfig from 'next/config'
 import dynamic from "next/dynamic"
 import { Button, Col, Modal, Radio, Row, Slider } from "antd"
-import { useCallback, useState } from "react"
+import React, { useCallback, useState } from "react"
 import { useRouter } from "next/router"
-import { textsSelector, useStore } from "../lib/zustandProvider"
+import useText from "lib/useText"
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
@@ -13,7 +13,7 @@ const GlobeNoSSR = dynamic( () => import( "components/geo/GlobeNoSSR" ),
 
 export default function Home() {
 	const router = useRouter()
-	const texts = useStore( textsSelector )
+	const { getText } = useText()
 	const [ year, set_year ] = useState( 2019 )
 	const [ country, set_country ] = useState( undefined )
 	const [ tooltipVisible, set_tooltipVisible ] = useState( false )
@@ -68,23 +68,42 @@ export default function Home() {
 				</div>
 			</div>
 
+			{!!country &&
 			<Modal
 				visible={country?.name?.length > 0}
 				onCancel={() => set_country( undefined )}
 				footer={null}
 			>
 				<h1>{country?.name}</h1>
+
+				<table>
+					<tbody>
+						<tr>
+							<td>{getText( 'population' )} &nbsp;</td>
+							<td align="right">{Math.round( country.popEst / 1000000 )}M</td>
+						</tr>
+						<tr>
+							<td>{getText( 'production' )}&nbsp;</td>
+							<td align="right">1 M tons CO²</td>
+						</tr>
+						<tr>
+							<td>{getText( 'reserves' )}&nbsp;</td>
+							<td align="right">1 M tons CO²</td>
+						</tr>
+					</tbody>
+				</table>
+
 				<Button
 					type="primary"
-					block
+					block style={{ marginTop: 24 }}
 					onClick={() => {
 						set_country( undefined )
 						router.push( 'co2?country=' + country.isoA2?.toLowerCase() )
 					}}
 				>
-					{texts.co2_forecast}
+					{getText( 'co2_forecast' )}
 				</Button>
-			</Modal>
+			</Modal>}
 
 			<style jsx>{`
               .aspect-order {
