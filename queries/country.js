@@ -22,6 +22,7 @@ export const GQL_countryProductionByIso = gql`
 query countryProductions($iso3166: String!) {
   countryProductions(
   	condition: { iso3166: $iso3166 }
+    filter: {fossilFuelType: {in: ["oil", "gas"]}}
   	orderBy: YEAR_ASC
   ) {
     nodes {

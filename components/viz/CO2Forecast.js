@@ -42,6 +42,7 @@ function CO2Forecast( {
 		try {
 			co2 = filteredCombinedDataSet( production, reserves, [ 'oil', 'gas' ], sourceIds, grades, null, co2FromVolume )
 		} catch( e ) {
+			console.log( e )
 			notification.warning( {
 				message: "Error during data extraction",
 				description: <pre>{e.message}<br/>{e.stack}</pre>

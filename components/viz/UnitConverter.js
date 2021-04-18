@@ -77,13 +77,24 @@ const useUnitConversionGraphImpl = () => {
 			for( let step = 1; step < path1.length; step++ ) {
 				const from = path1[ step - 1 ]
 				const to = path1[ step ]
-				const { factor: stepFactor, low: stepLow, high: stepHigh } =
-					conversion[ from ][ to ][ fossilFuelType ]
+
+				const conv = conversion[ from ][ to ][ fossilFuelType ]
+				if( !conv ) throw new Error(
+					`Conversion data issue: From ${from} to ${to} for ${fossilFuelType} is ${JSON.stringify( conv )}` )
+				const { factor: stepFactor, low: stepLow, high: stepHigh } = conv
 
 				factor1 *= stepFactor
 				low1 *= stepLow ?? stepFactor
 				high1 *= stepHigh ?? stepFactor
-				if( log ) console.log( 'SCOPE 1', { from, to, factor1, low1, high1, volume, value: 1e-9 * volume * factor1 } )
+				if( log ) console.log( 'SCOPE 1', {
+					from,
+					to,
+					factor1,
+					low1,
+					high1,
+					volume,
+					value: 1e-9 * volume * factor1
+				} )
 			}
 
 			// Scope 3
@@ -97,13 +108,24 @@ const useUnitConversionGraphImpl = () => {
 			for( let step = 1; step < path.length; step++ ) {
 				const from = path[ step - 1 ]
 				const to = path[ step ]
-				const { factor: stepFactor, low: stepLow, high: stepHigh } =
-					conversion[ from ][ to ][ fossilFuelType ]
+
+				const conv = conversion[ from ][ to ][ fossilFuelType ]
+				if( !conv ) throw new Error(
+					`Conversion data issue: From ${from} to ${to} for ${fossilFuelType} is ${JSON.stringify( conv )}` )
+				const { factor: stepFactor, low: stepLow, high: stepHigh } = conv
 
 				factor *= stepFactor
 				low *= stepLow ?? stepFactor
 				high *= stepHigh ?? stepFactor
-				if( log ) console.log( 'SCOPE 3', { from, to, factor, low, high, volume, value: 1e-9 * volume * factor } )
+				if( log ) console.log( 'SCOPE 3', {
+					from,
+					to,
+					factor,
+					low,
+					high,
+					volume,
+					value: 1e-9 * volume * factor
+				} )
 			}
 
 
