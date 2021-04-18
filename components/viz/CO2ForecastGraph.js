@@ -109,7 +109,6 @@ function CO2ForecastGraphBase( {
 		gas3: getFuelScopeCO2( d.production.gas.scope3, estimate_prod ),
 		year: d.year
 	} ) )
-	console.log( { tooltipLeft, tooltipTop } )
 
 	return (
 		<div className="graph">
