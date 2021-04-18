@@ -3,12 +3,12 @@ import { useQuery, gql } from "@apollo/client"
 import Spinner from "./Spinner"
 import { useCallback, useEffect, useRef, useState } from "react"
 
-export default function GlobeNoSSR( { year, dataKeyName = 'production', onGlobeReady } ) {
+export default function GlobeNoSSR( { year, dataKeyName = 'production', onGlobeReady, onCountryClick } ) {
 
 	const { data }
 		= useQuery( gql`
 		{ neCountries { nodes { 
-			id geometry isoA2
+			id geometry isoA2, name
 			countryProductionsByIso3166 { nodes { volume year id } } 
 			countryReservesByIso3166 { nodes { id year volume } }
 		} } } `, {} )
@@ -36,6 +36,12 @@ export default function GlobeNoSSR( { year, dataKeyName = 'production', onGlobeR
 			)
 	}, [ countries ] )
 
+	const handleCountryClick = useCallback( ( obj, event ) => {
+		const _country = countries.find( c => c.isoA2 === obj?.isoA2 )
+		onCountryClick( _country )
+	}, [ countries ] )
+
+
 	const getAltitude = useCallback( country => {
 		let data
 		switch( dataKeyName ) {
@@ -60,6 +66,7 @@ export default function GlobeNoSSR( { year, dataKeyName = 'production', onGlobeR
 			backgroundColor="#ffffff"
 			globeImageUrl="//unpkg.com/three-globe/example/img/earth-day.jpg"
 			onGlobeReady={onGlobeReady}
+			onPolygonClick={handleCountryClick}
 			polygonsData={polygons}
 			polygonAltitude={getAltitude}
 			polygonCapColor={() => 'rgba(20, 0, 0, 0.5)'}

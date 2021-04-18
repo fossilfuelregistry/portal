@@ -1,8 +1,10 @@
 import TopNavigation from "components/navigation/TopNavigation"
 import getConfig from 'next/config'
 import dynamic from "next/dynamic"
-import { Col, Slider, Radio, Row } from "antd"
+import { Button, Col, Modal, Radio, Row, Slider } from "antd"
 import { useCallback, useState } from "react"
+import { useRouter } from "next/router"
+import { textsSelector, useStore } from "../lib/zustandProvider"
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
@@ -10,7 +12,10 @@ const GlobeNoSSR = dynamic( () => import( "components/geo/GlobeNoSSR" ),
 	{ ssr: false } )
 
 export default function Home() {
+	const router = useRouter()
+	const texts = useStore( textsSelector )
 	const [ year, set_year ] = useState( 2019 )
+	const [ country, set_country ] = useState( undefined )
 	const [ tooltipVisible, set_tooltipVisible ] = useState( false )
 	const [ dataKeyName, set_dataKeyName ] = useState( 'production' )
 
@@ -56,11 +61,30 @@ export default function Home() {
 				<div className="content-block">
 					<GlobeNoSSR
 						onGlobeReady={() => set_tooltipVisible( true )}
+						onCountryClick={set_country}
 						year={year}
 						dataKeyName={dataKeyName}
 					/>
 				</div>
 			</div>
+
+			<Modal
+				visible={country?.name?.length > 0}
+				onCancel={() => set_country( undefined )}
+				footer={null}
+			>
+				<h1>{country?.name}</h1>
+				<Button
+					type="primary"
+					block
+					onClick={() => {
+						set_country( undefined )
+						router.push( 'co2?country=' + country.isoA2?.toLowerCase() )
+					}}
+				>
+					{texts.co2_forecast}
+				</Button>
+			</Modal>
 
 			<style jsx>{`
               .aspect-order {
