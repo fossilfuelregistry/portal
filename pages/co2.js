@@ -6,6 +6,7 @@ import { Checkbox, Col, Radio, Row, Slider } from "antd"
 import { useRouter } from "next/router"
 import CO2Forecast from "components/viz/CO2Forecast"
 import useText from "lib/useText"
+import { NextSeo } from "next-seo"
 
 const DEBUG = false
 
@@ -21,6 +22,7 @@ export default function CO2ForecastPage() {
 	const router = useRouter()
 	const { getText } = useText()
 	const [ country, set_country ] = useState()
+	const [ countryName, set_countryName ] = useState()
 	const [ grades, set_grades ] = useState( {} )
 	const [ estimate, set_estimate ] = useState( 2 )
 	const [ estimate_prod, set_estimate_prod ] = useState( 2 )
@@ -30,6 +32,11 @@ export default function CO2ForecastPage() {
 
 	return (
 		<>
+			<NextSeo
+				title={getText( 'co2_effects_for_country' ) + ' ' + countryName ?? ''}
+				description={getText( 'a_service_from_gffr' )}
+			/>
+
 			<div className="page">
 				<TopNavigation/>
 
@@ -40,8 +47,9 @@ export default function CO2ForecastPage() {
 							<h3>{getText( 'country' )}</h3>
 							<CountrySelector
 								country={country}
-								onChange={c => {
-									set_country( c.value )
+								onChange={( c, e ) => {
+									set_country( c?.value )
+									set_countryName( e?.children )
 									router.replace( {
 										pathname: router.pathname,
 										query: { ...router.query, country: c.value }
@@ -127,7 +135,7 @@ export default function CO2ForecastPage() {
 								min={0}
 								max={4}
 								marks={{
-									0: getText( 'low' ) ,
+									0: getText( 'low' ),
 									2: getText( 'reserves' ),
 									4: getText( 'high' )
 								}}
@@ -145,7 +153,7 @@ export default function CO2ForecastPage() {
 								min={0}
 								max={4}
 								marks={{
-									0: getText( 'low' ) ,
+									0: getText( 'low' ),
 									2: getText( 'production' ),
 									4: getText( 'high' )
 								}}
@@ -173,13 +181,13 @@ export default function CO2ForecastPage() {
                   .co2 {
                     padding: 0 40px;
                   }
-				  
-				  @media (max-width: ${theme[ '@screen-sm' ]}) {
-                  	.co2 {
-                    	padding: 0 18px;
-                  	}
-				  }
-				  
+
+                  @media (max-width: ${theme[ '@screen-sm' ]}) {
+                    .co2 {
+                      padding: 0 18px;
+                    }
+                  }
+
                   h3 {
                     margin-bottom: 12px !important;
                   }

@@ -7,6 +7,7 @@ import { useRouter } from "next/router"
 import useText from "lib/useText"
 import { filteredCombinedDataSet, getCO2 } from "../components/viz/util"
 import { useUnitConversionGraph } from "components/viz/UnitConverter"
+import { NextSeo } from "next-seo"
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
@@ -38,6 +39,25 @@ export default function Home() {
 
 	return (
 		<div className="page">
+
+			<NextSeo
+				title={getText( 'gffr' )}
+				description={getText( 'fossil_fuel_prod_reserves' )}
+				openGraph={{
+					url: 'https://gffr.journeyman.se',
+					title: getText( 'gffr' ),
+					description: getText( 'fossil_fuel_prod_reserves' ),
+					images: [
+						{
+							url: 'https://gffr.journeyman.se/og1.jpg',
+							width: 1200,
+							height: 671,
+							alt: getText( 'gffr' ),
+						}
+					],
+					site_name: getText( 'gffr' ),
+				}}
+			/>
 
 			<TopNavigation/>
 
