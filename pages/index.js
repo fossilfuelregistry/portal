@@ -5,6 +5,8 @@ import { Button, Col, Modal, Radio, Row, Slider } from "antd"
 import React, { useCallback, useState } from "react"
 import { useRouter } from "next/router"
 import useText from "lib/useText"
+import { filteredCombinedDataSet, getCO2 } from "../components/viz/util"
+import { useUnitConversionGraph } from "components/viz/UnitConverter"
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
@@ -18,10 +20,21 @@ export default function Home() {
 	const [ country, set_country ] = useState( undefined )
 	const [ tooltipVisible, set_tooltipVisible ] = useState( false )
 	const [ dataKeyName, set_dataKeyName ] = useState( 'production' )
+	const { co2FromVolume } = useUnitConversionGraph( 'stable' )
 
 	const handleChangeKeyName = useCallback( event => {
 		set_dataKeyName( event.target.value )
 	}, [] )
+
+	let production, reserves, dataSet
+	if( country ) {
+		// Arbitrarily pick first available source
+		const sourceId = country.countryProductionsByIso3166?.nodes?.[ 0 ]?.sourceId
+		production = country.countryProductionsByIso3166?.nodes?.filter( p => p.year === year && p.sourceId ===sourceId ) ?? {}
+		reserves = country.countryReservesByIso3166?.nodes?.filter( p => p.year === year && p.sourceId ===sourceId ) ?? {}
+		dataSet = filteredCombinedDataSet( production, reserves, [ 'oil', 'gas' ], null, null, null, co2FromVolume )
+		console.log( dataSet )
+	}
 
 	return (
 		<div className="page">
@@ -80,15 +93,18 @@ export default function Home() {
 					<tbody>
 						<tr>
 							<td>{getText( 'population' )} &nbsp;</td>
-							<td align="right">{Math.round( country.popEst / 1000000 )}M</td>
+							<td align="right">{Math.round( country.popEst / 1000000 )}</td>
+							<td>M</td>
 						</tr>
 						<tr>
-							<td>{getText( 'production' )}&nbsp;</td>
-							<td align="right">1 M tons CO²</td>
+							<td>{getText( 'production' )} {year}&nbsp;&nbsp;</td>
+							<td align="right">{getCO2( dataSet[ 0 ]?.production, 2 )?.toFixed( 1 )}</td>
+							<td>M Tons CO²</td>
 						</tr>
 						<tr>
-							<td>{getText( 'reserves' )}&nbsp;</td>
-							<td align="right">1 M tons CO²</td>
+							<td>{getText( 'reserves' )} {year}&nbsp;&nbsp;</td>
+							<td align="right">{getCO2( dataSet[ 0 ]?.reserves, 2 )?.toFixed( 1 )}</td>
+							<td>M Tons CO²</td>
 						</tr>
 					</tbody>
 				</table>
@@ -101,7 +117,7 @@ export default function Home() {
 						router.push( 'co2?country=' + country.isoA2?.toLowerCase() )
 					}}
 				>
-					{getText( 'co2_forecast' )}
+					{getText( 'goto_co2_forecast' )}
 				</Button>
 			</Modal>}
 

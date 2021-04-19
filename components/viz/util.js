@@ -137,17 +137,18 @@ export function filteredCombinedDataSet( production, reserves, fossilFuelTypes, 
 	const dataset = []
 	let point = clone( emptyPoint )
 
-	if( production?.length < 2 ) return
+	if( production?.length < 1 ) return
 
 	production
 		.filter( data => {
-			if( !fossilFuelTypes.includes( data.fossilFuelType ) ) return false
-			if( !grades?.[ data.grade ] === true ) return false
-			if( !sources.includes( data.sourceId ) ) return false
+			if( fossilFuelTypes && !fossilFuelTypes.includes( data.fossilFuelType ) ) return false
+			if( grades && !grades?.[ data.grade ] === true ) return false
+			if( sources && !sources.includes( data.sourceId ) ) return false
 			if( projection !== null && projection !== data.projection ) return false
 			return true
 		} )
 		.forEach( data => {
+			console.log( JSON.stringify( data ) )
 			if( point.year && point.year !== data.year ) {
 				dataset.push( point )
 				point = clone( emptyPoint )
@@ -172,9 +173,9 @@ export function filteredCombinedDataSet( production, reserves, fossilFuelTypes, 
 	let index = 0
 	const filteredReserves = reserves
 		.filter( data => {
-			if( data.year < 2010 ) return false
-			if( !grades?.[ data.grade ] === true ) return false
-			if( !sources.includes( data.sourceId ) ) return false
+			if( data.year && data.year < 2010 ) return false
+			if( grades && !grades?.[ data.grade ] === true ) return false
+			if( sources && !sources.includes( data.sourceId ) ) return false
 			return true
 		} )
 

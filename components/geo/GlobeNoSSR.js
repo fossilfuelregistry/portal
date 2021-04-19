@@ -9,8 +9,8 @@ export default function GlobeNoSSR( { year, dataKeyName = 'production', onGlobeR
 		= useQuery( gql`
 		{ neCountries { nodes { 
 			id geometry isoA2 name popEst
-			countryProductionsByIso3166 { nodes { volume year id } } 
-			countryReservesByIso3166 { nodes { id year volume } }
+			countryProductionsByIso3166 { nodes { id year volume unit fossilFuelType sourceId grade } } 
+			countryReservesByIso3166 { nodes { id year volume unit fossilFuelType sourceId grade } }
 		} } } `, {} )
 
 	const [ polygons, set_polygons ] = useState( [] )
