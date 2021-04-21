@@ -1,6 +1,6 @@
 import clone from 'clone'
 
-const DEBUG = true
+const DEBUG = false
 
 const emptyPoint = {
 	production: {
@@ -51,7 +51,7 @@ const emptyPoint = {
 	}
 }
 
-const _addCO2 = ( datapoint, fuel, deltaCO2 ) => {
+export const addCO2 = ( datapoint, fuel, deltaCO2 ) => {
 	datapoint[ fuel ].scope1.co2 += deltaCO2.scope1.co2
 	datapoint[ fuel ].scope3.co2 += deltaCO2.scope3.co2
 	datapoint[ fuel ].scope1.range[ 0 ] += deltaCO2.scope1.range[ 0 ]
@@ -164,9 +164,9 @@ export function filteredCombinedDataSet( production, reserves, fossilFuelTypes, 
 
 			if( data.projection ) {
 				//console.log( point.future.authority.production, data.fossilFuelType, co2 )
-				_addCO2( point.future.authority.production, data.fossilFuelType, co2 )
+				addCO2( point.future.authority.production, data.fossilFuelType, co2 )
 			} else {
-				_addCO2( point.production, data.fossilFuelType, co2 )
+				addCO2( point.production, data.fossilFuelType, co2 )
 			}
 			return point
 		} )
@@ -192,7 +192,7 @@ export function filteredCombinedDataSet( production, reserves, fossilFuelTypes, 
 			while( filteredReserves[ index ]?.year === data.year && index < filteredReserves.length ) {
 				const reserve = filteredReserves[ index ]
 				const co2 = co2FromVolume( reserve, false, reserve.year === 3018 )
-				_addCO2( data.reserves, reserve.fossilFuelType, co2 )
+				addCO2( data.reserves, reserve.fossilFuelType, co2 )
 				if( reserve.year === 3018 ) console.log( { reserve, acc: data.reserves, co2 } )
 				index++
 			}

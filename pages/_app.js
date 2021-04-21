@@ -14,6 +14,8 @@ export const client = new ApolloClient( {
 function GFFR( { Component, pageProps } ) {
 
 	const store = useHydrate( pageProps.initialZustandState )
+	if( typeof window !== 'undefined' )
+		window._globalStore = store
 
 	useEffect( () => {
 		getUserIP()

@@ -9,16 +9,18 @@ import { dataSetEstimateFutures, filteredCombinedDataSet } from "./util"
 import CO2ForecastGraph from "./CO2ForecastGraph"
 import useText from "lib/useText"
 import InputDataGraph from "./InputDataGraph"
+import InputSummary from "./InputSummary"
+import FutureSummary from "./FutureSummary"
 
 const DEBUG = false
-
 
 function CO2Forecast( {
 	country, source, grades, onGrades, onSources, projection, estimate, estimate_prod
 } ) {
-	const { co2FromVolume } = useUnitConversionGraph( estimate )
+	const { co2FromVolume, setGWP } = useUnitConversionGraph( gwp )
 	const { getText } = useText()
 	const [ limits, set_limits ] = useState()
+	const [ gwp, set_gwp ] = useState()
 
 	const { data: sourcesData, loading: loadingSources, error: errorLoadingSources }
 		= useQuery( GQL_sources )
@@ -41,6 +43,7 @@ function CO2Forecast( {
 	console.log( { limits, source } )
 
 	const co2 = useMemo( () => {
+		setGWP( gwp )
 		let co2 = []
 		try {
 			co2 = filteredCombinedDataSet( production, reserves, [ 'oil', 'gas' ],
@@ -56,7 +59,7 @@ function CO2Forecast( {
 			} )
 		}
 		return co2
-	}, [ production, reserves, projection, source, grades, estimate, estimate_prod ] )
+	}, [ production, reserves, projection, source, grades, estimate, estimate_prod, gwp ] )
 
 	// Figure out available years and sources when production loaded.
 
@@ -114,17 +117,20 @@ function CO2Forecast( {
 				<Col xs={24} xl={18}>
 					<CO2ForecastGraph
 						data={co2} projection={projection} estimate={estimate}
-						estimate_prod={estimate_prod}
+						estimate_prod={estimate_prod} gwp={gwp}
 					/>
 				</Col>
 				<Col xs={24} xl={6}>
 					<Row gutter={[ 16, 16 ]}>
+
 						<Col xs={24} md={12} xl={24}>
-							<h3>TABLE 1</h3>
+							<FutureSummary data={co2} gwp={gwp} set_gwp={set_gwp}/>
 						</Col>
+
 						<Col xs={24} md={12} xl={24}>
-							<h3>TABLE 2</h3>
+							<InputSummary data={co2}/>
 						</Col>
+
 					</Row>
 				</Col>
 			</Row>

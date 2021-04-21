@@ -17,7 +17,7 @@ const DEBUG = true
 
 function CO2ForecastGraphBase( {
 	data, projection, estimate, estimate_prod,
-	parentWidth,
+	parentWidth, gwp,
 	tooltipLeft, tooltipTop, tooltipData,
 	hideTooltip, showTooltip
 } ) {
@@ -43,7 +43,7 @@ function CO2ForecastGraphBase( {
 		return getFuelCO2( d.future[ projectionType ].reserves[ fuel ], estimate )
 	}, [ projectionType, estimate ] )
 
-	// scales
+	// scale
 	const yearScale = scaleLinear( {
 		range: [ 0, parentWidth - margin.left ],
 		domain: [ 2010, 2040 ],

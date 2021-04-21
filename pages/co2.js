@@ -1,4 +1,4 @@
-import { useState } from "react"
+import React, { useState } from "react"
 import TopNavigation from "components/navigation/TopNavigation"
 import getConfig from 'next/config'
 import CountrySelector from "components/navigation/CountrySelector"
@@ -36,6 +36,20 @@ export default function CO2ForecastPage() {
 			<NextSeo
 				title={getText( 'co2_effects_for_country' ) + ' ' + countryName ?? ''}
 				description={getText( 'a_service_from_gffr' )}
+				openGraph={{
+					url: 'https://gffr.journeyman.se',
+					title: getText( 'gffr' ),
+					description: getText( 'fossil_fuel_prod_reserves' ),
+					images: [
+						{
+							url: 'https://gffr.journeyman.se/og1.jpg',
+							width: 1200,
+							height: 671,
+							alt: getText( 'gffr' ),
+						}
+					],
+					site_name: getText( 'gffr' ),
+				}}
 			/>
 
 			<div className="page">

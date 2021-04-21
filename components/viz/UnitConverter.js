@@ -1,36 +1,35 @@
-import { useEffect, useRef, useState } from 'react'
-import { singletonHook } from 'react-singleton-hook'
+import { useEffect } from 'react'
 import Graph from 'graph-data-structure'
 import { client } from "pages/_app"
 import { GQL_conversions } from "queries/general"
 
-const init = { loading: true }
+let graph
+let graphOil
+let graphGas
+let conversion = []
+let gwp
 
-const useUnitConversionGraphImpl = () => {
-	const [ conversion, set_conversion ] = useState( [] )
-	const graph = useRef()
-	const graphOil = useRef()
-	const graphGas = useRef()
+export const useUnitConversionGraph = () => {
 
 	useEffect( () => {
 
 		const asyncEffect = async() => {
 			const q = await client.query( { query: GQL_conversions } )
 			const constants = q?.data?.conversionConstants?.nodes ?? []
-			const conversion = {}
+			const _conversion = {}
 			constants.forEach( c => {
-				if( !conversion[ c.fromUnit ] ) conversion[ c.fromUnit ] = {}
-				if( !conversion[ c.fromUnit ][ c.toUnit ] ) conversion[ c.fromUnit ][ c.toUnit ] = {
+				if( !_conversion[ c.fromUnit ] ) _conversion[ c.fromUnit ] = {}
+				if( !_conversion[ c.fromUnit ][ c.toUnit ] ) _conversion[ c.fromUnit ][ c.toUnit ] = {
 					oil: { factor: 1 },
 					gas: {}
 				}
 				if( !c.fossilFuelType || c.fossilFuelType === 'oil' )
-					conversion[ c.fromUnit ][ c.toUnit ][ 'oil' ] = { factor: c.factor, low: c.low, high: c.high }
+					_conversion[ c.fromUnit ][ c.toUnit ][ 'oil' ] = { factor: c.factor, low: c.low, high: c.high }
 				if( !c.fossilFuelType || c.fossilFuelType === 'gas' )
-					conversion[ c.fromUnit ][ c.toUnit ][ 'gas' ] = { factor: c.factor, low: c.low, high: c.high }
+					_conversion[ c.fromUnit ][ c.toUnit ][ 'gas' ] = { factor: c.factor, low: c.low, high: c.high }
 			} )
-			set_conversion( conversion )
-			//console.log( { conversion } )
+			conversion = _conversion
+
 			// Find unique units
 			const _allUnits = {}
 			constants.forEach( u => {
@@ -38,25 +37,25 @@ const useUnitConversionGraphImpl = () => {
 				_allUnits[ u.toUnit ] = true
 			} )
 
-			graph.current = Graph()
-			graphOil.current = Graph()
-			graphGas.current = Graph()
+			graph = Graph()
+			graphOil = Graph()
+			graphGas = Graph()
 
-			Object.keys( _allUnits ).forEach( u => graph.current.addNode( u ) )
+			Object.keys( _allUnits ).forEach( u => graph.addNode( u ) )
 
 			constants.forEach( conv => {
-				graph.current.addEdge( conv.fromUnit, conv.toUnit )
+				graph.addEdge( conv.fromUnit, conv.toUnit )
 			} )
 			constants.filter( c => c.fossilFuelType !== 'gas' ).forEach( conv => {
-				graphOil.current.addEdge( conv.fromUnit, conv.toUnit )
+				graphOil.addEdge( conv.fromUnit, conv.toUnit )
 			} )
 			constants.filter( c => c.fossilFuelType !== 'oil' ).forEach( conv => {
-				graphGas.current.addEdge( conv.fromUnit, conv.toUnit )
+				graphGas.addEdge( conv.fromUnit, conv.toUnit )
 			} )
 			// console.log( {
-			// 	all: graph.current?.serialize(),
-			// 	oil: graphOil.current?.serialize(),
-			// 	gas: graphGas.current?.serialize(),
+			// 	all: graph?.serialize(),
+			// 	oil: graphOil?.serialize(),
+			// 	gas: graphGas?.serialize(),
 			// 	conversion
 			// } )
 		}
@@ -65,7 +64,7 @@ const useUnitConversionGraphImpl = () => {
 
 	const convertOil = ( value, fromUnit, toUnit ) => {
 		try {
-			const path = graphOil.current.shortestPath( fromUnit, toUnit )
+			const path = graphOil.shortestPath( fromUnit, toUnit )
 
 			let factor = 1, low = 1, high = 1
 
@@ -90,9 +89,11 @@ const useUnitConversionGraphImpl = () => {
 		}
 	}
 
+	const setGWP = _gwp => gwp = _gwp
+
 	const convertGas = ( value, fromUnit, toUnit ) => {
 		try {
-			const path = graphGas.current.shortestPath( fromUnit, toUnit )
+			const path = graphGas.shortestPath( fromUnit, toUnit )
 
 			let factor = 1, low = 1, high = 1
 
@@ -113,18 +114,20 @@ const useUnitConversionGraphImpl = () => {
 			return factor * value
 		} catch( e ) {
 			console.log( e.message + ': ' + fromUnit, toUnit )
+			//console.log( e.stack )
 			return value
 		}
 	}
 
 	const co2FromVolume = ( { volume, unit, fossilFuelType }, log ) => {
+		if( !graphGas || !graphOil ) return { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } }
+		console.log( { gwp } )
 		try {
-
 			// Scope 1
-
+			const gwpUnit = gwp ? 'kgco2e_100' : 'kgco2e_20'
 			const path1 = ( fossilFuelType === 'oil' )
-				? graphOil.current.shortestPath( unit, 'kgco2e_1' )
-				: graphGas.current.shortestPath( unit, 'kgco2e_1' )
+				? graphOil.shortestPath( unit, gwpUnit )
+				: graphGas.shortestPath( unit, gwpUnit )
 
 			//console.log( 'Path to ', { unit, path, conversion } )
 			let factor1 = 1, low1 = 1, high1 = 1
@@ -154,8 +157,8 @@ const useUnitConversionGraphImpl = () => {
 			// Scope 3
 
 			const path = ( fossilFuelType === 'oil' )
-				? graphOil.current.shortestPath( unit, 'kgco2e' )
-				: graphGas.current.shortestPath( unit, 'kgco2e' )
+				? graphOil.shortestPath( unit, 'kgco2e' )
+				: graphGas.shortestPath( unit, 'kgco2e' )
 
 			//console.log( 'Path to ', { unit, path, conversion } )
 			let factor = 1, low = 1, high = 1
@@ -198,7 +201,5 @@ const useUnitConversionGraphImpl = () => {
 		}
 	}
 
-	return { co2FromVolume, convertOil, convertGas }
+	return { co2FromVolume, convertOil, convertGas, setGWP }
 }
-
-export const useUnitConversionGraph = singletonHook( init, useUnitConversionGraphImpl )
