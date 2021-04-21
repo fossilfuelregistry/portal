@@ -28,7 +28,6 @@ query countryProductions($iso3166: String!) {
     nodes {
       iso3166
       fossilFuelType
-      grade
       sourceId
       unit
       volume

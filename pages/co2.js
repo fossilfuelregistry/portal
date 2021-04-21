@@ -27,8 +27,9 @@ export default function CO2ForecastPage() {
 	const [ estimate, set_estimate ] = useState( 2 )
 	const [ estimate_prod, set_estimate_prod ] = useState( 2 )
 	const [ projection, set_projection ] = useState( 'decline' )
-	const [ allSources, set_allSources ] = useState( [] )
-	const [ selectedSources, set_selectedSources ] = useState( [] )
+	const [ productionSources, set_productionSources ] = useState( [] )
+	const [ futureSources, set_futureSources ] = useState( [] )
+	const [ selectedSource, set_selectedSource ] = useState()
 
 	return (
 		<>
@@ -41,7 +42,8 @@ export default function CO2ForecastPage() {
 				<TopNavigation/>
 
 				<div className="co2">
-					<Row gutter={[ 12, 12 ]}>
+
+					<Row gutter={[ 12, 12 ]} style={{ marginBottom: 26 }}>
 
 						<Col xs={12} lg={6}>
 							<h3>{getText( 'country' )}</h3>
@@ -60,35 +62,21 @@ export default function CO2ForecastPage() {
 
 						<Col xs={12} lg={4}>
 							<h3>{getText( 'data_source' )}</h3>
-							<Row gutter={[ 12, 12 ]}>
-								{allSources.map( source => (
-									<Col xs={24} key={source?.sourceId}>
-										<Checkbox
-											checked={selectedSources[ source?.sourceId ]?.enabled}
-											onChange={
-												e => set_selectedSources(
-													s => {
-														let srcs = [ ...s ]
-														srcs[ source.sourceId ] = {
-															...source,
-															enabled: e.target.checked
-														}
-														return srcs
-													}
-												)
-											}
-										>
-											{source?.name}
-										</Checkbox>
-									</Col>
-								) )}
-							</Row>
+							<Radio.Group
+								onChange={e => set_selectedSource( e.target.value )}
+								value={selectedSource}
+							>
+								{productionSources.map( source => (
+									<Radio style={radioStyle} value={source?.sourceId} key={source?.sourceId}>
+										{source?.name}
+									</Radio> ) )}
+							</Radio.Group>
 						</Col>
 
 						<Col xs={12} lg={3}>
-							<h3>{getText( 'grades' )}</h3>
+							<h3>{getText( 'reserves' )}</h3>
 							<Row gutter={[ 12, 12 ]}>
-								{Object.keys( grades ).map( grade => (
+								{Object.keys( grades ?? {} ).map( grade => (
 									<Col xs={24} key={grade}>
 										<Checkbox
 											checked={grades[ grade ]}
@@ -109,9 +97,10 @@ export default function CO2ForecastPage() {
 							<div>
 								<h3>{getText( 'projection' )}</h3>
 								<Radio.Group onChange={e => set_projection( e.target.value )} value={projection}>
-									<Radio style={radioStyle} value={'auth'}>
-										{getText( 'authority' )}
-									</Radio>
+									{futureSources.map( source => (
+										<Radio style={radioStyle} value={source?.sourceId} key={source?.sourceId}>
+											{source?.name}
+										</Radio> ) )}
 									<Radio style={radioStyle} value={'stable'}>
 										{getText( 'stable' )}
 									</Radio>
@@ -161,20 +150,21 @@ export default function CO2ForecastPage() {
 							/>
 						</Col>
 
-						<Col xs={24}>
-							<CO2Forecast
-								country={country}
-								sources={selectedSources}
-								grades={grades}
-								estimate={estimate}
-								estimate_prod={estimate_prod}
-								projection={projection}
-								onGrades={set_grades}
-								onSources={set_allSources}
-							/>
-						</Col>
-
 					</Row>
+
+					<CO2Forecast
+						country={country}
+						source={productionSources[ selectedSource ]}
+						grades={grades}
+						estimate={estimate}
+						estimate_prod={estimate_prod}
+						projection={projection}
+						onGrades={set_grades}
+						onSources={s => {
+							set_productionSources( s.productionSources )
+							set_futureSources( s.futureSources )
+						}}
+					/>
 				</div>
 
 				<style jsx>{`

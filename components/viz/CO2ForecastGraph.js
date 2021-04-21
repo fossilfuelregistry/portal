@@ -1,17 +1,17 @@
 import React, { useCallback, useMemo } from "react"
 import { Group } from '@visx/group'
 import { AreaStack, Bar, LinePath } from '@visx/shape'
-import { AxisBottom, AxisLeft, AxisRight } from '@visx/axis'
+import { AxisBottom, AxisRight } from '@visx/axis'
 import { curveLinear } from '@visx/curve'
 import { scaleLinear } from '@visx/scale'
 import { defaultStyles, TooltipWithBounds, withTooltip } from '@visx/tooltip'
 import { localPoint } from '@visx/event'
-import { bisector, max } from 'd3-array'
+import { bisector, max, min } from 'd3-array'
 import { withParentSize } from "@visx/responsive"
 import { getCO2, getFuelCO2, getFuelScopeCO2, makeEstimate } from "./util"
 import useText from "lib/useText"
 
-const DEBUG = false
+const DEBUG = true
 
 //#008080,#70a494,#b4c8a8,#f6edbd,#edbb8a,#de8a5a,#ca562c
 
@@ -28,14 +28,23 @@ function CO2ForecastGraphBase( {
 	const getYear = d => d.year
 	const getY0 = d => d[ 0 ]
 	const getY1 = d => d[ 1 ]
+	const getAuth = d => getCO2( d.future.authority.production, estimate_prod )
+	const getStable = d => getCO2( d.future.stable.production, estimate_prod )
+	const getDecline = d => getCO2( d.future.decline.production, estimate_prod )
 	const getOilReservesCO2 = d => makeEstimate( d.reserves.oil.scope1, estimate )
 		+ makeEstimate( d.reserves.oil.scope3, estimate )
 	const getGasReservesCO2 = d => makeEstimate( d.reserves.gas.scope1, estimate )
 		+ makeEstimate( d.reserves.gas.scope3, estimate )
-	const getAuth = d => getCO2( d.projection, estimate_prod )
-	const getStable = d => getCO2( d.future.stable.production, estimate_prod )
-	const getDecline = d => getCO2( d.future.decline.production, estimate_prod )
-	DEBUG && console.log( 'GRAPH', { estimate_prod, estimate } )
+
+	//DEBUG && console.log( 'GRAPH', { estimate_prod, estimate, projection } )
+	let projectionType = projection
+	if( projection > 0 ) projectionType = 'authority'
+
+	const getFutureReserve = useCallback( ( d, fuel ) => {
+		//console.log( d.year, d, d.future[ projectionType ].reserves.oil.co2 )
+		return getFuelCO2( d.future[ projectionType ].reserves[ fuel ], estimate )
+	}, [ projectionType, estimate ] )
+
 	// scales
 	const yearScale = scaleLinear( {
 		range: [ 0, parentWidth - margin.left ],
@@ -43,30 +52,25 @@ function CO2ForecastGraphBase( {
 	} )
 
 	const maxCO2 = useMemo( () => {
-		let maxValues = {}
-		Object.keys( data[ 0 ] ).forEach( key => {
-			if( key === 'future' ) return
-			if( key === 'year' ) return
-			maxValues[ key ] = max( data, d => getCO2( d[ key ], 2 ) )
-		} )
-		console.log( { maxValues } )
-		return maxValues
+		let maxValue = max(
+			data.filter( d => d.year > 2010 ),
+			d => getCO2( d.production, 4 )
+		)
+		DEBUG && console.log( { maxValue } )
+		return maxValue
 	}, [ data ] )
-
-	const getFutureReserve = useCallback( ( d, fuel ) => {
-		//console.log( d.year, d, d.future[ projection ].reserves.oil.co2 )
-		return getFuelCO2( d.future[ projection ].reserves[ fuel ], estimate )
-	}, [ projection, estimate ] )
 
 	const productionScale = scaleLinear( {
 		range: [ height - 30, 0 ],
-		domain: [ 0, maxCO2.production ],
+		domain: [ 0, maxCO2 ],
 	} )
 
 	const reservesScale = scaleLinear( {
 		range: [ height - 30, 0 ],
-		domain: [ 0, maxCO2.reserves * 0.7 ],
+		domain: [ 0, max( data, d => getCO2( d.future[ projectionType ].reserves, estimate ) ) ]
 	} )
+
+	//console.log( { projection, projectionType, d: data[ 45 ] } )
 
 	const bisectDate = bisector( d => {
 		//console.log( 'bisectDate', d )
@@ -86,10 +90,8 @@ function CO2ForecastGraphBase( {
 			}
 			//console.log( { d, v: getValue( d ), y: yScale( getValue( d ) ) } )
 			let ttt = getCO2( d.production, estimate_prod )
-			if( ttt === 0 && projection === 'auth' )
-				ttt = getCO2( d.projection, estimate_prod )
-			if( ttt === 0 && projection !== 'auth' )
-				ttt = getCO2( d.future[ projection ].production, estimate_prod )
+			if( ttt === 0 )
+				ttt = getCO2( d.future[ projectionType ]?.production, estimate_prod )
 			showTooltip( {
 				tooltipData: d,
 				tooltipLeft: x,
@@ -100,13 +102,11 @@ function CO2ForecastGraphBase( {
 	)
 
 	const tip = tooltipData
-	if( !( maxCO2.production > 0 ) ) return null // JSON.stringify( maxCO2 )
+	if( !( maxCO2 > 0 ) ) return null // JSON.stringify( maxCO2 )
 
 	const productionData = data.map( d => ( {
-		oil1: getFuelScopeCO2( d.production.oil.scope1, estimate_prod ),
-		oil3: getFuelScopeCO2( d.production.oil.scope3, estimate_prod ),
-		gas1: getFuelScopeCO2( d.production.gas.scope1, estimate_prod ),
-		gas3: getFuelScopeCO2( d.production.gas.scope3, estimate_prod ),
+		oil: getFuelCO2( d.production.oil, estimate_prod ),
+		gas: getFuelCO2( d.production.gas, estimate_prod ),
 		year: d.year
 	} ) )
 
@@ -128,7 +128,6 @@ function CO2ForecastGraphBase( {
 							gas_projection: getFuelCO2( d.projection.gas, estimate_prod ),
 							year: d.year
 						} ) )}
-						defined={d => ( getY0( d ) > 0 || getY1( d ) > 0 ) && d.data.year >= 2010}
 						x={d => {
 							const x = yearScale( getYear( d.data ) ) ?? 0
 							//console.log( { d, x } )
@@ -145,8 +144,8 @@ function CO2ForecastGraphBase( {
 										d={path( stack ) || ''}
 										stroke="transparent"
 										fill={{
-											oil_projection: "#de8a5a",
-											gas_projection: "#ca562c"
+											oil_projection: "#b4c8a8",
+											gas_projection: "#f6edbd"
 										}[ stack.key ]}
 									/>
 								)
@@ -154,7 +153,7 @@ function CO2ForecastGraphBase( {
 					</AreaStack>
 
 					<AreaStack
-						keys={[ 'oil1', 'gas1', 'oil3', 'gas3' ]}
+						keys={[ 'oil', 'gas' ]}
 						data={productionData}
 						defined={d => ( getY0( d ) > 0 || getY1( d ) > 0 ) && d.data.year >= 2010}
 						x={d => {
@@ -173,10 +172,8 @@ function CO2ForecastGraphBase( {
 										d={path( stack ) || ''}
 										stroke="transparent"
 										fill={{
-											oil1: "#008080",
-											gas1: "#70a494",
-											oil3: "#b4c8a8",
-											gas3: "#f6edbd"
+											oil: "#008080",
+											gas: "#70a494",
 										}[ stack.key ]}
 									/>
 								)
@@ -185,36 +182,14 @@ function CO2ForecastGraphBase( {
 
 					<LinePath
 						curve={curveLinear}
-						className="reserves oil"
-						data={data}
-						defined={d => d.year >= 2010 && getOilReservesCO2( d ) > 0}
-						x={d => yearScale( getYear( d ) ) ?? 0}
-						y={d => reservesScale( getOilReservesCO2( d ) ) ?? 0}
-						shapeRendering="geometricPrecision"
-					/>
-
-					<LinePath
-						curve={curveLinear}
-						className="reserves gas"
-						data={data}
-						defined={d => d.year >= 2010 && getGasReservesCO2( d ) > 0}
-						x={d => yearScale( getYear( d ) ) ?? 0}
-						y={d => reservesScale( getGasReservesCO2( d ) ) ?? 0}
-						shapeRendering="geometricPrecision"
-					/>
-
-					{projection === 'stable' &&
-					<LinePath
-						curve={curveLinear}
 						className="projection stable"
 						data={data}
 						defined={d => d.year >= 2010 && getStable( d ) > 0}
 						x={d => yearScale( getYear( d ) ) ?? 0}
 						y={d => productionScale( getStable( d ) ) ?? 0}
 						shapeRendering="geometricPrecision"
-					/>}
+					/>
 
-					{projection === 'decline' &&
 					<LinePath
 						curve={curveLinear}
 						className="projection decline"
@@ -223,9 +198,8 @@ function CO2ForecastGraphBase( {
 						x={d => yearScale( getYear( d ) ) ?? 0}
 						y={d => productionScale( getDecline( d ) ) ?? 0}
 						shapeRendering="geometricPrecision"
-					/>}
+					/>
 
-					{projection === 'auth' &&
 					<LinePath
 						curve={curveLinear}
 						className="projection auth"
@@ -234,13 +208,13 @@ function CO2ForecastGraphBase( {
 						x={d => yearScale( getYear( d ) ) ?? 0}
 						y={d => productionScale( getAuth( d ) ) ?? 0}
 						shapeRendering="geometricPrecision"
-					/>}
+					/>
 
 					<LinePath
 						curve={curveLinear}
 						className="projection reserves oil"
 						data={data}
-						defined={d => d.year >= 2018 && getFutureReserve( d, 'oil' ) > 0}
+						defined={d => d.year >= 2020 && getFutureReserve( d, 'oil' ) > 0}
 						x={d => yearScale( getYear( d ) ) ?? 0}
 						y={d => reservesScale( getFutureReserve( d, 'oil' ) ) ?? 0}
 						shapeRendering="geometricPrecision"
@@ -250,7 +224,7 @@ function CO2ForecastGraphBase( {
 						curve={curveLinear}
 						className="projection reserves gas"
 						data={data}
-						defined={d => d.year >= 2018 && getFutureReserve( d, 'gas' ) > 0}
+						defined={d => d.year >= 2020 && getFutureReserve( d, 'gas' ) > 0}
 						x={d => yearScale( getYear( d ) ) ?? 0}
 						y={d => reservesScale( getFutureReserve( d, 'gas' ) ) ?? 0}
 						shapeRendering="geometricPrecision"
@@ -262,12 +236,6 @@ function CO2ForecastGraphBase( {
 						tickFormat={x => x.toFixed( 1 ).toString()}
 					/>
 
-					<AxisLeft
-						scale={reservesScale}
-						numTicks={parentWidth > 520 ? 8 : 4}
-						tickFormat={x => x.toFixed( 1 ).toString()}
-						left={parentWidth - margin.left}
-					/>
 				</Group>
 
 				<Bar
@@ -285,6 +253,7 @@ function CO2ForecastGraphBase( {
 				/>
 
 			</svg>
+
 			{tip && (
 				<TooltipWithBounds
 					key={Math.random()}
@@ -304,20 +273,12 @@ function CO2ForecastGraphBase( {
 					<table>
 						<tbody>
 							<tr>
-								<td>{getText( 'production' )} {getText( 'oil' )} 1&nbsp;</td>
-								<td align="right">{getFuelScopeCO2( tip.production.oil.scope1, estimate_prod )?.toFixed( 1 )}</td>
+								<td>{getText( 'production' )} {getText( 'oil' )}&nbsp;</td>
+								<td align="right">{getFuelCO2( tip.production.oil, estimate_prod )?.toFixed( 1 )}</td>
 							</tr>
 							<tr>
-								<td>{getText( 'production' )} {getText( 'oil' )} 3&nbsp;</td>
-								<td align="right">{getFuelScopeCO2( tip.production.oil.scope3, estimate_prod )?.toFixed( 1 )}</td>
-							</tr>
-							<tr>
-								<td>{getText( 'production' )} {getText( 'gas' )} 1&nbsp;</td>
-								<td align="right">{getFuelScopeCO2( tip.production.gas.scope1, estimate_prod )?.toFixed( 1 )}</td>
-							</tr>
-							<tr>
-								<td>{getText( 'production' )} {getText( 'gas' )} 3&nbsp;</td>
-								<td align="right">{getFuelScopeCO2( tip.production.gas.scope3, estimate_prod )?.toFixed( 1 )}</td>
+								<td>{getText( 'production' )} {getText( 'gas' )}&nbsp;</td>
+								<td align="right">{getFuelCO2( tip.production.gas, estimate_prod )?.toFixed( 1 )}</td>
 							</tr>
 							<tr>
 								<td>{getText( 'reserves' )} {getText( 'oil' )}&nbsp;</td>
@@ -330,29 +291,29 @@ function CO2ForecastGraphBase( {
 						</tbody>
 					</table>}
 
-					{tip.production.oil.scope1.co2 <= 0 && projection !== 'auth' &&
+					{tip.production.oil.scope1.co2 <= 0 && projectionType !== 'authority' &&
 					<table>
 						<tbody>
 							<tr>
 								<td>{getText( 'production' )} {getText( 'oil' )}&nbsp;</td>
-								<td align="right">{getFuelCO2( tip.future[ projection ].production.oil, estimate_prod )?.toFixed( 1 )}</td>
+								<td align="right">{getFuelCO2( tip.future[ projectionType ].production.oil, estimate_prod )?.toFixed( 1 )}</td>
 							</tr>
 							<tr>
 								<td>{getText( 'production' )} {getText( 'gas' )}&nbsp;</td>
-								<td align="right">{getFuelCO2( tip.future[ projection ].production.gas, estimate_prod )?.toFixed( 1 )}</td>
+								<td align="right">{getFuelCO2( tip.future[ projectionType ].production.gas, estimate_prod )?.toFixed( 1 )}</td>
 							</tr>
 							<tr>
 								<td>{getText( 'reserves' )} {getText( 'oil' )}&nbsp;</td>
-								<td align="right">{getFuelCO2( tip.future[ projection ].reserves.oil, estimate )?.toFixed( 1 )}</td>
+								<td align="right">{getFuelCO2( tip.future[ projectionType ].reserves.oil, estimate )?.toFixed( 1 )}</td>
 							</tr>
 							<tr>
 								<td>{getText( 'reserves' )} {getText( 'gas' )}&nbsp;</td>
-								<td align="right">{getFuelCO2( tip.future[ projection ].reserves.gas, estimate )?.toFixed( 1 )}</td>
+								<td align="right">{getFuelCO2( tip.future[ projectionType ].reserves.gas, estimate )?.toFixed( 1 )}</td>
 							</tr>
 						</tbody>
 					</table>}
 
-					{tip.production.oil.scope1.co2 <= 0 && projection === 'auth' &&
+					{tip.production.oil.scope1.co2 <= 0 && projectionType === 'authority' &&
 					<table>
 						<tbody>
 							<tr>
@@ -365,11 +326,11 @@ function CO2ForecastGraphBase( {
 							</tr>
 							<tr>
 								<td>{getText( 'reserves' )} {getText( 'oil' )}&nbsp;</td>
-								<td align="right">{getFuelCO2( tip.future[ projection ].reserves.oil, estimate )?.toFixed( 1 )}</td>
+								<td align="right">{getFuelCO2( tip.future[ projectionType ].reserves.oil, estimate )?.toFixed( 1 )}</td>
 							</tr>
 							<tr>
 								<td>{getText( 'reserves' )} {getText( 'gas' )}&nbsp;</td>
-								<td align="right">{getFuelCO2( tip.future[ projection ].reserves.gas, estimate )?.toFixed( 1 )}</td>
+								<td align="right">{getFuelCO2( tip.future[ projectionType ].reserves.gas, estimate )?.toFixed( 1 )}</td>
 							</tr>
 						</tbody>
 					</table>}
@@ -380,8 +341,9 @@ function CO2ForecastGraphBase( {
 			<style jsx>{`
               :global(path.projection) {
                 stroke: #333333;
-                stroke-width: 3;
-                stroke-dasharray: 8;
+                stroke-width: 2;
+                stroke-dasharray: 0;
+                stroke-opacity: 0.2;
               }
 
               :global(path.reserves) {
@@ -405,3 +367,30 @@ function CO2ForecastGraphBase( {
 }
 
 export default withParentSize( withTooltip( CO2ForecastGraphBase ) )
+
+/*
+	const getOilReservesCO2 = d => makeEstimate( d.reserves.oil.scope1, estimate )
+		+ makeEstimate( d.reserves.oil.scope3, estimate )
+	const getGasReservesCO2 = d => makeEstimate( d.reserves.gas.scope1, estimate )
+		+ makeEstimate( d.reserves.gas.scope3, estimate )
+
+	const getFutureReserve = useCallback( ( d, fuel ) => {
+		//console.log( d.year, d, d.future[ projection ].reserves.oil.co2 )
+		return getFuelCO2( d.future[ projection ].reserves[ fuel ], estimate )
+	}, [ projection, estimate ] )
+
+	const reservesScale = scaleLinear( {
+		range: [ height - 30, 0 ],
+		domain: [ 0, maxCO2.reserves * 0.7 ],
+	} )
+
+
+
+					<AxisLeft
+						scale={reservesScale}
+						numTicks={parentWidth > 520 ? 8 : 4}
+						tickFormat={x => x.toFixed( 1 ).toString()}
+						left={parentWidth - margin.left}
+					/>
+
+ */

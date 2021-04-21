@@ -33,7 +33,7 @@ export default function Home() {
 		const sourceId = country.countryProductionsByIso3166?.nodes?.[ 0 ]?.sourceId
 		production = country.countryProductionsByIso3166?.nodes?.filter( p => p.year === year && p.sourceId ===sourceId ) ?? {}
 		reserves = country.countryReservesByIso3166?.nodes?.filter( p => p.year === year && p.sourceId ===sourceId ) ?? {}
-		dataSet = filteredCombinedDataSet( production, reserves, [ 'oil', 'gas' ], null, null, null, co2FromVolume )
+		dataSet = filteredCombinedDataSet( production, reserves, [ 'oil', 'gas' ], null, null, co2FromVolume )
 		console.log( dataSet )
 	}
 
