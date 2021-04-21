@@ -15,6 +15,7 @@ const emptyPoint = {
 		oil: { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } },
 		gas: { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } }
 	},
+	history: {},
 	future: {
 		authority: {
 			source: '',
@@ -147,7 +148,7 @@ export function filteredCombinedDataSet( production, reserves, fossilFuelTypes, 
 		.filter( data => {
 			if( fossilFuelTypes && !fossilFuelTypes.includes( data.fossilFuelType ) ) return false
 			//console.log( { data } )
-			if( sourceId !== data.sourceId && futureSource?.sourceId !== data.sourceId ) return false
+			if( sourceId !== data.sourceId && !data.projection/*futureSource?.sourceId !== data.sourceId*/ ) return false
 			return true
 		} )
 		.forEach( data => {
@@ -225,7 +226,7 @@ export function dataSetEstimateFutures( dataset, _projection, estimate, estimate
 
 	let sumOfProjectedProduction = clone( emptyPoint.future )
 
-	dataset.forEach( ( dataYear, index ) => {
+	dataset?.forEach( ( dataYear, index ) => {
 		if( dataYear.production.oil.scope3.co2 > 0 ) {
 			lastOilDataIndex = index
 		}

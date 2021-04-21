@@ -168,6 +168,10 @@ export default function CO2ForecastPage() {
 				</div>
 
 				<style jsx>{`
+                  .page {
+                    padding-bottom: 20px;
+                  }
+
                   .co2 {
                     padding: 0 40px;
                   }

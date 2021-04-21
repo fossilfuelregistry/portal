@@ -8,7 +8,7 @@ import { GQL_sources } from "queries/general"
 import { dataSetEstimateFutures, filteredCombinedDataSet } from "./util"
 import CO2ForecastGraph from "./CO2ForecastGraph"
 import useText from "lib/useText"
-import ProductionGraph from "./ProductionGraph"
+import InputDataGraph from "./InputDataGraph"
 
 const DEBUG = false
 
@@ -112,7 +112,10 @@ function CO2Forecast( {
 		<>
 			<Row gutter={[ 16, 16 ]}>
 				<Col xs={24} xl={18}>
-					<CO2ForecastGraph data={co2} projection={projection} estimate={estimate} estimate_prod={estimate_prod}/>
+					<CO2ForecastGraph
+						data={co2} projection={projection} estimate={estimate}
+						estimate_prod={estimate_prod}
+					/>
 				</Col>
 				<Col xs={24} xl={6}>
 					<Row gutter={[ 16, 16 ]}>
@@ -128,23 +131,51 @@ function CO2Forecast( {
 
 			<Row gutter={[ 16, 16 ]}>
 				<Col xs={24} md={12} xxl={6}>
-					<h3>{getText( 'gas' ) + ' ' + getText( 'production' )}</h3>
-					<ProductionGraph data={co2} table="production" fuel="gas" estimate={estimate_prod}/>
+					<div className="graph-wrap">
+						<h4>{getText( 'gas' ) + ' ' + getText( 'production' )} e9m3</h4>
+						<InputDataGraph
+							data={production} allSources={allSources} fuel="gas" comment="PROD"
+							estimate={estimate_prod}
+						/>
+					</div>
 				</Col>
 				<Col xs={24} md={12} xxl={6}>
-					<h3>{getText( 'gas' ) + ' ' + getText( 'reserves' )}</h3>
-					<ProductionGraph data={co2} table="reserves" fuel="gas" estimate={estimate_prod}/>
+					<div className="graph-wrap">
+						<h4>{getText( 'gas' ) + ' ' + getText( 'reserves' )} e9m3</h4>
+						<InputDataGraph
+							data={reserves} allSources={allSources} fuel="gas" comment="RES"
+							estimate={estimate}
+						/>
+					</div>
 				</Col>
 				<Col xs={24} md={12} xxl={6}>
-					<h3>{getText( 'oil' ) + ' ' + getText( 'production' )}</h3>
-					<ProductionGraph data={co2} table="production" fuel="oil" estimate={estimate_prod}/>
+					<div className="graph-wrap">
+						<h4>{getText( 'oil' ) + ' ' + getText( 'production' )} e6bbl</h4>
+						<InputDataGraph
+							data={production} allSources={allSources} fuel="oil" comment="PROD"
+							estimate={estimate_prod}
+						/>
+					</div>
 				</Col>
 				<Col xs={24} md={12} xxl={6}>
-					<h3>{getText( 'oil' ) + ' ' + getText( 'reserves' )}</h3>
-					<ProductionGraph data={co2} table="reserves" fuel="oil" estimate={estimate_prod}/>
+					<div className="graph-wrap">
+						<h4>{getText( 'oil' ) + ' ' + getText( 'reserves' )} e6bbl</h4>
+						<InputDataGraph
+							data={reserves} allSources={allSources} fuel="oil" comment="RES"
+							estimate={estimate}
+						/>
+					</div>
 				</Col>
 			</Row>
 
+			<style jsx>{`
+              .graph-wrap {
+                background-color: #eeeeee;
+                padding: 16px;
+                border-radius: 8px;
+              }
+			`}
+			</style>
 		</> )
 }
 

@@ -63,6 +63,60 @@ const useUnitConversionGraphImpl = () => {
 		asyncEffect()
 	}, [] )
 
+	const convertOil = ( value, fromUnit, toUnit ) => {
+		try {
+			const path = graphOil.current.shortestPath( fromUnit, toUnit )
+
+			let factor = 1, low = 1, high = 1
+
+			for( let step = 1; step < path.length; step++ ) {
+				const from = path[ step - 1 ]
+				const to = path[ step ]
+
+				const conv = conversion[ from ][ to ].oil
+
+				if( !conv ) throw new Error(
+					`Conversion data issue: From ${from} to ${to} for Oil is ${JSON.stringify( conv )}` )
+
+				factor *= conv.factor
+				low *= conv.low
+				high *= conv.high
+			}
+
+			return factor * value
+		} catch( e ) {
+			console.log( e.message + ': ' + fromUnit, toUnit )
+			return value
+		}
+	}
+
+	const convertGas = ( value, fromUnit, toUnit ) => {
+		try {
+			const path = graphGas.current.shortestPath( fromUnit, toUnit )
+
+			let factor = 1, low = 1, high = 1
+
+			for( let step = 1; step < path.length; step++ ) {
+				const from = path[ step - 1 ]
+				const to = path[ step ]
+
+				const conv = conversion[ from ][ to ].gas
+
+				if( !conv ) throw new Error(
+					`Conversion data issue: From ${from} to ${to} for Gas is ${JSON.stringify( conv )}` )
+
+				factor *= conv.factor
+				low *= conv.low
+				high *= conv.high
+			}
+
+			return factor * value
+		} catch( e ) {
+			console.log( e.message + ': ' + fromUnit, toUnit )
+			return value
+		}
+	}
+
 	const co2FromVolume = ( { volume, unit, fossilFuelType }, log ) => {
 		try {
 
@@ -140,7 +194,7 @@ const useUnitConversionGraphImpl = () => {
 		}
 	}
 
-	return { co2FromVolume }
+	return { co2FromVolume, convertOil, convertGas }
 }
 
 export const useUnitConversionGraph = singletonHook( init, useUnitConversionGraphImpl )

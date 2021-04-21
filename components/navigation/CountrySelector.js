@@ -9,22 +9,28 @@ import { useEffect, useRef } from "react"
 export default function CountrySelector( { onChange } ) {
 	const router = useRouter()
 	const texts = useStore( textsSelector )
-	const didSetDefaultFromUrl = useRef()
-
-	useEffect( () => {
-		if( router.query.country && onChange && !didSetDefaultFromUrl.current ) {
-			onChange( { value: router.query.country } )
-			didSetDefaultFromUrl.current = true
-		}
-	}, [ router.query ] )
+	const didSetDefaultFromUrl = useRef( false )
 
 	const { data: countriesData, loading: loadingCountries, error: errorLoadingCountries }
 		= useQuery( GQL_countries )
 
+	const countries = countriesData?.neCountries?.nodes ?? []
+
+	useEffect( () => {
+		if( !countries.length ) return
+		const { country } = router.query
+		if( country && onChange && !didSetDefaultFromUrl.current ) {
+			const name = countries.find( c => c.isoA2.toLowerCase() === country.toLowerCase() )?.[ 'name' ]
+			onChange(
+				{ value: router.query.country },
+				{ children: name }
+			)
+			didSetDefaultFromUrl.current = true
+		}
+	}, [ router.query, countries ] )
+
 	if( loadingCountries || errorLoadingCountries )
 		return <GraphQLStatus loading={loadingCountries} error={errorLoadingCountries}/>
-
-	const countries = countriesData?.neCountries?.nodes ?? []
 
 	return (
 		<Select
