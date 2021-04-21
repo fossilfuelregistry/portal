@@ -31,10 +31,8 @@ function CO2ForecastGraphBase( {
 	const getAuth = d => getCO2( d.future.authority.production, estimate_prod )
 	const getStable = d => getCO2( d.future.stable.production, estimate_prod )
 	const getDecline = d => getCO2( d.future.decline.production, estimate_prod )
-	const getOilReservesCO2 = d => makeEstimate( d.reserves.oil.scope1, estimate )
-		+ makeEstimate( d.reserves.oil.scope3, estimate )
-	const getGasReservesCO2 = d => makeEstimate( d.reserves.gas.scope1, estimate )
-		+ makeEstimate( d.reserves.gas.scope3, estimate )
+
+	const showReserves = false
 
 	//DEBUG && console.log( 'GRAPH', { estimate_prod, estimate, projection } )
 	let projectionType = projection
@@ -210,6 +208,7 @@ function CO2ForecastGraphBase( {
 						shapeRendering="geometricPrecision"
 					/>
 
+					{showReserves &&
 					<LinePath
 						curve={curveLinear}
 						className="projection reserves oil"
@@ -218,8 +217,9 @@ function CO2ForecastGraphBase( {
 						x={d => yearScale( getYear( d ) ) ?? 0}
 						y={d => reservesScale( getFutureReserve( d, 'oil' ) ) ?? 0}
 						shapeRendering="geometricPrecision"
-					/>
+					/>}
 
+					{showReserves &&
 					<LinePath
 						curve={curveLinear}
 						className="projection reserves gas"
@@ -228,7 +228,7 @@ function CO2ForecastGraphBase( {
 						x={d => yearScale( getYear( d ) ) ?? 0}
 						y={d => reservesScale( getFutureReserve( d, 'gas' ) ) ?? 0}
 						shapeRendering="geometricPrecision"
-					/>
+					/>}
 
 					<AxisRight
 						scale={productionScale}
