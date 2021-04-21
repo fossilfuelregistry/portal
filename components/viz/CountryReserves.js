@@ -7,8 +7,9 @@ import { Alert } from "antd"
 import { textsSelector, useStore } from "lib/zustandProvider"
 import { useUnitConversionGraph } from "./UnitConverter"
 import { GQL_sources } from "queries/general"
+import { getFuelCO2 } from "./util"
 
-const DEBUG = false
+const DEBUG = true
 
 export default function CountryReserves( { country, fossilFuelType, sources, grades, onGrades, onSources } ) {
 	const { co2FromVolume } = useUnitConversionGraph()
@@ -63,16 +64,24 @@ export default function CountryReserves( { country, fossilFuelType, sources, gra
 				data: reserves
 					.filter( r => r.fossilFuelType === fossilFuelType && grades?.[ r.grade ] === true && source.sourceId === r.sourceId )
 					.map( r => {
+						console.log( r )
 						const point = { year: r.year }
-						const co2 = co2FromVolume( r.volume, r.unit )
-						scaleValues.min = scaleValues.min ? Math.min( scaleValues.min, co2.value ) : co2.value
-						scaleValues.max = scaleValues.max ? Math.max( scaleValues.max, co2.value ) : co2.value
+						const co2 = co2FromVolume( r )
+						const co2Total = getFuelCO2( co2, 2 )
+						scaleValues.min = scaleValues.min ? Math.min( scaleValues.min, co2Total ) : co2Total
+						scaleValues.max = scaleValues.max ? Math.max( scaleValues.max, co2Total ) : co2Total
 						if( r.projection ) {
-							point[ 'co2_' + source.name + '_projection' ] = co2.value
-							point[ 'co2_span_' + source.name + '_projection' ] = co2.range
+							point[ 'co2_' + source.name + '_projection' ] = co2Total
+							point[ 'co2_span_' + source.name + '_projection' ] = [
+								co2.scope1.range[ 0 ] + co2.scope3.range[ 0 ],
+								co2.scope1.range[ 1 ] + co2.scope3.range[ 1 ]
+							]
 						} else {
-							point[ 'co2_' + source.name ] = co2.value
-							point[ 'co2_span_' + source.name ] = co2.range
+							point[ 'co2_' + source.name ] = co2Total
+							point[ 'co2_span_' + source.name ] = [
+								co2.scope1.range[ 0 ] + co2.scope3.range[ 0 ],
+								co2.scope1.range[ 1 ] + co2.scope3.range[ 1 ]
+							]
 						}
 						return point
 					} )

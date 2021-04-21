@@ -52,12 +52,12 @@ const emptyPoint = {
 }
 
 const _addCO2 = ( datapoint, fuel, deltaCO2 ) => {
-	datapoint[ fuel ].scope1.co2 += deltaCO2.scope1
-	datapoint[ fuel ].scope3.co2 += deltaCO2.scope3
-	datapoint[ fuel ].scope1.range[ 0 ] += deltaCO2.s1range[ 0 ]
-	datapoint[ fuel ].scope1.range[ 1 ] += deltaCO2.s1range[ 1 ]
-	datapoint[ fuel ].scope3.range[ 0 ] += deltaCO2.s3range[ 0 ]
-	datapoint[ fuel ].scope3.range[ 1 ] += deltaCO2.s3range[ 1 ]
+	datapoint[ fuel ].scope1.co2 += deltaCO2.scope1.co2
+	datapoint[ fuel ].scope3.co2 += deltaCO2.scope3.co2
+	datapoint[ fuel ].scope1.range[ 0 ] += deltaCO2.scope1.range[ 0 ]
+	datapoint[ fuel ].scope1.range[ 1 ] += deltaCO2.scope1.range[ 1 ]
+	datapoint[ fuel ].scope3.range[ 0 ] += deltaCO2.scope3.range[ 0 ]
+	datapoint[ fuel ].scope3.range[ 1 ] += deltaCO2.scope3.range[ 1 ]
 	//console.log( fuel, datapoint[ fuel ], deltaCO2 )
 }
 

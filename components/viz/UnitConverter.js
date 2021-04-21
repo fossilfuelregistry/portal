@@ -184,10 +184,14 @@ const useUnitConversionGraphImpl = () => {
 
 
 			return {
-				scope1: volume * factor1 / 1e9,
-				scope3: volume * factor / 1e9,
-				s1range: [ volume * low1 / 1e9, volume * high1 / 1e9 ],
-				s3range: [ volume * low / 1e9, volume * high / 1e9 ]
+				scope1: {
+					co2: volume * factor1 / 1e9,
+					range: [ volume * low1 / 1e9, volume * high1 / 1e9 ]
+				},
+				scope3: {
+					co2: volume * factor / 1e9,
+					range: [ volume * low / 1e9, volume * high / 1e9 ]
+				}
 			}
 		} catch( e ) {
 			throw new Error( "While looking for " + unit + " -> kgco2e conversion:\n" + e.message )

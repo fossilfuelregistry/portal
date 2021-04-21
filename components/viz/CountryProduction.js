@@ -7,10 +7,11 @@ import { Alert } from "antd"
 import { textsSelector, useStore } from "lib/zustandProvider"
 import { useUnitConversionGraph } from "./UnitConverter"
 import { GQL_sources } from "queries/general"
+import { getFuelCO2 } from "./util"
 
 const DEBUG = false
 
-export default function CountryProduction( { country, fossilFuelType, sources, grades, onGrades, onSources } ) {
+export default function CountryProduction( { country, fossilFuelType, sources, onSources } ) {
 	const { co2FromVolume } = useUnitConversionGraph()
 	const texts = useStore( textsSelector )
 	const [ limits, set_limits ] = useState()
@@ -32,14 +33,12 @@ export default function CountryProduction( { country, fossilFuelType, sources, g
 		const newLimits = production.reduce( ( limits, r ) => {
 			limits.firstYear = ( limits.firstYear === undefined || r.year < limits.firstYear ) ? r.year : limits.firstYear
 			limits.lastYear = ( limits.lastYear === undefined || r.year > limits.lastYear ) ? r.year : limits.lastYear
-			limits.grades = Object.assign( { [ r.grade ]: false }, limits.grades ?? {} )
 			limits.sources[ r.sourceId ] = allSources.find( s => s.sourceId === r.sourceId )
 			return limits
 		}, { sources: [] } )
 
 		DEBUG && console.log( { newLimits } )
 		set_limits( newLimits )
-		onGrades && onGrades( newLimits.grades )
 		onSources && onSources( newLimits.sources )
 	}, [ production.length ] )
 
@@ -52,33 +51,41 @@ export default function CountryProduction( { country, fossilFuelType, sources, g
 
 	const scaleValues = { sync: true, nice: true }
 
-	DEBUG && console.log( 'CountryProduction', { fossilFuelType, firstYear, lastYear, grades, sources, scaleValues } )
+	DEBUG && console.log( 'CountryProduction', { fossilFuelType, firstYear, lastYear, sources, scaleValues } )
 
 	let datasets
-	try{
+	try {
 		datasets = sources.filter( s => s?.enabled ).map( source => {
 			DEBUG && console.log( source )
 			return {
 				source,
 				data: production
-					.filter( r => r.fossilFuelType === fossilFuelType && grades?.[ r.grade ] === true && source.sourceId === r.sourceId )
+					.filter( r => r.fossilFuelType === fossilFuelType && source.sourceId === r.sourceId )
 					.map( r => {
 						const point = { year: r.year }
-						const co2 = co2FromVolume( r.volume, r.unit )
-						scaleValues.min = scaleValues.min ? Math.min( scaleValues.min, co2.value ) : co2.value
-						scaleValues.max = scaleValues.max ? Math.max( scaleValues.max, co2.value ) : co2.value
+						const co2 = co2FromVolume( r )
+						const co2Total = getFuelCO2( co2, 2 )
+						scaleValues.min = scaleValues.min ? Math.min( scaleValues.min, co2Total ) : co2Total
+						scaleValues.max = scaleValues.max ? Math.max( scaleValues.max, co2Total ) : co2Total
 						if( r.projection ) {
-							point[ 'co2_' + source.name + '_projection' ] = co2.value
-							point[ 'co2_span_' + source.name + '_projection' ] = co2.range
+							point[ 'co2_' + source.name + '_projection' ] = co2Total
+							point[ 'co2_span_' + source.name + '_projection' ] = [
+								co2.scope1.range[ 0 ] + co2.scope3.range[ 0 ],
+								co2.scope1.range[ 1 ] + co2.scope3.range[ 1 ]
+							]
 						} else {
-							point[ 'co2_' + source.name ] = co2.value
-							point[ 'co2_span_' + source.name ] = co2.range
+							point[ 'co2_' + source.name ] = co2Total
+							point[ 'co2_span_' + source.name ] = [
+								co2.scope1.range[ 0 ] + co2.scope3.range[ 0 ],
+								co2.scope1.range[ 1 ] + co2.scope3.range[ 1 ]
+							]
 						}
 						return point
 					} )
 			}
 		} )
 	} catch( e ) {
+		console.log( e )
 		return <Alert message="Error during unit conversion" description={e.message} showIcon type="error"/>
 	}
 

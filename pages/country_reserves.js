@@ -46,12 +46,13 @@ export default function CountryReservesPage() {
 							<FossilFuelTypeSelector country={country} onChange={set_fossilFuelType}/>
 						</Col>
 
+						{( allSources.length>0 ) &&
 						<Col xs={24} sm={12} md={8} lg={6}>
 							<Row>
 								{allSources.map( source => (
-									<Col xs={6} key={source.sourceId}>
+									<Col xs={6} key={source?.sourceId}>
 										<Checkbox
-											checked={selectedSources[ source.sourceId ]?.enabled}
+											checked={selectedSources[ source?.sourceId ]?.enabled}
 											onChange={
 												e => set_selectedSources(
 													s => {
@@ -62,12 +63,12 @@ export default function CountryReservesPage() {
 												)
 											}
 										>
-											{source.name}
+											{source?.name}
 										</Checkbox>
 									</Col>
 								) )}
 							</Row>
-						</Col>
+						</Col>}
 
 						<Col xs={24} sm={12} md={8} lg={6}>
 							<Row>
