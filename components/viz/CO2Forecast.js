@@ -17,7 +17,7 @@ const DEBUG = false
 function CO2Forecast( {
 	country, source, grades, onGrades, onSources, projection, estimate, estimate_prod
 } ) {
-	const { co2FromVolume, setGWP } = useUnitConversionGraph( gwp )
+	const { co2FromVolume, setGWP } = useUnitConversionGraph(  )
 	const { getText } = useText()
 	const [ limits, set_limits ] = useState()
 	const [ gwp, set_gwp ] = useState()
