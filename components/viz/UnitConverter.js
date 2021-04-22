@@ -121,7 +121,6 @@ export const useUnitConversionGraph = () => {
 
 	const co2FromVolume = ( { volume, unit, fossilFuelType }, log ) => {
 		if( !graphGas || !graphOil ) return { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } }
-		console.log( { gwp } )
 		try {
 			// Scope 1
 			const gwpUnit = gwp ? 'kgco2e_100' : 'kgco2e_20'

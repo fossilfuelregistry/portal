@@ -4,11 +4,11 @@ import { AreaStack, Bar, LinePath } from '@visx/shape'
 import { AxisBottom, AxisRight } from '@visx/axis'
 import { curveLinear } from '@visx/curve'
 import { scaleLinear } from '@visx/scale'
-import { defaultStyles, TooltipWithBounds, withTooltip } from '@visx/tooltip'
+import { withTooltip } from '@visx/tooltip'
 import { localPoint } from '@visx/event'
-import { bisector, max, min } from 'd3-array'
+import { bisector, max } from 'd3-array'
 import { withParentSize } from "@visx/responsive"
-import { getCO2, getFuelCO2, getFuelScopeCO2, makeEstimate } from "./util"
+import { getCO2, getFuelCO2 } from "./util"
 import useText from "lib/useText"
 
 const DEBUG = true
@@ -40,7 +40,7 @@ function CO2ForecastGraphBase( {
 
 	const getFutureReserve = useCallback( ( d, fuel ) => {
 		//console.log( d.year, d, d.future[ projectionType ].reserves.oil.co2 )
-		return getFuelCO2( d.future[ projectionType ].reserves[ fuel ], estimate )
+		return getFuelCO2( d.future.reserves.p[ fuel ], estimate ) + getFuelCO2( d.future.reserves.c[ fuel ], estimate )
 	}, [ projectionType, estimate ] )
 
 	// scale
@@ -120,10 +120,12 @@ function CO2ForecastGraphBase( {
 					/>
 
 					<AreaStack
-						keys={[ 'oil_projection', 'gas_projection' ]}
+						keys={[ 'oil_c', 'oil_p', 'gas_c', 'gas_p' ]}
 						data={data.map( d => ( {
-							oil_projection: getFuelCO2( d.projection.oil, estimate_prod ),
-							gas_projection: getFuelCO2( d.projection.gas, estimate_prod ),
+							oil_p: getFuelCO2( d.future.reserves.production?.p.oil, estimate_prod ),
+							oil_c: getFuelCO2( d.future.reserves.production?.c.oil, estimate_prod ),
+							gas_p: getFuelCO2( d.future.reserves.production?.p.gas, estimate_prod ),
+							gas_c: getFuelCO2( d.future.reserves.production?.c.gas, estimate_prod ),
 							year: d.year
 						} ) )}
 						x={d => {
@@ -142,8 +144,10 @@ function CO2ForecastGraphBase( {
 										d={path( stack ) || ''}
 										stroke="transparent"
 										fill={{
-											oil_projection: "#b4c8a8",
-											gas_projection: "#f6edbd"
+											oil_p: "#b4c8a8",
+											gas_c: "#edbb8a",
+											gas_p: "#f6edbd",
+											oil_c: "#de8a5a"
 										}[ stack.key ]}
 									/>
 								)
@@ -254,6 +258,62 @@ function CO2ForecastGraphBase( {
 
 			</svg>
 
+
+			<style jsx>{`
+              :global(path.projection) {
+                stroke: #333333;
+                stroke-width: 2;
+                stroke-dasharray: 0;
+                stroke-opacity: 0.2;
+              }
+
+              :global(path.reserves) {
+                stroke-width: 3;
+              }
+
+              :global(path.projection.reserves) {
+                stroke-dasharray: 4;
+              }
+
+              :global(path.reserves.oil) {
+                stroke: #b1663d;
+              }
+
+              :global(path.reserves.gas) {
+                stroke: #4382b3;
+              }
+			`}
+			</style>
+		</div> )
+}
+
+export default withParentSize( withTooltip( CO2ForecastGraphBase ) )
+
+/*
+	const getOilReservesCO2 = d => makeEstimate( d.reserves.oil.scope1, estimate )
+		+ makeEstimate( d.reserves.oil.scope3, estimate )
+	const getGasReservesCO2 = d => makeEstimate( d.reserves.gas.scope1, estimate )
+		+ makeEstimate( d.reserves.gas.scope3, estimate )
+
+	const getFutureReserve = useCallback( ( d, fuel ) => {
+		//console.log( d.year, d, d.future[ projection ].reserves.oil.co2 )
+		return getFuelCO2( d.future[ projection ].reserves[ fuel ], estimate )
+	}, [ projection, estimate ] )
+
+	const reservesScale = scaleLinear( {
+		range: [ height - 30, 0 ],
+		domain: [ 0, maxCO2.reserves * 0.7 ],
+	} )
+
+
+
+					<AxisLeft
+						scale={reservesScale}
+						numTicks={parentWidth > 520 ? 8 : 4}
+						tickFormat={x => x.toFixed( 1 ).toString()}
+						left={parentWidth - margin.left}
+					/>
+
 			{tip && (
 				<TooltipWithBounds
 					key={Math.random()}
@@ -337,60 +397,5 @@ function CO2ForecastGraphBase( {
 
 				</TooltipWithBounds>
 			)}
-
-			<style jsx>{`
-              :global(path.projection) {
-                stroke: #333333;
-                stroke-width: 2;
-                stroke-dasharray: 0;
-                stroke-opacity: 0.2;
-              }
-
-              :global(path.reserves) {
-                stroke-width: 3;
-              }
-
-              :global(path.projection.reserves) {
-                stroke-dasharray: 4;
-              }
-
-              :global(path.reserves.oil) {
-                stroke: #b1663d;
-              }
-
-              :global(path.reserves.gas) {
-                stroke: #4382b3;
-              }
-			`}
-			</style>
-		</div> )
-}
-
-export default withParentSize( withTooltip( CO2ForecastGraphBase ) )
-
-/*
-	const getOilReservesCO2 = d => makeEstimate( d.reserves.oil.scope1, estimate )
-		+ makeEstimate( d.reserves.oil.scope3, estimate )
-	const getGasReservesCO2 = d => makeEstimate( d.reserves.gas.scope1, estimate )
-		+ makeEstimate( d.reserves.gas.scope3, estimate )
-
-	const getFutureReserve = useCallback( ( d, fuel ) => {
-		//console.log( d.year, d, d.future[ projection ].reserves.oil.co2 )
-		return getFuelCO2( d.future[ projection ].reserves[ fuel ], estimate )
-	}, [ projection, estimate ] )
-
-	const reservesScale = scaleLinear( {
-		range: [ height - 30, 0 ],
-		domain: [ 0, maxCO2.reserves * 0.7 ],
-	} )
-
-
-
-					<AxisLeft
-						scale={reservesScale}
-						numTicks={parentWidth > 520 ? 8 : 4}
-						tickFormat={x => x.toFixed( 1 ).toString()}
-						left={parentWidth - margin.left}
-					/>
 
  */

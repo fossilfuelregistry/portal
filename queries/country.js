@@ -6,15 +6,7 @@ query countryReserves($iso3166: String!) {
   	condition: { iso3166: $iso3166 }
   	orderBy: YEAR_ASC
   ) {
-    nodes {
-      iso3166
-      fossilFuelType
-      grade
-      sourceId
-      unit
-      volume
-      year
-    }
+    nodes { id iso3166 fossilFuelType grade sourceId unit volume quality year }
   }
 }`
 
@@ -25,14 +17,6 @@ query countryProductions($iso3166: String!) {
     filter: {fossilFuelType: {in: ["oil", "gas"]}}
   	orderBy: YEAR_ASC
   ) {
-    nodes {
-      iso3166
-      fossilFuelType
-      sourceId
-      unit
-      volume
-      year
-      projection
-    }
+    nodes { id iso3166 fossilFuelType sourceId unit volume year projection }
   }
 }`

@@ -1,6 +1,9 @@
 import clone from 'clone'
+import { max } from 'd3-array'
+import _get from 'lodash/get'
+import _set from 'lodash/set'
 
-const DEBUG = false
+const DEBUG = true
 
 const emptyPoint = {
 	production: {
@@ -17,13 +20,11 @@ const emptyPoint = {
 	},
 	history: {},
 	future: {
+		reserves: {},
+		production: {},
 		authority: {
 			source: '',
 			production: {
-				oil: { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } },
-				gas: { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } }
-			},
-			reserves: {
 				oil: { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } },
 				gas: { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } }
 			}
@@ -32,18 +33,10 @@ const emptyPoint = {
 			production: {
 				oil: { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } },
 				gas: { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } }
-			},
-			reserves: {
-				oil: { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } },
-				gas: { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } }
 			}
 		},
 		decline: {
 			production: {
-				oil: { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } },
-				gas: { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } }
-			},
-			reserves: {
 				oil: { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } },
 				gas: { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } }
 			}
@@ -61,57 +54,56 @@ export const addCO2 = ( datapoint, fuel, deltaCO2 ) => {
 	//console.log( fuel, datapoint[ fuel ], deltaCO2 )
 }
 
-const _accumulate = ( datapoint, production, estimate_prod ) => {
-	const prodOil1 = makeEstimate( production.oil.scope1, estimate_prod )
-	const prodOil3 = makeEstimate( production.oil.scope3, estimate_prod )
-	const prodGas1 = makeEstimate( production.gas.scope1, estimate_prod )
-	const prodGas3 = makeEstimate( production.gas.scope3, estimate_prod )
-	datapoint.gas.scope1.co2 += prodGas1
-	datapoint.gas.scope3.co2 += prodGas3
-	datapoint.oil.scope1.co2 += prodOil1
-	datapoint.oil.scope3.co2 += prodOil3
-	datapoint.gas.scope1.range[ 0 ] += prodGas1
-	datapoint.gas.scope1.range[ 1 ] += prodGas1
-	datapoint.gas.scope3.range[ 0 ] += prodGas3
-	datapoint.gas.scope3.range[ 1 ] += prodGas3
-	datapoint.oil.scope1.range[ 0 ] += prodOil1
-	datapoint.oil.scope1.range[ 1 ] += prodOil1
-	datapoint.oil.scope3.range[ 0 ] += prodOil3
-	datapoint.oil.scope3.range[ 1 ] += prodOil3
+const valuePaths = [
+	'oil.scope1.co2', 'oil.scope1.range[0]', 'oil.scope1.range[1]',
+	'oil.scope3.co2', 'oil.scope3.range[0]', 'oil.scope3.range[1]',
+	'gas.scope1.co2', 'gas.scope1.range[0]', 'gas.scope1.range[1]',
+	'gas.scope3.co2', 'gas.scope3.range[0]', 'gas.scope3.range[1]',
+]
+
+const _subtractProductionFromReserves = ( reserve, production ) => {
+	const result = { p: {}, c: {}, production: { p: {}, c: {} } }
+	for( let path of valuePaths ) {
+		let pReserve = _get( reserve.p, path )
+		let cReserve = _get( reserve.c, path )
+		let prod = _get( production, path )
+		//console.log( pReserve, cReserve, prod )
+
+		pReserve -= prod
+
+		if( pReserve < 0 ) {
+			// Grade p reserves depleted
+			const remain = -pReserve
+			pReserve = 0
+			cReserve -= remain
+			if( cReserve < 0 ) {
+				// Grade c reserves also depleted
+				_set( result.production.p, path, 0 )
+				_set( result.production.c, path, remain + cReserve ) // final bits...
+				cReserve = 0
+				//console.log( 'p', 0, 'c', remain + cReserve )
+			} else {
+				// We are producing from c
+				_set( result.production.p, path, prod - remain )
+				_set( result.production.c, path, remain )
+				//console.log( 'p', prod - remain, 'c', remain )
+			}
+		} else {
+			// We are producing from p
+			_set( result.production.p, path, prod )
+			_set( result.production.c, path, 0 )
+			//console.log( 'p', prod, 'c', 0 )
+		}
+
+		_set( result.p, path, pReserve )
+		_set( result.c, path, cReserve )
+	}
+	return result
 }
 
-const _diff = ( datapoint, production ) => {
-	const zero = value => Math.max( 0, value )
-
-	return {
-		oil: {
-			scope1: {
-				co2: zero( datapoint.oil.scope1.co2 - production.oil.scope1.co2 ),
-				range: [
-					zero( datapoint.oil.scope1.range[ 0 ] - production.oil.scope1.range[ 0 ] ),
-					zero( datapoint.oil.scope1.range[ 1 ] - production.oil.scope1.range[ 1 ] ) ]
-			},
-			scope3: {
-				co2: zero( datapoint.oil.scope3.co2 - production.oil.scope3.co2 ),
-				range: [
-					zero( datapoint.oil.scope3.range[ 0 ] - production.oil.scope3.range[ 0 ] ),
-					zero( datapoint.oil.scope3.range[ 1 ] - production.oil.scope3.range[ 1 ] ) ]
-			}
-		},
-		gas: {
-			scope1: {
-				co2: zero( datapoint.gas.scope1.co2 - production.gas.scope1.co2 ),
-				range: [
-					zero( datapoint.gas.scope1.range[ 0 ] - production.gas.scope1.range[ 0 ] ),
-					zero( datapoint.gas.scope1.range[ 1 ] - production.gas.scope1.range[ 1 ] ) ]
-			},
-			scope3: {
-				co2: zero( datapoint.gas.scope3.co2 - production.gas.scope3.co2 ),
-				range: [
-					zero( datapoint.gas.scope3.range[ 0 ] - production.gas.scope3.range[ 0 ] ),
-					zero( datapoint.gas.scope3.range[ 1 ] - production.gas.scope3.range[ 1 ] ) ]
-			}
-		}
+const _multiply = ( datapoint, factor ) => {
+	for( let path of valuePaths ) {
+		_set( datapoint, path, _get( datapoint, path ) * factor )
 	}
 }
 
@@ -128,6 +120,7 @@ export function getFuelScopeCO2( datapoint, estimate ) {
 
 export function getFuelCO2( datapoint, estimate ) {
 	//console.log( { datapoint } )
+	if( !datapoint ) return 0
 	return getFuelScopeCO2( datapoint.scope1, estimate ) + getFuelScopeCO2( datapoint.scope3, estimate )
 }
 
@@ -137,7 +130,10 @@ export function getCO2( datapoint, estimate ) {
 	return getFuelCO2( datapoint.oil, estimate ) + getFuelCO2( datapoint.gas, estimate )
 }
 
-export function filteredCombinedDataSet( production, reserves, fossilFuelTypes, sourceId, grades, futureSource, co2FromVolume ) {
+export function filteredCombinedDataSet(
+	production, reserves, fossilFuelTypes, sourceId, grades, futureSource,
+	_projection, estimate, estimate_prod,
+	co2FromVolume ) {
 
 	const dataset = []
 	let point = clone( emptyPoint )
@@ -173,58 +169,57 @@ export function filteredCombinedDataSet( production, reserves, fossilFuelTypes, 
 
 	dataset.push( point )
 
-	// Now try to merge reserves into the dataset.
+	// Find latest reserves estimate from highest quality source.
 
-	let index = 0
-	const filteredReserves = reserves
-		.filter( data => {
-			if( grades && !grades?.[ data.grade ] === true ) return false
-			if( sourceId !== data.sourceId ) return false
-			return true
-		} )
+	const qualitySources = reserves.reduce( ( qualities, datapoint ) => {
+		if( qualities[ datapoint.quality ] )
+			qualities[ datapoint.quality ][ datapoint.sourceId ] = true
+		else
+			qualities[ datapoint.quality ] = { [ datapoint.sourceId ]: true }
+		return qualities
+	}, {} )
 
-	dataset
-		.forEach( data => {
-			if( data.year < filteredReserves[ index ]?.year ) return
+	const qualities = Object.keys( qualitySources ).map( q => parseInt( q ) )
 
-			while( filteredReserves[ index ]?.year < data.year && index < filteredReserves.length ) index++
+	const best = max( qualities )
+	const bestSources = Object.keys( qualitySources[ best ] ).map( q => parseInt( q ) )
 
-			while( filteredReserves[ index ]?.year === data.year && index < filteredReserves.length ) {
-				const reserve = filteredReserves[ index ]
-				const co2 = co2FromVolume( reserve, false, reserve.year === 3018 )
-				addCO2( data.reserves, reserve.fossilFuelType, co2 )
-				if( reserve.year === 3018 ) console.log( { reserve, acc: data.reserves, co2 } )
-				index++
-			}
-		} )
+	const years = Object.keys( reserves
+		.filter( datapoint => bestSources.includes( datapoint.sourceId ) )
+		.reduce( ( years, datapoint ) => {
+			years[ datapoint.year ] = true
+			return years
+		}, {} ) ).map( y => parseInt( y ) )
 
-	DEBUG && console.log( 'filteredCombinedDataSet',
-		{
-			fossilFuelTypes,
-			source: sourceId,
-			grades,
-			in: production.length,
-			combined: dataset.length,
-			dataset
-		}
-	)
+	const lastYearOfBestReserve = max( years )
+	const bestReserves = reserves.filter( datapoint => datapoint.year === lastYearOfBestReserve && datapoint.sourceId === bestSources[ 0 ] )
 
+	const initialReserves = {
+		p: clone( emptyPoint.reserves ),
+		c: clone( emptyPoint.reserves )
+	}
+
+	bestReserves.forEach( r => {
+		if( r.grade[ 1 ] === 'p' )
+			addCO2( initialReserves.p, r.fossilFuelType, co2FromVolume( r ) )
+		else if( r.grade[ 1 ] === 'c' )
+			addCO2( initialReserves.c, r.fossilFuelType, co2FromVolume( r ) )
+		else
+			throw new Error( "Encontered an unknown reserves grade: " + r.grade )
+	} )
+
+	//DEBUG && console.log( { qualitySources, qualities, best, bestSources, years, lastYearOfBestReserve, bestReserves, initialReserves } )
+	//DEBUG && console.log( 'filteredCombinedDataSet', { fossilFuelTypes, source: sourceId, grades, in: production.length, combined: dataset.length, dataset } )
 	//DEBUG && console.log( JSON.stringify( dataset.find( d => d.year === 2022 ), null, 2 ) )
-
-	return dataset
-}
-
-export function dataSetEstimateFutures( dataset, _projection, estimate, estimate_prod ) {
 
 	let projection = _projection
 	if( _projection > 0 ) projection = 'authority'
-	DEBUG && console.log( 'dataSetEstimateFutures', _projection, projection )
+	DEBUG && console.log( 'Estimate Futures for', _projection, projection )
 
 	let declinedValues
 	let lastOilDataIndex, lastGasDataIndex
-	let oilDepletedYear, gasDepletedYear
 
-	let sumOfProjectedProduction = clone( emptyPoint.future )
+	// Find last production year
 
 	dataset?.forEach( ( dataYear, index ) => {
 		if( dataYear.production.oil.scope3.co2 > 0 ) {
@@ -256,15 +251,16 @@ export function dataSetEstimateFutures( dataset, _projection, estimate, estimate
 	let lastProductionIndex = Math.max( lastOilDataIndex, lastGasDataIndex )
 	const lastProduction = dataset[ lastProductionIndex ]
 
+	// Initialize projected production and reserves
+
 	declinedValues = clone( emptyPoint )
 	declinedValues.future.decline.production = clone( lastProduction.production )
-	lastProduction.future.authority.reserves.oil = clone( lastProduction.reserves.oil )
-	lastProduction.future.stable.reserves.oil = clone( lastProduction.reserves.oil )
-	lastProduction.future.decline.reserves.oil = clone( lastProduction.reserves.oil )
 
-	DEBUG && console.log( { lastProduction, lastOilDataIndex, lastGasDataIndex, declinedValues } )
+	lastProduction.future.reserves = clone( initialReserves )
+	//DEBUG && console.log( JSON.stringify( initialReserves ) )
+	let remainingReserves = clone( initialReserves )
 
-	const zeroProd = { co2: 0, range: [ 0, 0 ] }
+	//DEBUG && console.log( { lastProduction, lastOilDataIndex, lastGasDataIndex, declinedValues } )
 
 	for( let year = lastProduction.year; year <= 2040; year++ ) {
 		//console.log( { year, lastDataIndex } )
@@ -277,73 +273,38 @@ export function dataSetEstimateFutures( dataset, _projection, estimate, estimate
 		currentYearData.future.stable.production = clone( dataset[ lastOilDataIndex ].production )
 		currentYearData.future.decline.production = clone( declinedValues.future.decline.production )
 
-		declinedValues.future.decline.production.oil.scope1.co2 *= 0.9
-		declinedValues.future.decline.production.oil.scope3.co2 *= 0.9
-		declinedValues.future.decline.production.oil.scope1.range[ 0 ] *= 0.9
-		declinedValues.future.decline.production.oil.scope1.range[ 1 ] *= 0.9
-		declinedValues.future.decline.production.oil.scope3.range[ 0 ] *= 0.9
-		declinedValues.future.decline.production.oil.scope3.range[ 1 ] *= 0.9
-		declinedValues.future.decline.production.gas.scope1.co2 *= 0.9
-		declinedValues.future.decline.production.gas.scope3.co2 *= 0.9
-		declinedValues.future.decline.production.gas.scope1.range[ 0 ] *= 0.9
-		declinedValues.future.decline.production.gas.scope1.range[ 1 ] *= 0.9
-		declinedValues.future.decline.production.gas.scope3.range[ 0 ] *= 0.9
-		declinedValues.future.decline.production.gas.scope3.range[ 1 ] *= 0.9
+		_multiply( declinedValues.future.decline.production, 0.9 )
 
 		// Calculate remaining reserves
 
-		Object.keys( currentYearData.future ).forEach( projected => {
+		remainingReserves = _subtractProductionFromReserves(
+			remainingReserves,
+			currentYearData.future[ projection ].production
+		)
 
-			_accumulate(
-				sumOfProjectedProduction[ projected ].production,
-				currentYearData.future[ projected ].production,
-				estimate_prod )
+		currentYearData.future.reserves = clone( remainingReserves )
 
-			currentYearData.future[ projected ].reserves = _diff(
-				lastProduction.reserves,
-				sumOfProjectedProduction[ projected ].production )
+		currentYearData.projection = clone( currentYearData.future[ projection ].production )
 
-			if( projected === projection ) {
-				const remainingOil = getFuelCO2( currentYearData.future[ projected ].reserves.oil, estimate )
-				if( remainingOil === 0 && oilDepletedYear === undefined ) {
-					console.log( 'OIL DEPLETED', year, _projection )
-					oilDepletedYear = year
-				}
-
-				const remainingGas = getFuelCO2( currentYearData.future[ projected ].reserves.gas, estimate )
-				if( remainingGas === 0 && gasDepletedYear === undefined ) {
-					console.log( 'GAS DEPLETED', year, _projection )
-					gasDepletedYear = year
-				}
-
-				currentYearData.projection = clone( currentYearData.future[ projected ].production )
-
-				if( year >= gasDepletedYear ) {
-					currentYearData.projection.gas.scope1 = zeroProd
-					currentYearData.projection.gas.scope3 = zeroProd
-				}
-
-				if( year >= oilDepletedYear ) {
-					currentYearData.projection.oil.scope1 = zeroProd
-					currentYearData.projection.oil.scope3 = zeroProd
-				}
-			}
-		} )
-
-		if( DEBUG && currentYearData.year === 2030 ) {
+		if( DEBUG && currentYearData.year === 3030 ) {
 			console.log( {
 				lastProduction,
-				declinedValues: declinedValues,
-				sumOfProjectedProduction
+				declinedValues: declinedValues
 			} )
-			//console.log( JSON.stringify( currentYearData, null, 2 ) )
+			console.log( JSON.stringify( currentYearData.future.reserves.production.p, null, 2 ) )
+			console.log(
+				year,
+				currentYearData.future.reserves.p.oil.scope1.co2,
+				currentYearData.future.reserves.p.gas.scope1.co2,
+				currentYearData.future.reserves.c.oil.scope1.co2,
+				currentYearData.future.reserves.c.gas.scope1.co2
+			)
 		}
 
 		lastProductionIndex++
 	}
 
-
-	DEBUG && console.log( 'dataSetEstimateFutures', { dataset, sumOfProjectedProduction } )
+	DEBUG && console.log( 'dataSetEstimateFutures', { dataset } )
 	//console.log( JSON.stringify( dataset.find( d => d.year === 2018 )?.production, null, 2 ) )
 
 	return dataset

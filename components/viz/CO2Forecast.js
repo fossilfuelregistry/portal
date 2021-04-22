@@ -22,22 +22,23 @@ function CO2Forecast( {
 	const [ limits, set_limits ] = useState()
 	const [ gwp, set_gwp ] = useState()
 
+
 	const { data: sourcesData, loading: loadingSources, error: errorLoadingSources }
 		= useQuery( GQL_sources )
-
 	const allSources = sourcesData?.sources?.nodes ?? []
+
 
 	const { data: productionData, loading: loadingProduction, error: errorLoadingProduction }
 		= useQuery( GQL_countryProductionByIso,
 			{ variables: { iso3166: country }, skip: !country } )
-
 	const production = productionData?.countryProductions?.nodes ?? []
+
 
 	const { data: reservesData, loading: loadingReserves, error: errorLoadingReserves }
 		= useQuery( GQL_countryReservesByIso,
 			{ variables: { iso3166: country }, skip: !country } )
-
 	const reserves = reservesData?.countryReserves?.nodes ?? []
+
 
 	const sourceId = source?.sourceId
 	console.log( { limits, source } )
@@ -48,9 +49,8 @@ function CO2Forecast( {
 		try {
 			co2 = filteredCombinedDataSet( production, reserves, [ 'oil', 'gas' ],
 				sourceId, grades, allSources.find( s => s.sourceId === projection ),
+				projection, estimate, estimate_prod,
 				co2FromVolume )
-
-			dataSetEstimateFutures( co2, projection, estimate, estimate_prod )
 		} catch( e ) {
 			console.log( e )
 			notification.warning( {
