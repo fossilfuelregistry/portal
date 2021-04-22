@@ -1,31 +1,34 @@
-import React, { useEffect, useMemo, useState } from "react"
+import React, { useContext, useEffect, useMemo, useState } from "react"
 import { useQuery } from "@apollo/client"
 import GraphQLStatus from "components/GraphQLStatus"
 import { GQL_countryProductionByIso, GQL_countryReservesByIso } from "queries/country"
 import { Alert, Col, notification, Row } from "antd"
 import { useUnitConversionGraph } from "./UnitConverter"
 import { GQL_sources } from "queries/general"
-import { dataSetEstimateFutures, filteredCombinedDataSet } from "./util"
+import useCalculations from "./util"
 import CO2ForecastGraph from "./CO2ForecastGraph"
 import useText from "lib/useText"
 import InputDataGraph from "./InputDataGraph"
 import InputSummary from "./InputSummary"
 import FutureSummary from "./FutureSummary"
+import { StoreContext } from "lib/zustandProvider"
 
 const DEBUG = false
 
 function CO2Forecast( {
 	country, source, grades, onGrades, onSources, projection, estimate, estimate_prod
 } ) {
-	const { co2FromVolume, setGWP } = useUnitConversionGraph(  )
+	const store = useContext( StoreContext )
+	const { co2FromVolume, setGWP } = useUnitConversionGraph()
 	const { getText } = useText()
 	const [ limits, set_limits ] = useState()
 	const [ gwp, set_gwp ] = useState()
-
+	const { filteredCombinedDataSet } = useCalculations()
 
 	const { data: sourcesData, loading: loadingSources, error: errorLoadingSources }
 		= useQuery( GQL_sources )
 	const allSources = sourcesData?.sources?.nodes ?? []
+	store.setState( { allSources } )
 
 
 	const { data: productionData, loading: loadingProduction, error: errorLoadingProduction }

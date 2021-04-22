@@ -267,6 +267,13 @@ function CO2ForecastGraphBase( {
                 stroke-opacity: 0.2;
               }
 
+              :global(path.projection.auth) {
+                stroke: #333333;
+                stroke-width: 3;
+                stroke-dasharray: 0;
+                stroke-opacity: 0.4;
+              }
+
               :global(path.reserves) {
                 stroke-width: 3;
               }

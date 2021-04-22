@@ -2,11 +2,12 @@ import React, { useState } from "react"
 import TopNavigation from "components/navigation/TopNavigation"
 import getConfig from 'next/config'
 import CountrySelector from "components/navigation/CountrySelector"
-import { Checkbox, Col, Radio, Row, Slider } from "antd"
+import { Col, Radio, Row, Slider } from "antd"
 import { useRouter } from "next/router"
 import CO2Forecast from "components/viz/CO2Forecast"
 import useText from "lib/useText"
 import { NextSeo } from "next-seo"
+import { useStore } from "../lib/zustandProvider"
 
 const DEBUG = false
 
@@ -30,6 +31,11 @@ export default function CO2ForecastPage() {
 	const [ productionSources, set_productionSources ] = useState( [] )
 	const [ futureSources, set_futureSources ] = useState( [] )
 	const [ selectedSource, set_selectedSource ] = useState()
+	const bestReservesSourceId = useStore( state => state.bestReservesSourceId )
+	const lastYearOfBestReserve = useStore( state => state.lastYearOfBestReserve )
+	const allSources = useStore( state => state.allSources )
+
+	const reservesSource = allSources?.find( s => s.sourceId === bestReservesSourceId ) ?? {}
 
 	return (
 		<>
@@ -89,22 +95,9 @@ export default function CO2ForecastPage() {
 
 						<Col xs={12} lg={3}>
 							<h3>{getText( 'reserves' )}</h3>
-							<Row gutter={[ 12, 12 ]}>
-								{Object.keys( grades ?? {} ).map( grade => (
-									<Col xs={24} key={grade}>
-										<Checkbox
-											checked={grades[ grade ]}
-											onChange={
-												e => set_grades(
-													g => ( { ...g, [ grade ]: e.target.checked } )
-												)
-											}
-										>
-											{grade}
-										</Checkbox>
-									</Col>
-								) )}
-							</Row>
+							{reservesSource.name}
+							&nbsp;
+							({lastYearOfBestReserve})
 						</Col>
 
 						<Col xs={12} lg={5}>

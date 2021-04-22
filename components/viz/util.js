@@ -2,6 +2,8 @@ import clone from 'clone'
 import { max } from 'd3-array'
 import _get from 'lodash/get'
 import _set from 'lodash/set'
+import { useContext } from "react"
+import { StoreContext } from "lib/zustandProvider"
 
 const DEBUG = true
 
@@ -44,7 +46,7 @@ const emptyPoint = {
 	}
 }
 
-export const addCO2 = ( datapoint, fuel, deltaCO2 ) => {
+export function addCO2( datapoint, fuel, deltaCO2 ) {
 	datapoint[ fuel ].scope1.co2 += deltaCO2.scope1.co2
 	datapoint[ fuel ].scope3.co2 += deltaCO2.scope3.co2
 	datapoint[ fuel ].scope1.range[ 0 ] += deltaCO2.scope1.range[ 0 ]
@@ -130,182 +132,190 @@ export function getCO2( datapoint, estimate ) {
 	return getFuelCO2( datapoint.oil, estimate ) + getFuelCO2( datapoint.gas, estimate )
 }
 
-export function filteredCombinedDataSet(
-	production, reserves, fossilFuelTypes, sourceId, grades, futureSource,
-	_projection, estimate, estimate_prod,
-	co2FromVolume ) {
+export default function useCalculations() {
+	const store = useContext( StoreContext )
 
-	const dataset = []
-	let point = clone( emptyPoint )
+	function filteredCombinedDataSet(
+		production, reserves, fossilFuelTypes, sourceId, grades, futureSource,
+		_projection, estimate, estimate_prod,
+		co2FromVolume ) {
 
-	if( production?.length < 1 ) return
+		const dataset = []
+		let point = clone( emptyPoint )
 
-	production
-		.filter( data => {
-			if( fossilFuelTypes && !fossilFuelTypes.includes( data.fossilFuelType ) ) return false
-			//console.log( { data } )
-			if( sourceId !== data.sourceId && !data.projection/*futureSource?.sourceId !== data.sourceId*/ ) return false
-			return true
-		} )
-		.forEach( data => {
-			//console.log( JSON.stringify( data ) )
-			if( point.year && point.year !== data.year ) {
-				dataset.push( point )
-				point = clone( emptyPoint )
-			}
+		if( production?.length < 1 ) return
 
-			point.year = data.year
-			if( data.year === 3030 ) console.log( { data } )
-			const co2 = co2FromVolume( data, data.year === 3030 )
-
-			if( data.projection ) {
-				//console.log( point.future.authority.production, data.fossilFuelType, co2 )
-				addCO2( point.future.authority.production, data.fossilFuelType, co2 )
-			} else {
-				addCO2( point.production, data.fossilFuelType, co2 )
-			}
-			return point
-		} )
-
-	dataset.push( point )
-
-	// Find latest reserves estimate from highest quality source.
-
-	const qualitySources = reserves.reduce( ( qualities, datapoint ) => {
-		if( qualities[ datapoint.quality ] )
-			qualities[ datapoint.quality ][ datapoint.sourceId ] = true
-		else
-			qualities[ datapoint.quality ] = { [ datapoint.sourceId ]: true }
-		return qualities
-	}, {} )
-
-	const qualities = Object.keys( qualitySources ).map( q => parseInt( q ) )
-
-	const best = max( qualities )
-	const bestSources = Object.keys( qualitySources[ best ] ).map( q => parseInt( q ) )
-
-	const years = Object.keys( reserves
-		.filter( datapoint => bestSources.includes( datapoint.sourceId ) )
-		.reduce( ( years, datapoint ) => {
-			years[ datapoint.year ] = true
-			return years
-		}, {} ) ).map( y => parseInt( y ) )
-
-	const lastYearOfBestReserve = max( years )
-	const bestReserves = reserves.filter( datapoint => datapoint.year === lastYearOfBestReserve && datapoint.sourceId === bestSources[ 0 ] )
-
-	const initialReserves = {
-		p: clone( emptyPoint.reserves ),
-		c: clone( emptyPoint.reserves )
-	}
-
-	bestReserves.forEach( r => {
-		if( r.grade[ 1 ] === 'p' )
-			addCO2( initialReserves.p, r.fossilFuelType, co2FromVolume( r ) )
-		else if( r.grade[ 1 ] === 'c' )
-			addCO2( initialReserves.c, r.fossilFuelType, co2FromVolume( r ) )
-		else
-			throw new Error( "Encontered an unknown reserves grade: " + r.grade )
-	} )
-
-	//DEBUG && console.log( { qualitySources, qualities, best, bestSources, years, lastYearOfBestReserve, bestReserves, initialReserves } )
-	//DEBUG && console.log( 'filteredCombinedDataSet', { fossilFuelTypes, source: sourceId, grades, in: production.length, combined: dataset.length, dataset } )
-	//DEBUG && console.log( JSON.stringify( dataset.find( d => d.year === 2022 ), null, 2 ) )
-
-	let projection = _projection
-	if( _projection > 0 ) projection = 'authority'
-	DEBUG && console.log( 'Estimate Futures for', _projection, projection )
-
-	let declinedValues
-	let lastOilDataIndex, lastGasDataIndex
-
-	// Find last production year
-
-	dataset?.forEach( ( dataYear, index ) => {
-		if( dataYear.production.oil.scope3.co2 > 0 ) {
-			lastOilDataIndex = index
-		}
-		if( dataYear.production.gas.scope3.co2 > 0 ) {
-			lastGasDataIndex = index
-		}
-	} )
-
-	if( !lastOilDataIndex ) {
-		console.log( '>>>>>>> No last Oil Production' )
-		return
-	}
-
-	// Extrapolate production so oil and gas end same year.
-
-	if( lastGasDataIndex > lastOilDataIndex ) {
-		for( let i = lastOilDataIndex + 1; i <= lastGasDataIndex; i++ ) {
-			dataset[ i ].production.oil = clone( dataset[ lastOilDataIndex ].production.oil )
-		}
-	}
-	if( lastGasDataIndex < lastOilDataIndex ) {
-		for( let i = lastGasDataIndex + 1; i <= lastOilDataIndex; i++ ) {
-			dataset[ i ].production.gas = clone( dataset[ lastGasDataIndex ].production.gas )
-		}
-	}
-
-	let lastProductionIndex = Math.max( lastOilDataIndex, lastGasDataIndex )
-	const lastProduction = dataset[ lastProductionIndex ]
-
-	// Initialize projected production and reserves
-
-	declinedValues = clone( emptyPoint )
-	declinedValues.future.decline.production = clone( lastProduction.production )
-
-	lastProduction.future.reserves = clone( initialReserves )
-	//DEBUG && console.log( JSON.stringify( initialReserves ) )
-	let remainingReserves = clone( initialReserves )
-
-	//DEBUG && console.log( { lastProduction, lastOilDataIndex, lastGasDataIndex, declinedValues } )
-
-	for( let year = lastProduction.year; year <= 2040; year++ ) {
-		//console.log( { year, lastDataIndex } )
-		if( !dataset[ lastProductionIndex ] ) {
-			dataset[ lastProductionIndex ] = clone( emptyPoint )
-			dataset[ lastProductionIndex ].year = year
-		}
-		let currentYearData = dataset[ lastProductionIndex ]
-
-		currentYearData.future.stable.production = clone( dataset[ lastOilDataIndex ].production )
-		currentYearData.future.decline.production = clone( declinedValues.future.decline.production )
-
-		_multiply( declinedValues.future.decline.production, 0.9 )
-
-		// Calculate remaining reserves
-
-		remainingReserves = _subtractProductionFromReserves(
-			remainingReserves,
-			currentYearData.future[ projection ].production
-		)
-
-		currentYearData.future.reserves = clone( remainingReserves )
-
-		currentYearData.projection = clone( currentYearData.future[ projection ].production )
-
-		if( DEBUG && currentYearData.year === 3030 ) {
-			console.log( {
-				lastProduction,
-				declinedValues: declinedValues
+		production
+			.filter( data => {
+				if( fossilFuelTypes && !fossilFuelTypes.includes( data.fossilFuelType ) ) return false
+				//console.log( { data } )
+				if( sourceId !== data.sourceId && !data.projection/*futureSource?.sourceId !== data.sourceId*/ ) return false
+				return true
 			} )
-			console.log( JSON.stringify( currentYearData.future.reserves.production.p, null, 2 ) )
-			console.log(
-				year,
-				currentYearData.future.reserves.p.oil.scope1.co2,
-				currentYearData.future.reserves.p.gas.scope1.co2,
-				currentYearData.future.reserves.c.oil.scope1.co2,
-				currentYearData.future.reserves.c.gas.scope1.co2
-			)
+			.forEach( data => {
+				//console.log( JSON.stringify( data ) )
+				if( point.year && point.year !== data.year ) {
+					dataset.push( point )
+					point = clone( emptyPoint )
+				}
+
+				point.year = data.year
+				if( data.year === 3030 ) console.log( { data } )
+				const co2 = co2FromVolume( data, data.year === 3030 )
+
+				if( data.projection ) {
+					//console.log( point.future.authority.production, data.fossilFuelType, co2 )
+					addCO2( point.future.authority.production, data.fossilFuelType, co2 )
+				} else {
+					addCO2( point.production, data.fossilFuelType, co2 )
+				}
+				return point
+			} )
+
+		dataset.push( point )
+
+		// Find latest reserves estimate from highest quality source.
+
+		const qualitySources = reserves.reduce( ( qualities, datapoint ) => {
+			if( qualities[ datapoint.quality ] )
+				qualities[ datapoint.quality ][ datapoint.sourceId ] = true
+			else
+				qualities[ datapoint.quality ] = { [ datapoint.sourceId ]: true }
+			return qualities
+		}, {} )
+
+		const qualities = Object.keys( qualitySources ).map( q => parseInt( q ) )
+
+		const best = max( qualities )
+		const bestSources = Object.keys( qualitySources[ best ] ).map( q => parseInt( q ) )
+
+		const years = Object.keys( reserves
+			.filter( datapoint => bestSources.includes( datapoint.sourceId ) )
+			.reduce( ( years, datapoint ) => {
+				years[ datapoint.year ] = true
+				return years
+			}, {} ) ).map( y => parseInt( y ) )
+
+		const lastYearOfBestReserve = max( years )
+		const bestReserves = reserves.filter( datapoint => datapoint.year === lastYearOfBestReserve && datapoint.sourceId === bestSources[ 0 ] )
+
+		const initialReserves = {
+			p: clone( emptyPoint.reserves ),
+			c: clone( emptyPoint.reserves )
 		}
 
-		lastProductionIndex++
+		bestReserves.forEach( r => {
+			if( r.grade[ 1 ] === 'p' )
+				addCO2( initialReserves.p, r.fossilFuelType, co2FromVolume( r ) )
+			else if( r.grade[ 1 ] === 'c' )
+				addCO2( initialReserves.c, r.fossilFuelType, co2FromVolume( r ) )
+			else
+				throw new Error( "Encountered an unknown reserves grade: " + r.grade )
+		} )
+
+		store.setState( { bestReservesSourceId: best, lastYearOfBestReserve } )
+
+		DEBUG && console.log( { qualitySources, qualities, best, bestSources, years, lastYearOfBestReserve, bestReserves, initialReserves } )
+		//DEBUG && console.log( 'filteredCombinedDataSet', { fossilFuelTypes, source: sourceId, grades, in: production.length, combined: dataset.length, dataset } )
+		//DEBUG && console.log( JSON.stringify( dataset.find( d => d.year === 2022 ), null, 2 ) )
+
+		let projection = _projection
+		if( _projection > 0 ) projection = 'authority'
+		DEBUG && console.log( 'Estimate Futures for', _projection, projection )
+
+		let declinedValues
+		let lastOilDataIndex, lastGasDataIndex
+
+		// Find last production year
+
+		dataset?.forEach( ( dataYear, index ) => {
+			if( dataYear.production.oil.scope3.co2 > 0 ) {
+				lastOilDataIndex = index
+			}
+			if( dataYear.production.gas.scope3.co2 > 0 ) {
+				lastGasDataIndex = index
+			}
+		} )
+
+		if( !lastOilDataIndex ) {
+			console.log( '>>>>>>> No last Oil Production' )
+			return
+		}
+
+		// Extrapolate production so oil and gas end same year.
+
+		if( lastGasDataIndex > lastOilDataIndex ) {
+			for( let i = lastOilDataIndex + 1; i <= lastGasDataIndex; i++ ) {
+				dataset[ i ].production.oil = clone( dataset[ lastOilDataIndex ].production.oil )
+			}
+		}
+		if( lastGasDataIndex < lastOilDataIndex ) {
+			for( let i = lastGasDataIndex + 1; i <= lastOilDataIndex; i++ ) {
+				dataset[ i ].production.gas = clone( dataset[ lastGasDataIndex ].production.gas )
+			}
+		}
+
+		let lastProductionIndex = Math.max( lastOilDataIndex, lastGasDataIndex )
+		const lastProduction = dataset[ lastProductionIndex ]
+
+		// Initialize projected production and reserves
+
+		declinedValues = clone( emptyPoint )
+		declinedValues.future.decline.production = clone( lastProduction.production )
+
+		lastProduction.future.reserves = clone( initialReserves )
+		//DEBUG && console.log( JSON.stringify( initialReserves ) )
+		let remainingReserves = clone( initialReserves )
+
+		//DEBUG && console.log( { lastProduction, lastOilDataIndex, lastGasDataIndex, declinedValues } )
+
+		for( let year = lastProduction.year; year <= 2040; year++ ) {
+			//console.log( { year, lastDataIndex } )
+			if( !dataset[ lastProductionIndex ] ) {
+				dataset[ lastProductionIndex ] = clone( emptyPoint )
+				dataset[ lastProductionIndex ].year = year
+			}
+			let currentYearData = dataset[ lastProductionIndex ]
+
+			currentYearData.future.stable.production = clone( dataset[ lastOilDataIndex ].production )
+			currentYearData.future.decline.production = clone( declinedValues.future.decline.production )
+
+			_multiply( declinedValues.future.decline.production, 0.9 )
+
+			// Calculate remaining reserves
+
+			remainingReserves = _subtractProductionFromReserves(
+				remainingReserves,
+				currentYearData.future[ projection ].production
+			)
+
+			currentYearData.future.reserves = clone( remainingReserves )
+
+			currentYearData.projection = clone( currentYearData.future[ projection ].production )
+
+			if( DEBUG && currentYearData.year === 3030 ) {
+				console.log( {
+					lastProduction,
+					declinedValues: declinedValues
+				} )
+				console.log( JSON.stringify( currentYearData.future.reserves.production.p, null, 2 ) )
+				console.log(
+					year,
+					currentYearData.future.reserves.p.oil.scope1.co2,
+					currentYearData.future.reserves.p.gas.scope1.co2,
+					currentYearData.future.reserves.c.oil.scope1.co2,
+					currentYearData.future.reserves.c.gas.scope1.co2
+				)
+			}
+
+			lastProductionIndex++
+		}
+
+		DEBUG && console.log( 'dataSetEstimateFutures', { dataset } )
+		//console.log( JSON.stringify( dataset.find( d => d.year === 2018 )?.production, null, 2 ) )
+
+		return dataset
 	}
 
-	DEBUG && console.log( 'dataSetEstimateFutures', { dataset } )
-	//console.log( JSON.stringify( dataset.find( d => d.year === 2018 )?.production, null, 2 ) )
-
-	return dataset
+	return { filteredCombinedDataSet }
 }
