@@ -56,7 +56,7 @@ function CO2Forecast( {
 			console.log( e )
 			notification.warning( {
 				message: "Error during data extraction",
-				description: <pre>{e.message}<br/>{e.stack}</pre>
+				description: e.message
 			} )
 		}
 	}, [ production, reserves, projection, source, grades, estimate, estimate_prod, gwp ] )
@@ -64,7 +64,6 @@ function CO2Forecast( {
 	const co2 = dataset?.co2 ?? []
 	useEffect( () => {
 		if( !dataset ) return
-		console.log( dataset )
 		dispatch( { type: 'BESTRESERVESSOURCEID', payload: dataset.bestReservesSourceId } )
 		dispatch( { type: 'LASTYEAROFBESTRESERVE', payload: dataset.lastYearOfBestReserve } )
 	}, [ dataset?.bestReservesSourceId, dataset?.lastYearOfBestReserve ] )

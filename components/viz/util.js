@@ -2,7 +2,6 @@ import clone from 'clone'
 import { max } from 'd3-array'
 import _get from 'lodash/get'
 import _set from 'lodash/set'
-import { useDispatch } from "react-redux"
 import { useUnitConversionGraph } from './UnitConverter'
 
 const DEBUG = true
@@ -126,7 +125,7 @@ export function getFuelCO2( datapoint, estimate ) {
 	return getFuelScopeCO2( datapoint.scope1, estimate ) + getFuelScopeCO2( datapoint.scope3, estimate )
 }
 
-export function getCO2( datapoint, estimate  = 2 ) {
+export function getCO2( datapoint, estimate = 2 ) {
 	if( !datapoint ) return 0
 	//console.log( { datapoint } )
 	return getFuelCO2( datapoint.oil, estimate ) + getFuelCO2( datapoint.gas, estimate )
@@ -148,9 +147,11 @@ export function findLastProductionYear( data, sourceId ) {
 			}
 		}
 	} )
-	const yearData = data.filter( d => d.year === lastOilYear && d.fossilFuelType === 'oil' ).concat(
-		data.filter( d => d.year === lastGasYear && d.fossilFuelType === 'gas' )
-	)
+	const yearData = data
+		.filter( d => d.year === lastOilYear && d.fossilFuelType === 'oil' && d.sourceId === sourceId )
+		.concat(
+			data.filter( d => d.year === lastGasYear && d.fossilFuelType === 'gas' && d.sourceId === sourceId )
+		)
 	return { lastOilYear, lastGasYear, yearData }
 }
 
@@ -177,10 +178,10 @@ export function findLastReservesYear( data ) {
 }
 
 export default function useCalculations() {
-	const dispatch = useDispatch()
 	const { co2FromVolume } = useUnitConversionGraph()
 
 	function filteredCombinedDataSet( production, reserves, fossilFuelTypes, sourceId, grades, futureSource, _projection ) {
+		if( !sourceId ) return []
 
 		const dataset = []
 		let point = clone( emptyPoint )
@@ -228,8 +229,9 @@ export default function useCalculations() {
 
 		const qualities = Object.keys( qualitySources ).map( q => parseInt( q ) )
 
-		const bestReservesSourceId = max( qualities )
-		const bestSources = Object.keys( qualitySources[ bestReservesSourceId ] ?? {} ).map( q => parseInt( q ) )
+		const bestSourceQuality = max( qualities )
+		const bestSources = Object.keys( qualitySources[ bestSourceQuality ] ?? {} ).map( q => parseInt( q ) )
+		const bestSourceId = bestSources[ 0 ]
 
 		const years = Object.keys( reserves
 			.filter( datapoint => bestSources.includes( datapoint.sourceId ) )
@@ -247,9 +249,9 @@ export default function useCalculations() {
 		}
 
 		bestReserves.forEach( r => {
-			if( r.grade[ 1 ] === 'p' )
+			if( r.grade?.[ 1 ] === 'p' )
 				addCO2( initialReserves.p, r.fossilFuelType, co2FromVolume( r ) )
-			else if( r.grade[ 1 ] === 'c' )
+			else if( r.grade?.[ 1 ] === 'c' )
 				addCO2( initialReserves.c, r.fossilFuelType, co2FromVolume( r ) )
 			else
 				throw new Error( "Encountered an unknown reserves grade: " + r.grade )
@@ -258,7 +260,7 @@ export default function useCalculations() {
 		DEBUG && console.log( {
 			qualitySources,
 			qualities,
-			bestReservesSourceId,
+			bestReservesSourceId: bestSourceQuality,
 			bestSources,
 			years,
 			lastYearOfBestReserve,
@@ -273,7 +275,7 @@ export default function useCalculations() {
 
 		let declinedValues
 
-		const { lastOilYear, lastGasYear } = findLastProductionYear( production, sourceId )
+		const { lastOilYear, lastGasYear, yearData } = findLastProductionYear( production, sourceId )
 		const lastOilDataIndex = dataset.findIndex( d => d.year === lastOilYear )
 		const lastGasDataIndex = dataset.findIndex( d => d.year === lastGasYear )
 
@@ -282,7 +284,9 @@ export default function useCalculations() {
 			return
 		}
 
-		DEBUG && console.log( 'Estimate Futures for', _projection, projection, lastOilYear, lastGasYear, lastOilDataIndex, lastGasDataIndex )
+		DEBUG && console.log( 'Estimate Futures for', _projection, projection, lastOilYear, lastGasYear, lastOilDataIndex, lastGasDataIndex, yearData )
+
+		if( lastGasDataIndex < 0 || lastOilDataIndex < 0 ) throw new Error( `Failed to find year for last production in dataset: ${lastOilYear} ${lastGasYear} >> ${lastOilDataIndex} ${lastGasDataIndex} ` )
 
 		// Extrapolate production so oil and gas end same year.
 
@@ -303,7 +307,7 @@ export default function useCalculations() {
 		// Initialize projected production and reserves
 
 		declinedValues = clone( emptyPoint )
-		declinedValues.future.decline.production = clone( lastProduction.production )
+		declinedValues.future.decline.production = clone( lastProduction?.production )
 
 		lastProduction.future.reserves = clone( initialReserves )
 		//DEBUG && console.log( JSON.stringify( initialReserves ) )
@@ -356,7 +360,7 @@ export default function useCalculations() {
 		DEBUG && console.log( 'dataSetEstimateFutures', { dataset } )
 		//console.log( JSON.stringify( dataset.find( d => d.year === 2018 )?.production, null, 2 ) )
 
-		return { co2: dataset, bestReservesSourceId, lastYearOfBestReserve }
+		return { co2: dataset, bestReservesSourceId: bestSourceId, lastYearOfBestReserve }
 	}
 
 	return { filteredCombinedDataSet }

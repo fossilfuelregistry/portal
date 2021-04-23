@@ -345,6 +345,7 @@ function CO2ForecastGraphBase( {
                 border: 1px solid #dddddd;
                 border-radius: 8px;
                 padding: 8px 12px 12px;
+                background-color: rgba(255,255,255,0.5);
               }
 
               .blob {
