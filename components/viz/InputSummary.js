@@ -27,7 +27,7 @@ function InputSummary( { data = [] } ) {
 			<table>
 				<thead>
 					<tr>
-						<th colSpan={3}>{getText( 'past_emissions' )}</th>
+						<th colSpan={3}>{getText( 'past_emissions' )} e9 kg CO²e</th>
 					</tr>
 				</thead>
 				<tbody>

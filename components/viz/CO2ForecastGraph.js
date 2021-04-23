@@ -258,6 +258,49 @@ function CO2ForecastGraphBase( {
 
 			</svg>
 
+			<div className="legend">
+				<table>
+					<tbody>
+						<tr>
+							<td>
+								<div className="blob oil past"/>
+							</td>
+							<td>{getText( 'oil' )} {getText( 'past_emissions' )}</td>
+						</tr>
+						<tr>
+							<td>
+								<div className="blob gas past"/>
+							</td>
+							<td>{getText( 'gas' )} {getText( 'past_emissions' )}</td>
+						</tr>
+						<tr>
+							<td>
+								<div className="blob oil p"/>
+							</td>
+							<td>{getText( 'oil' )}  {getText( 'future_emissions' )} P  {getText( 'reserves' )}</td>
+						</tr>
+						<tr>
+							<td>
+								<div className="blob gas p"/>
+							</td>
+							<td>{getText( 'gas' )}  {getText( 'future_emissions' )} P  {getText( 'reserves' )}</td>
+						</tr>
+						<tr>
+							<td>
+								<div className="blob oil c"/>
+							</td>
+							<td>{getText( 'oil' )}  {getText( 'future_emissions' )} C  {getText( 'reserves' )}</td>
+						</tr>
+						<tr>
+							<td>
+								<div className="blob gas c"/>
+							</td>
+							<td>{getText( 'gas' )}  {getText( 'future_emissions' )} C {getText( 'reserves' )}</td>
+						</tr>
+					</tbody>
+				</table>
+
+			</div>
 
 			<style jsx>{`
               :global(path.projection) {
@@ -289,10 +332,58 @@ function CO2ForecastGraphBase( {
               :global(path.reserves.gas) {
                 stroke: #4382b3;
               }
+
+              .graph {
+                position: relative;
+              }
+
+              .legend {
+                position: absolute;
+                font-size: 14px;
+                top: 20px;
+                right: 50px;
+                border: 1px solid #dddddd;
+                border-radius: 8px;
+                padding: 8px 12px 12px;
+              }
+
+              .blob {
+                height: 16px;
+                width: 16px;
+                border-radius: 6px;
+                border: 1px solid #dddddd;
+                margin-right: 6px;
+              }
+
+              .oil.past {
+                background-color: #008080;
+              }
+
+              .gas.past {
+                background-color: #70a494;
+              }
+
+              .oil.p {
+                background-color: #b4c8a8;
+              }
+
+              .gas.p {
+                background-color: #f6edbd;
+              }
+
+              .oil.c {
+                background-color: #edbb8a;
+              }
+
+              .gas.c {
+                background-color: #de8a5a;
+              }
 			`}
 			</style>
 		</div> )
 }
+
+//#008080,#70a494,#b4c8a8,#f6edbd,#edbb8a,#de8a5a,#ca562c
 
 export default withParentSize( withTooltip( CO2ForecastGraphBase ) )
 
