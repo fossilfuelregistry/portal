@@ -263,21 +263,15 @@ function CO2ForecastGraphBase( {
 					<tbody>
 						<tr>
 							<td>
-								<div className="blob oil past"/>
-							</td>
-							<td>{getText( 'oil' )} {getText( 'past_emissions' )}</td>
-						</tr>
-						<tr>
-							<td>
 								<div className="blob gas past"/>
 							</td>
 							<td>{getText( 'gas' )} {getText( 'past_emissions' )}</td>
 						</tr>
 						<tr>
 							<td>
-								<div className="blob oil p"/>
+								<div className="blob oil past"/>
 							</td>
-							<td>{getText( 'oil' )}  {getText( 'future_emissions' )} P  {getText( 'reserves' )}</td>
+							<td>{getText( 'oil' )} {getText( 'past_emissions' )}</td>
 						</tr>
 						<tr>
 							<td>
@@ -287,15 +281,21 @@ function CO2ForecastGraphBase( {
 						</tr>
 						<tr>
 							<td>
-								<div className="blob oil c"/>
+								<div className="blob oil p"/>
 							</td>
-							<td>{getText( 'oil' )}  {getText( 'future_emissions' )} C  {getText( 'reserves' )}</td>
+							<td>{getText( 'oil' )}  {getText( 'future_emissions' )} P  {getText( 'reserves' )}</td>
 						</tr>
 						<tr>
 							<td>
 								<div className="blob gas c"/>
 							</td>
 							<td>{getText( 'gas' )}  {getText( 'future_emissions' )} C {getText( 'reserves' )}</td>
+						</tr>
+						<tr>
+							<td>
+								<div className="blob oil c"/>
+							</td>
+							<td>{getText( 'oil' )}  {getText( 'future_emissions' )} C  {getText( 'reserves' )}</td>
 						</tr>
 					</tbody>
 				</table>
@@ -372,11 +372,11 @@ function CO2ForecastGraphBase( {
               }
 
               .oil.c {
-                background-color: #edbb8a;
+                background-color: #de8a5a;
               }
 
               .gas.c {
-                background-color: #de8a5a;
+                background-color: #edbb8a;
               }
 			`}
 			</style>
