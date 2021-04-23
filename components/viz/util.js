@@ -260,7 +260,7 @@ export default function useCalculations() {
 		DEBUG && console.log( {
 			qualitySources,
 			qualities,
-			bestReservesSourceId: bestSourceQuality,
+			bestSourceQuality,
 			bestSources,
 			years,
 			lastYearOfBestReserve,
