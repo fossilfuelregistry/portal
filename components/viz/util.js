@@ -2,8 +2,8 @@ import clone from 'clone'
 import { max } from 'd3-array'
 import _get from 'lodash/get'
 import _set from 'lodash/set'
-import { useContext } from "react"
-import { StoreContext } from "lib/zustandProvider"
+import { useDispatch } from "react-redux"
+import { useUnitConversionGraph } from './UnitConverter'
 
 const DEBUG = true
 
@@ -132,13 +132,57 @@ export function getCO2( datapoint, estimate ) {
 	return getFuelCO2( datapoint.oil, estimate ) + getFuelCO2( datapoint.gas, estimate )
 }
 
+export function findLastProductionYear( data, sourceId ) {
+	if( !data ) return {}
+	let lastOilYear, lastGasYear
+
+	data?.forEach( ( yearData ) => {
+		if( yearData.projection ) return
+		if( sourceId && yearData.sourceId !== sourceId ) return
+		if( yearData.volume > 0 ) {
+			if( yearData.fossilFuelType === 'gas' ) {
+				lastGasYear = yearData.year
+			}
+			if( yearData.fossilFuelType === 'oil' ) {
+				lastOilYear = yearData.year
+			}
+		}
+	} )
+	const yearData = data.filter( d => d.year === lastOilYear && d.fossilFuelType === 'oil' ).concat(
+		data.filter( d => d.year === lastGasYear && d.fossilFuelType === 'gas' )
+	)
+	return { lastOilYear, lastGasYear, yearData }
+}
+
+export function findLastReservesYear( data ) {
+	if( !data ) return {}
+	let lastOilYear, lastGasYear
+
+	data?.forEach( ( yearData ) => {
+		if( yearData.volume > 0 ) {
+			if( yearData.fossilFuelType === 'gas' ) {
+				lastGasYear = yearData.year
+			}
+			if( yearData.fossilFuelType === 'oil' ) {
+				lastOilYear = yearData.year
+			}
+		}
+	} )
+
+	const yearData = data.filter( d => d.year === lastOilYear && d.fossilFuelType === 'oil' ).concat(
+		data.filter( d => d.year === lastGasYear && d.fossilFuelType === 'gas' )
+	)
+
+	return { lastOilYear, lastGasYear, yearData }
+}
+
 export default function useCalculations() {
-	const store = useContext( StoreContext )
+	const dispatch = useDispatch()
+	const { co2FromVolume } = useUnitConversionGraph()
 
 	function filteredCombinedDataSet(
 		production, reserves, fossilFuelTypes, sourceId, grades, futureSource,
-		_projection, estimate, estimate_prod,
-		co2FromVolume ) {
+		_projection, estimate, estimate_prod ) {
 
 		const dataset = []
 		let point = clone( emptyPoint )
@@ -186,8 +230,8 @@ export default function useCalculations() {
 
 		const qualities = Object.keys( qualitySources ).map( q => parseInt( q ) )
 
-		const best = max( qualities )
-		const bestSources = Object.keys( qualitySources[ best ] ).map( q => parseInt( q ) )
+		const bestReservesSourceId = max( qualities )
+		const bestSources = Object.keys( qualitySources[ bestReservesSourceId ] ).map( q => parseInt( q ) )
 
 		const years = Object.keys( reserves
 			.filter( datapoint => bestSources.includes( datapoint.sourceId ) )
@@ -213,34 +257,34 @@ export default function useCalculations() {
 				throw new Error( "Encountered an unknown reserves grade: " + r.grade )
 		} )
 
-		store.setState( { bestReservesSourceId: best, lastYearOfBestReserve } )
-
-		DEBUG && console.log( { qualitySources, qualities, best, bestSources, years, lastYearOfBestReserve, bestReserves, initialReserves } )
+		DEBUG && console.log( {
+			qualitySources,
+			qualities,
+			bestReservesSourceId,
+			bestSources,
+			years,
+			lastYearOfBestReserve,
+			bestReserves,
+			initialReserves
+		} )
 		//DEBUG && console.log( 'filteredCombinedDataSet', { fossilFuelTypes, source: sourceId, grades, in: production.length, combined: dataset.length, dataset } )
 		//DEBUG && console.log( JSON.stringify( dataset.find( d => d.year === 2022 ), null, 2 ) )
 
 		let projection = _projection
 		if( _projection > 0 ) projection = 'authority'
-		DEBUG && console.log( 'Estimate Futures for', _projection, projection )
 
 		let declinedValues
-		let lastOilDataIndex, lastGasDataIndex
 
-		// Find last production year
-
-		dataset?.forEach( ( dataYear, index ) => {
-			if( dataYear.production.oil.scope3.co2 > 0 ) {
-				lastOilDataIndex = index
-			}
-			if( dataYear.production.gas.scope3.co2 > 0 ) {
-				lastGasDataIndex = index
-			}
-		} )
+		const { lastOilYear, lastGasYear } = findLastProductionYear( production, sourceId )
+		const lastOilDataIndex = dataset.findIndex( d => d.year === lastOilYear )
+		const lastGasDataIndex = dataset.findIndex( d => d.year === lastGasYear )
 
 		if( !lastOilDataIndex ) {
 			console.log( '>>>>>>> No last Oil Production' )
 			return
 		}
+
+		DEBUG && console.log( 'Estimate Futures for', _projection, projection, lastOilYear, lastGasYear, lastOilDataIndex, lastGasDataIndex )
 
 		// Extrapolate production so oil and gas end same year.
 
@@ -314,7 +358,7 @@ export default function useCalculations() {
 		DEBUG && console.log( 'dataSetEstimateFutures', { dataset } )
 		//console.log( JSON.stringify( dataset.find( d => d.year === 2018 )?.production, null, 2 ) )
 
-		return dataset
+		return { co2: dataset, bestReservesSourceId, lastYearOfBestReserve }
 	}
 
 	return { filteredCombinedDataSet }

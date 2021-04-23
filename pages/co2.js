@@ -7,7 +7,7 @@ import { useRouter } from "next/router"
 import CO2Forecast from "components/viz/CO2Forecast"
 import useText from "lib/useText"
 import { NextSeo } from "next-seo"
-import { useStore } from "../lib/zustandProvider"
+import { useSelector } from "react-redux"
 
 const DEBUG = false
 
@@ -31,9 +31,10 @@ export default function CO2ForecastPage() {
 	const [ productionSources, set_productionSources ] = useState( [] )
 	const [ futureSources, set_futureSources ] = useState( [] )
 	const [ selectedSource, set_selectedSource ] = useState()
-	const bestReservesSourceId = useStore( state => state.bestReservesSourceId )
-	const lastYearOfBestReserve = useStore( state => state.lastYearOfBestReserve )
-	const allSources = useStore( state => state.allSources )
+
+	const bestReservesSourceId = useSelector( redux => redux.bestReservesSourceId )
+	const lastYearOfBestReserve = useSelector( redux => redux.lastYearOfBestReserve )
+	const allSources = useSelector( redux => redux.allSources )
 
 	const reservesSource = allSources?.find( s => s.sourceId === bestReservesSourceId ) ?? {}
 
@@ -211,4 +212,4 @@ export default function CO2ForecastPage() {
 	)
 }
 
-export { getStaticProps } from '../lib/getStaticProps'
+export { getStaticProps } from 'lib/getStaticProps'

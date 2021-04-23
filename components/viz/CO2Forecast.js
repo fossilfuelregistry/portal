@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { useQuery } from "@apollo/client"
 import GraphQLStatus from "components/GraphQLStatus"
 import { GQL_countryProductionByIso, GQL_countryReservesByIso } from "queries/country"
@@ -11,25 +11,28 @@ import useText from "lib/useText"
 import InputDataGraph from "./InputDataGraph"
 import InputSummary from "./InputSummary"
 import FutureSummary from "./FutureSummary"
-import { StoreContext } from "lib/zustandProvider"
+import { useDispatch, useSelector } from "react-redux"
 
 const DEBUG = false
 
 function CO2Forecast( {
 	country, source, grades, onGrades, onSources, projection, estimate, estimate_prod
 } ) {
-	const store = useContext( StoreContext )
-	const { co2FromVolume, setGWP } = useUnitConversionGraph()
+	const dispatch = useDispatch()
+	const { co2FromVolume } = useUnitConversionGraph()
 	const { getText } = useText()
 	const [ limits, set_limits ] = useState()
-	const [ gwp, set_gwp ] = useState()
 	const { filteredCombinedDataSet } = useCalculations()
+	const gwp = useSelector( redux => redux.gwp )
+	console.log( gwp )
 
 	const { data: sourcesData, loading: loadingSources, error: errorLoadingSources }
 		= useQuery( GQL_sources )
 	const allSources = sourcesData?.sources?.nodes ?? []
-	store.setState( { allSources } )
-
+	useEffect( () => {
+		if( allSources.length > 0 )
+			dispatch( { type: 'ALLSOURCES', payload: allSources } )
+	}, [ allSources ] )
 
 	const { data: productionData, loading: loadingProduction, error: errorLoadingProduction }
 		= useQuery( GQL_countryProductionByIso,
@@ -44,16 +47,12 @@ function CO2Forecast( {
 
 
 	const sourceId = source?.sourceId
-	console.log( { limits, source } )
 
-	const co2 = useMemo( () => {
-		setGWP( gwp )
-		let co2 = []
+	const dataset = useMemo( () => {
 		try {
-			co2 = filteredCombinedDataSet( production, reserves, [ 'oil', 'gas' ],
+			return filteredCombinedDataSet( production, reserves, [ 'oil', 'gas' ],
 				sourceId, grades, allSources.find( s => s.sourceId === projection ),
-				projection, estimate, estimate_prod,
-				co2FromVolume )
+				projection, estimate, estimate_prod )
 		} catch( e ) {
 			console.log( e )
 			notification.warning( {
@@ -61,8 +60,15 @@ function CO2Forecast( {
 				description: <pre>{e.message}<br/>{e.stack}</pre>
 			} )
 		}
-		return co2
 	}, [ production, reserves, projection, source, grades, estimate, estimate_prod, gwp ] )
+
+	const co2 = dataset?.co2 ?? []
+	useEffect( () => {
+		if( !dataset ) return
+		console.log( dataset )
+		dispatch( { type: 'BESTRESERVESSOURCEID', payload: dataset.bestReservesSourceId } )
+		dispatch( { type: 'LASTYEAROFBESTRESERVE', payload: dataset.lastYearOfBestReserve } )
+	}, [ dataset?.bestReservesSourceId, dataset?.lastYearOfBestReserve ] )
 
 	// Figure out available years and sources when production loaded.
 
@@ -119,15 +125,17 @@ function CO2Forecast( {
 			<Row gutter={[ 16, 16 ]}>
 				<Col xs={24} xl={18}>
 					<CO2ForecastGraph
-						data={co2} projection={projection} estimate={estimate}
-						estimate_prod={estimate_prod} gwp={gwp}
+						data={co2}
+						projection={projection}
+						estimate={estimate}
+						estimate_prod={estimate_prod}
 					/>
 				</Col>
 				<Col xs={24} xl={6}>
 					<Row gutter={[ 16, 16 ]}>
 
 						<Col xs={24} md={12} xl={24}>
-							<FutureSummary data={co2} gwp={gwp} set_gwp={set_gwp}/>
+							<FutureSummary data={co2}/>
 						</Col>
 
 						<Col xs={24} md={12} xl={24}>

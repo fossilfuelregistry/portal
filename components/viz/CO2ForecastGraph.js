@@ -17,7 +17,7 @@ const DEBUG = true
 
 function CO2ForecastGraphBase( {
 	data, projection, estimate, estimate_prod,
-	parentWidth, gwp,
+	parentWidth,
 	tooltipLeft, tooltipTop, tooltipData,
 	hideTooltip, showTooltip
 } ) {
@@ -54,7 +54,7 @@ function CO2ForecastGraphBase( {
 			data.filter( d => d.year > 2010 ),
 			d => getCO2( d.production, 4 )
 		)
-		DEBUG && console.log( { maxValue } )
+		//DEBUG && console.log( { maxValue } )
 		return maxValue
 	}, [ data ] )
 

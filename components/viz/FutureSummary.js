@@ -1,13 +1,16 @@
-import React, { useContext } from "react"
+import React from "react"
 import Loading from "components/Loading"
 import useText from "lib/useText"
 import { addCO2 } from "./util"
 import { Switch } from "antd"
+import { useDispatch, useSelector } from "react-redux"
 
 const DEBUG = false
 
-function FutureSummary( { data = [], gwp, set_gwp } ) {
+function FutureSummary( { data = [] } ) {
 	const { getText } = useText()
+	const gwp = useSelector( redux => redux.gwp )
+	const dispatch = useDispatch()
 
 	if( !( data?.length > 0 ) ) return <Loading/>
 
@@ -39,7 +42,7 @@ function FutureSummary( { data = [], gwp, set_gwp } ) {
 								checkedChildren="GWP20"
 								unCheckedChildren="GWP100"
 								checked={gwp}
-								onChange={set_gwp}
+								onChange={c => dispatch( { type: 'GWP', payload: c } )}
 							/>
 						</td>
 					</tr>

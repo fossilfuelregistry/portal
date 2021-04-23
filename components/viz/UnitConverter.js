@@ -1,15 +1,16 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Graph from 'graph-data-structure'
 import { client } from "pages/_app"
 import { GQL_conversions } from "queries/general"
+import { useSelector } from "react-redux"
 
 let graph
 let graphOil
 let graphGas
 let conversion = []
-let gwp
 
 export const useUnitConversionGraph = () => {
+	const gwp = useSelector( redux => redux.gwp )
 
 	useEffect( () => {
 
@@ -89,8 +90,6 @@ export const useUnitConversionGraph = () => {
 		}
 	}
 
-	const setGWP = _gwp => gwp = _gwp
-
 	const convertGas = ( value, fromUnit, toUnit ) => {
 		try {
 			const path = graphGas.shortestPath( fromUnit, toUnit )
@@ -121,6 +120,7 @@ export const useUnitConversionGraph = () => {
 
 	const co2FromVolume = ( { volume, unit, fossilFuelType }, log ) => {
 		if( !graphGas || !graphOil ) return { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } }
+
 		try {
 			// Scope 1
 			const gwpUnit = gwp ? 'kgco2e_100' : 'kgco2e_20'
@@ -200,5 +200,5 @@ export const useUnitConversionGraph = () => {
 		}
 	}
 
-	return { co2FromVolume, convertOil, convertGas, setGWP }
+	return { co2FromVolume, convertOil, convertGas }
 }

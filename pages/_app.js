@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react'
-import { StoreProvider } from 'lib/zustandProvider'
-import { useHydrate } from 'lib/store'
-import 'assets/app.less'
+import { wrapper } from 'lib/store'
 import { getUserIP } from "lib/getUserIp"
 import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client'
 import { ConfigProvider } from "antd"
+import 'assets/app.less'
+import { useDispatch } from "react-redux"
 
 export const client = new ApolloClient( {
 	uri: process.env.NEXT_PUBLIC_BACKEND_URL + '/graphql',
@@ -12,35 +12,29 @@ export const client = new ApolloClient( {
 } )
 
 function GFFR( { Component, pageProps } ) {
-
-	const store = useHydrate( pageProps.initialZustandState )
-	if( typeof window !== 'undefined' )
-		window._globalStore = store
-
+	const dispatch = useDispatch()
 	useEffect( () => {
 		getUserIP()
 			.then( ip => {
-				store.setState( { ip } )
+				dispatch( { type: 'IP', payload: ip } )
 				return fetch( process.env.NEXT_PUBLIC_BACKEND_URL + '/api/v1/ip-location/' + ip )
 			} )
 			.then( api => {
 				return api.json()
 			} )
 			.then( ipLocation => {
-				store.setState( { ipLocation: { lat: ipLocation.lat, lng: ipLocation.lon } } )
+				dispatch( { type: 'IPLOCATION', payload: { lat: ipLocation.lat, lng: ipLocation.lon } } )
 			} )
 			.catch( e => console.log( e.message ) )
 	}, [] )
 
 	return (
 		<ApolloProvider client={client}>
-			<StoreProvider store={store}>
-				<ConfigProvider componentSize={'large'}>
-					<Component {...pageProps} />
-				</ConfigProvider>
-			</StoreProvider>
+			<ConfigProvider componentSize={'large'}>
+				<Component {...pageProps} />
+			</ConfigProvider>
 		</ApolloProvider>
 	)
 }
 
-export default GFFR
+export default wrapper.withRedux( GFFR )

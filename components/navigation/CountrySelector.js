@@ -1,14 +1,14 @@
 import { useQuery } from "@apollo/client"
 import { GQL_countries } from "queries/general"
 import GraphQLStatus from "../GraphQLStatus"
-import { textsSelector, useStore } from "lib/zustandProvider"
 import { Select } from "antd"
 import { useRouter } from "next/router"
 import { useEffect, useRef } from "react"
+import { useSelector } from "react-redux"
 
 export default function CountrySelector( { onChange } ) {
 	const router = useRouter()
-	const texts = useStore( textsSelector )
+	const texts = useSelector( redux => redux.texts )
 	const didSetDefaultFromUrl = useRef( false )
 
 	const { data: countriesData, loading: loadingCountries, error: errorLoadingCountries }

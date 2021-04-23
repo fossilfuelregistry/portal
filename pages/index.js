@@ -5,9 +5,9 @@ import { Button, Col, Modal, Radio, Row, Slider } from "antd"
 import React, { useCallback, useState } from "react"
 import { useRouter } from "next/router"
 import useText from "lib/useText"
-import { filteredCombinedDataSet, getCO2 } from "../components/viz/util"
-import { useUnitConversionGraph } from "components/viz/UnitConverter"
 import { NextSeo } from "next-seo"
+import { findLastProductionYear, findLastReservesYear, getFuelCO2 } from "components/viz/util"
+import { useUnitConversionGraph } from "../components/viz/UnitConverter"
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
@@ -21,20 +21,25 @@ export default function Home() {
 	const [ country, set_country ] = useState( undefined )
 	const [ tooltipVisible, set_tooltipVisible ] = useState( false )
 	const [ dataKeyName, set_dataKeyName ] = useState( 'production' )
-	const { co2FromVolume } = useUnitConversionGraph( 'stable' )
+	const { co2FromVolume } = useUnitConversionGraph()
 
 	const handleChangeKeyName = useCallback( event => {
 		set_dataKeyName( event.target.value )
 	}, [] )
 
-	let production, reserves, dataSet
+	let production, reserves, countryProd, countryRes
 	if( country ) {
 		// Arbitrarily pick first available source
 		const sourceId = country.countryProductionsByIso3166?.nodes?.[ 0 ]?.sourceId
-		production = country.countryProductionsByIso3166?.nodes?.filter( p => p.year === year && p.sourceId ===sourceId ) ?? {}
-		reserves = country.countryReservesByIso3166?.nodes?.filter( p => p.year === year && p.sourceId ===sourceId ) ?? {}
-		dataSet = filteredCombinedDataSet( production, reserves, [ 'oil', 'gas' ], null, null, co2FromVolume )
-		console.log( dataSet )
+		production = country.countryProductionsByIso3166?.nodes?.filter( p => p.sourceId === sourceId ) ?? {}
+		reserves = country.countryReservesByIso3166?.nodes?.filter( p => p.sourceId === sourceId ) ?? {}
+		const lastProd = findLastProductionYear( production )
+		const lastRes = findLastReservesYear( reserves )
+		countryProd = getFuelCO2( co2FromVolume( lastProd.yearData[ 0 ] ), 2 )
+			+ getFuelCO2( co2FromVolume( lastProd.yearData[ 1 ] ), 2 )
+		countryRes = getFuelCO2( co2FromVolume( lastRes.yearData[ 0 ] ), 2 )
+			+ getFuelCO2( co2FromVolume( lastRes.yearData[ 1 ] ), 2 )
+		console.log( { lastProd, lastRes, countryProd, countryRes } )
 	}
 
 	return (
@@ -118,12 +123,12 @@ export default function Home() {
 						</tr>
 						<tr>
 							<td>{getText( 'production' )} {year}&nbsp;&nbsp;</td>
-							<td align="right">{getCO2( dataSet[ 0 ]?.production, 2 )?.toFixed( 1 )}</td>
+							<td align="right">{countryProd?.toFixed( 1 )}</td>
 							<td>M Tons CO²</td>
 						</tr>
 						<tr>
 							<td>{getText( 'reserves' )} {year}&nbsp;&nbsp;</td>
-							<td align="right">{getCO2( dataSet[ 0 ]?.reserves, 2 )?.toFixed( 1 )}</td>
+							<td align="right">{countryRes?.toFixed( 1 )}</td>
 							<td>M Tons CO²</td>
 						</tr>
 					</tbody>
