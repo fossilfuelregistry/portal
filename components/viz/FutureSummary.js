@@ -51,17 +51,17 @@ function FutureSummary( { data = [] } ) {
 					</tr>
 					<tr>
 						<td>{getText( 'stable' )}</td>
-						<td align="right">{totals.stable?.toFixed( 1 )}</td>
+						<td align="right" className="total">{totals.stable?.toFixed( 1 )}</td>
 						<td align="right">e9 kgCO²e</td>
 					</tr>
 					<tr>
 						<td>{getText( 'declining' )}</td>
-						<td align="right">{totals.decline?.toFixed( 1 )}</td>
+						<td align="right" className="total">{totals.decline?.toFixed( 1 )}</td>
 						<td align="right">e9 kgCO²e</td>
 					</tr>
 					<tr>
 						<td>{reservesSource.name}</td>
-						<td align="right">{totals.authority?.toFixed( 1 )}</td>
+						<td align="right" className="total">{totals.authority?.toFixed( 1 )}</td>
 						<td align="right">e9 kgCO²e</td>
 					</tr>
 				</tbody>
@@ -97,7 +97,7 @@ function FutureSummary( { data = [] } ) {
                 background-color: #eeeeee;
               }
 
-              .total td {
+              .total {
                 font-weight: 700;
               }
 			`}
