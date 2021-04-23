@@ -180,9 +180,7 @@ export default function useCalculations() {
 	const dispatch = useDispatch()
 	const { co2FromVolume } = useUnitConversionGraph()
 
-	function filteredCombinedDataSet(
-		production, reserves, fossilFuelTypes, sourceId, grades, futureSource,
-		_projection, estimate, estimate_prod ) {
+	function filteredCombinedDataSet( production, reserves, fossilFuelTypes, sourceId, grades, futureSource, _projection ) {
 
 		const dataset = []
 		let point = clone( emptyPoint )
@@ -231,7 +229,7 @@ export default function useCalculations() {
 		const qualities = Object.keys( qualitySources ).map( q => parseInt( q ) )
 
 		const bestReservesSourceId = max( qualities )
-		const bestSources = Object.keys( qualitySources[ bestReservesSourceId ] ).map( q => parseInt( q ) )
+		const bestSources = Object.keys( qualitySources[ bestReservesSourceId ] ?? {} ).map( q => parseInt( q ) )
 
 		const years = Object.keys( reserves
 			.filter( datapoint => bestSources.includes( datapoint.sourceId ) )

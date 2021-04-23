@@ -24,7 +24,6 @@ function CO2Forecast( {
 	const [ limits, set_limits ] = useState()
 	const { filteredCombinedDataSet } = useCalculations()
 	const gwp = useSelector( redux => redux.gwp )
-	console.log( gwp )
 
 	const { data: sourcesData, loading: loadingSources, error: errorLoadingSources }
 		= useQuery( GQL_sources )
