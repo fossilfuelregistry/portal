@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import TopNavigation from "components/navigation/TopNavigation"
 import getConfig from 'next/config'
-import { ipLocationSelector, useStore } from "lib/zustandProvider"
 import dynamic from 'next/dynamic'
-import { useQuery, gql } from '@apollo/client'
+import { gql, useQuery } from '@apollo/client'
+import { useSelector } from "react-redux"
 
 const DEBUG = false
 
@@ -22,9 +22,9 @@ query ProductionWells( $swLat: Float! $swLng: Float! $neLat: Float! $neLng: Floa
 const MapWithNoSSR = dynamic( () => import( "components/geo/Leaflet" ),
 	{ ssr: false } )
 
-export default function Wells( props ) {
+export default function Wells() {
 	//const texts = useStore( textsSelector )
-	const ipLocation = useStore( ipLocationSelector )
+	const ipLocation = useSelector( r => r.ipLocation )
 
 	const [ center, set_center ] = useState( { lat: 0, lng: 0 } )
 	const [ map, set_map ] = useState()

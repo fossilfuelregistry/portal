@@ -4,16 +4,16 @@ import { useQuery } from "@apollo/client"
 import GraphQLStatus from "components/GraphQLStatus"
 import { GQL_countryProductionByIso } from "queries/country"
 import { Alert } from "antd"
-import { textsSelector, useStore } from "lib/zustandProvider"
 import { useUnitConversionGraph } from "./UnitConverter"
 import { GQL_sources } from "queries/general"
 import { getFuelCO2 } from "./util"
+import { useSelector } from "react-redux"
 
 const DEBUG = false
 
 export default function CountryProduction( { country, fossilFuelType, sources, onSources } ) {
 	const { co2FromVolume } = useUnitConversionGraph()
-	const texts = useStore( textsSelector )
+	const texts = useSelector( r => r.texts )
 	const [ limits, set_limits ] = useState()
 
 	const { data: sourcesData, loading: loadingSources, error: errorLoadingSources }

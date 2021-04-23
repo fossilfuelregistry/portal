@@ -1,7 +1,6 @@
 import { useState } from "react"
 import TopNavigation from "components/navigation/TopNavigation"
 import getConfig from 'next/config'
-//import dynamic from 'next/dynamic'
 import CountryProduction from "components/viz/CountryProduction"
 import CountrySelector from "components/navigation/CountrySelector"
 import { Checkbox, Col, Row } from "antd"
@@ -11,7 +10,6 @@ import { useRouter } from "next/router"
 const DEBUG = false
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
-//const MultiView = dynamic( () => import( "components/viz/MutliViewChart" ), { ssr: false } )
 
 export default function CountryProductionPage() {
 	const router = useRouter()

@@ -1,12 +1,12 @@
 import { useQuery } from "@apollo/client"
 import { GQL_fossilFuelTypes } from "queries/general"
 import GraphQLStatus from "../GraphQLStatus"
-import { textsSelector, useStore } from "lib/zustandProvider"
 import { Select } from "antd"
+import { useSelector } from "react-redux"
 
 export default function FossilFuelTypeSelector( { onChange } ) {
 
-	const texts = useStore( textsSelector )
+	const texts = useSelector( r => r.texts )
 	const { data: fftData, loading: loadingFft, error: errorLoadingFft }
 		= useQuery( GQL_fossilFuelTypes )
 

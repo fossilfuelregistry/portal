@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react"
 import TopNavigation from "components/navigation/TopNavigation"
-import { conversionsSelector, useStore } from "lib/zustandProvider"
 
 const DEBUG = false
 
