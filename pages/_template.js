@@ -4,8 +4,6 @@ import TopNavigation from "components/navigation/TopNavigation"
 const DEBUG = false
 
 export default function Wells( props ) {
-	const conversion = useStore( conversionsSelector )
-
 	const [ map, set_map ] = useState()
 	const heatmap = useRef()
 
