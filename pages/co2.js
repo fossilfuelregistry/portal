@@ -7,7 +7,7 @@ import { useRouter } from "next/router"
 import CO2Forecast from "components/viz/CO2Forecast"
 import useText from "lib/useText"
 import { NextSeo } from "next-seo"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 
 const DEBUG = false
 
@@ -32,6 +32,7 @@ export default function CO2ForecastPage() {
 	const [ futureSources, set_futureSources ] = useState( [] )
 	const [ selectedSource, set_selectedSource ] = useState()
 
+	const dispatch = useDispatch()
 	const bestReservesSourceId = useSelector( redux => redux.bestReservesSourceId )
 	const lastYearOfBestReserve = useSelector( redux => redux.lastYearOfBestReserve )
 	const allSources = useSelector( redux => redux.allSources )
@@ -84,7 +85,9 @@ export default function CO2ForecastPage() {
 						<Col xs={12} lg={4}>
 							<h3>{getText( 'data_source' )}</h3>
 							<Radio.Group
-								onChange={e => set_selectedSource( e.target.value )}
+								onChange={e => {
+									set_selectedSource( e.target.value )
+								}}
 								value={selectedSource}
 							>
 								{productionSources.map( source => (

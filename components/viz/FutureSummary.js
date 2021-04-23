@@ -1,7 +1,7 @@
 import React from "react"
 import Loading from "components/Loading"
 import useText from "lib/useText"
-import { addCO2 } from "./util"
+import { getCO2 } from "./util"
 import { Switch } from "antd"
 import { useDispatch, useSelector } from "react-redux"
 
@@ -11,17 +11,20 @@ function FutureSummary( { data = [] } ) {
 	const { getText } = useText()
 	const gwp = useSelector( redux => redux.gwp )
 	const dispatch = useDispatch()
+	const bestReservesSourceId = useSelector( redux => redux.bestReservesSourceId )
+	const allSources = useSelector( redux => redux.allSources )
+
+	const reservesSource = allSources?.find( s => s.sourceId === bestReservesSourceId ) ?? {}
 
 	if( !( data?.length > 0 ) ) return <Loading/>
 
-	const totals = {
-		oil: { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } },
-		gas: { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } }
-	}
+	const totals = { stable: 0, decline: 0, authority: 0 }
 
-	data.forEach( point => {
-		addCO2( totals, 'oil', point.production.oil )
-		addCO2( totals, 'gas', point.production.gas )
+	data.forEach( ( point, i ) => {
+		if( !point.future?.stable?.production ) return
+		totals.stable += getCO2( point.future.stable.production )
+		totals.decline += getCO2( point.future.decline.production )
+		totals.authority += getCO2( point.future.authority.production )
 	} )
 
 	const _ = v => Math.round( v )
@@ -47,19 +50,19 @@ function FutureSummary( { data = [] } ) {
 						</td>
 					</tr>
 					<tr>
-						<td>{getText( '...' )}</td>
-						<td align="right">...</td>
-						<td align="right">Unit</td>
+						<td>{getText( 'stable' )}</td>
+						<td align="right">{totals.stable?.toFixed( 1 )}</td>
+						<td align="right">e9 kgCO²e</td>
 					</tr>
 					<tr>
-						<td>{getText( '...' )}</td>
-						<td align="right">...</td>
-						<td align="right">Unit</td>
+						<td>{getText( 'declining' )}</td>
+						<td align="right">{totals.decline?.toFixed( 1 )}</td>
+						<td align="right">e9 kgCO²e</td>
 					</tr>
 					<tr>
-						<td>{getText( '...' )}</td>
-						<td align="right">...</td>
-						<td align="right">Unit</td>
+						<td>{reservesSource.name}</td>
+						<td align="right">{totals.authority?.toFixed( 1 )}</td>
+						<td align="right">e9 kgCO²e</td>
 					</tr>
 				</tbody>
 			</table>

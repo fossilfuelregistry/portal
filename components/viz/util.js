@@ -126,7 +126,7 @@ export function getFuelCO2( datapoint, estimate ) {
 	return getFuelScopeCO2( datapoint.scope1, estimate ) + getFuelScopeCO2( datapoint.scope3, estimate )
 }
 
-export function getCO2( datapoint, estimate ) {
+export function getCO2( datapoint, estimate  = 2 ) {
 	if( !datapoint ) return 0
 	//console.log( { datapoint } )
 	return getFuelCO2( datapoint.oil, estimate ) + getFuelCO2( datapoint.gas, estimate )
