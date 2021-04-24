@@ -39,17 +39,6 @@ function FutureSummary( { data = [] } ) {
 				</thead>
 				<tbody>
 					<tr>
-						<td>{getText( 'methane_gwp_ratio' )}</td>
-						<td colSpan={2} align="right">
-							<Switch
-								checkedChildren="GWP20"
-								unCheckedChildren="GWP100"
-								checked={gwp}
-								onChange={c => dispatch( { type: 'GWP', payload: c } )}
-							/>
-						</td>
-					</tr>
-					<tr>
 						<td>{getText( 'stable' )}</td>
 						<td align="right" className="total">{totals.stable?.toFixed( 1 )}</td>
 						<td align="right">e9 kgCO²e</td>

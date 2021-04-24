@@ -8,6 +8,7 @@ import CO2Forecast from "components/viz/CO2Forecast"
 import useText from "lib/useText"
 import { NextSeo } from "next-seo"
 import { useSelector } from "react-redux"
+import CarbonIntensitySelector from "../components/viz/IntensitySelector"
 
 const DEBUG = false
 
@@ -109,45 +110,10 @@ export default function CO2ForecastPage() {
 							</div>
 						</Col>
 
-						<Col xs={24} lg={6}>
-							<h3>{getText( 'estimates' )}</h3>
-							<Slider
-								trackStyle={{ height: '12px' }}
-								railStyle={{ height: '12px' }}
-								handleStyle={{ height: '22px', width: '22px' }}
-								tooltipVisible={false}
-								value={estimate}
-								dots={false}
-								step={0.1}
-								min={0}
-								max={4}
-								marks={{
-									0: getText( 'low' ),
-									2: getText( 'reserves' ),
-									4: getText( 'high' )
-								}}
-								onChange={set_estimate}
-							/>
-							<br/>
-							<Slider
-								trackStyle={{ height: '12px' }}
-								railStyle={{ height: '12px' }}
-								handleStyle={{ height: '22px', width: '22px' }}
-								tooltipVisible={false}
-								value={estimate_prod}
-								dots={false}
-								step={0.1}
-								min={0}
-								max={4}
-								marks={{
-									0: getText( 'low' ),
-									2: getText( 'production' ),
-									4: getText( 'high' )
-								}}
-								onChange={set_estimate_prod}
-							/>
+						<Col xs={24} md={12} lg={6}>
+							<h3>{getText( 'carbon_intensity' )}</h3>
+							<CarbonIntensitySelector/>
 						</Col>
-
 					</Row>
 
 					<CO2Forecast
@@ -203,3 +169,45 @@ export default function CO2ForecastPage() {
 }
 
 export { getStaticProps } from 'lib/getStaticProps'
+
+/*
+						<Col xs={24} lg={6}>
+							<h3>{getText( 'estimates' )}</h3>
+							<Slider
+								trackStyle={{ height: '12px' }}
+								railStyle={{ height: '12px' }}
+								handleStyle={{ height: '22px', width: '22px' }}
+								tooltipVisible={false}
+								value={estimate}
+								dots={false}
+								step={0.1}
+								min={0}
+								max={4}
+								marks={{
+									0: getText( 'low' ),
+									2: getText( 'reserves' ),
+									4: getText( 'high' )
+								}}
+								onChange={set_estimate}
+							/>
+							<br/>
+							<Slider
+								trackStyle={{ height: '12px' }}
+								railStyle={{ height: '12px' }}
+								handleStyle={{ height: '22px', width: '22px' }}
+								tooltipVisible={false}
+								value={estimate_prod}
+								dots={false}
+								step={0.1}
+								min={0}
+								max={4}
+								marks={{
+									0: getText( 'low' ),
+									2: getText( 'production' ),
+									4: getText( 'high' )
+								}}
+								onChange={set_estimate_prod}
+							/>
+						</Col>
+
+ */

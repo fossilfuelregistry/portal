@@ -4,7 +4,7 @@ export const GQL_conversions = gql`
 query conversions {
   conversionConstants {
     nodes {
-      authority description fossilFuelType
+      id authority description fossilFuelType
       fromUnit toUnit high factor low
       country modifier
     }

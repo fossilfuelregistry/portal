@@ -116,10 +116,22 @@ export const useUnitConversionGraph = () => {
 
 		try {
 			// Scope 1
-			const gwpUnit = gwp ? 'kgco2e_100' : 'kgco2e_20'
+			// For Scope 1 gas we need to find the general GWP instead of country specific one.
+
+			const constant = constants.find( c => c.toUnit === gwp )
+			let gasToUnit = gwp
+			if( constant.country && constant.fossilFuelType === 'oil' ) {
+				const nonCountryConstant = constants.filter(
+					c => c.toUnit.startsWith( 'kgco2e' )
+						&& ( c.fossilFuelType === 'gas' || !c.fossilFuelType )
+						&& c.modifier === constant.modifier )
+				if( !nonCountryConstant ) throw new Error( "Failed to find a Gas GWP conversion constant corresponding to " + gwp )
+				gasToUnit = nonCountryConstant[ 0 ].toUnit
+			}
+
 			const path1 = ( fossilFuelType === 'oil' )
-				? graphOil.shortestPath( unit, gwpUnit )
-				: graphGas.shortestPath( unit, gwpUnit )
+				? graphOil.shortestPath( unit, gwp )
+				: graphGas.shortestPath( unit, gasToUnit )
 
 			//console.log( 'Path to ', { unit, path, conversion } )
 			let factor1 = 1, low1 = 1, high1 = 1
