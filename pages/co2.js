@@ -20,10 +20,7 @@ const radioStyle = {
 }
 
 export default function CO2ForecastPage() {
-	const router = useRouter()
 	const { getText } = useText()
-	const [ country, set_country ] = useState()
-	const [ countryName, set_countryName ] = useState()
 	const [ grades, set_grades ] = useState( {} )
 	const [ estimate, set_estimate ] = useState( 2 )
 	const [ estimate_prod, set_estimate_prod ] = useState( 2 )
@@ -35,13 +32,14 @@ export default function CO2ForecastPage() {
 	const bestReservesSourceId = useSelector( redux => redux.bestReservesSourceId )
 	const lastYearOfBestReserve = useSelector( redux => redux.lastYearOfBestReserve )
 	const allSources = useSelector( redux => redux.allSources )
+	const country = useSelector( redux => redux.country )
 
 	const reservesSource = allSources?.find( s => s.sourceId === bestReservesSourceId ) ?? {}
 
 	return (
 		<>
 			<NextSeo
-				title={getText( 'co2_effects_for_country' ) + ' ' + countryName ?? ''}
+				title={getText( 'co2_effects_for_country' ) + ' ' + country?.label ?? ''}
 				description={getText( 'a_service_from_gffr' )}
 				openGraph={{
 					url: 'https://gffr.journeyman.se',
@@ -68,17 +66,7 @@ export default function CO2ForecastPage() {
 
 						<Col xs={12} lg={6}>
 							<h3>{getText( 'country' )}</h3>
-							<CountrySelector
-								country={country}
-								onChange={( c, e ) => {
-									set_country( c?.value )
-									set_countryName( e?.children )
-									router.replace( {
-										pathname: router.pathname,
-										query: { ...router.query, country: c.value }
-									} )
-								}}
-							/>
+							<CountrySelector/>
 						</Col>
 
 						<Col xs={12} lg={4}>
@@ -163,7 +151,7 @@ export default function CO2ForecastPage() {
 					</Row>
 
 					<CO2Forecast
-						country={country}
+						country={country?.value}
 						source={productionSources[ selectedSource ]}
 						grades={grades}
 						estimate={estimate}

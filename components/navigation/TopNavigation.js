@@ -1,18 +1,35 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Col, Row } from 'antd'
 import NavigDrawer from "components/navigation/NavigDrawer"
 import { CgMenu } from 'react-icons/cg'
 import getConfig from 'next/config'
+import { useRouter } from 'next/router'
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
 export default function TopNavigation( props ) {
-	const [ visible, setVisible ] = useState( false )
+	const router = useRouter()
+	const [ visible, set_visible ] = useState( false )
+
+	useEffect( () => {
+		const handleRouteChange = ( url, { shallow } ) => {
+			set_visible( false )
+		}
+
+		router.events.on( 'routeChangeStart', handleRouteChange )
+
+		// If the component is unmounted, unsubscribe
+		// from the event with the `off` method:
+		return () => {
+			router.events.off( 'routeChangeStart', handleRouteChange )
+		}
+	}, [] )
+
 	const showDrawer = () => {
-		setVisible( true )
+		set_visible( true )
 	}
 	const onClose = () => {
-		setVisible( false )
+		set_visible( false )
 	}
 
 	return (

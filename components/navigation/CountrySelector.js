@@ -4,11 +4,12 @@ import GraphQLStatus from "../GraphQLStatus"
 import { Select } from "antd"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 
-export default function CountrySelector( { onChange } ) {
+export default function CountrySelector() {
 	const router = useRouter()
 	const [ value, set_value ] = useState()
+	const dispatch = useDispatch()
 	const texts = useSelector( redux => redux.texts )
 
 	const { data: countriesData, loading: loadingCountries, error: errorLoadingCountries }
@@ -19,10 +20,10 @@ export default function CountrySelector( { onChange } ) {
 	useEffect( () => {
 		if( !countries.length ) return
 		const { country } = router.query
-		if( country && !value ) {
+		if( country && ( !value || value.value !== country ) ) {
 			const name = countries.find( c => c.isoA2.toLowerCase() === country.toLowerCase() )?.[ 'name' ]
-			const v = { value: router.query.country }
-			onChange?.( v, { children: name } )
+			const v = { value: router.query.country, label: name }
+			dispatch( { type: 'COUNTRY', payload: v } )
 			set_value( v )
 		}
 	}, [ router.query.country, countries?.length ] )
@@ -38,9 +39,13 @@ export default function CountrySelector( { onChange } ) {
 			labelInValue={true}
 			placeholder={texts?.country + '...'}
 			optionFilterProp="children"
-			onChange={v => {
+			onChange={async v => {
 				set_value( v )
-				onChange?.( v )
+				dispatch( { type: 'COUNTRY', payload: v } )
+				await router.replace( {
+					pathname: router.pathname,
+					query: { ...router.query, country: v.value }
+				} )
 			}}
 			filterOption={( input, option ) =>
 				option.children?.toLowerCase().indexOf( input?.toLowerCase() ) >= 0
