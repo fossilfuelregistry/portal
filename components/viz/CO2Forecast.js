@@ -121,7 +121,7 @@ function CO2Forecast( {
 	return (
 		<>
 			<Row gutter={[ 16, 16 ]}>
-				<Col xs={24} xl={18}>
+				<Col xs={24} lg={14} xxl={18}>
 					<CO2ForecastGraph
 						data={co2}
 						projection={projection}
@@ -129,14 +129,14 @@ function CO2Forecast( {
 						estimate_prod={estimate_prod}
 					/>
 				</Col>
-				<Col xs={24} xl={6}>
+				<Col xs={24} lg={10} xxl={6}>
 					<Row gutter={[ 16, 16 ]}>
 
-						<Col xs={24} md={12} xl={24}>
+						<Col xs={24} xl={24}>
 							<FutureSummary data={co2}/>
 						</Col>
 
-						<Col xs={24} md={12} xl={24}>
+						<Col xs={24} xl={24}>
 							<InputSummary data={co2}/>
 						</Col>
 

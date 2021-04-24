@@ -1,7 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import Graph from 'graph-data-structure'
-import { client } from "pages/_app"
-import { GQL_conversions } from "queries/general"
 import { useSelector } from "react-redux"
 
 let graph
@@ -10,58 +8,53 @@ let graphGas
 let conversion = []
 
 export const useUnitConversionGraph = () => {
+	const constants = useSelector( redux => redux.conversions )
 	const gwp = useSelector( redux => redux.gwp )
 
 	useEffect( () => {
+		const _conversion = {}
+		constants.forEach( c => {
+			if( !_conversion[ c.fromUnit ] ) _conversion[ c.fromUnit ] = {}
+			if( !_conversion[ c.fromUnit ][ c.toUnit ] ) _conversion[ c.fromUnit ][ c.toUnit ] = {
+				oil: { factor: 1 },
+				gas: {}
+			}
+			if( !c.fossilFuelType || c.fossilFuelType === 'oil' )
+				_conversion[ c.fromUnit ][ c.toUnit ][ 'oil' ] = { factor: c.factor, low: c.low, high: c.high }
+			if( !c.fossilFuelType || c.fossilFuelType === 'gas' )
+				_conversion[ c.fromUnit ][ c.toUnit ][ 'gas' ] = { factor: c.factor, low: c.low, high: c.high }
+		} )
+		conversion = _conversion
 
-		const asyncEffect = async() => {
-			const q = await client.query( { query: GQL_conversions } )
-			const constants = q?.data?.conversionConstants?.nodes ?? []
-			const _conversion = {}
-			constants.forEach( c => {
-				if( !_conversion[ c.fromUnit ] ) _conversion[ c.fromUnit ] = {}
-				if( !_conversion[ c.fromUnit ][ c.toUnit ] ) _conversion[ c.fromUnit ][ c.toUnit ] = {
-					oil: { factor: 1 },
-					gas: {}
-				}
-				if( !c.fossilFuelType || c.fossilFuelType === 'oil' )
-					_conversion[ c.fromUnit ][ c.toUnit ][ 'oil' ] = { factor: c.factor, low: c.low, high: c.high }
-				if( !c.fossilFuelType || c.fossilFuelType === 'gas' )
-					_conversion[ c.fromUnit ][ c.toUnit ][ 'gas' ] = { factor: c.factor, low: c.low, high: c.high }
-			} )
-			conversion = _conversion
+		// Find unique units
+		const _allUnits = {}
+		constants.forEach( u => {
+			_allUnits[ u.fromUnit ] = true
+			_allUnits[ u.toUnit ] = true
+		} )
 
-			// Find unique units
-			const _allUnits = {}
-			constants.forEach( u => {
-				_allUnits[ u.fromUnit ] = true
-				_allUnits[ u.toUnit ] = true
-			} )
+		graph = Graph()
+		graphOil = Graph()
+		graphGas = Graph()
 
-			graph = Graph()
-			graphOil = Graph()
-			graphGas = Graph()
+		Object.keys( _allUnits ).forEach( u => graph.addNode( u ) )
 
-			Object.keys( _allUnits ).forEach( u => graph.addNode( u ) )
-
-			constants.forEach( conv => {
-				graph.addEdge( conv.fromUnit, conv.toUnit )
-			} )
-			constants.filter( c => c.fossilFuelType !== 'gas' ).forEach( conv => {
-				graphOil.addEdge( conv.fromUnit, conv.toUnit )
-			} )
-			constants.filter( c => c.fossilFuelType !== 'oil' ).forEach( conv => {
-				graphGas.addEdge( conv.fromUnit, conv.toUnit )
-			} )
-			// console.log( {
-			// 	all: graph?.serialize(),
-			// 	oil: graphOil?.serialize(),
-			// 	gas: graphGas?.serialize(),
-			// 	conversion
-			// } )
-		}
-		asyncEffect()
-	}, [] )
+		constants.forEach( conv => {
+			graph.addEdge( conv.fromUnit, conv.toUnit )
+		} )
+		constants.filter( c => c.fossilFuelType !== 'gas' ).forEach( conv => {
+			graphOil.addEdge( conv.fromUnit, conv.toUnit )
+		} )
+		constants.filter( c => c.fossilFuelType !== 'oil' ).forEach( conv => {
+			graphGas.addEdge( conv.fromUnit, conv.toUnit )
+		} )
+		console.log( {
+			all: graph?.serialize(),
+			oil: graphOil?.serialize(),
+			gas: graphGas?.serialize(),
+			conversion
+		} )
+	}, [ constants ] )
 
 	const convertOil = ( value, fromUnit, toUnit ) => {
 		try {
