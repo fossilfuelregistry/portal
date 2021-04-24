@@ -3,13 +3,13 @@ import { GQL_countries } from "queries/general"
 import GraphQLStatus from "../GraphQLStatus"
 import { Select } from "antd"
 import { useRouter } from "next/router"
-import { useEffect, useRef } from "react"
+import { useEffect, useState } from "react"
 import { useSelector } from "react-redux"
 
 export default function CountrySelector( { onChange } ) {
 	const router = useRouter()
+	const [ value, set_value ] = useState()
 	const texts = useSelector( redux => redux.texts )
-	const didSetDefaultFromUrl = useRef( false )
 
 	const { data: countriesData, loading: loadingCountries, error: errorLoadingCountries }
 		= useQuery( GQL_countries )
@@ -17,17 +17,16 @@ export default function CountrySelector( { onChange } ) {
 	const countries = countriesData?.neCountries?.nodes ?? []
 
 	useEffect( () => {
+		console.log( { q: router.query, countries } )
 		if( !countries.length ) return
 		const { country } = router.query
-		if( country && onChange && !didSetDefaultFromUrl.current ) {
+		if( country && !value ) {
 			const name = countries.find( c => c.isoA2.toLowerCase() === country.toLowerCase() )?.[ 'name' ]
-			onChange(
-				{ value: router.query.country },
-				{ children: name }
-			)
-			didSetDefaultFromUrl.current = true
+			const v = { value: router.query.country }
+			onChange?.( v, { children: name } )
+			set_value( v )
 		}
-	}, [ router.query, countries ] )
+	}, [ router.query.country, countries?.length ] )
 
 	if( loadingCountries || errorLoadingCountries )
 		return <GraphQLStatus loading={loadingCountries} error={errorLoadingCountries}/>
@@ -36,11 +35,14 @@ export default function CountrySelector( { onChange } ) {
 		<Select
 			showSearch
 			style={{ minWidth: 120, width: '100%' }}
-			defaultValue={router.query.country ? { value: router.query.country } : undefined}
+			value={value}
 			labelInValue={true}
 			placeholder={texts?.country + '...'}
 			optionFilterProp="children"
-			onChange={onChange}
+			onChange={v => {
+				set_value( v )
+				onChange?.( v )
+			}}
 			filterOption={( input, option ) =>
 				option.children?.toLowerCase().indexOf( input?.toLowerCase() ) >= 0
 			}

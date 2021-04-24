@@ -97,7 +97,7 @@ function CO2Forecast( {
 			g[ r.grade ] = false
 			return g
 		}, {} )
-		console.log( _grades )
+		//console.log( _grades )
 		onGrades && onGrades( _grades )
 	}, [ reserves?.length ] )
 

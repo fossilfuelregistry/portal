@@ -48,12 +48,12 @@ export const useUnitConversionGraph = () => {
 		constants.filter( c => c.fossilFuelType !== 'oil' ).forEach( conv => {
 			graphGas.addEdge( conv.fromUnit, conv.toUnit )
 		} )
-		console.log( {
-			all: graph?.serialize(),
-			oil: graphOil?.serialize(),
-			gas: graphGas?.serialize(),
-			conversion
-		} )
+		// console.log( {
+		// 	all: graph?.serialize(),
+		// 	oil: graphOil?.serialize(),
+		// 	gas: graphGas?.serialize(),
+		// 	conversion
+		// } )
 	}, [ constants ] )
 
 	const convertOil = ( value, fromUnit, toUnit ) => {
