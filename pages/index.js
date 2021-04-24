@@ -1,8 +1,8 @@
 import TopNavigation from "components/navigation/TopNavigation"
 import getConfig from 'next/config'
 import dynamic from "next/dynamic"
-import { Button, Col, Modal, Radio, Row, Slider } from "antd"
-import React, { useCallback, useState } from "react"
+import { Alert, Button, Col, Modal, Radio, Row, Slider } from "antd"
+import React, { useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/router"
 import useText from "lib/useText"
 import { NextSeo } from "next-seo"
@@ -19,6 +19,7 @@ export default function Home() {
 	const { getText } = useText()
 	const [ year, set_year ] = useState( 2019 )
 	const [ country, set_country ] = useState( undefined )
+	const [ modalData, set_modalData ] = useState( undefined )
 	const [ tooltipVisible, set_tooltipVisible ] = useState( false )
 	const [ dataKeyName, set_dataKeyName ] = useState( 'production' )
 	const { co2FromVolume } = useUnitConversionGraph()
@@ -27,20 +28,27 @@ export default function Home() {
 		set_dataKeyName( event.target.value )
 	}, [] )
 
-	let production, reserves, countryProd, countryRes
-	if( country ) {
-		// Arbitrarily pick first available source
-		const sourceId = country.countryProductionsByIso3166?.nodes?.[ 0 ]?.sourceId
-		production = country.countryProductionsByIso3166?.nodes?.filter( p => p.sourceId === sourceId ) ?? {}
-		reserves = country.countryReservesByIso3166?.nodes?.filter( p => p.sourceId === sourceId ) ?? {}
-		const lastProd = findLastProductionYear( production )
-		const lastRes = findLastReservesYear( reserves )
-		countryProd = getFuelCO2( co2FromVolume( lastProd.yearData[ 0 ] ), 2 )
-			+ getFuelCO2( co2FromVolume( lastProd.yearData[ 1 ] ), 2 )
-		countryRes = getFuelCO2( co2FromVolume( lastRes.yearData[ 0 ] ), 2 )
-			+ getFuelCO2( co2FromVolume( lastRes.yearData[ 1 ] ), 2 )
-		console.log( { lastProd, lastRes, countryProd, countryRes } )
-	}
+	useEffect( () => {
+		if( country ) {
+			const data = {}
+			// Arbitrarily pick EIA source
+			data.production = country.countryProductionsByIso3166?.nodes?.filter( p => p.sourceId === 2 ) ?? {}
+			data.reserves = country.countryReservesByIso3166?.nodes?.filter( p => p.sourceId === 2 ) ?? {}
+			if( data.production.length > 0 ) {
+				const lastProd = findLastProductionYear( data.production, 2 )
+				const lastRes = findLastReservesYear( data.reserves )
+				console.log( { lastProd, lastRes } )
+				if( !!lastProd.yearData[ 0 ] && !!lastRes.yearData[ 0 ] ) {
+					data.countryProd = getFuelCO2( co2FromVolume( lastProd.yearData[ 0 ] ), 2 )
+						+ getFuelCO2( co2FromVolume( lastProd.yearData[ 1 ] ), 2 )
+					data.countryRes = getFuelCO2( co2FromVolume( lastRes.yearData[ 0 ] ), 2 )
+						+ getFuelCO2( co2FromVolume( lastRes.yearData[ 1 ] ), 2 )
+					console.log( data )
+					set_modalData( data )
+				}
+			}
+		}
+	}, [ country ] )
 
 	return (
 		<div className="page">
@@ -114,6 +122,7 @@ export default function Home() {
 			>
 				<h1>{country?.name}</h1>
 
+				{modalData?.countryProd > 0 &&
 				<table>
 					<tbody>
 						<tr>
@@ -123,16 +132,19 @@ export default function Home() {
 						</tr>
 						<tr>
 							<td>{getText( 'production' )} {year}&nbsp;&nbsp;</td>
-							<td align="right">{countryProd?.toFixed( 1 )}</td>
+							<td align="right">{modalData.countryProd?.toFixed( 1 )}</td>
 							<td>M Tons CO²</td>
 						</tr>
 						<tr>
 							<td>{getText( 'reserves' )} {year}&nbsp;&nbsp;</td>
-							<td align="right">{countryRes?.toFixed( 1 )}</td>
+							<td align="right">{modalData.countryRes?.toFixed( 1 )}</td>
 							<td>M Tons CO²</td>
 						</tr>
 					</tbody>
-				</table>
+				</table>}
+
+				{!modalData &&
+				<Alert type="warning" showIcon message="EIA Production unavailable"/>}
 
 				<Button
 					type="primary"
@@ -144,6 +156,7 @@ export default function Home() {
 				>
 					{getText( 'goto_co2_forecast' )}
 				</Button>
+
 			</Modal>}
 
 			<style jsx>{`

@@ -101,7 +101,7 @@ export default function CO2ForecastPage() {
 							<h3>{getText( 'reserves' )}</h3>
 							{reservesSource.name}
 							&nbsp;
-							({lastYearOfBestReserve})
+							{reservesSource?.name?.length > 0 && `(${lastYearOfBestReserve})`}
 						</Col>
 
 						<Col xs={12} lg={5}>
