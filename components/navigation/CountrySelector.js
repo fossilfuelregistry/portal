@@ -17,7 +17,6 @@ export default function CountrySelector( { onChange } ) {
 	const countries = countriesData?.neCountries?.nodes ?? []
 
 	useEffect( () => {
-		console.log( { q: router.query, countries } )
 		if( !countries.length ) return
 		const { country } = router.query
 		if( country && !value ) {
