@@ -60,7 +60,7 @@ export default function CO2ForecastPage() {
 			/>
 
 			<div className="page">
-				<TopNavigation/>
+				<TopNavigation share={true}/>
 
 				<div className="co2">
 

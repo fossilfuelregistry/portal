@@ -4,6 +4,16 @@ import NavigDrawer from "components/navigation/NavigDrawer"
 import { CgMenu } from 'react-icons/cg'
 import getConfig from 'next/config'
 import { useRouter } from 'next/router'
+import {
+	EmailShareButton,
+	FacebookShareButton,
+	LinkedinShareButton,
+	TwitterShareButton,
+	EmailIcon,
+	FacebookIcon,
+	LinkedinIcon,
+	TwitterIcon,
+} from "react-share";
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
@@ -42,7 +52,14 @@ export default function TopNavigation( props ) {
 					<img src="/SVG/gffr-logo.svg" alt="GFFR Logo" height={40}/>
 				</Col>
 				<Col>
-					<h4>Global Fossil Fuel Registry</h4>
+					<h4>
+						Global Fossil Fuel Registry
+						&nbsp;&nbsp;&nbsp;
+						<FacebookShareButton url="https://gffr.journeyman.se/" ><FacebookIcon size={24}/></FacebookShareButton>&nbsp;
+						<EmailShareButton url="https://gffr.journeyman.se/" ><EmailIcon size={24}/></EmailShareButton>&nbsp;
+						<LinkedinShareButton url="https://gffr.journeyman.se/" ><LinkedinIcon size={24}/></LinkedinShareButton>&nbsp;
+						<TwitterShareButton url="https://gffr.journeyman.se/" ><TwitterIcon size={24}/></TwitterShareButton>&nbsp;
+					</h4>
 				</Col>
 			</Row>
 
