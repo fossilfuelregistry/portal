@@ -40,7 +40,7 @@ export default function CO2ForecastPage() {
 	return (
 		<>
 			<NextSeo
-				title={getText( 'co2_effects_for_country' ) + ' ' + country?.label ?? ''}
+				title={getText( 'co2_effects_for_country' ) + ' ' + ( country?.label ?? '' )}
 				description={getText( 'a_service_from_gffr' )}
 				openGraph={{
 					url: 'https://gffr.journeyman.se',
