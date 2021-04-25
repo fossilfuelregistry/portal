@@ -5,15 +5,15 @@ import { CgMenu } from 'react-icons/cg'
 import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import {
-	EmailShareButton,
-	FacebookShareButton,
-	LinkedinShareButton,
-	TwitterShareButton,
 	EmailIcon,
+	EmailShareButton,
 	FacebookIcon,
+	FacebookShareButton,
 	LinkedinIcon,
+	LinkedinShareButton,
 	TwitterIcon,
-} from "react-share";
+	TwitterShareButton,
+} from "react-share"
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
@@ -55,10 +55,18 @@ export default function TopNavigation( props ) {
 					<h4>
 						Global Fossil Fuel Registry
 						&nbsp;&nbsp;&nbsp;
-						<FacebookShareButton url="https://gffr.journeyman.se/" ><FacebookIcon size={24}/></FacebookShareButton>&nbsp;
-						<EmailShareButton url="https://gffr.journeyman.se/" ><EmailIcon size={24}/></EmailShareButton>&nbsp;
-						<LinkedinShareButton url="https://gffr.journeyman.se/" ><LinkedinIcon size={24}/></LinkedinShareButton>&nbsp;
-						<TwitterShareButton url="https://gffr.journeyman.se/" ><TwitterIcon size={24}/></TwitterShareButton>&nbsp;
+						<FacebookShareButton className="social" url="https://gffr.journeyman.se/">
+							<FacebookIcon size={26} round/>
+						</FacebookShareButton>&nbsp;
+						<EmailShareButton className="social" url="https://gffr.journeyman.se/">
+							<EmailIcon size={26} round/>
+						</EmailShareButton>&nbsp;
+						<LinkedinShareButton className="social" url="https://gffr.journeyman.se/">
+							<LinkedinIcon size={26} round/>
+						</LinkedinShareButton>&nbsp;
+						<TwitterShareButton className="social" url="https://gffr.journeyman.se/">
+							<TwitterIcon size={26} round/>
+						</TwitterShareButton>&nbsp;
 					</h4>
 				</Col>
 			</Row>
@@ -72,6 +80,15 @@ export default function TopNavigation( props ) {
                 line-height: 1;
                 height: 100px;
               }
+
+                .navigation :global(.social) {
+                  opacity: 0.5;
+                  transition: opacity ease-in-out 300ms;
+                }
+
+                .navigation :global(.social:hover) {
+                  opacity: 1;
+                }
 
               @media (max-width: ${theme[ '@screen-sm' ]}) {
                 .navigation {
