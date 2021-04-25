@@ -37,15 +37,16 @@ export default function CO2ForecastPage() {
 
 	const reservesSource = allSources?.find( s => s.sourceId === bestReservesSourceId ) ?? {}
 
+	const title = ( country?.label ? country.label + ' - ' :'' ) + getText( 'co2_effects_for_country' )
 	return (
 		<>
 			<NextSeo
-				title={ ( country?.label ? country.label + ' - ' :'' ) + getText( 'co2_effects_for_country' )}
+				title={title}
 				description={getText( 'a_service_from_gffr' )}
 				openGraph={{
 					url: 'https://gffr.journeyman.se',
 					title: getText( 'gffr' ),
-					description: getText( 'fossil_fuel_prod_reserves' ),
+					description: title,
 					images: [
 						{
 							url: 'https://gffr.journeyman.se/og1.jpg',
