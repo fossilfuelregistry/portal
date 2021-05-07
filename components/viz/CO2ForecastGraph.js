@@ -117,6 +117,13 @@ function CO2ForecastGraphBase( {
 						scale={yearScale}
 						numTicks={parentWidth > 520 ? 8 : 4}
 						tickFormat={x => `${x.toFixed( 0 )}`}
+						tickLabelProps={() => ( {
+							dy: '0.25em',
+							fill: '#222',
+							fontFamily: 'Arial',
+							fontSize: 13,
+							textAnchor: 'middle',
+						} )}
 					/>
 
 					<AreaStack
@@ -237,7 +244,16 @@ function CO2ForecastGraphBase( {
 					<AxisRight
 						scale={productionScale}
 						numTicks={parentWidth > 520 ? 8 : 4}
-						tickFormat={x => x.toFixed( 1 ).toString()}
+						tickFormat={x => x.toFixed( 0 ).toString()}		
+						tickLabelProps={() => ( {
+							dx: '0.25em',
+							dy: '0.25em',
+							fill: '#222',
+							fontFamily: 'Arial',
+							fontSize: 13,
+							textAnchor: 'start',
+						} )}
+
 					/>
 
 				</Group>
@@ -277,25 +293,25 @@ function CO2ForecastGraphBase( {
 							<td>
 								<div className="blob gas p"/>
 							</td>
-							<td>{getText( 'gas' )}  {getText( 'future_emissions' )} P  {getText( 'reserves' )}</td>
+							<td>{getText( 'gas' )}: {getText( 'against_reserves' )}</td>
 						</tr>
 						<tr>
 							<td>
 								<div className="blob oil p"/>
 							</td>
-							<td>{getText( 'oil' )}  {getText( 'future_emissions' )} P  {getText( 'reserves' )}</td>
+							<td>{getText( 'oil' )}: {getText( 'against_reserves' )}</td>
 						</tr>
 						<tr>
 							<td>
 								<div className="blob gas c"/>
 							</td>
-							<td>{getText( 'gas' )}  {getText( 'future_emissions' )} C {getText( 'reserves' )}</td>
+							<td>{getText( 'gas' )}: {getText( 'against_contingent' )}</td>
 						</tr>
 						<tr>
 							<td>
 								<div className="blob oil c"/>
 							</td>
-							<td>{getText( 'oil' )}  {getText( 'future_emissions' )} C  {getText( 'reserves' )}</td>
+							<td>{getText( 'oil' )} : {getText( 'against_contingent' )}</td>
 						</tr>
 					</tbody>
 				</table>
@@ -345,7 +361,7 @@ function CO2ForecastGraphBase( {
                 border: 1px solid #dddddd;
                 border-radius: 8px;
                 padding: 8px 12px 12px;
-                background-color: rgba(255,255,255,0.5);
+                background-color: rgba(255, 255, 255, 0.5);
               }
 
               .blob {

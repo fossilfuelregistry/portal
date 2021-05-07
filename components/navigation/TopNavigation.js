@@ -53,7 +53,7 @@ export default function TopNavigation( props ) {
 				</Col>
 				<Col>
 					<h4>
-						Global Fossil Fuel Registry
+						Global Registry of Fossil Fuels
 						&nbsp;&nbsp;&nbsp;
 						<FacebookShareButton className="social" url="https://gffr.journeyman.se/">
 							<FacebookIcon size={26} round/>

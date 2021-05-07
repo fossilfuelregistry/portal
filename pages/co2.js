@@ -44,12 +44,12 @@ export default function CO2ForecastPage() {
 				title={title}
 				description={getText( 'a_service_from_gffr' )}
 				openGraph={{
-					url: 'https://gffr.journeyman.se',
+					url: 'https://grff.journeyman.se',
 					title: getText( 'gffr' ),
 					description: title,
 					images: [
 						{
-							url: 'https://gffr.journeyman.se/og1.jpg',
+							url: 'https://grff.journeyman.se/og1.jpg',
 							width: 1200,
 							height: 671,
 							alt: getText( 'gffr' ),
