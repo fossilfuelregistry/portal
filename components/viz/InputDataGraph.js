@@ -78,12 +78,28 @@ function InputDataGraphBase( {
 						scale={yearScale}
 						numTicks={parentWidth > 520 ? 8 : 4}
 						tickFormat={x => `${x.toFixed( 0 )}`}
+						tickLabelProps={() => ( {
+							dx: '0.25em',
+							dy: '0.25em',
+							fill: '#222',
+							fontFamily: 'Arial',
+							fontSize: 12,
+							textAnchor: 'start',
+						} )}
 					/>
 
 					<AxisRight
 						scale={yScale}
 						numTicks={parentWidth > 520 ? 8 : 4}
-						tickFormat={x => x.toFixed( 1 ).toString()}
+						tickFormat={x => x.toFixed( 0 ).toString()}
+						tickLabelProps={() => ( {
+							dx: '0.25em',
+							dy: '0.25em',
+							fill: '#222',
+							fontFamily: 'Arial',
+							fontSize: 12,
+							textAnchor: 'start',
+						} )}
 					/>
 
 					{sources.map( ( s, i ) => {

@@ -13,6 +13,11 @@ import useText from "lib/useText"
 
 const DEBUG = true
 
+const colors = {
+	oil: { past: '#008080', reserves: '#70a494', contingent: '#b4c8a8' },
+	gas: { past: '#de8a5a', reserves: '#edbb8a', contingent: '#f6edbd' },
+}
+
 //#008080,#70a494,#b4c8a8,#f6edbd,#edbb8a,#de8a5a,#ca562c
 
 function CO2ForecastGraphBase( {
@@ -151,10 +156,10 @@ function CO2ForecastGraphBase( {
 										d={path( stack ) || ''}
 										stroke="transparent"
 										fill={{
-											oil_p: "#b4c8a8",
-											gas_c: "#edbb8a",
-											gas_p: "#f6edbd",
-											oil_c: "#de8a5a"
+											oil_p: colors.oil.reserves,
+											gas_c: colors.gas.contingent,
+											gas_p: colors.gas.reserves,
+											oil_c: colors.oil.contingent
 										}[ stack.key ]}
 									/>
 								)
@@ -181,8 +186,8 @@ function CO2ForecastGraphBase( {
 										d={path( stack ) || ''}
 										stroke="transparent"
 										fill={{
-											oil: "#008080",
-											gas: "#70a494",
+											oil: colors.oil.past,
+											gas: colors.gas.past,
 										}[ stack.key ]}
 									/>
 								)
@@ -244,7 +249,7 @@ function CO2ForecastGraphBase( {
 					<AxisRight
 						scale={productionScale}
 						numTicks={parentWidth > 520 ? 8 : 4}
-						tickFormat={x => x.toFixed( 0 ).toString()}		
+						tickFormat={x => x.toFixed( 0 ).toString()}
 						tickLabelProps={() => ( {
 							dx: '0.25em',
 							dy: '0.25em',
@@ -253,8 +258,11 @@ function CO2ForecastGraphBase( {
 							fontSize: 13,
 							textAnchor: 'start',
 						} )}
-
 					/>
+
+					<text x="40" y="18" transform="rotate(0)" fontSize={13}>
+						CO²e (e6ton)
+					</text>
 
 				</Group>
 
@@ -373,34 +381,32 @@ function CO2ForecastGraphBase( {
               }
 
               .oil.past {
-                background-color: #008080;
+                background-color: ${colors.oil.past};
               }
 
               .gas.past {
-                background-color: #70a494;
+                background-color: ${colors.gas.past};
               }
 
               .oil.p {
-                background-color: #b4c8a8;
+                background-color: ${colors.oil.reserves};
               }
 
               .gas.p {
-                background-color: #f6edbd;
+                background-color: ${colors.gas.reserves};
               }
 
               .oil.c {
-                background-color: #de8a5a;
+                background-color: ${colors.oil.contingent};
               }
 
               .gas.c {
-                background-color: #edbb8a;
+                background-color: ${colors.gas.contingent};
               }
 			`}
 			</style>
 		</div> )
 }
-
-//#008080,#70a494,#b4c8a8,#f6edbd,#edbb8a,#de8a5a,#ca562c
 
 export default withParentSize( withTooltip( CO2ForecastGraphBase ) )
 
