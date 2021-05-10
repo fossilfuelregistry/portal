@@ -2,26 +2,26 @@ import React from "react"
 import Loading from "components/Loading"
 import useText from "lib/useText"
 import { getCO2 } from "./util"
-import { Switch } from "antd"
-import { useDispatch, useSelector } from "react-redux"
+import { useSelector } from "react-redux"
 
 const DEBUG = false
 
 function FutureSummary( { data = [] } ) {
 	const { getText } = useText()
-	const gwp = useSelector( redux => redux.gwp )
-	const dispatch = useDispatch()
 	const bestReservesSourceId = useSelector( redux => redux.bestReservesSourceId )
 	const allSources = useSelector( redux => redux.allSources )
 
 	const reservesSource = allSources?.find( s => s.sourceId === bestReservesSourceId ) ?? {}
 
-	if( !( data?.length > 0 ) ) return <Loading/>
+	if ( !( data?.length > 0 ) ) return <Loading/>
 
 	const totals = { stable: 0, decline: 0, authority: 0 }
 
+
 	data.forEach( ( point, i ) => {
-		if( !point.future?.stable?.production ) return
+		if( getCO2( point.future?.decline?.production ) <= 0 ) return
+		if( point.year > 2040 ) return
+		DEBUG && console.log( point.year, point.future )
 		totals.stable += getCO2( point.future.stable.production )
 		totals.decline += getCO2( point.future.decline.production )
 		totals.authority += getCO2( point.future.authority.production )
@@ -89,7 +89,7 @@ function FutureSummary( { data = [] } ) {
               .total {
                 font-weight: 700;
               }
-			`}
+            `}
 			</style>
 		</div>
 	)

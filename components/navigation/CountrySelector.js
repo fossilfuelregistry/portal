@@ -15,7 +15,7 @@ export default function CountrySelector() {
 	const { data: countriesData, loading: loadingCountries, error: errorLoadingCountries }
 		= useQuery( GQL_countries )
 
-	const countries = countriesData?.neCountries?.nodes ?? []
+	const countries = countriesData?.getProducingCountries?.nodes ?? []
 
 	useEffect( () => {
 		if( !countries.length ) return

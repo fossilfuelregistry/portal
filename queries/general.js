@@ -13,7 +13,7 @@ query conversions {
 
 export const GQL_countries = gql`
 query countries {
-  neCountries(orderBy: NAME_ASC) {
+  getProducingCountries {
     nodes { isoA2 name }
   }
 }`
