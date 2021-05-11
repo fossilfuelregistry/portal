@@ -8,7 +8,7 @@ import { withTooltip } from '@visx/tooltip'
 import { localPoint } from '@visx/event'
 import { bisector, max } from 'd3-array'
 import { withParentSize } from "@visx/responsive"
-import { getCO2, getFuelCO2 } from "./util"
+import { _log1_future, getCO2, getFuelCO2 } from "./util"
 import useText from "lib/useText"
 
 const DEBUG = true
@@ -21,11 +21,11 @@ const colors = {
 //#008080,#70a494,#b4c8a8,#f6edbd,#edbb8a,#de8a5a,#ca562c
 
 function CO2ForecastGraphBase( {
-	data, projection, estimate, estimate_prod,
-	parentWidth,
-	tooltipLeft, tooltipTop, tooltipData,
-	hideTooltip, showTooltip
-} ) {
+								   data, projection, estimate, estimate_prod,
+								   parentWidth, cGrade, pGrade,
+								   tooltipLeft, tooltipTop, tooltipData,
+								   hideTooltip, showTooltip
+							   } ) {
 	const { getText } = useText()
 	const height = 500
 	const margin = { left: 0, top: 10 }
@@ -115,169 +115,172 @@ function CO2ForecastGraphBase( {
 
 	return (
 		<div className="graph">
-			<svg width={'100%'} height={height}>
-				<Group left={margin.left} top={0}>
+			<svg width={ '100%' } height={ height }>
+				<Group left={ margin.left } top={ 0 }>
 					<AxisBottom
-						top={height - 30}
-						scale={yearScale}
-						numTicks={parentWidth > 520 ? 8 : 4}
-						tickFormat={x => `${x.toFixed( 0 )}`}
-						tickLabelProps={() => ( {
+						top={ height - 30 }
+						scale={ yearScale }
+						numTicks={ parentWidth > 520 ? 8 : 4 }
+						tickFormat={ x => `${ x.toFixed( 0 ) }` }
+						tickLabelProps={ () => ( {
 							dy: '0.25em',
 							fill: '#222',
 							fontFamily: 'Arial',
 							fontSize: 13,
 							textAnchor: 'middle',
-						} )}
+						} ) }
 					/>
 
 					<AreaStack
-						keys={[ 'oil_c', 'oil_p', 'gas_c', 'gas_p' ]}
-						data={data.map( d => ( {
-							oil_p: getFuelCO2( d.future.reserves.production?.p.oil, estimate_prod ),
-							oil_c: getFuelCO2( d.future.reserves.production?.c.oil, estimate_prod ),
-							gas_p: getFuelCO2( d.future.reserves.production?.p.gas, estimate_prod ),
-							gas_c: getFuelCO2( d.future.reserves.production?.c.gas, estimate_prod ),
-							year: d.year
-						} ) )}
-						x={d => {
+						keys={ [ 'oil_c', 'oil_p', 'gas_c', 'gas_p' ] }
+						data={ data.map( d => {
+							if( d.year === 2025 ) _log1_future( d.year, d.future.reserves )
+							return {
+								oil_p: getFuelCO2( d.future.reserves.production?.p.oil, estimate_prod ),
+								oil_c: getFuelCO2( d.future.reserves.production?.c.oil, estimate_prod ),
+								gas_p: getFuelCO2( d.future.reserves.production?.p.gas, estimate_prod ),
+								gas_c: getFuelCO2( d.future.reserves.production?.c.gas, estimate_prod ),
+								year: d.year
+							}
+						} ) }
+						x={ d => {
 							const x = yearScale( getYear( d.data ) ) ?? 0
 							//console.log( { d, x } )
 							return x
-						}}
-						y0={d => productionScale( getY0( d ) ) ?? 0}
-						y1={d => productionScale( getY1( d ) ) ?? 0}
+						} }
+						y0={ d => productionScale( getY0( d ) ) ?? 0 }
+						y1={ d => productionScale( getY1( d ) ) ?? 0 }
 					>
-						{( { stacks, path } ) =>
+						{ ( { stacks, path } ) =>
 							stacks.map( stack => {
 								return (
 									<path
-										key={`stack-${stack.key}`}
-										d={path( stack ) || ''}
+										key={ `stack-${ stack.key }` }
+										d={ path( stack ) || '' }
 										stroke="transparent"
-										fill={{
+										fill={ {
 											oil_p: colors.oil.reserves,
 											gas_c: colors.gas.contingent,
 											gas_p: colors.gas.reserves,
 											oil_c: colors.oil.contingent
-										}[ stack.key ]}
+										}[ stack.key ] }
 									/>
 								)
-							} )}
+							} ) }
 					</AreaStack>
 
 					<AreaStack
-						keys={[ 'oil', 'gas' ]}
-						data={productionData}
-						defined={d => ( getY0( d ) > 0 || getY1( d ) > 0 ) && d.data.year >= 2010}
-						x={d => {
+						keys={ [ 'oil', 'gas' ] }
+						data={ productionData }
+						defined={ d => ( getY0( d ) > 0 || getY1( d ) > 0 ) && d.data.year >= 2010 }
+						x={ d => {
 							const x = yearScale( getYear( d.data ) ) ?? 0
 							//console.log( { d, x } )
 							return x
-						}}
-						y0={d => productionScale( getY0( d ) ) ?? 0}
-						y1={d => productionScale( getY1( d ) ) ?? 0}
+						} }
+						y0={ d => productionScale( getY0( d ) ) ?? 0 }
+						y1={ d => productionScale( getY1( d ) ) ?? 0 }
 					>
-						{( { stacks, path } ) =>
+						{ ( { stacks, path } ) =>
 							stacks.map( stack => {
 								return (
 									<path
-										key={`stack-${stack.key}`}
-										d={path( stack ) || ''}
+										key={ `stack-${ stack.key }` }
+										d={ path( stack ) || '' }
 										stroke="transparent"
-										fill={{
+										fill={ {
 											oil: colors.oil.past,
 											gas: colors.gas.past,
-										}[ stack.key ]}
+										}[ stack.key ] }
 									/>
 								)
-							} )}
+							} ) }
 					</AreaStack>
 
 					<LinePath
-						curve={curveLinear}
+						curve={ curveLinear }
 						className="projection stable"
-						data={data}
-						defined={d => d.year >= 2010 && getStable( d ) > 0}
-						x={d => yearScale( getYear( d ) ) ?? 0}
-						y={d => productionScale( getStable( d ) ) ?? 0}
+						data={ data }
+						defined={ d => d.year >= 2010 && getStable( d ) > 0 }
+						x={ d => yearScale( getYear( d ) ) ?? 0 }
+						y={ d => productionScale( getStable( d ) ) ?? 0 }
 						shapeRendering="geometricPrecision"
 					/>
 
 					<LinePath
-						curve={curveLinear}
+						curve={ curveLinear }
 						className="projection decline"
-						data={data}
-						defined={d => d.year >= 2010 && getDecline( d ) > 0}
-						x={d => yearScale( getYear( d ) ) ?? 0}
-						y={d => productionScale( getDecline( d ) ) ?? 0}
+						data={ data }
+						defined={ d => d.year >= 2010 && getDecline( d ) > 0 }
+						x={ d => yearScale( getYear( d ) ) ?? 0 }
+						y={ d => productionScale( getDecline( d ) ) ?? 0 }
 						shapeRendering="geometricPrecision"
 					/>
 
 					<LinePath
-						curve={curveLinear}
+						curve={ curveLinear }
 						className="projection auth"
-						data={data}
-						defined={d => d.year >= 2010 && getAuth( d ) > 0}
-						x={d => yearScale( getYear( d ) ) ?? 0}
-						y={d => productionScale( getAuth( d ) ) ?? 0}
+						data={ data }
+						defined={ d => d.year >= 2010 && getAuth( d ) > 0 }
+						x={ d => yearScale( getYear( d ) ) ?? 0 }
+						y={ d => productionScale( getAuth( d ) ) ?? 0 }
 						shapeRendering="geometricPrecision"
 					/>
 
-					{showReserves &&
+					{ showReserves &&
 					<LinePath
-						curve={curveLinear}
+						curve={ curveLinear }
 						className="projection reserves oil"
-						data={data}
-						defined={d => d.year >= 2020 && getFutureReserve( d, 'oil' ) > 0}
-						x={d => yearScale( getYear( d ) ) ?? 0}
-						y={d => reservesScale( getFutureReserve( d, 'oil' ) ) ?? 0}
+						data={ data }
+						defined={ d => d.year >= 2020 && getFutureReserve( d, 'oil' ) > 0 }
+						x={ d => yearScale( getYear( d ) ) ?? 0 }
+						y={ d => reservesScale( getFutureReserve( d, 'oil' ) ) ?? 0 }
 						shapeRendering="geometricPrecision"
-					/>}
+					/> }
 
-					{showReserves &&
+					{ showReserves &&
 					<LinePath
-						curve={curveLinear}
+						curve={ curveLinear }
 						className="projection reserves gas"
-						data={data}
-						defined={d => d.year >= 2020 && getFutureReserve( d, 'gas' ) > 0}
-						x={d => yearScale( getYear( d ) ) ?? 0}
-						y={d => reservesScale( getFutureReserve( d, 'gas' ) ) ?? 0}
+						data={ data }
+						defined={ d => d.year >= 2020 && getFutureReserve( d, 'gas' ) > 0 }
+						x={ d => yearScale( getYear( d ) ) ?? 0 }
+						y={ d => reservesScale( getFutureReserve( d, 'gas' ) ) ?? 0 }
 						shapeRendering="geometricPrecision"
-					/>}
+					/> }
 
 					<AxisRight
-						scale={productionScale}
-						numTicks={parentWidth > 520 ? 8 : 4}
-						tickFormat={x => x.toFixed( 0 ).toString()}
-						tickLabelProps={() => ( {
+						scale={ productionScale }
+						numTicks={ parentWidth > 520 ? 8 : 4 }
+						tickFormat={ x => x.toFixed( 0 ).toString() }
+						tickLabelProps={ () => ( {
 							dx: '0.25em',
 							dy: '0.25em',
 							fill: '#222',
 							fontFamily: 'Arial',
 							fontSize: 13,
 							textAnchor: 'start',
-						} )}
+						} ) }
 					/>
 
-					<text x="40" y="18" transform="rotate(0)" fontSize={13}>
+					<text x="40" y="18" transform="rotate(0)" fontSize={ 13 }>
 						CO²e (e6ton)
 					</text>
 
 				</Group>
 
 				<Bar
-					x={margin.left}
-					y={margin.top}
-					width={parentWidth - margin.left}
-					height={height - margin.top}
+					x={ margin.left }
+					y={ margin.top }
+					width={ parentWidth - margin.left }
+					height={ height - margin.top }
 					fill="transparent"
-					onTouchStart={handleTooltip}
-					onTouchMove={handleTooltip}
-					onMouseMove={handleTooltip}
-					onMouseLeave={() => {
+					onTouchStart={ handleTooltip }
+					onTouchMove={ handleTooltip }
+					onMouseMove={ handleTooltip }
+					onMouseLeave={ () => {
 						hideTooltip()
-					}}
+					} }
 				/>
 
 			</svg>
@@ -289,44 +292,44 @@ function CO2ForecastGraphBase( {
 							<td>
 								<div className="blob gas past"/>
 							</td>
-							<td>{getText( 'gas' )} {getText( 'past_emissions' )}</td>
+							<td>{ getText( 'gas' ) } { getText( 'past_emissions' ) }</td>
 						</tr>
 						<tr>
 							<td>
 								<div className="blob oil past"/>
 							</td>
-							<td>{getText( 'oil' )} {getText( 'past_emissions' )}</td>
+							<td>{ getText( 'oil' ) } { getText( 'past_emissions' ) }</td>
 						</tr>
 						<tr>
 							<td>
 								<div className="blob gas p"/>
 							</td>
-							<td>{getText( 'gas' )}: {getText( 'against_reserves' )}</td>
+							<td>{ getText( 'gas' ) }: { getText( 'against_reserves' ) } {pGrade}</td>
 						</tr>
 						<tr>
 							<td>
 								<div className="blob oil p"/>
 							</td>
-							<td>{getText( 'oil' )}: {getText( 'against_reserves' )}</td>
+							<td>{ getText( 'oil' ) }: { getText( 'against_reserves' ) } {pGrade}</td>
 						</tr>
 						<tr>
 							<td>
 								<div className="blob gas c"/>
 							</td>
-							<td>{getText( 'gas' )}: {getText( 'against_contingent' )}</td>
+							<td>{ getText( 'gas' ) }: { getText( 'against_contingent' ) } {cGrade}</td>
 						</tr>
 						<tr>
 							<td>
 								<div className="blob oil c"/>
 							</td>
-							<td>{getText( 'oil' )} : {getText( 'against_contingent' )}</td>
+							<td>{ getText( 'oil' ) } : { getText( 'against_contingent' ) } {cGrade}</td>
 						</tr>
 					</tbody>
 				</table>
 
 			</div>
 
-			<style jsx>{`
+			<style jsx>{ `
               :global(path.projection) {
                 stroke: #333333;
                 stroke-width: 2;
@@ -381,29 +384,29 @@ function CO2ForecastGraphBase( {
               }
 
               .oil.past {
-                background-color: ${colors.oil.past};
+                background-color: ${ colors.oil.past };
               }
 
               .gas.past {
-                background-color: ${colors.gas.past};
+                background-color: ${ colors.gas.past };
               }
 
               .oil.p {
-                background-color: ${colors.oil.reserves};
+                background-color: ${ colors.oil.reserves };
               }
 
               .gas.p {
-                background-color: ${colors.gas.reserves};
+                background-color: ${ colors.gas.reserves };
               }
 
               .oil.c {
-                background-color: ${colors.oil.contingent};
+                background-color: ${ colors.oil.contingent };
               }
 
               .gas.c {
-                background-color: ${colors.gas.contingent};
+                background-color: ${ colors.gas.contingent };
               }
-			`}
+			` }
 			</style>
 		</div> )
 }

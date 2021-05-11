@@ -3,7 +3,6 @@ import { useQuery } from "@apollo/client"
 import GraphQLStatus from "components/GraphQLStatus"
 import { GQL_countryProductionByIso, GQL_countryReservesByIso } from "queries/country"
 import { Alert, Col, notification, Row } from "antd"
-import { useUnitConversionGraph } from "./UnitConverter"
 import { GQL_sources } from "queries/general"
 import useCalculations from "./util"
 import CO2ForecastGraph from "./CO2ForecastGraph"
@@ -19,7 +18,6 @@ function CO2Forecast( {
 	country, source, grades, onGrades, onSources, projection, estimate, estimate_prod
 } ) {
 	const dispatch = useDispatch()
-	const { co2FromVolume } = useUnitConversionGraph()
 	const { getText } = useText()
 	const [ limits, set_limits ] = useState()
 	const { filteredCombinedDataSet } = useCalculations()
@@ -62,6 +60,7 @@ function CO2Forecast( {
 	}, [ production, reserves, projection, source, grades, estimate, estimate_prod, gwp ] )
 
 	const co2 = dataset?.co2 ?? []
+
 	useEffect( () => {
 		if( !dataset ) return
 		dispatch( { type: 'BESTRESERVESSOURCEID', payload: dataset.bestReservesSourceId } )
@@ -126,6 +125,8 @@ function CO2Forecast( {
 						data={co2}
 						projection={projection}
 						estimate={estimate}
+						cGrade={dataset.cGrade}
+						pGrade={dataset.pGrade}
 						estimate_prod={estimate_prod}
 					/>
 				</Col>

@@ -3,7 +3,7 @@ import { GQL_countries } from "queries/general"
 import GraphQLStatus from "../GraphQLStatus"
 import { Select } from "antd"
 import { useRouter } from "next/router"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 
 export default function CountrySelector() {
@@ -15,7 +15,11 @@ export default function CountrySelector() {
 	const { data: countriesData, loading: loadingCountries, error: errorLoadingCountries }
 		= useQuery( GQL_countries )
 
-	const countries = countriesData?.getProducingCountries?.nodes ?? []
+	const countries = useMemo( () =>
+		( countriesData?.getProducingCountries?.nodes ?? [] )
+			.filter( c => c.name !== null )
+			.sort( ( a, b ) => a.name.localeCompare( b.name ) ),
+	[ countriesData?.getProducingCountries?.nodes?.length ] )
 
 	useEffect( () => {
 		if( !countries.length ) return
@@ -29,29 +33,29 @@ export default function CountrySelector() {
 	}, [ router.query.country, countries?.length ] )
 
 	if( loadingCountries || errorLoadingCountries )
-		return <GraphQLStatus loading={loadingCountries} error={errorLoadingCountries}/>
+		return <GraphQLStatus loading={ loadingCountries } error={ errorLoadingCountries }/>
 
 	return (
 		<Select
 			showSearch
-			style={{ minWidth: 120, width: '100%' }}
-			value={value}
-			labelInValue={true}
-			placeholder={texts?.country + '...'}
+			style={ { minWidth: 120, width: '100%' } }
+			value={ value }
+			labelInValue={ true }
+			placeholder={ texts?.country + '...' }
 			optionFilterProp="children"
-			onChange={async v => {
+			onChange={ async v => {
 				set_value( v )
 				dispatch( { type: 'COUNTRY', payload: v } )
 				await router.replace( {
 					pathname: router.pathname,
 					query: { ...router.query, country: v.value }
 				} )
-			}}
-			filterOption={( input, option ) =>
+			} }
+			filterOption={ ( input, option ) =>
 				option.children?.toLowerCase().indexOf( input?.toLowerCase() ) >= 0
 			}
 		>
-			{countries.map( c => ( <Select.Option key={c.isoA2?.toLowerCase()}>{c.name}</Select.Option> ) )}
+			{ countries.map( c => ( <Select.Option key={ c.isoA2?.toLowerCase() }>{ c.name }</Select.Option> ) ) }
 		</Select>
 	)
 }

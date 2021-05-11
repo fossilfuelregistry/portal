@@ -177,6 +177,19 @@ export function findLastReservesYear( data ) {
 	return { lastOilYear, lastGasYear, yearData }
 }
 
+export function _log1_future( y, p ) {
+	console.log( y,
+		p.production?.p.oil.scope1.co2,
+		p.production?.p.oil.scope3.co2,
+		p.production?.p.gas.scope1.co2,
+		p.production?.p.gas.scope3.co2,
+		p.production?.c.oil.scope1.co2,
+		p.production?.c.oil.scope3.co2,
+		p.production?.c.gas.scope1.co2,
+		p.production?.c.gas.scope3.co2,
+	)
+}
+
 export default function useCalculations() {
 	const { co2FromVolume } = useUnitConversionGraph()
 
@@ -248,13 +261,27 @@ export default function useCalculations() {
 			c: clone( emptyPoint.reserves )
 		}
 
+		const gradesToUse = '3x12'
+
+		let pGrade = -1, cGrade = -1
 		bestReserves.forEach( r => {
-			if( r.grade?.[ 1 ] === 'p' )
+			if( r.grade?.[ 1 ] === 'p' ) {
+				pGrade = Math.max( pGrade, gradesToUse.indexOf( r.grade?.[ 0 ] ) )
+			}
+			if( r.grade?.[ 1 ] === 'c' ) {
+				cGrade = Math.max( cGrade, gradesToUse.indexOf( r.grade?.[ 0 ] ) )
+			}
+		} )
+		if( pGrade < 0 ) pGrade = 'na'
+		else pGrade = gradesToUse[ pGrade ] + 'p'
+		if( cGrade < 0 ) cGrade = 'na'
+		else cGrade = gradesToUse[ cGrade ] + 'c'
+
+		bestReserves.forEach( r => {
+			if( r.grade === pGrade )
 				addCO2( initialReserves.p, r.fossilFuelType, co2FromVolume( r ) )
-			else if( r.grade?.[ 1 ] === 'c' )
+			else if( r.grade === cGrade )
 				addCO2( initialReserves.c, r.fossilFuelType, co2FromVolume( r ) )
-			else
-				throw new Error( "Encountered an unknown reserves grade: " + r.grade )
 		} )
 
 		DEBUG && console.log( {
@@ -286,7 +313,7 @@ export default function useCalculations() {
 
 		DEBUG && console.log( 'Estimate Futures for', _projection, projection, lastOilYear, lastGasYear, lastOilDataIndex, lastGasDataIndex, yearData )
 
-		if( lastGasDataIndex < 0 || lastOilDataIndex < 0 ) throw new Error( `Failed to find year for last production in dataset: ${lastOilYear} ${lastGasYear} >> ${lastOilDataIndex} ${lastGasDataIndex} ` )
+		if( lastGasDataIndex < 0 || lastOilDataIndex < 0 ) throw new Error( `Failed to find year for last production in dataset: ${ lastOilYear } ${ lastGasYear } >> ${ lastOilDataIndex } ${ lastGasDataIndex } ` )
 
 		// Extrapolate production so oil and gas end same year.
 
@@ -310,10 +337,10 @@ export default function useCalculations() {
 		declinedValues.future.decline.production = clone( lastProduction?.production )
 
 		lastProduction.future.reserves = clone( initialReserves )
-		//DEBUG && console.log( JSON.stringify( initialReserves ) )
+		DEBUG && console.log( { initialReserves } )
 		let remainingReserves = clone( initialReserves )
 
-		//DEBUG && console.log( { lastProduction, lastOilDataIndex, lastGasDataIndex, declinedValues } )
+		DEBUG && console.log( { lastProduction, lastOilDataIndex, lastGasDataIndex, declinedValues } )
 
 		for( let year = lastProduction.year; year <= 2040; year++ ) {
 			//console.log( { year, lastDataIndex } )
@@ -358,9 +385,9 @@ export default function useCalculations() {
 		}
 
 		DEBUG && console.log( 'dataSetEstimateFutures', { dataset } )
-		//console.log( JSON.stringify( dataset.find( d => d.year === 2018 )?.production, null, 2 ) )
+		//console.log( JSON.stringify( dataset.find( d => d.year === 2030 )?.production, null, 2 ) )
 
-		return { co2: dataset, bestReservesSourceId: bestSourceId, lastYearOfBestReserve }
+		return { co2: dataset, bestReservesSourceId: bestSourceId, lastYearOfBestReserve, pGrade, cGrade }
 	}
 
 	return { filteredCombinedDataSet }
