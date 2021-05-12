@@ -1,5 +1,5 @@
 /* eslint-disable */
-const withLess = require( '@zeit/next-less' )
+const withAntdLess = require('next-plugin-antd-less');
 const lessToJS = require( 'less-vars-to-js' )
 const fs = require( 'fs' )
 const path = require( 'path' )
@@ -9,44 +9,18 @@ const themeVariables = lessToJS(
 	fs.readFileSync( path.resolve( __dirname, './assets/antd-custom.less' ), 'utf8' )
 )
 
-module.exports = withLess( {
-	lessLoaderOptions: {
-		javascriptEnabled: true,
-		modifyVars: themeVariables, // make your antd custom effective
+module.exports = withAntdLess( {
+	future: {
+		webpack5: true,
 	},
+	modifyVars: themeVariables,
 	publicRuntimeConfig: { themeVariables },
-	webpack: ( config, { isServer } ) => {
-		if( isServer ) {
-			const antStyles = /antd\/.*?\/style.*?/
-			const origExternals = [ ...config.externals ]
-			config.externals = [
-				( context, request, callback ) => {
-					if( request.match( antStyles ) ) return callback()
-					if( typeof origExternals[ 0 ] === 'function' ) {
-						origExternals[ 0 ]( context, request, callback )
-					} else {
-						callback()
-					}
-				},
-				...( typeof origExternals[ 0 ] === 'function' ? [] : origExternals ),
-			]
-
-			config.module.rules.unshift( {
-				test: antStyles,
-				use: 'null-loader',
-			} )
-		}
-
+	webpack: ( config ) => {
 		config.resolve.modules.push( path.resolve( './' ) )
-
 		return config
 	},
 	i18n: {
-		// These are all the locales you want to support in
-		// your application
 		locales: [ 'en', 'fr' ],
-		// This is the default locale you want to be used when visiting
-		// a non-locale prefixed path e.g. `/hello`
 		defaultLocale: 'en'
 	},
 } )

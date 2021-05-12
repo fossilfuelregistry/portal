@@ -134,7 +134,7 @@ function CO2ForecastGraphBase( {
 					<AreaStack
 						keys={ [ 'oil_c', 'oil_p', 'gas_c', 'gas_p' ] }
 						data={ data.map( d => {
-							if( d.year === 2025 ) _log1_future( d.year, d.future.reserves )
+							//if( d.year === 2025 ) _log1_future( d.year, d.future.reserves )
 							return {
 								oil_p: getFuelCO2( d.future.reserves.production?.p.oil, estimate_prod ),
 								oil_c: getFuelCO2( d.future.reserves.production?.c.oil, estimate_prod ),

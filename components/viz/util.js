@@ -232,6 +232,18 @@ export default function useCalculations() {
 
 		// Find latest reserves estimate from highest quality source.
 
+		const _reserveSources = reserves.reduce( ( sources, datapoint ) => {
+			if( sources[ datapoint.sourceId ] )
+				sources[ datapoint.sourceId ].quality = datapoint.quality
+			else
+				sources[ datapoint.sourceId ] = { quality: datapoint.quality, sourceId: datapoint.sourceId }
+			return sources
+		}, {} )
+
+		const reserveSources = Object.keys( _reserveSources )
+			.map( k => _reserveSources[ k ] )
+			.sort( ( a, b ) => Math.sign( a.quality - b.quality ) )
+
 		const qualitySources = reserves.reduce( ( qualities, datapoint ) => {
 			if( qualities[ datapoint.quality ] )
 				qualities[ datapoint.quality ][ datapoint.sourceId ] = true
@@ -244,8 +256,9 @@ export default function useCalculations() {
 
 		const bestSourceQuality = max( qualities )
 		const bestSources = Object.keys( qualitySources[ bestSourceQuality ] ?? {} ).map( q => parseInt( q ) )
-		const bestSourceId = bestSources[ 0 ]
+		const bestSourceId = bestSources[ 0 ] // Pick first source if there are several.
 
+		// Build an array of years of best source
 		const years = Object.keys( reserves
 			.filter( datapoint => bestSources.includes( datapoint.sourceId ) )
 			.reduce( ( years, datapoint ) => {
@@ -285,6 +298,7 @@ export default function useCalculations() {
 		} )
 
 		DEBUG && console.log( {
+			reserveSources,
 			qualitySources,
 			qualities,
 			bestSourceQuality,
