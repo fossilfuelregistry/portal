@@ -21,11 +21,11 @@ const colors = {
 //#008080,#70a494,#b4c8a8,#f6edbd,#edbb8a,#de8a5a,#ca562c
 
 function CO2ForecastGraphBase( {
-								   data, projection, estimate, estimate_prod,
-								   parentWidth, cGrade, pGrade,
-								   tooltipLeft, tooltipTop, tooltipData,
-								   hideTooltip, showTooltip
-							   } ) {
+	data, projection, estimate, estimate_prod,
+	parentWidth, cGrade, pGrade,
+	tooltipLeft, tooltipTop, tooltipData,
+	hideTooltip, showTooltip
+} ) {
 	const { getText } = useText()
 	const height = 500
 	const margin = { left: 0, top: 10 }
@@ -304,25 +304,25 @@ function CO2ForecastGraphBase( {
 							<td>
 								<div className="blob gas p"/>
 							</td>
-							<td>{ getText( 'gas' ) }: { getText( 'against_reserves' ) } {pGrade}</td>
+							<td>{ getText( 'gas' ) }: { getText( 'against_reserves' ) } { pGrade }</td>
 						</tr>
 						<tr>
 							<td>
 								<div className="blob oil p"/>
 							</td>
-							<td>{ getText( 'oil' ) }: { getText( 'against_reserves' ) } {pGrade}</td>
+							<td>{ getText( 'oil' ) }: { getText( 'against_reserves' ) } { pGrade }</td>
 						</tr>
 						<tr>
 							<td>
 								<div className="blob gas c"/>
 							</td>
-							<td>{ getText( 'gas' ) }: { getText( 'against_contingent' ) } {cGrade}</td>
+							<td>{ getText( 'gas' ) }: { getText( 'against_contingent' ) } { cGrade }</td>
 						</tr>
 						<tr>
 							<td>
 								<div className="blob oil c"/>
 							</td>
-							<td>{ getText( 'oil' ) } : { getText( 'against_contingent' ) } {cGrade}</td>
+							<td>{ getText( 'oil' ) } : { getText( 'against_contingent' ) } { cGrade }</td>
 						</tr>
 					</tbody>
 				</table>

@@ -111,10 +111,6 @@ export default function CO2ForecastPage() {
 							</div>
 						</Col>
 
-						<Col xs={24} md={12} lg={6}>
-							<h3>{getText( 'carbon_intensity' )}</h3>
-							<CarbonIntensitySelector/>
-						</Col>
 					</Row>
 
 					<CO2Forecast
