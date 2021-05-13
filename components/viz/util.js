@@ -3,6 +3,7 @@ import { max } from 'd3-array'
 import _get from 'lodash/get'
 import _set from 'lodash/set'
 import { useUnitConversionGraph } from './UnitConverter'
+import { useDispatch } from "react-redux";
 
 const DEBUG = true
 
@@ -190,8 +191,27 @@ export function _log1_future( y, p ) {
 	)
 }
 
+function _getGradesToUse( reserves ) {
+	let pGrade = -1, cGrade = -1
+	const gradesToUse = '3x12'
+	reserves.forEach( r => {
+		if( r.grade?.[ 1 ] === 'p' ) {
+			pGrade = Math.max( pGrade, gradesToUse.indexOf( r.grade?.[ 0 ] ) )
+		}
+		if( r.grade?.[ 1 ] === 'c' ) {
+			cGrade = Math.max( cGrade, gradesToUse.indexOf( r.grade?.[ 0 ] ) )
+		}
+	} )
+	if( pGrade < 0 ) pGrade = 'na'
+	else pGrade = gradesToUse[ pGrade ] + 'p'
+	if( cGrade < 0 ) cGrade = 'na'
+	else cGrade = gradesToUse[ cGrade ] + 'c'
+	return { pGrade, cGrade }
+}
+
 export default function useCalculations() {
 	const { co2FromVolume } = useUnitConversionGraph()
+	const dispatch = useDispatch()
 
 	function filteredCombinedDataSet( production, reserves, fossilFuelTypes, sourceId, grades, futureSource, _projection ) {
 		if( !sourceId ) return []
@@ -230,19 +250,35 @@ export default function useCalculations() {
 
 		dataset.push( point )
 
-		// Find latest reserves estimate from highest quality source.
-
+		// List of available reserve sources
 		const _reserveSources = reserves.reduce( ( sources, datapoint ) => {
-			if( sources[ datapoint.sourceId ] )
+			if( sources[ datapoint.sourceId ] ) {
 				sources[ datapoint.sourceId ].quality = datapoint.quality
-			else
-				sources[ datapoint.sourceId ] = { quality: datapoint.quality, sourceId: datapoint.sourceId }
+				sources[ datapoint.sourceId ].lastYear = Math.max( datapoint.year, sources[ datapoint.sourceId ].lastYear )
+			} else {
+				sources[ datapoint.sourceId ] = {
+					quality: datapoint.quality,
+					sourceId: datapoint.sourceId,
+					lastYear: datapoint.year,
+				}
+			}
 			return sources
 		}, {} )
 
 		const reserveSources = Object.keys( _reserveSources )
 			.map( k => _reserveSources[ k ] )
-			.sort( ( a, b ) => Math.sign( a.quality - b.quality ) )
+			.sort( ( a, b ) => Math.sign( b.quality - a.quality ) )
+
+		// Find latest reserves estimate from sources.
+		reserveSources.forEach( source => {
+			const sourceReserve = reserves.filter( datapoint => datapoint.year === source.lastYear && datapoint.sourceId === source.sourceId )
+			const grades = _getGradesToUse( sourceReserve )
+			source.pGrade = grades.pGrade
+			source.cGrade = grades.cGrade
+			source.reserves = sourceReserve.filter( datapoint => datapoint.grade === source.pGrade || datapoint.grade === source.cGrade )
+		} )
+
+		dispatch( { type: 'AVAILABLERESERVESOURCES', payload: reserveSources } )
 
 		const qualitySources = reserves.reduce( ( qualities, datapoint ) => {
 			if( qualities[ datapoint.quality ] )
@@ -274,21 +310,7 @@ export default function useCalculations() {
 			c: clone( emptyPoint.reserves )
 		}
 
-		const gradesToUse = '3x12'
-
-		let pGrade = -1, cGrade = -1
-		bestReserves.forEach( r => {
-			if( r.grade?.[ 1 ] === 'p' ) {
-				pGrade = Math.max( pGrade, gradesToUse.indexOf( r.grade?.[ 0 ] ) )
-			}
-			if( r.grade?.[ 1 ] === 'c' ) {
-				cGrade = Math.max( cGrade, gradesToUse.indexOf( r.grade?.[ 0 ] ) )
-			}
-		} )
-		if( pGrade < 0 ) pGrade = 'na'
-		else pGrade = gradesToUse[ pGrade ] + 'p'
-		if( cGrade < 0 ) cGrade = 'na'
-		else cGrade = gradesToUse[ cGrade ] + 'c'
+		let { pGrade, cGrade } = _getGradesToUse( bestReserves )
 
 		bestReserves.forEach( r => {
 			if( r.grade === pGrade )
@@ -401,7 +423,14 @@ export default function useCalculations() {
 		DEBUG && console.log( 'dataSetEstimateFutures', { dataset } )
 		//console.log( JSON.stringify( dataset.find( d => d.year === 2030 )?.production, null, 2 ) )
 
-		return { co2: dataset, bestReservesSourceId: bestSourceId, lastYearOfBestReserve, pGrade, cGrade }
+		return {
+			co2: dataset,
+			bestReservesSourceId: bestSourceId,
+			lastYearOfBestReserve,
+			reserveSources,
+			pGrade,
+			cGrade
+		}
 	}
 
 	return { filteredCombinedDataSet }

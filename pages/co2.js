@@ -2,13 +2,13 @@ import React, { useState } from "react"
 import TopNavigation from "components/navigation/TopNavigation"
 import getConfig from 'next/config'
 import CountrySelector from "components/navigation/CountrySelector"
-import { Col, Radio, Row, Slider } from "antd"
-import { useRouter } from "next/router"
+import { Col, Radio, Row } from "antd"
 import CO2Forecast from "components/viz/CO2Forecast"
 import useText from "lib/useText"
 import { NextSeo } from "next-seo"
 import { useSelector } from "react-redux"
-import CarbonIntensitySelector from "../components/viz/IntensitySelector"
+import CarbonIntensitySelector from "components/viz/IntensitySelector"
+import ReservesSelector from "components/viz/ReservesSelector"
 
 const DEBUG = false
 
@@ -37,13 +37,13 @@ export default function CO2ForecastPage() {
 
 	const reservesSource = allSources?.find( s => s.sourceId === bestReservesSourceId ) ?? {}
 
-	const title = ( country?.label ? country.label + ' - ' :'' ) + getText( 'co2_effects_for_country' )
+	const title = ( country?.label ? country.label + ' - ' : '' ) + getText( 'co2_effects_for_country' )
 	return (
 		<>
 			<NextSeo
-				title={title}
-				description={getText( 'a_service_from_gffr' )}
-				openGraph={{
+				title={ title }
+				description={ getText( 'a_service_from_gffr' ) }
+				openGraph={ {
 					url: 'https://grff.journeyman.se',
 					title: getText( 'gffr' ),
 					description: title,
@@ -56,79 +56,85 @@ export default function CO2ForecastPage() {
 						}
 					],
 					site_name: getText( 'gffr' ),
-				}}
+				} }
 			/>
 
 			<div className="page">
-				<TopNavigation share={true}/>
+				<TopNavigation share={ true }/>
 
 				<div className="co2">
 
-					<Row gutter={[ 12, 12 ]} style={{ marginBottom: 26 }}>
+					<Row gutter={ [ 12, 12 ] } style={ { marginBottom: 26 } }>
 
-						<Col xs={12} lg={6}>
-							<h3>{getText( 'country' )}</h3>
+						<Col xs={ 12 } lg={ 6 }>
+							<h3>{ getText( 'country' ) }</h3>
 							<CountrySelector/>
 						</Col>
 
-						<Col xs={12} lg={4}>
-							<h3>{getText( 'data_source' )}</h3>
+						<Col xs={ 12 } lg={ 4 }>
+							<h3>{ getText( 'data_source' ) }</h3>
 							<Radio.Group
-								onChange={e => {
+								onChange={ e => {
 									set_selectedSource( e.target.value )
-								}}
-								value={selectedSource}
+								} }
+								value={ selectedSource }
 							>
-								{productionSources.map( source => (
-									<Radio style={radioStyle} value={source?.sourceId} key={source?.sourceId}>
-										{source?.name}
-									</Radio> ) )}
+								{ productionSources.map( source => (
+									<Radio style={ radioStyle } value={ source?.sourceId } key={ source?.sourceId }>
+										{ source?.name }
+									</Radio> ) ) }
 							</Radio.Group>
 						</Col>
 
-						<Col xs={12} lg={3}>
-							<h3>{getText( 'reserves' )}</h3>
-							{reservesSource.name}
+						<Col xs={ 12 } lg={ 5 }>
+							<h3>{ getText( 'reserves' ) }</h3>
+							{ reservesSource.name }
 							&nbsp;
-							{reservesSource?.name?.length > 0 && `(${lastYearOfBestReserve})`}
+							{ reservesSource?.name?.length > 0 && `(${ lastYearOfBestReserve })` }
+							<ReservesSelector/>
 						</Col>
 
-						<Col xs={12} lg={5}>
+						<Col xs={ 12 } lg={ 5 }>
 							<div>
-								<h3>{getText( 'projection' )}</h3>
-								<Radio.Group onChange={e => set_projection( e.target.value )} value={projection}>
-									{futureSources.map( source => (
-										<Radio style={radioStyle} value={source?.sourceId} key={source?.sourceId}>
-											{source?.name}
-										</Radio> ) )}
-									<Radio style={radioStyle} value={'stable'}>
-										{getText( 'stable' )}
+								<h3>{ getText( 'projection' ) }</h3>
+								<Radio.Group onChange={ e => set_projection( e.target.value ) } value={ projection }>
+									{ futureSources.map( source => (
+										<Radio style={ radioStyle } value={ source?.sourceId } key={ source?.sourceId }>
+											{ source?.name }
+										</Radio> ) ) }
+									<Radio style={ radioStyle } value={ 'stable' }>
+										{ getText( 'stable' ) }
 									</Radio>
-									<Radio style={radioStyle} value={'decline'}>
-										{getText( 'declining' )}
+									<Radio style={ radioStyle } value={ 'decline' }>
+										{ getText( 'declining' ) }
 									</Radio>
 								</Radio.Group>
 							</div>
 						</Col>
 
+						<Col xs={ 24 } md={ 12 } lg={ 4 }>
+							<h3>{ getText( 'carbon_intensity' ) }</h3>
+							<CarbonIntensitySelector/>
+						</Col>
+
 					</Row>
 
 					<CO2Forecast
-						country={country?.value}
-						source={productionSources[ selectedSource ]}
-						grades={grades}
-						estimate={estimate}
-						estimate_prod={estimate_prod}
-						projection={projection}
-						onGrades={set_grades}
-						onSources={s => {
+						country={ country?.value }
+						source={ productionSources[ selectedSource ] }
+						grades={ grades }
+						estimate={ estimate }
+						estimate_prod={ estimate_prod }
+						projection={ projection }
+						onGrades={ set_grades }
+						onSources={ s => {
 							set_productionSources( s.productionSources )
 							set_futureSources( s.futureSources )
-						}}
+						} }
 					/>
 				</div>
 
-				<style jsx>{`
+				<style jsx>{ `
                   .page {
                     padding-bottom: 20px;
                   }
@@ -137,7 +143,7 @@ export default function CO2ForecastPage() {
                     padding: 0 40px;
                   }
 
-                  @media (max-width: ${theme[ '@screen-sm' ]}) {
+                  @media (max-width: ${ theme[ '@screen-sm' ] }) {
                     .co2 {
                       padding: 0 18px;
                     }
@@ -157,7 +163,7 @@ export default function CO2ForecastPage() {
                     top: -4px;
                     transform: translateX(-6.5px);
                   }
-				`}
+				` }
 				</style>
 
 			</div>

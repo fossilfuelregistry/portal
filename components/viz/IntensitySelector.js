@@ -22,7 +22,8 @@ export default function CarbonIntensitySelector() {
 
 		set_options( _options )
 	}, [ constants ] )
-
+	// 			{options.map( c => ( <Select.Option key={c.toUnit}>{c.label}</Select.Option> ) )}
+	
 	return (
 		<Select
 			style={{ minWidth: 120, width: '100%' }}
@@ -34,7 +35,8 @@ export default function CarbonIntensitySelector() {
 				dispatch( { type: 'GWP', payload: v.value } )
 			}}
 		>
-			{options.map( c => ( <Select.Option key={c.toUnit}>{c.label}</Select.Option> ) )}
+			<Select.Option value="kgco2e_100">GWP100</Select.Option>
+			<Select.Option value="kgco2e_20">GWP20</Select.Option>
 		</Select>
 	)
 }
