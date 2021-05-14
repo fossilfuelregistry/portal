@@ -2,10 +2,27 @@ import React from "react"
 import Loading from "components/Loading"
 import useText from "lib/useText"
 import { addCO2 } from "./util"
+import { QuestionCircleOutlined } from '@ant-design/icons'
+import ReactMarkdown from 'react-markdown'
+import { Modal } from "antd"
+import getConfig from "next/config";
 
 const DEBUG = false
 
-function InputSummary( { data = [] } ) {
+const theme = getConfig()?.publicRuntimeConfig?.themeVariables
+
+function helpModal( title, content ) {
+	return Modal.info( {
+		title,
+		content: ( <ReactMarkdown>{ content }</ReactMarkdown> )
+	} )
+}
+
+function InputSummary(
+	{
+		data = []
+	}
+) {
 	const { getText } = useText()
 
 	if( !( data?.length > 0 ) ) return <Loading/>
@@ -27,60 +44,95 @@ function InputSummary( { data = [] } ) {
 			<table>
 				<thead>
 					<tr>
-						<th colSpan={3}>{getText( 'past_emissions' )} e9 kg CO²e</th>
+						<th colSpan={ 3 }>
+							{ getText( 'past_emissions' ) } e9 kg CO²e
+							{ ' ' }
+							<QuestionCircleOutlined
+								style={{ color: theme[ '@primary-color' ] }}
+								onClick={ () => helpModal( getText( 'ranges' ), getText( 'explanation_of_ranges' ) ) }
+							/>
+						</th>
 					</tr>
 				</thead>
 				<tbody>
 					<tr className="subheader">
-						<td>{getText( 'oil' )}</td>
-						<td align="right">{getText( 'low' )}</td>
-						<td align="right">{getText( 'high' )}</td>
+						<td>{ getText( 'oil' ) }</td>
+						<td align="right">{ getText( 'low' ) }</td>
+						<td align="right">{ getText( 'high' ) }</td>
 					</tr>
 					<tr>
-						<td>{getText( 'scope' )} 1</td>
-						<td align="right">{_( totals.oil.scope1.range[ 0 ] )}</td>
-						<td align="right">{_( totals.oil.scope1.range[ 1 ] )}</td>
+						<td>
+							{ getText( 'scope' ) } 1
+							{ ' ' }
+							<QuestionCircleOutlined
+								style={{ color: theme[ '@primary-color' ] }}
+								onClick={ () => helpModal( getText( 'scopes' ), getText( 'explanation_of_scopes' ) ) }
+							/>
+						</td>
+						<td align="right">{ _( totals.oil.scope1.range[ 0 ] ) }</td>
+						<td align="right">{ _( totals.oil.scope1.range[ 1 ] ) }</td>
 					</tr>
 					<tr>
-						<td>{getText( 'scope' )} 3</td>
-						<td align="right">{_( totals.oil.scope3.range[ 0 ] )}</td>
-						<td align="right">{_( totals.oil.scope3.range[ 1 ] )}</td>
+						<td>
+							{ getText( 'scope' ) } 3
+							{ ' ' }
+							<QuestionCircleOutlined
+								style={{ color: theme[ '@primary-color' ] }}
+								onClick={ () => helpModal( getText( 'scopes' ), getText( 'explanation_of_scopes' ) ) }
+							/>
+						</td>
+						<td align="right">{ _( totals.oil.scope3.range[ 0 ] ) }</td>
+						<td align="right">{ _( totals.oil.scope3.range[ 1 ] ) }</td>
 					</tr>
 					<tr className="total">
-						<td>{getText( 'oil' )} {getText( 'total' )}</td>
-						<td align="right">{_( totals.oil.scope1.range[ 0 ] + totals.oil.scope3.range[ 0 ] )}</td>
-						<td align="right">{_( totals.oil.scope1.range[ 1 ] + totals.oil.scope3.range[ 1 ] )}</td>
+						<td>{ getText( 'oil' ) } { getText( 'total' ) }</td>
+						<td align="right">{ _( totals.oil.scope1.range[ 0 ] + totals.oil.scope3.range[ 0 ] ) }</td>
+						<td align="right">{ _( totals.oil.scope1.range[ 1 ] + totals.oil.scope3.range[ 1 ] ) }</td>
 					</tr>
 
 					<tr className="subheader">
-						<td>{getText( 'gas' )}</td>
-						<td align="right">{getText( 'low' )}</td>
-						<td align="right">{getText( 'high' )}</td>
+						<td>{ getText( 'gas' ) }</td>
+						<td align="right">{ getText( 'low' ) }</td>
+						<td align="right">{ getText( 'high' ) }</td>
 					</tr>
 					<tr>
-						<td>{getText( 'scope' )} 1</td>
-						<td align="right">{_( totals.gas.scope1.range[ 0 ] )}</td>
-						<td align="right">{_( totals.gas.scope1.range[ 1 ] )}</td>
+						<td>
+							{ getText( 'scope' ) } 1
+							{ ' ' }
+							<QuestionCircleOutlined
+								style={{ color: theme[ '@primary-color' ] }}
+								onClick={ () => helpModal( getText( 'ranges' ), getText( 'explanation_of_ranges' ) ) }
+							/>
+						</td>
+						<td align="right">{ _( totals.gas.scope1.range[ 0 ] ) }</td>
+						<td align="right">{ _( totals.gas.scope1.range[ 1 ] ) }</td>
 					</tr>
 					<tr>
-						<td>{getText( 'scope' )} 3</td>
-						<td align="right">{_( totals.gas.scope3.range[ 0 ] )}</td>
-						<td align="right">{_( totals.gas.scope3.range[ 1 ] )}</td>
+						<td>
+							{ getText( 'scope' ) } 3
+							{ ' ' }
+							<QuestionCircleOutlined
+								style={{ color: theme[ '@primary-color' ] }}
+								onClick={ () => helpModal( getText( 'ranges' ), getText( 'explanation_of_ranges' ) ) }
+							/>
+						</td>
+						<td align="right">{ _( totals.gas.scope3.range[ 0 ] ) }</td>
+						<td align="right">{ _( totals.gas.scope3.range[ 1 ] ) }</td>
 					</tr>
 					<tr className="total">
-						<td>{getText( 'gas' )} {getText( 'total' )}</td>
-						<td align="right">{_( totals.gas.scope1.range[ 0 ] + totals.gas.scope3.range[ 0 ] )}</td>
-						<td align="right">{_( totals.gas.scope1.range[ 1 ] + totals.gas.scope3.range[ 1 ] )}</td>
+						<td>{ getText( 'gas' ) } { getText( 'total' ) }</td>
+						<td align="right">{ _( totals.gas.scope1.range[ 0 ] + totals.gas.scope3.range[ 0 ] ) }</td>
+						<td align="right">{ _( totals.gas.scope1.range[ 1 ] + totals.gas.scope3.range[ 1 ] ) }</td>
 					</tr>
 					<tr className="total subheader">
-						<td>{getText( 'totals' )}</td>
-						<td align="right">{_( totals.gas.scope1.range[ 0 ] + totals.gas.scope3.range[ 0 ] + totals.oil.scope1.range[ 0 ] + totals.oil.scope3.range[ 0 ] )}</td>
-						<td align="right">{_( totals.gas.scope1.range[ 1 ] + totals.gas.scope3.range[ 1 ] + totals.oil.scope1.range[ 1 ] + totals.oil.scope3.range[ 1 ] )}</td>
+						<td>{ getText( 'totals' ) }</td>
+						<td align="right">{ _( totals.gas.scope1.range[ 0 ] + totals.gas.scope3.range[ 0 ] + totals.oil.scope1.range[ 0 ] + totals.oil.scope3.range[ 0 ] ) }</td>
+						<td align="right">{ _( totals.gas.scope1.range[ 1 ] + totals.gas.scope3.range[ 1 ] + totals.oil.scope1.range[ 1 ] + totals.oil.scope3.range[ 1 ] ) }</td>
 					</tr>
 				</tbody>
 			</table>
 
-			<style jsx>{`
+			<style jsx>{ `
               .table-wrap {
                 border: 1px solid #dddddd;
                 border-radius: 8px;
@@ -114,7 +166,7 @@ function InputSummary( { data = [] } ) {
               .total td {
                 font-weight: 700;
               }
-			`}
+			` }
 			</style>
 		</div> )
 }
