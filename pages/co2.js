@@ -6,7 +6,7 @@ import { Col, Radio, Row } from "antd"
 import CO2Forecast from "components/viz/CO2Forecast"
 import useText from "lib/useText"
 import { NextSeo } from "next-seo"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import CarbonIntensitySelector from "components/viz/IntensitySelector"
 import ReservesSelector from "components/viz/ReservesSelector"
 
@@ -22,6 +22,7 @@ const radioStyle = {
 
 export default function CO2ForecastPage() {
 	const { getText } = useText()
+	const dispatch = useDispatch()
 	const [ grades, set_grades ] = useState( {} )
 	const [ estimate, set_estimate ] = useState( 2 )
 	const [ estimate_prod, set_estimate_prod ] = useState( 2 )
@@ -30,12 +31,7 @@ export default function CO2ForecastPage() {
 	const [ futureSources, set_futureSources ] = useState( [] )
 	const [ selectedSource, set_selectedSource ] = useState()
 
-	const bestReservesSourceId = useSelector( redux => redux.bestReservesSourceId )
-	const lastYearOfBestReserve = useSelector( redux => redux.lastYearOfBestReserve )
-	const allSources = useSelector( redux => redux.allSources )
 	const country = useSelector( redux => redux.country )
-
-	const reservesSource = allSources?.find( s => s.sourceId === bestReservesSourceId ) ?? {}
 
 	const title = ( country?.label ? country.label + ' - ' : '' ) + getText( 'co2_effects_for_country' )
 	return (
@@ -76,6 +72,7 @@ export default function CO2ForecastPage() {
 							<Radio.Group
 								onChange={ e => {
 									set_selectedSource( e.target.value )
+									dispatch( { type: 'PRODUCTIONSOURCEID', payload: e.target.value } )
 								} }
 								value={ selectedSource }
 							>
@@ -88,9 +85,6 @@ export default function CO2ForecastPage() {
 
 						<Col xs={ 12 } lg={ 5 }>
 							<h3>{ getText( 'reserves' ) }</h3>
-							{ reservesSource.name }
-							&nbsp;
-							{ reservesSource?.name?.length > 0 && `(${ lastYearOfBestReserve })` }
 							<ReservesSelector/>
 						</Col>
 

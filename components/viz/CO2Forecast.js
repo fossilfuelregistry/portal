@@ -20,26 +20,25 @@ function CO2Forecast( {
 	const dispatch = useDispatch()
 	const { getText } = useText()
 	const [ limits, set_limits ] = useState()
-	const { filteredCombinedDataSet } = useCalculations()
+	const { filteredCombinedDataSet, updateReserves } = useCalculations()
 	const gwp = useSelector( redux => redux.gwp )
 
 	const { data: sourcesData, loading: loadingSources, error: errorLoadingSources }
 		= useQuery( GQL_sources )
 	const allSources = sourcesData?.sources?.nodes ?? []
+
 	useEffect( () => {
 		if( allSources.length > 0 )
 			dispatch( { type: 'ALLSOURCES', payload: allSources } )
 	}, [ allSources ] )
 
 	const { data: productionData, loading: loadingProduction, error: errorLoadingProduction }
-		= useQuery( GQL_countryProductionByIso,
-			{ variables: { iso3166: country }, skip: !country } )
+		= useQuery( GQL_countryProductionByIso, { variables: { iso3166: country }, skip: !country } )
 	const production = productionData?.countryProductions?.nodes ?? []
 
 
 	const { data: reservesData, loading: loadingReserves, error: errorLoadingReserves }
-		= useQuery( GQL_countryReservesByIso,
-			{ variables: { iso3166: country }, skip: !country } )
+		= useQuery( GQL_countryReservesByIso, { variables: { iso3166: country }, skip: !country } )
 	const reserves = reservesData?.countryReserves?.nodes ?? []
 
 
@@ -47,9 +46,7 @@ function CO2Forecast( {
 
 	const dataset = useMemo( () => {
 		try {
-			return filteredCombinedDataSet( production, reserves, [ 'oil', 'gas' ],
-				sourceId, grades, allSources.find( s => s.sourceId === projection ),
-				projection, estimate, estimate_prod )
+			return filteredCombinedDataSet( production, reserves, [ 'oil', 'gas' ], sourceId, estimate, estimate_prod )
 		} catch( e ) {
 			console.log( e )
 			notification.warning( {
@@ -58,6 +55,16 @@ function CO2Forecast( {
 			} )
 		}
 	}, [ production, reserves, projection, source, grades, estimate, estimate_prod, gwp ] )
+
+	try {
+		updateReserves( dataset, production, projection )
+	} catch( e ) {
+		console.log( e )
+		notification.warning( {
+			message: "Error during future production vs reserves calculation",
+			description: e.message
+		} )
+	}
 
 	const co2 = dataset?.co2 ?? []
 
@@ -101,11 +108,11 @@ function CO2Forecast( {
 	}, [ reserves?.length ] )
 
 	if( loadingSources || errorLoadingSources )
-		return <GraphQLStatus loading={loadingSources} error={errorLoadingSources}/>
+		return <GraphQLStatus loading={ loadingSources } error={ errorLoadingSources }/>
 	if( loadingProduction || errorLoadingProduction )
-		return <GraphQLStatus loading={loadingProduction} error={errorLoadingProduction}/>
+		return <GraphQLStatus loading={ loadingProduction } error={ errorLoadingProduction }/>
 	if( loadingReserves || errorLoadingReserves )
-		return <GraphQLStatus loading={loadingReserves} error={errorLoadingReserves}/>
+		return <GraphQLStatus loading={ loadingReserves } error={ errorLoadingReserves }/>
 
 	const { firstYear, lastYear } = limits ?? {}
 
@@ -113,84 +120,84 @@ function CO2Forecast( {
 
 	// Don't try to render a chart until all data looks good
 	if( !firstYear || !lastYear || !co2?.length > 0 )
-		return <Alert message={getText( 'make_selections' )} type="info" showIcon/>
+		return <Alert message={ getText( 'make_selections' ) } type="info" showIcon/>
 
 	DEBUG && console.log( 'CountryProduction', { firstYear, lastYear, grades, source } )
 
 	return (
 		<>
-			<Row gutter={[ 16, 16 ]}>
-				<Col xs={24} lg={14} xxl={18}>
+			<Row gutter={ [ 16, 16 ] }>
+				<Col xs={ 24 } lg={ 14 } xxl={ 18 }>
 					<CO2ForecastGraph
-						data={co2}
-						projection={projection}
-						estimate={estimate}
-						cGrade={dataset.cGrade}
-						pGrade={dataset.pGrade}
-						estimate_prod={estimate_prod}
+						data={ co2 }
+						projection={ projection }
+						estimate={ estimate }
+						cGrade={ dataset.cGrade }
+						pGrade={ dataset.pGrade }
+						estimate_prod={ estimate_prod }
 					/>
 				</Col>
-				<Col xs={24} lg={10} xxl={6}>
-					<Row gutter={[ 16, 16 ]}>
+				<Col xs={ 24 } lg={ 10 } xxl={ 6 }>
+					<Row gutter={ [ 16, 16 ] }>
 
-						<Col xs={24} xl={24}>
-							<FutureSummary data={co2}/>
+						<Col xs={ 24 } xl={ 24 }>
+							<FutureSummary data={ co2 }/>
 						</Col>
 
-						<Col xs={24} xl={24}>
-							<InputSummary data={co2}/>
+						<Col xs={ 24 } xl={ 24 }>
+							<InputSummary data={ co2 }/>
 						</Col>
 
 					</Row>
 				</Col>
 			</Row>
 
-			<Row gutter={[ 16, 16 ]}>
-				<Col xs={24} md={12} xxl={6}>
+			<Row gutter={ [ 16, 16 ] }>
+				<Col xs={ 24 } md={ 12 } xxl={ 6 }>
 					<div className="graph-wrap">
-						<h4>{getText( 'gas' ) + ' ' + getText( 'production' )} e9m3</h4>
+						<h4>{ getText( 'gas' ) + ' ' + getText( 'production' ) } e9m3</h4>
 						<InputDataGraph
-							data={production} allSources={allSources} fuel="gas" comment="PROD"
-							estimate={estimate_prod}
+							data={ production } allSources={ allSources } fuel="gas" comment="PROD"
+							estimate={ estimate_prod }
 						/>
 					</div>
 				</Col>
-				<Col xs={24} md={12} xxl={6}>
+				<Col xs={ 24 } md={ 12 } xxl={ 6 }>
 					<div className="graph-wrap">
-						<h4>{getText( 'gas' ) + ' ' + getText( 'reserves' )} e9m3</h4>
+						<h4>{ getText( 'gas' ) + ' ' + getText( 'reserves' ) } e9m3</h4>
 						<InputDataGraph
-							data={reserves} allSources={allSources} fuel="gas" comment="RES"
-							estimate={estimate}
+							data={ reserves } allSources={ allSources } fuel="gas" comment="RES"
+							estimate={ estimate }
 						/>
 					</div>
 				</Col>
-				<Col xs={24} md={12} xxl={6}>
+				<Col xs={ 24 } md={ 12 } xxl={ 6 }>
 					<div className="graph-wrap">
-						<h4>{getText( 'oil' ) + ' ' + getText( 'production' )} e6bbl</h4>
+						<h4>{ getText( 'oil' ) + ' ' + getText( 'production' ) } e6bbl</h4>
 						<InputDataGraph
-							data={production} allSources={allSources} fuel="oil" comment="PROD"
-							estimate={estimate_prod}
+							data={ production } allSources={ allSources } fuel="oil" comment="PROD"
+							estimate={ estimate_prod }
 						/>
 					</div>
 				</Col>
-				<Col xs={24} md={12} xxl={6}>
+				<Col xs={ 24 } md={ 12 } xxl={ 6 }>
 					<div className="graph-wrap">
-						<h4>{getText( 'oil' ) + ' ' + getText( 'reserves' )} e6bbl</h4>
+						<h4>{ getText( 'oil' ) + ' ' + getText( 'reserves' ) } e6bbl</h4>
 						<InputDataGraph
-							data={reserves} allSources={allSources} fuel="oil" comment="RES"
-							estimate={estimate}
+							data={ reserves } allSources={ allSources } fuel="oil" comment="RES"
+							estimate={ estimate }
 						/>
 					</div>
 				</Col>
 			</Row>
 
-			<style jsx>{`
+			<style jsx>{ `
               .graph-wrap {
                 background-color: #eeeeee;
                 padding: 16px;
                 border-radius: 8px;
               }
-			`}
+			` }
 			</style>
 		</> )
 }

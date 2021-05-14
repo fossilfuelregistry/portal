@@ -3,7 +3,7 @@ import { max } from 'd3-array'
 import _get from 'lodash/get'
 import _set from 'lodash/set'
 import { useUnitConversionGraph } from './UnitConverter'
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 const DEBUG = true
 
@@ -202,9 +202,9 @@ function _getGradesToUse( reserves ) {
 			cGrade = Math.max( cGrade, gradesToUse.indexOf( r.grade?.[ 0 ] ) )
 		}
 	} )
-	if( pGrade < 0 ) pGrade = 'na'
+	if( pGrade < 0 ) pGrade = '--'
 	else pGrade = gradesToUse[ pGrade ] + 'p'
-	if( cGrade < 0 ) cGrade = 'na'
+	if( cGrade < 0 ) cGrade = '--'
 	else cGrade = gradesToUse[ cGrade ] + 'c'
 	return { pGrade, cGrade }
 }
@@ -212,8 +212,44 @@ function _getGradesToUse( reserves ) {
 export default function useCalculations() {
 	const { co2FromVolume } = useUnitConversionGraph()
 	const dispatch = useDispatch()
+	const availableReserveSources = useSelector( redux => redux.availableReserveSources )
+	const reservesSourceId = useSelector( redux => redux.reservesSourceId )
+	const productionSourceId = useSelector( redux => redux.productionSourceId )
 
-	function filteredCombinedDataSet( production, reserves, fossilFuelTypes, sourceId, grades, futureSource, _projection ) {
+	function determineAvailableReservesSources( reserves ) {
+
+		const _reserveSources = reserves.reduce( ( sources, datapoint ) => {
+			if( sources[ datapoint.sourceId ] ) {
+				sources[ datapoint.sourceId ].quality = datapoint.quality
+				sources[ datapoint.sourceId ].lastYear = Math.max( datapoint.year, sources[ datapoint.sourceId ].lastYear )
+			} else {
+				sources[ datapoint.sourceId ] = {
+					quality: datapoint.quality,
+					sourceId: datapoint.sourceId,
+					lastYear: datapoint.year,
+				}
+			}
+			return sources
+		}, {} )
+
+		const reserveSources = Object.keys( _reserveSources )
+			.map( k => _reserveSources[ k ] )
+			.sort( ( a, b ) => Math.sign( b.quality - a.quality ) )
+
+		// Find latest reserves estimate from sources.
+		reserveSources.forEach( source => {
+			const sourceReserve = reserves.filter( datapoint => datapoint.year === source.lastYear && datapoint.sourceId === source.sourceId )
+			const grades = _getGradesToUse( sourceReserve )
+			source.pGrade = grades.pGrade
+			source.cGrade = grades.cGrade
+			source.reserves = sourceReserve.filter( datapoint => datapoint.grade === source.pGrade || datapoint.grade === source.cGrade )
+		} )
+
+		dispatch( { type: 'AVAILABLERESERVESOURCES', payload: reserveSources } )
+		DEBUG && console.log( 'determineAvailableReservesSources', reserveSources )
+	}
+
+	function filteredCombinedDataSet( production, reserves, fossilFuelTypes, sourceId ) {
 		if( !sourceId ) return []
 
 		const dataset = []
@@ -250,100 +286,31 @@ export default function useCalculations() {
 
 		dataset.push( point )
 
-		// List of available reserve sources
-		const _reserveSources = reserves.reduce( ( sources, datapoint ) => {
-			if( sources[ datapoint.sourceId ] ) {
-				sources[ datapoint.sourceId ].quality = datapoint.quality
-				sources[ datapoint.sourceId ].lastYear = Math.max( datapoint.year, sources[ datapoint.sourceId ].lastYear )
-			} else {
-				sources[ datapoint.sourceId ] = {
-					quality: datapoint.quality,
-					sourceId: datapoint.sourceId,
-					lastYear: datapoint.year,
-				}
-			}
-			return sources
-		}, {} )
+		determineAvailableReservesSources( reserves )
 
-		const reserveSources = Object.keys( _reserveSources )
-			.map( k => _reserveSources[ k ] )
-			.sort( ( a, b ) => Math.sign( b.quality - a.quality ) )
-
-		// Find latest reserves estimate from sources.
-		reserveSources.forEach( source => {
-			const sourceReserve = reserves.filter( datapoint => datapoint.year === source.lastYear && datapoint.sourceId === source.sourceId )
-			const grades = _getGradesToUse( sourceReserve )
-			source.pGrade = grades.pGrade
-			source.cGrade = grades.cGrade
-			source.reserves = sourceReserve.filter( datapoint => datapoint.grade === source.pGrade || datapoint.grade === source.cGrade )
-		} )
-
-		dispatch( { type: 'AVAILABLERESERVESOURCES', payload: reserveSources } )
-
-		const qualitySources = reserves.reduce( ( qualities, datapoint ) => {
-			if( qualities[ datapoint.quality ] )
-				qualities[ datapoint.quality ][ datapoint.sourceId ] = true
-			else
-				qualities[ datapoint.quality ] = { [ datapoint.sourceId ]: true }
-			return qualities
-		}, {} )
-
-		const qualities = Object.keys( qualitySources ).map( q => parseInt( q ) )
-
-		const bestSourceQuality = max( qualities )
-		const bestSources = Object.keys( qualitySources[ bestSourceQuality ] ?? {} ).map( q => parseInt( q ) )
-		const bestSourceId = bestSources[ 0 ] // Pick first source if there are several.
-
-		// Build an array of years of best source
-		const years = Object.keys( reserves
-			.filter( datapoint => bestSources.includes( datapoint.sourceId ) )
-			.reduce( ( years, datapoint ) => {
-				years[ datapoint.year ] = true
-				return years
-			}, {} ) ).map( y => parseInt( y ) )
-
-		const lastYearOfBestReserve = max( years )
-		const bestReserves = reserves.filter( datapoint => datapoint.year === lastYearOfBestReserve && datapoint.sourceId === bestSources[ 0 ] )
-
-		const initialReserves = {
-			p: clone( emptyPoint.reserves ),
-			c: clone( emptyPoint.reserves )
+		return {
+			co2: dataset
 		}
+	}
 
-		let { pGrade, cGrade } = _getGradesToUse( bestReserves )
-
-		bestReserves.forEach( r => {
-			if( r.grade === pGrade )
-				addCO2( initialReserves.p, r.fossilFuelType, co2FromVolume( r ) )
-			else if( r.grade === cGrade )
-				addCO2( initialReserves.c, r.fossilFuelType, co2FromVolume( r ) )
-		} )
-
-		DEBUG && console.log( {
-			reserveSources,
-			qualitySources,
-			qualities,
-			bestSourceQuality,
-			bestSources,
-			years,
-			lastYearOfBestReserve,
-			bestReserves,
-			initialReserves
-		} )
-		//DEBUG && console.log( 'filteredCombinedDataSet', { fossilFuelTypes, source: sourceId, grades, in: production.length, combined: dataset.length, dataset } )
-		//DEBUG && console.log( JSON.stringify( dataset.find( d => d.year === 2022 ), null, 2 ) )
+	function updateReserves( dataset, production, _projection ) {
+		DEBUG && console.log( 'updateReserves', { dataset, productionSourceId } )
+		if( !production?.length > 0 ) return
+		if( !dataset?.co2?.length > 0 ) return
 
 		let projection = _projection
 		if( _projection > 0 ) projection = 'authority'
 
 		let declinedValues
+		const reserveSource = availableReserveSources.find( s => s.sourceId === reservesSourceId )
+		if( !reserveSource ) return
 
-		const { lastOilYear, lastGasYear, yearData } = findLastProductionYear( production, sourceId )
-		const lastOilDataIndex = dataset.findIndex( d => d.year === lastOilYear )
-		const lastGasDataIndex = dataset.findIndex( d => d.year === lastGasYear )
+		const { lastOilYear, lastGasYear, yearData } = findLastProductionYear( production, productionSourceId )
+		const lastOilDataIndex = dataset.co2.findIndex( d => d.year === lastOilYear )
+		const lastGasDataIndex = dataset.co2.findIndex( d => d.year === lastGasYear )
 
-		if( !lastOilDataIndex ) {
-			console.log( '>>>>>>> No last Oil Production' )
+		if( !( lastOilDataIndex >= 0 ) ) {
+			console.log( '>>>>>>> No last Oil Production', _projection, projection, lastOilYear, lastGasYear, lastOilDataIndex, lastGasDataIndex, yearData )
 			return
 		}
 
@@ -355,22 +322,34 @@ export default function useCalculations() {
 
 		if( lastGasDataIndex > lastOilDataIndex ) {
 			for( let i = lastOilDataIndex + 1; i <= lastGasDataIndex; i++ ) {
-				dataset[ i ].production.oil = clone( dataset[ lastOilDataIndex ].production.oil )
+				dataset.co2[ i ].production.oil = clone( dataset.co2[ lastOilDataIndex ].production.oil )
 			}
 		}
 		if( lastGasDataIndex < lastOilDataIndex ) {
 			for( let i = lastGasDataIndex + 1; i <= lastOilDataIndex; i++ ) {
-				dataset[ i ].production.gas = clone( dataset[ lastGasDataIndex ].production.gas )
+				dataset.co2[ i ].production.gas = clone( dataset.co2[ lastGasDataIndex ].production.gas )
 			}
 		}
 
 		let lastProductionIndex = Math.max( lastOilDataIndex, lastGasDataIndex )
-		const lastProduction = dataset[ lastProductionIndex ]
+		const lastProduction = dataset.co2[ lastProductionIndex ]
 
 		// Initialize projected production and reserves
 
 		declinedValues = clone( emptyPoint )
 		declinedValues.future.decline.production = clone( lastProduction?.production )
+
+		const initialReserves = {
+			p: clone( emptyPoint.reserves ),
+			c: clone( emptyPoint.reserves )
+		}
+
+		reserveSource.reserves.forEach( r => {
+			if( r.grade[ 1 ] === 'p' )
+				addCO2( initialReserves.p, r.fossilFuelType, co2FromVolume( r ) )
+			else if( r.grade[ 1 ] === 'c' )
+				addCO2( initialReserves.c, r.fossilFuelType, co2FromVolume( r ) )
+		} )
 
 		lastProduction.future.reserves = clone( initialReserves )
 		DEBUG && console.log( { initialReserves } )
@@ -378,15 +357,16 @@ export default function useCalculations() {
 
 		DEBUG && console.log( { lastProduction, lastOilDataIndex, lastGasDataIndex, declinedValues } )
 
+
 		for( let year = lastProduction.year; year <= 2040; year++ ) {
 			//console.log( { year, lastDataIndex } )
-			if( !dataset[ lastProductionIndex ] ) {
-				dataset[ lastProductionIndex ] = clone( emptyPoint )
-				dataset[ lastProductionIndex ].year = year
+			if( !dataset.co2[ lastProductionIndex ] ) {
+				dataset.co2[ lastProductionIndex ] = clone( emptyPoint )
+				dataset.co2[ lastProductionIndex ].year = year
 			}
-			let currentYearData = dataset[ lastProductionIndex ]
+			let currentYearData = dataset.co2[ lastProductionIndex ]
 
-			currentYearData.future.stable.production = clone( dataset[ lastOilDataIndex ].production )
+			currentYearData.future.stable.production = clone( dataset.co2[ lastOilDataIndex ].production )
 			currentYearData.future.decline.production = clone( declinedValues.future.decline.production )
 
 			_multiply( declinedValues.future.decline.production, 0.9 )
@@ -421,17 +401,7 @@ export default function useCalculations() {
 		}
 
 		DEBUG && console.log( 'dataSetEstimateFutures', { dataset } )
-		//console.log( JSON.stringify( dataset.find( d => d.year === 2030 )?.production, null, 2 ) )
-
-		return {
-			co2: dataset,
-			bestReservesSourceId: bestSourceId,
-			lastYearOfBestReserve,
-			reserveSources,
-			pGrade,
-			cGrade
-		}
 	}
 
-	return { filteredCombinedDataSet }
+	return { filteredCombinedDataSet, updateReserves }
 }

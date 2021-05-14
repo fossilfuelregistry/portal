@@ -8,7 +8,6 @@ export default function CarbonIntensitySelector() {
 	const reservesSourceId = useSelector( redux => redux.reservesSourceId )
 	const availableReserveSources = useSelector( redux => redux.availableReserveSources )
 	const [ options, set_options ] = useState( [] )
-	const [ value, set_value ] = useState()
 	const dispatch = useDispatch()
 	const { getText } = useText()
 
@@ -23,21 +22,30 @@ export default function CarbonIntensitySelector() {
 		} )
 
 		set_options( _options )
+		dispatch( { type: 'RESERVESSOURCEID', payload: _options[ 0 ]?.sourceId } )
+
 	}, [ availableReserveSources, allSources ] )
 
 	return (
-		<Select
-			style={ { minWidth: 120, width: '100%' } }
-			value={ { value: reservesSourceId } }
-			labelInValue={ true }
-			placeholder={ getText( 'reserves' ) }
-			onChange={ v => {
-				set_value( v )
-				dispatch( { type: 'RESERVESSOURCEID', payload: v.value } )
-			} }
-		>
-			{ options.map( src => (
-				<Select.Option key={ src.sourceId }>{ src.label }</Select.Option> ) ) }
-		</Select>
+		<div className="reserves-selector">
+			<Select
+				style={ { minWidth: 120, width: '100%' } }
+				value={ { value: reservesSourceId?.toString() } }
+				labelInValue={ true }
+				placeholder={ getText( 'reserves' ) }
+				onChange={ v => {
+					dispatch( { type: 'RESERVESSOURCEID', payload: parseInt( v.value ) } )
+				} }
+			>
+				{ options.map( ( src, i ) => (
+					<Select.Option key={ src.sourceId }>
+						<span style={ ( i === 0 ? { fontWeight: 'bold' } : {} ) }>{ src.label }</span>
+					</Select.Option> ) ) }
+			</Select>
+
+			<style jsx>{ `
+			` }
+			</style>
+		</div>
 	)
 }
