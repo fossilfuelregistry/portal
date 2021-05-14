@@ -3085,6 +3085,11 @@ file-entry-cache@^6.0.1:
   dependencies:
     flat-cache "^3.0.4"
 
+file-saver@^2.0.2:
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/file-saver/-/file-saver-2.0.5.tgz#d61cfe2ce059f414d899e9dd6d4107ee25670c38"
+  integrity sha512-P9bmyZ3h/PRG+Nzga+rbdI4OEpNDzAVyy74uVO9ATgzLK6VtAsYybF/+TOCvrc0MO793d6+42lLyZTw7/ArVzA==
+
 fill-range@^7.0.1:
   version "7.0.1"
   resolved "https://registry.yarnpkg.com/fill-range/-/fill-range-7.0.1.tgz#1919a6a7c75fe38b2c7c77e5198535da9acdda40"
@@ -4889,6 +4894,13 @@ rc-virtual-list@^3.0.1, rc-virtual-list@^3.2.0:
     classnames "^2.2.6"
     rc-resize-observer "^1.0.0"
     rc-util "^5.0.7"
+
+react-csv-downloader@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/react-csv-downloader/-/react-csv-downloader-2.2.0.tgz#4851fda6fd1c2b5704b466c21eed303d5cab6571"
+  integrity sha512-x1tUyzukQKFazy2EfdmEYqJGXufzxb/a5FL9ka2LBAda5vJ6omBEg3UIeN2ZyH3QdtC2H5h0tu9hMm+g9v5GkQ==
+  dependencies:
+    file-saver "^2.0.2"
 
 react-dom@^17.0.2:
   version "17.0.2"

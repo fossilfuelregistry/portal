@@ -28,6 +28,7 @@
     "next-seo": "^4.24.0",
     "null-loader": "4.0.1",
     "react": "^17.0.2",
+    "react-csv-downloader": "^2.2.0",
     "react-dom": "^17.0.2",
     "react-globe.gl": "^2.18.1",
     "react-icons": "^4.2.0",

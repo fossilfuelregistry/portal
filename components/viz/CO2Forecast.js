@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useState } from "react"
 import { useQuery } from "@apollo/client"
 import GraphQLStatus from "components/GraphQLStatus"
 import { GQL_countryProductionByIso, GQL_countryReservesByIso } from "queries/country"
-import { Alert, Col, notification, Row } from "antd"
+import { Alert, Button, Col, notification, Row } from "antd"
+import CsvDownloader from 'react-csv-downloader'
 import { GQL_sources } from "queries/general"
 import useCalculations from "./util"
 import CO2ForecastGraph from "./CO2ForecastGraph"
@@ -40,7 +41,6 @@ function CO2Forecast( {
 	const { data: reservesData, loading: loadingReserves, error: errorLoadingReserves }
 		= useQuery( GQL_countryReservesByIso, { variables: { iso3166: country }, skip: !country } )
 	const reserves = reservesData?.countryReserves?.nodes ?? []
-
 
 	const sourceId = source?.sourceId
 
@@ -160,6 +160,9 @@ function CO2Forecast( {
 							data={ production } allSources={ allSources } fuel="gas" comment="PROD"
 							estimate={ estimate_prod }
 						/>
+						<CsvDownloader datas={production} filename={'gas_production_' + country}>
+							<Button className="download" block>{ getText( 'download' ) }</Button>
+						</CsvDownloader>
 					</div>
 				</Col>
 				<Col xs={ 24 } md={ 12 } xxl={ 6 }>
@@ -169,6 +172,9 @@ function CO2Forecast( {
 							data={ reserves } allSources={ allSources } fuel="gas" comment="RES"
 							estimate={ estimate }
 						/>
+						<CsvDownloader datas={reserves} filename={'gas_reserves_' + country}>
+							<Button className="download" block>{ getText( 'download' ) }</Button>
+						</CsvDownloader>
 					</div>
 				</Col>
 				<Col xs={ 24 } md={ 12 } xxl={ 6 }>
@@ -178,6 +184,9 @@ function CO2Forecast( {
 							data={ production } allSources={ allSources } fuel="oil" comment="PROD"
 							estimate={ estimate_prod }
 						/>
+						<CsvDownloader datas={production} filename={'oil_production_' + country}>
+							<Button className="download" block>{ getText( 'download' ) }</Button>
+						</CsvDownloader>
 					</div>
 				</Col>
 				<Col xs={ 24 } md={ 12 } xxl={ 6 }>
@@ -187,6 +196,9 @@ function CO2Forecast( {
 							data={ reserves } allSources={ allSources } fuel="oil" comment="RES"
 							estimate={ estimate }
 						/>
+						<CsvDownloader datas={reserves} filename={'oil_reserves_' + country}>
+							<Button className="download" block>{ getText( 'download' ) }</Button>
+						</CsvDownloader>
 					</div>
 				</Col>
 			</Row>
@@ -196,6 +208,10 @@ function CO2Forecast( {
                 background-color: #eeeeee;
                 padding: 16px;
                 border-radius: 8px;
+              }
+
+              .graph-wrap :global(.download) {
+                margin-top: 12px;
               }
 			` }
 			</style>
