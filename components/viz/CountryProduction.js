@@ -9,11 +9,12 @@ import { GQL_sources } from "queries/general"
 import { getFuelCO2 } from "./util"
 import { useSelector } from "react-redux"
 
-const DEBUG = false
+const DEBUG = true
 
-export default function CountryProduction( { country, fossilFuelType, sources, onSources } ) {
+export default function CountryProduction( { fossilFuelType, sources, onSources } ) {
 	const { co2FromVolume } = useUnitConversionGraph()
-	const texts = useSelector( r => r.texts )
+	const country = useSelector( redux => redux.country )
+	const texts = useSelector( redux => redux.texts )
 	const [ limits, set_limits ] = useState()
 
 	const { data: sourcesData, loading: loadingSources, error: errorLoadingSources }
@@ -23,7 +24,7 @@ export default function CountryProduction( { country, fossilFuelType, sources, o
 
 	const { data: productionData, loading: loadingProduction, error: errorLoadingProduction }
 		= useQuery( GQL_countryProductionByIso,
-			{ variables: { iso3166: country }, skip: !country } )
+			{ variables: { iso3166: country?.value }, skip: !country } )
 
 	const production = productionData?.countryProductions?.nodes ?? []
 
@@ -51,7 +52,7 @@ export default function CountryProduction( { country, fossilFuelType, sources, o
 
 	const scaleValues = { sync: true, nice: true }
 
-	DEBUG && console.log( 'CountryProduction', { fossilFuelType, firstYear, lastYear, sources, scaleValues } )
+	DEBUG && console.log( 'CountryProduction', { production, fossilFuelType, firstYear, lastYear, sources, scaleValues } )
 
 	let datasets
 	try {

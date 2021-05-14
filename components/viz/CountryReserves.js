@@ -11,9 +11,10 @@ import { useSelector } from "react-redux"
 
 const DEBUG = true
 
-export default function CountryReserves( { country, fossilFuelType, sources, grades, onGrades, onSources } ) {
+export default function CountryReserves( { fossilFuelType, sources, grades, onGrades, onSources } ) {
 	const { co2FromVolume } = useUnitConversionGraph()
-	const texts = useSelector( r => r.texts )
+	const country = useSelector( redux => redux.country )
+	const texts = useSelector( redux => redux.texts )
 	const [ limits, set_limits ] = useState()
 
 	const { data: sourcesData, loading: loadingSources, error: errorLoadingSources }
@@ -23,7 +24,7 @@ export default function CountryReserves( { country, fossilFuelType, sources, gra
 
 	const { data: reservesData, loading: loadingReserves, error: errorLoadingReserves }
 		= useQuery( GQL_countryReservesByIso,
-			{ variables: { iso3166: country }, skip: !country } )
+			{ variables: { iso3166: country?.value }, skip: !country } )
 
 	const reserves = reservesData?.countryReserves?.nodes ?? []
 
