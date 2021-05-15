@@ -1,5 +1,4 @@
 import clone from 'clone'
-import { max } from 'd3-array'
 import _get from 'lodash/get'
 import _set from 'lodash/set'
 import { useUnitConversionGraph } from './UnitConverter'

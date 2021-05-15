@@ -12,6 +12,7 @@ import InputDataGraph from "./InputDataGraph"
 import InputSummary from "./InputSummary"
 import FutureSummary from "./FutureSummary"
 import { useDispatch, useSelector } from "react-redux"
+import YearSummary from "./YearSummary";
 
 const DEBUG = false
 
@@ -142,6 +143,10 @@ function CO2Forecast( {
 
 						<Col xs={ 24 } xl={ 24 }>
 							<FutureSummary data={ co2 }/>
+						</Col>
+
+						<Col xs={ 24 } xl={ 24 }>
+							<YearSummary data={ co2 }/>
 						</Col>
 
 						<Col xs={ 24 } xl={ 24 }>
