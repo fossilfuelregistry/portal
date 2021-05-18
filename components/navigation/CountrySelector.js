@@ -4,13 +4,16 @@ import GraphQLStatus from "../GraphQLStatus"
 import { Select } from "antd"
 import { useRouter } from "next/router"
 import { useEffect, useMemo, useState } from "react"
-import { useDispatch, useSelector } from "react-redux"
+import { useDispatch } from "react-redux"
+import useText from "lib/useText";
+import useTracker from "lib/useTracker";
 
 export default function CountrySelector() {
 	const router = useRouter()
 	const [ value, set_value ] = useState()
 	const dispatch = useDispatch()
-	const texts = useSelector( redux => redux.texts )
+	const { getText } = useText()
+	const { trackEvent } = useTracker()
 
 	const { data: countriesData, loading: loadingCountries, error: errorLoadingCountries }
 		= useQuery( GQL_countries )
@@ -27,8 +30,10 @@ export default function CountrySelector() {
 		if( country && ( !value || value.value !== country ) ) {
 			const name = countries.find( c => c.isoA2.toLowerCase() === country.toLowerCase() )?.[ 'name' ]
 			const v = { value: router.query.country, label: name }
+
 			dispatch( { type: 'COUNTRY', payload: v } )
 			set_value( v )
+			trackEvent( 'country', v )
 		}
 	}, [ router.query.country, countries?.length ] )
 
@@ -41,7 +46,7 @@ export default function CountrySelector() {
 			style={ { minWidth: 120, width: '100%' } }
 			value={ value }
 			labelInValue={ true }
-			placeholder={ texts?.country + '...' }
+			placeholder={ getText( 'country' ) + '...' }
 			optionFilterProp="children"
 			onChange={ async v => {
 				set_value( v )

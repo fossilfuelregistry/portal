@@ -5,6 +5,8 @@ import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client'
 import { ConfigProvider } from "antd"
 import 'assets/app.less'
 import { useDispatch } from "react-redux"
+import { useRouter } from "next/router";
+import useTracker from "../lib/useTracker";
 
 export const client = new ApolloClient( {
 	uri: process.env.NEXT_PUBLIC_BACKEND_URL + '/graphql',
@@ -13,6 +15,19 @@ export const client = new ApolloClient( {
 
 function GFFR( { Component, pageProps } ) {
 	const dispatch = useDispatch()
+	const router = useRouter()
+	const { trackView } = useTracker()
+
+	useEffect( () => {
+		const handleRouteChange = ( url ) => {
+			trackView( url )
+		}
+		router.events.on( 'routeChangeComplete', handleRouteChange )
+		return () => {
+			router.events.off( 'routeChangeComplete', handleRouteChange )
+		}
+	}, [ router.events ] )
+
 	useEffect( () => {
 		getUserIP()
 			.then( ip => {
@@ -29,9 +44,9 @@ function GFFR( { Component, pageProps } ) {
 	}, [] )
 
 	return (
-		<ApolloProvider client={client}>
-			<ConfigProvider componentSize={'large'}>
-				<Component {...pageProps} />
+		<ApolloProvider client={ client }>
+			<ConfigProvider componentSize={ 'large' }>
+				<Component { ...pageProps } />
 			</ConfigProvider>
 		</ApolloProvider>
 	)
