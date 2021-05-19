@@ -1,62 +1,82 @@
 import React from "react"
 import Loading from "components/Loading"
 import useText from "lib/useText"
-import { getCO2 } from "./util"
+import { addCO2, getCO2 } from "./util"
 import { useSelector } from "react-redux"
+import clone from 'clone'
 
 const DEBUG = false
 
 function FutureSummary( { data = [] } ) {
 	const { getText } = useText()
-	const bestReservesSourceId = useSelector( redux => redux.bestReservesSourceId )
+	const bestReservesSourceId = useSelector( redux => redux.reservesSourceId )
 	const allSources = useSelector( redux => redux.allSources )
 
 	const reservesSource = allSources?.find( s => s.sourceId === bestReservesSourceId ) ?? {}
 
-	if ( !( data?.length > 0 ) ) return <Loading/>
+	if( !( data?.length > 0 ) ) return <Loading/>
 
-	const totals = { stable: 0, decline: 0, authority: 0 }
+	const _totals = {
+		oil: { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } },
+		gas: { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } }
+	}
+
+	const stable = clone( _totals )
+	const decline = clone( _totals )
+	const authority = clone( _totals )
 
 
 	data.forEach( ( point, i ) => {
-		if( getCO2( point.future?.decline?.production ) <= 0 ) return
+		if( getCO2( point.future?.stable?.production ) <= 0 ) return
 		if( point.year > 2040 ) return
 		DEBUG && console.log( point.year, point.future )
-		totals.stable += getCO2( point.future.stable.production )
-		totals.decline += getCO2( point.future.decline.production )
-		totals.authority += getCO2( point.future.authority.production )
+		addCO2( stable, 'oil', point.future.stable.production.oil )
+		addCO2( stable, 'gas', point.future.stable.production.gas )
+		addCO2( decline, 'oil', point.future.decline.production.oil )
+		addCO2( decline, 'gas', point.future.decline.production.gas )
+		addCO2( authority, 'oil', point.future.authority.production.oil )
+		addCO2( authority, 'gas', point.future.authority.production.gas )
 	} )
 
 	const _ = v => Math.round( v )
-
+	
 	return (
 		<div className="table-wrap">
 			<table>
 				<thead>
 					<tr>
-						<th colSpan={3}>{getText( 'future_emissions' )}</th>
+						<th colSpan={ 4 }>{ getText( 'future_emissions' ) } e9 kg CO²e</th>
 					</tr>
 				</thead>
 				<tbody>
-					<tr>
-						<td>{getText( 'stable' )}</td>
-						<td align="right" className="total">{totals.stable?.toFixed( 1 )}</td>
-						<td align="right">e9 kgCO²e</td>
+					<tr className="subheader">
+						<td align="right"/>
+						<td align="right">{ getText( 'low' ) }</td>
+						<td align="right">{ getText( 'mid' ) }</td>
+						<td align="right">{ getText( 'high' ) }</td>
 					</tr>
 					<tr>
-						<td>{getText( 'declining' )}</td>
-						<td align="right" className="total">{totals.decline?.toFixed( 1 )}</td>
-						<td align="right">e9 kgCO²e</td>
+						<td>{ getText( 'stable' ) }</td>
+						<td align="right">{ _( stable.oil.scope1.range[ 0 ] + stable.oil.scope3.range[ 0 ] + stable.gas.scope1.range[ 0 ] + stable.gas.scope3.range[ 0 ] ) }</td>
+						<td align="right">{ _( stable.oil.scope1.co2 + stable.oil.scope3.co2 + stable.gas.scope1.co2 + stable.gas.scope3.co2 ) }</td>
+						<td align="right">{ _( stable.oil.scope1.range[ 1 ] + stable.oil.scope3.range[ 1 ] + stable.gas.scope1.range[ 1 ] + stable.gas.scope3.range[ 1 ] ) }</td>
 					</tr>
 					<tr>
-						<td>{reservesSource.name}</td>
-						<td align="right" className="total">{totals.authority?.toFixed( 1 )}</td>
-						<td align="right">e9 kgCO²e</td>
+						<td>{ getText( 'declining' ) }</td>
+						<td align="right">{ _( decline.oil.scope1.range[ 0 ] + decline.oil.scope3.range[ 0 ] + decline.gas.scope1.range[ 0 ] + decline.gas.scope3.range[ 0 ] ) }</td>
+						<td align="right">{ _( decline.oil.scope1.co2 + decline.oil.scope3.co2 + decline.gas.scope1.co2 + decline.gas.scope3.co2 ) }</td>
+						<td align="right">{ _( decline.oil.scope1.range[ 1 ] + decline.oil.scope3.range[ 1 ] + decline.gas.scope1.range[ 1 ] + decline.gas.scope3.range[ 1 ] ) }</td>
+					</tr>
+					<tr>
+						<td>{ reservesSource.name }</td>
+						<td align="right">{ _( authority.oil.scope1.range[ 0 ] + authority.oil.scope3.range[ 0 ] + authority.gas.scope1.range[ 0 ] + authority.gas.scope3.range[ 0 ] ) }</td>
+						<td align="right">{ _( authority.oil.scope1.co2 + authority.oil.scope3.co2 + authority.gas.scope1.co2 + authority.gas.scope3.co2 ) }</td>
+						<td align="right">{ _( authority.oil.scope1.range[ 1 ] + authority.oil.scope3.range[ 1 ] + authority.gas.scope1.range[ 1 ] + authority.gas.scope3.range[ 1 ] ) }</td>
 					</tr>
 				</tbody>
 			</table>
 
-			<style jsx>{`
+			<style jsx>{ `
               .table-wrap {
                 border: 1px solid #dddddd;
                 border-radius: 8px;
@@ -89,7 +109,7 @@ function FutureSummary( { data = [] } ) {
               .total {
                 font-weight: 700;
               }
-            `}
+			` }
 			</style>
 		</div>
 	)

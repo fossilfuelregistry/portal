@@ -44,7 +44,7 @@ function InputSummary(
 			<table>
 				<thead>
 					<tr>
-						<th colSpan={ 3 }>
+						<th colSpan={ 4 }>
 							{ getText( 'past_emissions' ) } e9 kg CO²e
 							{ ' ' }
 							<QuestionCircleOutlined
@@ -58,6 +58,7 @@ function InputSummary(
 					<tr className="subheader">
 						<td>{ getText( 'oil' ) }</td>
 						<td align="right">{ getText( 'low' ) }</td>
+						<td align="right">{ getText( 'mid' ) }</td>
 						<td align="right">{ getText( 'high' ) }</td>
 					</tr>
 					<tr>
@@ -70,6 +71,7 @@ function InputSummary(
 							/>
 						</td>
 						<td align="right">{ _( totals.oil.scope1.range[ 0 ] ) }</td>
+						<td align="right">{ _( totals.oil.scope1.co2 ) }</td>
 						<td align="right">{ _( totals.oil.scope1.range[ 1 ] ) }</td>
 					</tr>
 					<tr>
@@ -82,17 +84,20 @@ function InputSummary(
 							/>
 						</td>
 						<td align="right">{ _( totals.oil.scope3.range[ 0 ] ) }</td>
+						<td align="right">{ _( totals.oil.scope3.co2 ) }</td>
 						<td align="right">{ _( totals.oil.scope3.range[ 1 ] ) }</td>
 					</tr>
 					<tr className="total">
 						<td>{ getText( 'oil' ) } { getText( 'total' ) }</td>
 						<td align="right">{ _( totals.oil.scope1.range[ 0 ] + totals.oil.scope3.range[ 0 ] ) }</td>
+						<td align="right">{ _( totals.oil.scope1.co2 + totals.oil.scope3.co2 ) }</td>
 						<td align="right">{ _( totals.oil.scope1.range[ 1 ] + totals.oil.scope3.range[ 1 ] ) }</td>
 					</tr>
 
 					<tr className="subheader">
 						<td>{ getText( 'gas' ) }</td>
 						<td align="right">{ getText( 'low' ) }</td>
+						<td align="right">{ getText( 'mid' ) }</td>
 						<td align="right">{ getText( 'high' ) }</td>
 					</tr>
 					<tr>
@@ -105,6 +110,7 @@ function InputSummary(
 							/>
 						</td>
 						<td align="right">{ _( totals.gas.scope1.range[ 0 ] ) }</td>
+						<td align="right">{ _( totals.gas.scope1.co2 ) }</td>
 						<td align="right">{ _( totals.gas.scope1.range[ 1 ] ) }</td>
 					</tr>
 					<tr>
@@ -117,16 +123,19 @@ function InputSummary(
 							/>
 						</td>
 						<td align="right">{ _( totals.gas.scope3.range[ 0 ] ) }</td>
+						<td align="right">{ _( totals.gas.scope3.co2 ) }</td>
 						<td align="right">{ _( totals.gas.scope3.range[ 1 ] ) }</td>
 					</tr>
 					<tr className="total">
 						<td>{ getText( 'gas' ) } { getText( 'total' ) }</td>
 						<td align="right">{ _( totals.gas.scope1.range[ 0 ] + totals.gas.scope3.range[ 0 ] ) }</td>
+						<td align="right">{ _( totals.gas.scope1.co2 + totals.gas.scope3.co2 ) }</td>
 						<td align="right">{ _( totals.gas.scope1.range[ 1 ] + totals.gas.scope3.range[ 1 ] ) }</td>
 					</tr>
 					<tr className="total subheader">
 						<td>{ getText( 'totals' ) }</td>
 						<td align="right">{ _( totals.gas.scope1.range[ 0 ] + totals.gas.scope3.range[ 0 ] + totals.oil.scope1.range[ 0 ] + totals.oil.scope3.range[ 0 ] ) }</td>
+						<td align="right">{ _( totals.gas.scope1.co2 + totals.gas.scope3.co2 + totals.oil.scope1.co2 + totals.oil.scope3.co2 ) }</td>
 						<td align="right">{ _( totals.gas.scope1.range[ 1 ] + totals.gas.scope3.range[ 1 ] + totals.oil.scope1.range[ 1 ] + totals.oil.scope3.range[ 1 ] ) }</td>
 					</tr>
 				</tbody>
