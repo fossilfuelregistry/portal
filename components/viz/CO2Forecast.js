@@ -12,7 +12,7 @@ import InputDataGraph from "./InputDataGraph"
 import InputSummary from "./InputSummary"
 import FutureSummary from "./FutureSummary"
 import { useDispatch, useSelector } from "react-redux"
-import YearSummary from "./YearSummary";
+import YearSummary from "./YearSummary"
 
 const DEBUG = false
 
@@ -46,6 +46,12 @@ function CO2Forecast( {
 	const sourceId = source?.sourceId
 
 	const dataset = useMemo( () => {
+		if( !production?.length ) return []
+		if( !reserves?.length ) return []
+		if( !source ) return []
+
+		DEBUG && console.log( { production, reserves, projection, source, grades, estimate, estimate_prod, gwp } )
+
 		try {
 			return filteredCombinedDataSet( production, reserves, [ 'oil', 'gas' ], sourceId, estimate, estimate_prod )
 		} catch( e ) {
@@ -165,7 +171,7 @@ function CO2Forecast( {
 							data={ production } allSources={ allSources } fuel="gas" comment="PROD"
 							estimate={ estimate_prod }
 						/>
-						<CsvDownloader datas={production} filename={'gas_production_' + country}>
+						<CsvDownloader datas={ production } filename={ 'gas_production_' + country }>
 							<Button className="download" block>{ getText( 'download' ) }</Button>
 						</CsvDownloader>
 					</div>
@@ -177,7 +183,7 @@ function CO2Forecast( {
 							data={ reserves } allSources={ allSources } fuel="gas" comment="RES"
 							estimate={ estimate }
 						/>
-						<CsvDownloader datas={reserves} filename={'gas_reserves_' + country}>
+						<CsvDownloader datas={ reserves } filename={ 'gas_reserves_' + country }>
 							<Button className="download" block>{ getText( 'download' ) }</Button>
 						</CsvDownloader>
 					</div>
@@ -189,7 +195,7 @@ function CO2Forecast( {
 							data={ production } allSources={ allSources } fuel="oil" comment="PROD"
 							estimate={ estimate_prod }
 						/>
-						<CsvDownloader datas={production} filename={'oil_production_' + country}>
+						<CsvDownloader datas={ production } filename={ 'oil_production_' + country }>
 							<Button className="download" block>{ getText( 'download' ) }</Button>
 						</CsvDownloader>
 					</div>
@@ -201,7 +207,7 @@ function CO2Forecast( {
 							data={ reserves } allSources={ allSources } fuel="oil" comment="RES"
 							estimate={ estimate }
 						/>
-						<CsvDownloader datas={reserves} filename={'oil_reserves_' + country}>
+						<CsvDownloader datas={ reserves } filename={ 'oil_reserves_' + country }>
 							<Button className="download" block>{ getText( 'download' ) }</Button>
 						</CsvDownloader>
 					</div>

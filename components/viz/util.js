@@ -4,7 +4,7 @@ import _set from 'lodash/set'
 import { useUnitConversionGraph } from './UnitConverter'
 import { useDispatch, useSelector } from "react-redux";
 
-const DEBUG = true
+const DEBUG = false
 
 const emptyPoint = {
 	production: {
