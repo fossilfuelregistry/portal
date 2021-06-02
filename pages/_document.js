@@ -1,4 +1,5 @@
 import Document, { Html, Head, Main, NextScript } from 'next/document'
+import { Divider } from "antd"
 
 export default class MyDocument extends Document {
 	render() {
@@ -35,6 +36,12 @@ export default class MyDocument extends Document {
 				<body>
 					<Main/>
 					<NextScript/>
+					<div style={ { marginTop: 20, padding: '8px 40px', borderTop: '1px solid #dddddd' } }>
+						<a href="http://creativecommons.org/licenses/by-sa/4.0/">
+							<img src="/cc.svg" alt="CC-BY-SA" height={ 32 }/>&nbsp;&nbsp;
+							All data is licensed under CC-BY-SA
+						</a>
+					</div>
 				</body>
 			</Html>
 		)
