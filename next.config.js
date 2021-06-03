@@ -20,7 +20,7 @@ module.exports = withAntdLess( {
 		return config
 	},
 	i18n: {
-		locales: [ 'en', 'fr' ],
+		locales: [ 'en', 'fr', 'es' ],
 		defaultLocale: 'en'
 	},
 } )
