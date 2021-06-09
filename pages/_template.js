@@ -24,4 +24,4 @@ export default function Wells( props ) {
 	)
 }
 
-export { getStaticProps } from '../lib/getStaticProps'
+export { getStaticProps } from 'lib/getStaticProps'

@@ -115,4 +115,4 @@ export default function CountryReservesPage() {
 	)
 }
 
-export { getStaticProps } from '../lib/getStaticProps'
+export { getStaticProps } from 'lib/getStaticProps'

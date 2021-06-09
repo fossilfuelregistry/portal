@@ -2,7 +2,7 @@ import clone from 'clone'
 import _get from 'lodash/get'
 import _set from 'lodash/set'
 import { useUnitConversionGraph } from './UnitConverter'
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux"
 
 const DEBUG = false
 
@@ -248,9 +248,9 @@ export default function useCalculations() {
 		DEBUG && console.log( 'determineAvailableReservesSources', reserveSources )
 	}
 
-	function filteredCombinedDataSet( production, reserves, fossilFuelTypes, sourceId ) {
+	function filteredCombinedDataSet( production, reserves, fossilFuelTypes, sourceId, projectionSourceId ) {
 		if( !sourceId ) return []
-
+		console.log( 'filteredCombinedDataSet', sourceId, projectionSourceId )
 		const dataset = []
 		let point = clone( emptyPoint )
 
@@ -260,7 +260,8 @@ export default function useCalculations() {
 			.filter( data => {
 				if( fossilFuelTypes && !fossilFuelTypes.includes( data.fossilFuelType ) ) return false
 				//console.log( { data } )
-				if( sourceId !== data.sourceId && !data.projection/*futureSource?.sourceId !== data.sourceId*/ ) return false
+				if( sourceId !== data.sourceId && !data.projection ) return false
+				if( projectionSourceId !== data.sourceId && data.projection ) return false
 				return true
 			} )
 			.forEach( data => {

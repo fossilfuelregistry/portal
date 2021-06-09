@@ -53,7 +53,7 @@ function CO2Forecast( {
 		DEBUG && console.log( { production, reserves, projection, source, grades, estimate, estimate_prod, gwp } )
 
 		try {
-			return filteredCombinedDataSet( production, reserves, [ 'oil', 'gas' ], sourceId, estimate, estimate_prod )
+			return filteredCombinedDataSet( production, reserves, [ 'oil', 'gas' ], sourceId, projection )
 		} catch( e ) {
 			console.log( e )
 			notification.warning( {

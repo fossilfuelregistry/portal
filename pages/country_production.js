@@ -112,4 +112,4 @@ export default function CountryProductionPage() {
 	)
 }
 
-export { getStaticProps } from '../lib/getStaticProps'
+export { getStaticProps } from 'lib/getStaticProps'

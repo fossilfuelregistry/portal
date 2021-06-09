@@ -115,4 +115,4 @@ export default function Wells() {
 	)
 }
 
-export { getStaticProps } from '../lib/getStaticProps'
+export { getStaticProps } from 'lib/getStaticProps'

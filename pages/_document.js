@@ -16,7 +16,7 @@ export default class MyDocument extends Document {
 					<script
 						type="text/javascript"
 						src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js"
-						charset="UTF-8"
+						charSet="UTF-8"
 						data-domain-script="78d11342-08d5-4084-a887-79f448fb6b96-test"
 					/>
 
