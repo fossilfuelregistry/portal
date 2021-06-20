@@ -1,24 +1,13 @@
 import React from "react"
 import Loading from "components/Loading"
 import useText from "lib/useText"
-import { addCO2, findLastProductionYear } from "./util"
-import { QuestionCircleOutlined } from '@ant-design/icons'
-import ReactMarkdown from 'react-markdown'
-import { Modal } from "antd"
-import getConfig from "next/config";
+import { addCO2 } from "./util"
 import { useSelector } from "react-redux";
+import HelpModal from "../HelpModal"
 
 const DEBUG = true
 
-const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 const _ = v => Math.round( v )
-
-function helpModal( title, content ) {
-	return Modal.info( {
-		title,
-		content: ( <ReactMarkdown>{ content }</ReactMarkdown> )
-	} )
-}
 
 function YearSummary( { data = [] } ) {
 	const { getText } = useText()
@@ -62,11 +51,7 @@ function YearSummary( { data = [] } ) {
 					<tr>
 						<th colSpan={ 4 }>
 							{ getText( 'this_year' ) } {year} e9 kg CO²e
-							{ ' ' }
-							<QuestionCircleOutlined
-								style={ { color: theme[ '@primary-color' ] } }
-								onClick={ () => helpModal( getText( 'ranges' ), getText( 'explanation_of_ranges' ) ) }
-							/>
+							<HelpModal title="ranges" content="explanation_ranges"/>
 						</th>
 					</tr>
 				</thead>
@@ -80,11 +65,7 @@ function YearSummary( { data = [] } ) {
 					<tr>
 						<td>
 							{ getText( 'scope' ) } 1
-							{ ' ' }
-							<QuestionCircleOutlined
-								style={ { color: theme[ '@primary-color' ] } }
-								onClick={ () => helpModal( getText( 'scopes' ), getText( 'explanation_of_scopes' ) ) }
-							/>
+							<HelpModal title="scopes" content="scope_1"/>
 						</td>
 						<td align="right">{ _( totals.oil.scope1.range[ 0 ] + totals.gas.scope1.range[ 0 ] ) }</td>
 						<td align="right">{ _( totals.oil.scope1.co2 + totals.gas.scope1.co2 ) }</td>
@@ -93,11 +74,7 @@ function YearSummary( { data = [] } ) {
 					<tr>
 						<td>
 							{ getText( 'scope' ) } 3
-							{ ' ' }
-							<QuestionCircleOutlined
-								style={ { color: theme[ '@primary-color' ] } }
-								onClick={ () => helpModal( getText( 'scopes' ), getText( 'explanation_of_scopes' ) ) }
-							/>
+							<HelpModal title="scopes" content="scope_3"/>
 						</td>
 						<td align="right">{ _( totals.oil.scope3.range[ 0 ] + totals.gas.scope3.range[ 0 ] ) }</td>
 						<td align="right">{ _( totals.oil.scope3.co2 + totals.gas.scope3.co2 ) }</td>
