@@ -8,10 +8,10 @@ import { withTooltip } from '@visx/tooltip'
 import { localPoint } from '@visx/event'
 import { bisector, max } from 'd3-array'
 import { withParentSize } from "@visx/responsive"
-import { _log1_future, getCO2, getFuelCO2 } from "./util"
+import { getCO2, getFuelCO2 } from "./util"
 import useText from "lib/useText"
 
-const DEBUG = true
+//const DEBUG = true
 
 const colors = {
 	oil: { past: '#008080', reserves: '#70a494', contingent: '#b4c8a8' },
@@ -23,7 +23,7 @@ const colors = {
 function CO2ForecastGraphBase( {
 	data, projection, estimate, estimate_prod,
 	parentWidth, cGrade, pGrade,
-	tooltipLeft, tooltipTop, tooltipData,
+	//tooltipLeft, tooltipTop, tooltipData,
 	hideTooltip, showTooltip
 } ) {
 	const { getText } = useText()
@@ -35,7 +35,6 @@ function CO2ForecastGraphBase( {
 	const getY1 = d => d[ 1 ]
 	const getAuth = d => getCO2( d.future.authority.production, estimate_prod )
 	const getStable = d => getCO2( d.future.stable.production, estimate_prod )
-	const getDecline = d => getCO2( d.future.decline.production, estimate_prod )
 
 	const showReserves = false
 
@@ -104,7 +103,8 @@ function CO2ForecastGraphBase( {
 		[ showTooltip, productionScale, yearScale ],
 	)
 
-	const tip = tooltipData
+	//const tip = tooltipData
+
 	if( !( maxCO2 > 0 ) ) return null // JSON.stringify( maxCO2 )
 
 	const productionData = data.map( d => ( {
@@ -204,16 +204,6 @@ function CO2ForecastGraphBase( {
 						defined={ d => d.year >= 2010 && getStable( d ) > 0 }
 						x={ d => yearScale( getYear( d ) ) ?? 0 }
 						y={ d => productionScale( getStable( d ) ) ?? 0 }
-						shapeRendering="geometricPrecision"
-					/>
-
-					<LinePath
-						curve={ curveLinear }
-						className="projection decline"
-						data={ data }
-						defined={ d => d.year >= 2010 && getDecline( d ) > 0 }
-						x={ d => yearScale( getYear( d ) ) ?? 0 }
-						y={ d => productionScale( getDecline( d ) ) ?? 0 }
 						shapeRendering="geometricPrecision"
 					/>
 

@@ -22,9 +22,7 @@ function FutureSummary( { data = [] } ) {
 	}
 
 	const stable = clone( _totals )
-	const decline = clone( _totals )
 	const authority = clone( _totals )
-
 
 	data.forEach( ( point, i ) => {
 		if( getCO2( point.future?.stable?.production ) <= 0 ) return
@@ -32,8 +30,6 @@ function FutureSummary( { data = [] } ) {
 		DEBUG && console.log( point.year, point.future )
 		addCO2( stable, 'oil', point.future.stable.production.oil )
 		addCO2( stable, 'gas', point.future.stable.production.gas )
-		addCO2( decline, 'oil', point.future.decline.production.oil )
-		addCO2( decline, 'gas', point.future.decline.production.gas )
 		addCO2( authority, 'oil', point.future.authority.production.oil )
 		addCO2( authority, 'gas', point.future.authority.production.gas )
 	} )
@@ -60,12 +56,6 @@ function FutureSummary( { data = [] } ) {
 						<td align="right">{ _( stable.oil.scope1.range[ 0 ] + stable.oil.scope3.range[ 0 ] + stable.gas.scope1.range[ 0 ] + stable.gas.scope3.range[ 0 ] ) }</td>
 						<td align="right">{ _( stable.oil.scope1.co2 + stable.oil.scope3.co2 + stable.gas.scope1.co2 + stable.gas.scope3.co2 ) }</td>
 						<td align="right">{ _( stable.oil.scope1.range[ 1 ] + stable.oil.scope3.range[ 1 ] + stable.gas.scope1.range[ 1 ] + stable.gas.scope3.range[ 1 ] ) }</td>
-					</tr>
-					<tr>
-						<td>{ getText( 'declining' ) }</td>
-						<td align="right">{ _( decline.oil.scope1.range[ 0 ] + decline.oil.scope3.range[ 0 ] + decline.gas.scope1.range[ 0 ] + decline.gas.scope3.range[ 0 ] ) }</td>
-						<td align="right">{ _( decline.oil.scope1.co2 + decline.oil.scope3.co2 + decline.gas.scope1.co2 + decline.gas.scope3.co2 ) }</td>
-						<td align="right">{ _( decline.oil.scope1.range[ 1 ] + decline.oil.scope3.range[ 1 ] + decline.gas.scope1.range[ 1 ] + decline.gas.scope3.range[ 1 ] ) }</td>
 					</tr>
 					<tr>
 						<td>{ reservesSource.name }</td>

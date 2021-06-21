@@ -36,12 +36,6 @@ const emptyPoint = {
 				gas: { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } }
 			}
 		},
-		decline: {
-			production: {
-				oil: { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } },
-				gas: { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } }
-			}
-		}
 	}
 }
 
@@ -301,7 +295,6 @@ export default function useCalculations() {
 		let projection = _projection
 		if( _projection > 0 ) projection = 'authority'
 
-		let declinedValues
 		const reserveSource = availableReserveSources.find( s => s.sourceId === reservesSourceId )
 		if( !reserveSource ) return
 
@@ -336,9 +329,6 @@ export default function useCalculations() {
 
 		// Initialize projected production and reserves
 
-		declinedValues = clone( emptyPoint )
-		declinedValues.future.decline.production = clone( lastProduction?.production )
-
 		const initialReserves = {
 			p: clone( emptyPoint.reserves ),
 			c: clone( emptyPoint.reserves )
@@ -355,7 +345,7 @@ export default function useCalculations() {
 		DEBUG && console.log( { initialReserves } )
 		let remainingReserves = clone( initialReserves )
 
-		DEBUG && console.log( { lastProduction, lastOilDataIndex, lastGasDataIndex, declinedValues } )
+		DEBUG && console.log( { lastProduction, lastOilDataIndex, lastGasDataIndex } )
 
 
 		for( let year = lastProduction.year; year <= 2040; year++ ) {
@@ -367,9 +357,6 @@ export default function useCalculations() {
 			let currentYearData = dataset.co2[ lastProductionIndex ]
 
 			currentYearData.future.stable.production = clone( dataset.co2[ lastOilDataIndex ].production )
-			currentYearData.future.decline.production = clone( declinedValues.future.decline.production )
-
-			_multiply( declinedValues.future.decline.production, 0.9 )
 
 			// Calculate remaining reserves
 
@@ -383,10 +370,7 @@ export default function useCalculations() {
 			currentYearData.projection = clone( currentYearData.future[ projection ].production )
 
 			if( DEBUG && currentYearData.year === 3030 ) {
-				console.log( {
-					lastProduction,
-					declinedValues: declinedValues
-				} )
+				console.log( { lastProduction } )
 				console.log( JSON.stringify( currentYearData.future.reserves.production.p, null, 2 ) )
 				console.log(
 					year,

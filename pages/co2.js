@@ -9,6 +9,7 @@ import { NextSeo } from "next-seo"
 import { useDispatch, useSelector } from "react-redux"
 import CarbonIntensitySelector from "components/viz/IntensitySelector"
 import ReservesSelector from "components/viz/ReservesSelector"
+import HelpModal from "../components/HelpModal"
 
 const DEBUG = false
 
@@ -26,7 +27,7 @@ export default function CO2ForecastPage() {
 	const [ grades, set_grades ] = useState( {} )
 	const [ estimate, set_estimate ] = useState( 2 )
 	const [ estimate_prod, set_estimate_prod ] = useState( 2 )
-	const [ projection, set_projection ] = useState( 'decline' )
+	const [ projection, set_projection ] = useState( 'stable' )
 	const [ productionSources, set_productionSources ] = useState( [] )
 	const [ futureSources, set_futureSources ] = useState( [] )
 	const [ selectedSource, set_selectedSource ] = useState()
@@ -68,7 +69,10 @@ export default function CO2ForecastPage() {
 						</Col>
 
 						<Col xs={ 12 } lg={ 4 }>
-							<h3>{ getText( 'data_source' ) }</h3>
+							<h3>
+								{ getText( 'data_source' ) }
+								<HelpModal title="data_source" content="explanation_countryhistoric"/>
+							</h3>
 							<Radio.Group
 								onChange={ e => {
 									set_selectedSource( e.target.value )
@@ -90,24 +94,45 @@ export default function CO2ForecastPage() {
 
 						<Col xs={ 12 } lg={ 5 }>
 							<div>
-								<h3>{ getText( 'projection' ) }</h3>
+								<h3>
+									{ getText( 'projection' ) }
+								</h3>
 								<Radio.Group onChange={ e => set_projection( e.target.value ) } value={ projection }>
 									{ futureSources.map( source => (
 										<Radio style={ radioStyle } value={ source?.sourceId } key={ source?.sourceId }>
-											{ source?.name }
+
+											{ source?.name === 'trend' &&
+											<>
+												{ getText( 'trend' ) }
+												<HelpModal
+													title="projection"
+													content="explanation_productioncountry_trend"
+												/>
+											</> }
+
+											{ source?.name !== 'trend' &&
+											<>
+												{ source?.name }
+												<HelpModal
+													title="projection"
+													content="explanation_countryproduction_sourced"
+												/>
+											</> }
+
 										</Radio> ) ) }
 									<Radio style={ radioStyle } value={ 'stable' }>
 										{ getText( 'stable' ) }
-									</Radio>
-									<Radio style={ radioStyle } value={ 'decline' }>
-										{ getText( 'declining' ) }
+										<HelpModal title="stable" content="explanation_productioncountry_stable"/>
 									</Radio>
 								</Radio.Group>
 							</div>
 						</Col>
 
 						<Col xs={ 24 } md={ 12 } lg={ 4 }>
-							<h3>{ getText( 'carbon_intensity' ) }</h3>
+							<h3>
+								{ getText( 'carbon_intensity' ) }
+								<HelpModal title="carbon_intensity" content="explanation_methanefactor"/>
+							</h3>
 							<CarbonIntensitySelector/>
 						</Col>
 
