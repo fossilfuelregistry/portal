@@ -1,4 +1,4 @@
-name: CD/CI for PPI VM
+name: Continous Deploy
 
 on:
   push:
