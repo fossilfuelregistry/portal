@@ -6,7 +6,7 @@ on:
       - master
 
 jobs:
-  deploy-stage:
+  deploy-dev:
     name: Deploy to dev
     runs-on: ubuntu-20.04
 
@@ -23,7 +23,7 @@ jobs:
         with:
           host: dev.fossilfuelregistry.org
           username: grff
-          key_path: ./id_rsa
+          key-path: ./id_rsa
           script: |
             pwd
             id
