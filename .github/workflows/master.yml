@@ -23,7 +23,7 @@ jobs:
         with:
           host: dev.fossilfuelregistry.org
           username: grff
-          key-path: ./id_rsa
+          key_path: ./id_rsa
           script: |
             pwd
             id
