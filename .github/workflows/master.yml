@@ -27,5 +27,5 @@ jobs:
           script: |
             pwd
             id
-            cd /grff-portal
+            cd grff-portal
             git pull
