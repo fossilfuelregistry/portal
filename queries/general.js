@@ -18,6 +18,12 @@ query countries {
   }
 }`
 
+export const GQL_productionCountries = gql`
+query MyQuery {
+  getProducingIso3166 {
+    nodes { iso3166 iso31662 fr es en sv } }
+}`
+
 export const GQL_fossilFuelTypes = gql`
 query fossilFuelTypes {
 	fossilFuelTypes { nodes }
