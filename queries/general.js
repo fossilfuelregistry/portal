@@ -35,29 +35,29 @@ query projects($iso3166_: String!, $iso31662_: String = "") {
 }`
 
 export const GQL_productionSources = gql`
-query productionSources($projectId_: String = "", $iso31662_: String = "", $iso3166_: String = "") {
+query productionSources($projectId: String = "", $iso31662: String = "", $iso3166: String = "") {
   getProductionSources(
-    iso3166_: $iso3166_
-    iso31662_: $iso31662_
-    projectId_: $projectId_
+    iso3166_: $iso3166
+    iso31662_: $iso31662
+    projectId_: $projectId
   ) { nodes { sourceId name namePretty } }
 }`
 
 export const GQL_projectionSources = gql`
-query projectionSources($projectId_: String = "", $iso31662_: String = "", $iso3166_: String = "") {
+query projectionSources($projectId: String = "", $iso31662: String = "", $iso3166: String = "") {
   getProjectionSources(
-    iso3166_: $iso3166_
-    iso31662_: $iso31662_
-    projectId_: $projectId_
+    iso3166_: $iso3166
+    iso31662_: $iso31662
+    projectId_: $projectId
   ) { nodes { sourceId name namePretty } }
 }`
 
 export const GQL_reservesSources = gql`
-query reservesSources($projectId_: String = "", $iso31662_: String = "", $iso3166_: String = "") {
+query reservesSources($projectId: String = "", $iso31662: String = "", $iso3166: String = "") {
   getReservesSources(
-    iso3166_: $iso3166_
-    iso31662_: $iso31662_
-    projectId_: $projectId_
+    iso3166_: $iso3166
+    iso31662_: $iso31662
+    projectId_: $projectId
   ) { nodes { sourceId name namePretty } }
 }`
 

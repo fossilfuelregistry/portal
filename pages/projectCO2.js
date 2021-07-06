@@ -32,18 +32,20 @@ export default function CO2ForecastPage() {
 	const region = useSelector( redux => redux.region )
 	const project = useSelector( redux => redux.project )
 
+	console.log( { country, region, project } )
+
 	const { data: _productionSources, loading: productionLoading } = useQuery( GQL_productionSources, {
-		variables: { iso3166_: country, iso31662_: region, projectId: project },
+		variables: { iso3166: country, iso31662: region, projectId: project },
 		skip: !country
 	} )
 
 	const { data: _projectionSources, loading: projectionLoading } = useQuery( GQL_projectionSources, {
-		variables: { iso3166_: country, iso31662_: region, projectId: project },
+		variables: { iso3166: country, iso31662: region, projectId: project },
 		skip: !country
 	} )
 
 	const { data: _reservesSources, loading: reservesLoading } = useQuery( GQL_reservesSources, {
-		variables: { iso3166_: country, iso31662_: region, projectId: project },
+		variables: { iso3166: country, iso31662: region, projectId: project },
 		skip: !country
 	} )
 
