@@ -10,6 +10,7 @@ import CarbonIntensitySelector from "components/viz/IntensitySelector"
 import ReservesSelector from "components/viz/ReservesSelector"
 import HelpModal from "../components/HelpModal"
 import LoadData from "../components/CO2Forecast/LoadData"
+import ProjectSelector from "../components/navigation/ProjectSelector"
 
 const DEBUG = false
 
@@ -31,6 +32,7 @@ export default function CO2ForecastPage() {
 	const [ selectedSource, set_selectedSource ] = useState()
 
 	const country = useSelector( redux => redux.country )
+	const region = useSelector( redux => redux.region )
 
 	const title = ( country?.label ? country.label + ' - ' : '' ) + getText( 'co2_effects_for_country' )
 	return (
@@ -64,6 +66,10 @@ export default function CO2ForecastPage() {
 						<Col xs={ 12 } lg={ 6 }>
 							<h3>{ getText( 'country' ) }</h3>
 							<CountrySelector/>
+							<ProjectSelector
+								iso3166={ country }
+								iso31662={ region ?? '' }
+							/>
 						</Col>
 
 						<Col xs={ 12 } lg={ 4 }>

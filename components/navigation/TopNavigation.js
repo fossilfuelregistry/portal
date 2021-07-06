@@ -56,20 +56,6 @@ export default function TopNavigation( props ) {
 				<Col>
 					<h4>{ getText( 'grff' ) }</h4>
 				</Col>
-				<Col>
-					<FacebookShareButton className="social" url="https://gffr.journeyman.se/">
-						<FacebookIcon size={ 26 } round/>
-					</FacebookShareButton>&nbsp;
-					<EmailShareButton className="social" url="https://gffr.journeyman.se/">
-						<EmailIcon size={ 26 } round/>
-					</EmailShareButton>&nbsp;
-					<LinkedinShareButton className="social" url="https://gffr.journeyman.se/">
-						<LinkedinIcon size={ 26 } round/>
-					</LinkedinShareButton>&nbsp;
-					<TwitterShareButton className="social" url="https://gffr.journeyman.se/">
-						<TwitterIcon size={ 26 } round/>
-					</TwitterShareButton>&nbsp;
-				</Col>
 			</Row>
 
 			<NavigDrawer visible={ visible } onClose={ onClose }/>

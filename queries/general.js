@@ -19,7 +19,7 @@ query countries {
 }`
 
 export const GQL_productionCountries = gql`
-query MyQuery {
+query producingCountries {
   getProducingIso3166 {
     nodes { iso3166 iso31662 fr es en sv } }
 }`
@@ -27,6 +27,11 @@ query MyQuery {
 export const GQL_fossilFuelTypes = gql`
 query fossilFuelTypes {
 	fossilFuelTypes { nodes }
+}`
+
+export const GQL_projects = gql`
+query projects($iso3166_: String!, $iso31662_: String = "") {
+  getProjects(iso3166_: $iso3166_, iso31662_: $iso31662_) { nodes { iso31662 projectId } }
 }`
 
 export const GQL_sources = gql`
