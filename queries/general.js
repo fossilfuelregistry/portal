@@ -34,9 +34,37 @@ query projects($iso3166_: String!, $iso31662_: String = "") {
   getProjects(iso3166_: $iso3166_, iso31662_: $iso31662_) { nodes { iso31662 projectId } }
 }`
 
+export const GQL_productionSources = gql`
+query productionSources($projectId_: String = "", $iso31662_: String = "", $iso3166_: String = "") {
+  getProductionSources(
+    iso3166_: $iso3166_
+    iso31662_: $iso31662_
+    projectId_: $projectId_
+  ) { nodes { sourceId name namePretty } }
+}`
+
+export const GQL_projectionSources = gql`
+query projectionSources($projectId_: String = "", $iso31662_: String = "", $iso3166_: String = "") {
+  getProjectionSources(
+    iso3166_: $iso3166_
+    iso31662_: $iso31662_
+    projectId_: $projectId_
+  ) { nodes { sourceId name namePretty } }
+}`
+
+export const GQL_reservesSources = gql`
+query reservesSources($projectId_: String = "", $iso31662_: String = "", $iso3166_: String = "") {
+  getReservesSources(
+    iso3166_: $iso3166_
+    iso31662_: $iso31662_
+    projectId_: $projectId_
+  ) { nodes { sourceId name namePretty } }
+}`
+
 export const GQL_sources = gql`
 query sources {
   sources {
     nodes { description name sourceId url }
   }
 }`
+

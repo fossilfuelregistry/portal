@@ -1,16 +1,18 @@
-import React, { useState } from "react"
+import React from "react"
 import TopNavigation from "components/navigation/TopNavigation"
 import getConfig from 'next/config'
 import CountrySelector from "components/navigation/CountrySelector"
-import { Col, Radio, Row } from "antd"
+import { Col, Row } from "antd"
 import useText from "lib/useText"
 import { NextSeo } from "next-seo"
 import { useDispatch, useSelector } from "react-redux"
 import CarbonIntensitySelector from "components/viz/IntensitySelector"
-import ReservesSelector from "components/viz/ReservesSelector"
-import HelpModal from "../components/HelpModal"
-import LoadData from "../components/CO2Forecast/LoadData"
-import ProjectSelector from "../components/navigation/ProjectSelector"
+import HelpModal from "components/HelpModal"
+import LoadData from "components/CO2Forecast/LoadData"
+import ProjectSelector from "components/navigation/ProjectSelector"
+import { useQuery } from "@apollo/client"
+import { GQL_productionSources, GQL_projectionSources, GQL_reservesSources } from "queries/general"
+import SourceSelector from "../components/navigation/SourceSelector"
 
 const DEBUG = false
 
@@ -25,28 +27,44 @@ const radioStyle = {
 export default function CO2ForecastPage() {
 	const { getText } = useText()
 	const dispatch = useDispatch()
-	const [ grades, set_grades ] = useState( {} )
-	const [ projection, set_projection ] = useState( 'stable' )
-	const [ productionSources, set_productionSources ] = useState( [] )
-	const [ futureSources, set_futureSources ] = useState( [] )
-	const [ selectedSource, set_selectedSource ] = useState()
 
 	const country = useSelector( redux => redux.country )
 	const region = useSelector( redux => redux.region )
+	const project = useSelector( redux => redux.project )
+
+	const { data: _productionSources, loading: productionLoading } = useQuery( GQL_productionSources, {
+		variables: { iso3166_: country, iso31662_: region, projectId: project },
+		skip: !country
+	} )
+
+	const { data: _projectionSources, loading: projectionLoading } = useQuery( GQL_projectionSources, {
+		variables: { iso3166_: country, iso31662_: region, projectId: project },
+		skip: !country
+	} )
+
+	const { data: _reservesSources, loading: reservesLoading } = useQuery( GQL_reservesSources, {
+		variables: { iso3166_: country, iso31662_: region, projectId: project },
+		skip: !country
+	} )
 
 	const title = ( country?.label ? country.label + ' - ' : '' ) + getText( 'co2_effects_for_country' )
+
+	const productionSources = ( _productionSources?.getProductionSources?.nodes ?? [] )
+	const projectionSources = ( _projectionSources?.getProjectionSources?.nodes ?? [] )
+	const reservesSources = ( _reservesSources?.getReservesSources?.nodes ?? [] )
+	console.log( projectionSources )
 	return (
 		<>
 			<NextSeo
 				title={ title }
 				description={ getText( 'a_service_from_gffr' ) }
 				openGraph={ {
-					url: 'https://grff.journeyman.se',
+					url: 'https://fossilfuelregistry.org',
 					title: getText( 'gffr' ),
 					description: title,
 					images: [
 						{
-							url: 'https://grff.journeyman.se/og1.jpg',
+							url: 'https://fossilfuelregistry.org/og1.jpg',
 							width: 1200,
 							height: 671,
 							alt: getText( 'gffr' ),
@@ -77,23 +95,20 @@ export default function CO2ForecastPage() {
 								{ getText( 'data_source' ) }
 								<HelpModal title="data_source" content="explanation_countryhistoric"/>
 							</h3>
-							<Radio.Group
-								onChange={ e => {
-									set_selectedSource( e.target.value )
-									dispatch( { type: 'PRODUCTIONSOURCEID', payload: e.target.value } )
-								} }
-								value={ selectedSource }
-							>
-								{ productionSources.map( source => (
-									<Radio style={ radioStyle } value={ source?.sourceId } key={ source?.sourceId }>
-										{ source?.name }
-									</Radio> ) ) }
-							</Radio.Group>
+							<SourceSelector
+								sources={ productionSources }
+								stateKey="productionSourceId"
+								placeholder={ getText( 'data_source' ) }
+							/>
 						</Col>
 
 						<Col xs={ 12 } lg={ 5 }>
 							<h3>{ getText( 'reserves' ) }</h3>
-							<ReservesSelector/>
+							<SourceSelector
+								sources={ reservesSources }
+								stateKey="reservesSourceId"
+								placeholder={ getText( 'reserves' ) }
+							/>
 						</Col>
 
 						<Col xs={ 12 } lg={ 5 }>
@@ -101,34 +116,11 @@ export default function CO2ForecastPage() {
 								<h3>
 									{ getText( 'projection' ) }
 								</h3>
-								<Radio.Group onChange={ e => set_projection( e.target.value ) } value={ projection }>
-									{ futureSources.map( source => (
-										<Radio style={ radioStyle } value={ source?.sourceId } key={ source?.sourceId }>
-
-											{ source?.name === 'trend' &&
-											<>
-												{ getText( 'trend' ) }
-												<HelpModal
-													title="projection"
-													content="explanation_productioncountry_trend"
-												/>
-											</> }
-
-											{ source?.name !== 'trend' &&
-											<>
-												{ source?.name }
-												<HelpModal
-													title="projection"
-													content="explanation_countryproduction_sourced"
-												/>
-											</> }
-
-										</Radio> ) ) }
-									<Radio style={ radioStyle } value={ 'stable' }>
-										{ getText( 'stable' ) }
-										<HelpModal title="stable" content="explanation_productioncountry_stable"/>
-									</Radio>
-								</Radio.Group>
+								<SourceSelector
+									sources={ projectionSources }
+									stateKey="projectionSourceId"
+									placeholder={ getText( 'projection' ) }
+								/>
 							</div>
 						</Col>
 
