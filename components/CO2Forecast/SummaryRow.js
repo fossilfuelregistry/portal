@@ -1,11 +1,12 @@
 import HelpModal from "components/HelpModal"
 import React from "react"
 import useText from "lib/useText"
+import { sumOfCO2 } from "./calculate"
 
 export default function SummaryRow( { label, totals, total } ) {
 	const { getText } = useText()
 	const _ = v => Math.round( v )
-	console.log( totals )
+
 	return (
 		<>
 			<tr className="subheader">
@@ -34,9 +35,9 @@ export default function SummaryRow( { label, totals, total } ) {
 			</tr>
 			<tr className="total">
 				<td>{ total }</td>
-				<td align="right">{ _( totals.scope1[ 0 ] + totals.scope3[ 0 ] ) }</td>
-				<td align="right">{ _( totals.scope1[ 1 ] + totals.scope3[ 1 ] ) }</td>
-				<td align="right">{ _( totals.scope1[ 2 ] + totals.scope3[ 2 ] ) }</td>
+				<td align="right">{ _( sumOfCO2( totals, 0 ) ) }</td>
+				<td align="right">{ _( sumOfCO2( totals, 1 ) ) }</td>
+				<td align="right">{ _( sumOfCO2( totals, 2 ) ) }</td>
 			</tr>
 
 			<style jsx>{ `

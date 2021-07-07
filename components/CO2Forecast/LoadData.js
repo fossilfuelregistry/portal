@@ -25,7 +25,6 @@ function LoadData() {
 	const gwp = useSelector( redux => redux.gwp )
 
 	const _co2 = dataset => {
-		console.log( 'CALC CO2' )
 		return ( dataset ?? [] ).map( datapoint => ( {
 			...datapoint,
 			co2: co2FromVolume( datapoint, datapoint.year === 2010 )
@@ -43,8 +42,15 @@ function LoadData() {
 
 	const { data: productionData, loading: loadingProduction, error: errorLoadingProduction }
 		= useQuery( queries.production, { skip: !productionSourceId } )
-	const production = useMemo( () => _co2( productionData?.countryProductions?.nodes ),
-		[ productionData?.countryProductions?.nodes, gwp ] )
+
+	const production = useMemo( () => {
+		const p = _co2( productionData?.countryProductions?.nodes )
+		const reverse = [ ...p ].reverse()
+		const oil = reverse.find( d => d.fossilFuelType === 'oil' )
+		const gas = reverse.find( d => d.fossilFuelType === 'gas' )
+		dispatch( { type: 'STABLEPRODUCTION', payload: { oil, gas } } )
+		return p
+	}, [ productionData?.countryProductions?.nodes, gwp ] )
 
 	const { data: projectionData, loading: loadingProjection, error: errorLoadingProjection }
 		= useQuery( queries.projection, { skip: !projectionSourceId } )

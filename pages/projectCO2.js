@@ -1,11 +1,11 @@
-import React from "react"
+import React, { useEffect } from "react"
 import TopNavigation from "components/navigation/TopNavigation"
 import getConfig from 'next/config'
 import CountrySelector from "components/navigation/CountrySelector"
 import { Col, Row } from "antd"
 import useText from "lib/useText"
 import { NextSeo } from "next-seo"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import CarbonIntensitySelector from "components/viz/IntensitySelector"
 import HelpModal from "components/HelpModal"
 import LoadData from "components/CO2Forecast/LoadData"
@@ -20,7 +20,7 @@ const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
 export default function CO2ForecastPage() {
 	const { getText } = useText()
-
+	const { dispatch } = useDispatch()
 	const country = useSelector( redux => redux.country )
 	const region = useSelector( redux => redux.region )
 	const project = useSelector( redux => redux.project )
@@ -49,6 +49,11 @@ export default function CO2ForecastPage() {
 			...s,
 			namePretty: `${ s.grades } ${ s.year }`
 		} ) )
+
+	useEffect( () => {
+		if( !reservesSources?.length > 0 ) return
+		//dispatch()
+	}, [ reservesSources?.[ 0 ] ] )
 
 	return (
 		<>

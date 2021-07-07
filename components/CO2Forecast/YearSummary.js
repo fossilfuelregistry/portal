@@ -5,11 +5,9 @@ import HelpModal from "../HelpModal"
 import SummaryRow from "./SummaryRow"
 import { addToTotal } from "./calculate"
 
-const DEBUG = true
+const DEBUG = false
 
-const _ = v => Math.round( v )
-
-function YearSummary( { dataset = [], limits } ) {
+function YearSummary( { dataset = [] } ) {
 	const { getText } = useText()
 	const productionSourceId = useSelector( redux => redux.productionSourceId )
 

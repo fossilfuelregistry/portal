@@ -23,7 +23,7 @@ export default function SourceSelector( { sources, stateKey, placeholder } ) {
 				defaultActiveFirstOption={ true }
 				onChange={ async e => {
 					set_selectedSourceOption( e )
-					dispatch( { type: stateKey.toUpperCase(), payload: e?.value } )
+					dispatch( { type: stateKey.toUpperCase(), payload: parseInt( e?.value ) } )
 					const query = { ...router.query }
 					delete query[ stateKey ]
 					if( e?.value ) query[ stateKey ] = e.value

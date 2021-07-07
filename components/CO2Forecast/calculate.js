@@ -10,3 +10,15 @@ export function addToTotal( total, datapoint ) {
 		} )
 	} )
 }
+
+function _sumOfFuelCO2( fuel, range ) {
+	return fuel.scope1[ range ] + fuel.scope3[ range ]
+}
+
+export function sumOfCO2( datapoint, range ) {
+	if( datapoint.oil ) {
+		return _sumOfFuelCO2( datapoint.oil, range ) + _sumOfFuelCO2( datapoint.gas, range )
+	} else {
+		return _sumOfFuelCO2( datapoint, range )
+	}
+}

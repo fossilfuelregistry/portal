@@ -1,25 +1,51 @@
 import React from "react"
 import useText from "lib/useText"
 import { useSelector } from "react-redux"
-import clone from 'clone'
+import { useUnitConversionGraph } from "../viz/UnitConverter"
+import { addToTotal, sumOfCO2 } from "./calculate"
 
-const DEBUG = false
+const DEBUG = true
 
 function FutureSummary( { dataset, limits } ) {
 	const { getText } = useText()
-	const bestReservesSourceId = useSelector( redux => redux.reservesSourceId )
+	const { co2FromVolume } = useUnitConversionGraph()
+	const stableProduction = useSelector( redux => redux.stableProduction )
 	const allSources = useSelector( redux => redux.allSources )
-	const reservesSource = allSources?.find( s => s.sourceId === bestReservesSourceId ) ?? {}
+	const projectionSourceId = useSelector( redux => redux.projectionSourceId )
 
 	if( !( dataset?.length > 0 ) ) return null
 
-	const totals = {
+	DEBUG && console.log( { projectionSourceId, allSources, limits, stableProduction } )
+
+	const stable = {
+		oil: co2FromVolume( stableProduction.oil ),
+		gas: co2FromVolume( stableProduction.gas )
+	}
+
+	const projectionSource = allSources.find( s => s.sourceId === projectionSourceId )
+	if( !projectionSource ) return null
+	let sourceName = projectionSource?.name
+	if( sourceName.startsWith( 'name_' ) ) sourceName = getText( sourceName )
+
+	const year = dataset.reduce( ( yrs, datapoint ) => {
+		yrs.first = Math.min( datapoint.year, yrs.first ?? 9999 )
+		yrs.last = Math.max( datapoint.year, yrs.last ?? 0 )
+		return yrs
+	}, {} )
+	year.first = Math.max( new Date().getFullYear(), year.first )
+	const years = 1 + year.last - year.first
+
+	const sourceTotal = {
 		oil: { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] },
 		gas: { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] }
 	}
 
-	const stable = clone( totals )
-	const selected = clone( totals )
+	dataset.forEach( d => {
+		if( d.year < year.first ) return
+		addToTotal( sourceTotal[ d.fossilFuelType ], d.co2 )
+	} )
+
+	DEBUG && console.log( { years, year, stable } )
 
 	const _ = v => Math.round( v )
 
@@ -32,7 +58,24 @@ function FutureSummary( { dataset, limits } ) {
 					</tr>
 				</thead>
 				<tbody>
-					<tr/>
+					<tr className="subheader">
+						<td align="right"/>
+						<td align="right">{ getText( 'low' ) }</td>
+						<td align="right">{ getText( 'mid' ) }</td>
+						<td align="right">{ getText( 'high' ) }</td>
+					</tr>
+					<tr>
+						<td>{ sourceName }</td>
+						<td align="right">{ _( sumOfCO2( sourceTotal, 0 ) ) }</td>
+						<td align="right">{ _( sumOfCO2( sourceTotal, 1 ) ) }</td>
+						<td align="right">{ _( sumOfCO2( sourceTotal, 2 ) ) }</td>
+					</tr>
+					<tr>
+						<td>{ getText( 'stable' ) }</td>
+						<td align="right">{ _( years * sumOfCO2( stable, 0 ) ) }</td>
+						<td align="right">{ _( years * sumOfCO2( stable, 1 ) ) }</td>
+						<td align="right">{ _( years * sumOfCO2( stable, 2 ) ) }</td>
+					</tr>
 				</tbody>
 			</table>
 
@@ -60,6 +103,14 @@ function FutureSummary( { dataset, limits } ) {
 
               th, td {
                 padding: 3px 12px;
+              }
+
+              .subheader td {
+                background-color: #eeeeee;
+              }
+
+              .total td {
+                font-weight: 700;
               }
 			` }
 			</style>

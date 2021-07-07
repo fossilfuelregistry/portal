@@ -1,11 +1,11 @@
 import React from "react"
 import useText from "lib/useText"
 import HelpModal from "../HelpModal"
-import { addToTotal } from "./calculate"
+import { addToTotal, sumOfCO2 } from "./calculate"
 import { useSelector } from "react-redux"
 import SummaryRow from "./SummaryRow"
 
-const DEBUG = true
+const DEBUG = false
 
 function InputSummary( { dataset = [] } ) {
 	const { getText } = useText()
@@ -51,9 +51,9 @@ function InputSummary( { dataset = [] } ) {
 					/>
 					<tr className="total subheader">
 						<td>{ getText( 'totals' ) }</td>
-						<td align="right">{ _( totals.gas.scope1[ 0 ] + totals.gas.scope3[ 0 ] + totals.oil.scope1[ 0 ] + totals.oil.scope3[ 0 ] ) }</td>
-						<td align="right">{ _( totals.gas.scope1[ 1 ] + totals.gas.scope3[ 1 ] + totals.oil.scope1[ 1 ] + totals.oil.scope3[ 1 ] ) }</td>
-						<td align="right">{ _( totals.gas.scope1[ 2 ] + totals.gas.scope3[ 2 ] + totals.oil.scope1[ 2 ] + totals.oil.scope3[ 2 ] ) }</td>
+						<td align="right">{ _( sumOfCO2( totals, 0 ) ) }</td>
+						<td align="right">{ _( sumOfCO2( totals, 1 ) ) }</td>
+						<td align="right">{ _( sumOfCO2( totals, 2 ) ) }</td>
 					</tr>
 				</tbody>
 			</table>
