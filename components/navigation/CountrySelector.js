@@ -41,7 +41,6 @@ export default function CountrySelector() {
 		const { country } = router.query
 		if( country && ( !selectedCountryOption || selectedCountryOption.value !== country ) ) {
 			const name = countries.find( c => c.iso3166.toLowerCase() === country.toLowerCase() )?.[ 'name' ]
-			console.log( { name } )
 			const newselectedCountryOption = { value: router.query.country, label: name }
 
 			dispatch( { type: 'COUNTRY', payload: newselectedCountryOption.value } )
@@ -53,7 +52,6 @@ export default function CountrySelector() {
 			const _regions = ( countriesData?.getProducingIso3166?.nodes ?? [] )
 				.filter( r => r.iso3166 === country && !!r.iso31662 )
 				.map( r => ( { ...r, name: r[ language ] ?? r.en } ) )
-			console.log( 'CountrySelector', { country, _regions } )
 			set_regions( _regions )
 		}
 	}, [ router.query.country, countries?.length, selectedCountryOption?.value ] )

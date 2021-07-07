@@ -1,25 +1,28 @@
 import React from "react"
-import Loading from "components/Loading"
 import useText from "lib/useText"
 import HelpModal from "../HelpModal"
 import { addToTotal } from "./calculate"
+import { useSelector } from "react-redux"
 
-//const DEBUG = false
+const DEBUG = true
 
 function InputSummary( { dataset = [] } ) {
 	const { getText } = useText()
+	const productionSourceId = useSelector( redux => redux.productionSourceId )
 
-	if( !( dataset?.length > 0 ) ) return <Loading/>
+	if( !( dataset?.length > 0 ) ) return null
 
 	const totals = {
 		oil: { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] },
 		gas: { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] }
 	}
 
-	dataset.forEach( datapoint => {
-		addToTotal( totals.oil, 'oil', datapoint.production.oil )
-		addToTotal( totals.gas, 'gas', datapoint.production.gas )
+	const sourceData = dataset.filter( p => p.sourceId === parseInt( productionSourceId ) )
+	sourceData.forEach( datapoint => {
+		addToTotal( totals[ datapoint.fossilFuelType ], datapoint.co2 )
 	} )
+
+	DEBUG && console.log( 'InputSummary', { dataset, productionSourceId, sourceData } )
 
 	const _ = v => Math.round( v )
 
@@ -46,24 +49,24 @@ function InputSummary( { dataset = [] } ) {
 							{ getText( 'scope' ) } 1
 							<HelpModal title="scopes" content="scope_1"/>
 						</td>
-						<td align="right">{ _( totals.oil.scope1.range[ 0 ] ) }</td>
-						<td align="right">{ _( totals.oil.scope1.co2 ) }</td>
-						<td align="right">{ _( totals.oil.scope1.range[ 1 ] ) }</td>
+						<td align="right">{ _( totals.oil.scope1[ 0 ] ) }</td>
+						<td align="right">{ _( totals.oil.scope1[ 1 ] ) }</td>
+						<td align="right">{ _( totals.oil.scope1[ 2 ] ) }</td>
 					</tr>
 					<tr>
 						<td>
 							{ getText( 'scope' ) } 3
 							<HelpModal title="scopes" content="scope_2"/>
 						</td>
-						<td align="right">{ _( totals.oil.scope3.range[ 0 ] ) }</td>
-						<td align="right">{ _( totals.oil.scope3.co2 ) }</td>
-						<td align="right">{ _( totals.oil.scope3.range[ 1 ] ) }</td>
+						<td align="right">{ _( totals.oil.scope3[ 0 ] ) }</td>
+						<td align="right">{ _( totals.oil.scope3[ 1 ] ) }</td>
+						<td align="right">{ _( totals.oil.scope3[ 2 ] ) }</td>
 					</tr>
 					<tr className="total">
 						<td>{ getText( 'oil' ) } { getText( 'total' ) }</td>
-						<td align="right">{ _( totals.oil.scope1.range[ 0 ] + totals.oil.scope3.range[ 0 ] ) }</td>
-						<td align="right">{ _( totals.oil.scope1.co2 + totals.oil.scope3.co2 ) }</td>
-						<td align="right">{ _( totals.oil.scope1.range[ 1 ] + totals.oil.scope3.range[ 1 ] ) }</td>
+						<td align="right">{ _( totals.oil.scope1[ 0 ] + totals.oil.scope3[ 0 ] ) }</td>
+						<td align="right">{ _( totals.oil.scope1[ 1 ] + totals.oil.scope3[ 1 ] ) }</td>
+						<td align="right">{ _( totals.oil.scope1[ 2 ] + totals.oil.scope3[ 2 ] ) }</td>
 					</tr>
 
 					<tr className="subheader">
@@ -77,30 +80,30 @@ function InputSummary( { dataset = [] } ) {
 							{ getText( 'scope' ) } 1
 							<HelpModal title="scopes" content="scope_1"/>
 						</td>
-						<td align="right">{ _( totals.gas.scope1.range[ 0 ] ) }</td>
-						<td align="right">{ _( totals.gas.scope1.co2 ) }</td>
-						<td align="right">{ _( totals.gas.scope1.range[ 1 ] ) }</td>
+						<td align="right">{ _( totals.gas.scope1[ 0 ] ) }</td>
+						<td align="right">{ _( totals.gas.scope1[ 1 ] ) }</td>
+						<td align="right">{ _( totals.gas.scope1[ 2 ] ) }</td>
 					</tr>
 					<tr>
 						<td>
 							{ getText( 'scope' ) } 3
-							<HelpModal title="scopes" content="scope_3"/>
+							<HelpModal title="scopes" content="scope_2"/>
 						</td>
-						<td align="right">{ _( totals.gas.scope3.range[ 0 ] ) }</td>
-						<td align="right">{ _( totals.gas.scope3.co2 ) }</td>
-						<td align="right">{ _( totals.gas.scope3.range[ 1 ] ) }</td>
+						<td align="right">{ _( totals.gas.scope3[ 0 ] ) }</td>
+						<td align="right">{ _( totals.gas.scope3[ 1 ] ) }</td>
+						<td align="right">{ _( totals.gas.scope3[ 2 ] ) }</td>
 					</tr>
 					<tr className="total">
 						<td>{ getText( 'gas' ) } { getText( 'total' ) }</td>
-						<td align="right">{ _( totals.gas.scope1.range[ 0 ] + totals.gas.scope3.range[ 0 ] ) }</td>
-						<td align="right">{ _( totals.gas.scope1.co2 + totals.gas.scope3.co2 ) }</td>
-						<td align="right">{ _( totals.gas.scope1.range[ 1 ] + totals.gas.scope3.range[ 1 ] ) }</td>
+						<td align="right">{ _( totals.gas.scope1[ 0 ] + totals.gas.scope3[ 0 ] ) }</td>
+						<td align="right">{ _( totals.gas.scope1[ 1 ] + totals.gas.scope3[ 1 ] ) }</td>
+						<td align="right">{ _( totals.gas.scope1[ 2 ] + totals.gas.scope3[ 2 ] ) }</td>
 					</tr>
 					<tr className="total subheader">
 						<td>{ getText( 'totals' ) }</td>
-						<td align="right">{ _( totals.gas.scope1.range[ 0 ] + totals.gas.scope3.range[ 0 ] + totals.oil.scope1.range[ 0 ] + totals.oil.scope3.range[ 0 ] ) }</td>
-						<td align="right">{ _( totals.gas.scope1.co2 + totals.gas.scope3.co2 + totals.oil.scope1.co2 + totals.oil.scope3.co2 ) }</td>
-						<td align="right">{ _( totals.gas.scope1.range[ 1 ] + totals.gas.scope3.range[ 1 ] + totals.oil.scope1.range[ 1 ] + totals.oil.scope3.range[ 1 ] ) }</td>
+						<td align="right">{ _( totals.gas.scope1[ 0 ] + totals.gas.scope3[ 0 ] + totals.oil.scope1[ 0 ] + totals.oil.scope3[ 0 ] ) }</td>
+						<td align="right">{ _( totals.gas.scope1[ 1 ] + totals.gas.scope3[ 1 ] + totals.oil.scope1[ 1 ] + totals.oil.scope3[ 1 ] ) }</td>
+						<td align="right">{ _( totals.gas.scope1[ 2 ] + totals.gas.scope3[ 2 ] + totals.oil.scope1[ 2 ] + totals.oil.scope3[ 2 ] ) }</td>
 					</tr>
 				</tbody>
 			</table>

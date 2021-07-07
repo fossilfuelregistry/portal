@@ -1,43 +1,60 @@
 import React, { useEffect, useMemo, useState } from "react"
 import { useQuery } from "@apollo/client"
 import GraphQLStatus from "components/GraphQLStatus"
-import { GQL_countryProductionByIso, GQL_countryReservesByIso } from "queries/country"
+import { GQL_dataQuery } from "queries/country"
 import { Alert, notification } from "antd"
 import useText from "lib/useText"
 import { useDispatch, useSelector } from "react-redux"
 import ForecastView from "./ForecastView"
+import { useUnitConversionGraph } from "../viz/UnitConverter"
 
 const DEBUG = false
 
-function LoadData( {
-	source, grades, onGrades, onSources, projection, estimate, estimate_prod
-} ) {
+function LoadData() {
 	const dispatch = useDispatch()
+	const { co2FromVolume } = useUnitConversionGraph()
 	const { getText } = useText()
-	const [ limits, set_limits ] = useState()
+	const [ limits, set_limits ] = useState( {} )
+	const [ grades, set_grades ] = useState( {} )
 	const country = useSelector( redux => redux.country )
-	const allSources = useSelector( redux => redux.allSources )
+	const region = useSelector( redux => redux.region )
+	const project = useSelector( redux => redux.project )
+	const productionSourceId = useSelector( redux => redux.productionSourceId )
+	const projectionSourceId = useSelector( redux => redux.projectionSourceId )
+	const reservesSourceId = useSelector( redux => redux.reservesSourceId )
 	const gwp = useSelector( redux => redux.gwp )
 
+	const _co2 = dataset => {
+		console.log( 'CALC CO2' )
+		return ( dataset ?? [] ).map( datapoint => ( {
+			...datapoint,
+			co2: co2FromVolume( datapoint, datapoint.year === 2010 )
+		} ) )
+	}
+
+	const queries = useMemo( () => {
+		return GQL_dataQuery( {
+			iso3166: country,
+			iso31662: region,
+			projectId: project,
+			sourceId: reservesSourceId
+		} )
+	}, [ country, region, project, productionSourceId ] )
+
 	const { data: productionData, loading: loadingProduction, error: errorLoadingProduction }
-		= useQuery( GQL_countryProductionByIso, { variables: { iso3166: country }, skip: !country } )
-	const production = productionData?.countryProductions?.nodes ?? []
+		= useQuery( queries.production, { skip: !productionSourceId } )
+	const production = useMemo( () => _co2( productionData?.countryProductions?.nodes ),
+		[ productionData?.countryProductions?.nodes, gwp ] )
+
+	const { data: projectionData, loading: loadingProjection, error: errorLoadingProjection }
+		= useQuery( queries.projection, { skip: !projectionSourceId } )
+	const projection = useMemo( () => _co2( projectionData?.countryProductions?.nodes ),
+		[ projectionData?.countryProductions?.nodes?.length, gwp ] )
 
 	const { data: reservesData, loading: loadingReserves, error: errorLoadingReserves }
-		= useQuery( GQL_countryReservesByIso, { variables: { iso3166: country }, skip: !country } )
-	const reserves = reservesData?.countryReserves?.nodes ?? []
-
-	const sourceId = source?.sourceId
-
-	const dataset = useMemo( () => {
-		if( !production?.length ) return []
-		if( !reserves?.length ) return []
-		if( !source ) return []
-
-		DEBUG && console.log( { production, reserves, projection, source, grades, estimate, estimate_prod, gwp } )
-
-
-	}, [ production, reserves, projection, source, grades, estimate, estimate_prod, gwp ] )
+		= useQuery( queries.reserves, { skip: !reservesSourceId } )
+	const reserves = useMemo( () => _co2( reservesData?.countryReserves?.nodes ),
+		[ reservesData?.countryReserves?.nodes?.length, gwp ] )
 
 	try {
 		//updateReserves( dataset, production, projection )
@@ -49,65 +66,80 @@ function LoadData( {
 		} )
 	}
 
-	const co2 = dataset?.co2 ?? []
+	// Figure out available years when data loaded.
 
 	useEffect( () => {
-		if( !dataset ) return
-		dispatch( { type: 'BESTRESERVESSOURCEID', payload: dataset.bestReservesSourceId } )
-		dispatch( { type: 'LASTYEAROFBESTRESERVE', payload: dataset.lastYearOfBestReserve } )
-	}, [ dataset?.bestReservesSourceId, dataset?.lastYearOfBestReserve ] )
-
-	// Figure out available years and sources when production loaded.
-
-	useEffect( () => {
-		DEBUG && console.log( 'useEffect Production.length', { allSources } )
-		if( !( production?.length > 0 ) || !( allSources?.length > 0 ) ) return
-		const newLimits = production.reduce( ( limits, dbRow ) => {
-			limits.firstYear = ( limits.firstYear === undefined || dbRow.year < limits.firstYear ) ? dbRow.year : limits.firstYear
-			limits.lastYear = ( limits.lastYear === undefined || dbRow.year > limits.lastYear ) ? dbRow.year : limits.lastYear
-			if( dbRow.projection )
-				limits.futureSources[ dbRow.sourceId ] = allSources.find( s => s.sourceId === dbRow.sourceId )
-			else
-				limits.productionSources[ dbRow.sourceId ] = allSources.find( s => s.sourceId === dbRow.sourceId )
+		DEBUG && console.log( 'useEffect Production.length', production?.length, { limits } )
+		if( !production?.length > 0 ) return
+		const newLimits = production.reduce( ( limits, datapoint ) => {
+			limits.firstYear = ( limits.firstYear === undefined || datapoint.year < limits.firstYear ) ? datapoint.year : limits.firstYear
+			limits.lastYear = ( limits.lastYear === undefined || datapoint.year > limits.lastYear ) ? datapoint.year : limits.lastYear
 			return limits
-		}, { futureSources: [], productionSources: [] } )
+		}, {} )
 
-		DEBUG && console.log( { newLimits } )
-		set_limits( newLimits )
-		onSources && onSources( newLimits )
+		set_limits( { ...limits, production: newLimits } )
 	}, [ production?.length ] )
+
+	useEffect( () => {
+		DEBUG && console.log( 'useEffect projection.length', { limits } )
+		if( !projection?.length > 0 ) return
+		const newLimits = projection.reduce( ( limits, datapoint ) => {
+			limits.firstYear = ( limits.firstYear === undefined || datapoint.year < limits.firstYear ) ? datapoint.year : limits.firstYear
+			limits.lastYear = ( limits.lastYear === undefined || datapoint.year > limits.lastYear ) ? datapoint.year : limits.lastYear
+			return limits
+		}, {} )
+
+		set_limits( { ...limits, projection: newLimits } )
+	}, [ projection?.length ] )
+
+	useEffect( () => {
+		DEBUG && console.log( 'useEffect reserves.length', { limits } )
+		if( !reserves?.length > 0 ) return
+		const newLimits = reserves.reduce( ( limits, datapoint ) => {
+			limits.firstYear = ( limits.firstYear === undefined || datapoint.year < limits.firstYear ) ? datapoint.year : limits.firstYear
+			limits.lastYear = ( limits.lastYear === undefined || datapoint.year > limits.lastYear ) ? datapoint.year : limits.lastYear
+			return limits
+		}, {} )
+
+		set_limits( { ...limits, reserves: newLimits } )
+	}, [ reserves?.length ] )
+
+	DEBUG && console.log( { limits, production } )
 
 	// Figure out available grades when reserves loaded.
 
 	useEffect( () => {
-		DEBUG && console.log( 'useEffect Reserves', { allSources } )
+		DEBUG && console.log( 'useEffect Reserves', {} )
 		if( !( reserves?.length > 0 ) ) return
 		const _grades = reserves.reduce( ( g, r ) => {
 			g[ r.grade ] = false
 			return g
 		}, {} )
 		//console.log( _grades )
-		onGrades && onGrades( _grades )
+		set_grades( _grades )
 	}, [ reserves?.length ] )
 
 	if( loadingProduction || errorLoadingProduction )
 		return <GraphQLStatus loading={ loadingProduction } error={ errorLoadingProduction }/>
+	if( loadingProjection || errorLoadingProjection )
+		return <GraphQLStatus loading={ loadingProjection } error={ errorLoadingProjection }/>
 	if( loadingReserves || errorLoadingReserves )
 		return <GraphQLStatus loading={ loadingReserves } error={ errorLoadingReserves }/>
 
-	const { firstYear, lastYear } = limits ?? {}
-
-	DEBUG && console.log( 'CountryProduction', { oil: co2 } )
+	const { firstYear, lastYear } = limits.production ?? {}
 
 	// Don't try to render a chart until all data looks good
-	if( !firstYear || !lastYear || !co2?.length > 0 )
+	if( !firstYear || !lastYear || !production?.length > 0 )
 		return <Alert message={ getText( 'make_selections' ) } type="info" showIcon/>
 
-	DEBUG && console.log( 'CountryProduction', { firstYear, lastYear, grades, source } )
+	DEBUG && console.log( 'CountryProduction', { firstYear, lastYear, grades } )
 
 	return (
 		<ForecastView
-			dataset={dataset}
+			production={ production }
+			projection={ projection }
+			reserves={ reserves }
+			limits={ limits }
 		/>
 	)
 }

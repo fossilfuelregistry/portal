@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux"
 import useText from "lib/useText"
 import { GQL_projects } from "queries/general"
 
-const DEBUG = true
+const DEBUG = false
 
 export default function ProjectSelector( { iso3166, iso31662 } ) {
 	const router = useRouter()

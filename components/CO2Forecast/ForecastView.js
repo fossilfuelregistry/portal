@@ -6,16 +6,12 @@ import { useDispatch, useSelector } from "react-redux"
 
 const DEBUG = true
 
-function ForecastView( { dataset, firstYear, lastYear } ) {
+function ForecastView( { production, projection, reserves, limits } ) {
 	const dispatch = useDispatch()
 	const { getText } = useText()
 	const gwp = useSelector( redux => redux.gwp )
 
-	DEBUG && console.log( 'ForecastView', { dataset, firstYear, lastYear } )
-
-	// Don't try to render a chart until all data looks good
-	if( !firstYear || !lastYear || !dataset?.length > 0 )
-		return <Alert message={ getText( 'make_selections' ) } type="info" showIcon/>
+	DEBUG && console.log( 'ForecastView', { production, projection, reserves, limits } )
 
 	return (
 		<>
@@ -29,7 +25,7 @@ function ForecastView( { dataset, firstYear, lastYear } ) {
 						<Col xs={ 24 } xl={ 24 } />
 
 						<Col xs={ 24 } xl={ 24 }>
-							<InputSummary dataset={ dataset }/>
+							<InputSummary dataset={ production }/>
 						</Col>
 
 					</Row>

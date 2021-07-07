@@ -2,6 +2,8 @@ import { useEffect } from 'react'
 import Graph from 'graph-data-structure'
 import { useSelector } from "react-redux"
 
+const DEBUG = false
+
 let graph
 let graphOil
 let graphGas
@@ -69,7 +71,7 @@ export const useUnitConversionGraph = () => {
 				const conv = conversion[ from ][ to ].oil
 
 				if( !conv ) throw new Error(
-					`Conversion data issue: From ${from} to ${to} for Oil is ${JSON.stringify( conv )}` )
+					`Conversion data issue: From ${ from } to ${ to } for Oil is ${ JSON.stringify( conv ) }` )
 
 				factor *= conv.factor
 				low *= conv.low
@@ -96,7 +98,7 @@ export const useUnitConversionGraph = () => {
 				const conv = conversion[ from ][ to ].gas
 
 				if( !conv ) throw new Error(
-					`Conversion data issue: From ${from} to ${to} for Gas is ${JSON.stringify( conv )}` )
+					`Conversion data issue: From ${ from } to ${ to } for Gas is ${ JSON.stringify( conv ) }` )
 
 				factor *= conv.factor
 				low *= conv.low
@@ -141,13 +143,13 @@ export const useUnitConversionGraph = () => {
 
 				const conv = conversion[ from ][ to ][ fossilFuelType ]
 				if( !conv ) throw new Error(
-					`Conversion data issue: From ${from} to ${to} for ${fossilFuelType} is ${JSON.stringify( conv )}` )
+					`Conversion data issue: From ${ from } to ${ to } for ${ fossilFuelType } is ${ JSON.stringify( conv ) }` )
 				const { factor: stepFactor, low: stepLow, high: stepHigh } = conv
 
 				factor1 *= stepFactor
 				low1 *= stepLow ?? stepFactor
 				high1 *= stepHigh ?? stepFactor
-				if( log ) console.log( 'SCOPE 1', {
+				if( log && DEBUG ) console.log( 'SCOPE 1', {
 					from,
 					to,
 					factor1,
@@ -172,13 +174,13 @@ export const useUnitConversionGraph = () => {
 
 				const conv = conversion[ from ][ to ][ fossilFuelType ]
 				if( !conv ) throw new Error(
-					`Conversion data issue: From ${from} to ${to} for ${fossilFuelType} is ${JSON.stringify( conv )}` )
+					`Conversion data issue: From ${ from } to ${ to } for ${ fossilFuelType } is ${ JSON.stringify( conv ) }` )
 				const { factor: stepFactor, low: stepLow, high: stepHigh } = conv
 
 				factor *= stepFactor
 				low *= stepLow ?? stepFactor
 				high *= stepHigh ?? stepFactor
-				if( log ) console.log( 'SCOPE 3', {
+				if( log && DEBUG ) console.log( 'SCOPE 3', {
 					from,
 					to,
 					factor,
@@ -189,17 +191,14 @@ export const useUnitConversionGraph = () => {
 				} )
 			}
 
-
-			return {
-				scope1: {
-					co2: volume * factor1 / 1e9,
-					range: [ volume * low1 / 1e9, volume * high1 / 1e9 ]
-				},
-				scope3: {
-					co2: volume * factor / 1e9,
-					range: [ volume * low / 1e9, volume * high / 1e9 ]
-				}
+			const result = {
+				scope1: [ volume * low1 / 1e9, volume * factor1 / 1e9, volume * high1 / 1e9 ],
+				scope3: [ volume * low / 1e9, volume * factor / 1e9, volume * high / 1e9 ]
 			}
+
+			if( log ) console.log( '.....co2', { result } )
+
+			return result
 		} catch( e ) {
 			throw new Error( "While looking for " + unit + " -> kgco2e conversion:\n" + e.message )
 		}
