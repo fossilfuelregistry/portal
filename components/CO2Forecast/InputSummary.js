@@ -3,6 +3,7 @@ import useText from "lib/useText"
 import HelpModal from "../HelpModal"
 import { addToTotal } from "./calculate"
 import { useSelector } from "react-redux"
+import SummaryRow from "./SummaryRow"
 
 const DEBUG = true
 
@@ -38,67 +39,16 @@ function InputSummary( { dataset = [] } ) {
 					</tr>
 				</thead>
 				<tbody>
-					<tr className="subheader">
-						<td>{ getText( 'oil' ) }</td>
-						<td align="right">{ getText( 'low' ) }</td>
-						<td align="right">{ getText( 'mid' ) }</td>
-						<td align="right">{ getText( 'high' ) }</td>
-					</tr>
-					<tr>
-						<td>
-							{ getText( 'scope' ) } 1
-							<HelpModal title="scopes" content="scope_1"/>
-						</td>
-						<td align="right">{ _( totals.oil.scope1[ 0 ] ) }</td>
-						<td align="right">{ _( totals.oil.scope1[ 1 ] ) }</td>
-						<td align="right">{ _( totals.oil.scope1[ 2 ] ) }</td>
-					</tr>
-					<tr>
-						<td>
-							{ getText( 'scope' ) } 3
-							<HelpModal title="scopes" content="scope_2"/>
-						</td>
-						<td align="right">{ _( totals.oil.scope3[ 0 ] ) }</td>
-						<td align="right">{ _( totals.oil.scope3[ 1 ] ) }</td>
-						<td align="right">{ _( totals.oil.scope3[ 2 ] ) }</td>
-					</tr>
-					<tr className="total">
-						<td>{ getText( 'oil' ) } { getText( 'total' ) }</td>
-						<td align="right">{ _( totals.oil.scope1[ 0 ] + totals.oil.scope3[ 0 ] ) }</td>
-						<td align="right">{ _( totals.oil.scope1[ 1 ] + totals.oil.scope3[ 1 ] ) }</td>
-						<td align="right">{ _( totals.oil.scope1[ 2 ] + totals.oil.scope3[ 2 ] ) }</td>
-					</tr>
-
-					<tr className="subheader">
-						<td>{ getText( 'gas' ) }</td>
-						<td align="right">{ getText( 'low' ) }</td>
-						<td align="right">{ getText( 'mid' ) }</td>
-						<td align="right">{ getText( 'high' ) }</td>
-					</tr>
-					<tr>
-						<td>
-							{ getText( 'scope' ) } 1
-							<HelpModal title="scopes" content="scope_1"/>
-						</td>
-						<td align="right">{ _( totals.gas.scope1[ 0 ] ) }</td>
-						<td align="right">{ _( totals.gas.scope1[ 1 ] ) }</td>
-						<td align="right">{ _( totals.gas.scope1[ 2 ] ) }</td>
-					</tr>
-					<tr>
-						<td>
-							{ getText( 'scope' ) } 3
-							<HelpModal title="scopes" content="scope_2"/>
-						</td>
-						<td align="right">{ _( totals.gas.scope3[ 0 ] ) }</td>
-						<td align="right">{ _( totals.gas.scope3[ 1 ] ) }</td>
-						<td align="right">{ _( totals.gas.scope3[ 2 ] ) }</td>
-					</tr>
-					<tr className="total">
-						<td>{ getText( 'gas' ) } { getText( 'total' ) }</td>
-						<td align="right">{ _( totals.gas.scope1[ 0 ] + totals.gas.scope3[ 0 ] ) }</td>
-						<td align="right">{ _( totals.gas.scope1[ 1 ] + totals.gas.scope3[ 1 ] ) }</td>
-						<td align="right">{ _( totals.gas.scope1[ 2 ] + totals.gas.scope3[ 2 ] ) }</td>
-					</tr>
+					<SummaryRow
+						label={ getText( 'oil' ) }
+						total={ getText( 'oil' ) + ' ' + getText( 'total' ) }
+						totals={ totals.oil }
+					/>
+					<SummaryRow
+						label={ getText( 'gas' ) }
+						total={ getText( 'gas' ) + ' ' + getText( 'total' ) }
+						totals={ totals.gas }
+					/>
 					<tr className="total subheader">
 						<td>{ getText( 'totals' ) }</td>
 						<td align="right">{ _( totals.gas.scope1[ 0 ] + totals.gas.scope3[ 0 ] + totals.oil.scope1[ 0 ] + totals.oil.scope3[ 0 ] ) }</td>
