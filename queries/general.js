@@ -58,7 +58,7 @@ query reservesSources($projectId: String = "", $iso31662: String = "", $iso3166:
     iso3166_: $iso3166
     iso31662_: $iso31662
     projectId_: $projectId
-  ) { nodes { sourceId name namePretty } }
+  ) { nodes { sourceId name namePretty grades year quality } }
 }`
 
 export const GQL_sources = gql`

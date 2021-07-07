@@ -45,6 +45,10 @@ export default function CO2ForecastPage() {
 	const productionSources = ( _productionSources?.getProductionSources?.nodes ?? [] )
 	const projectionSources = ( _projectionSources?.getProjectionSources?.nodes ?? [] )
 	const reservesSources = ( _reservesSources?.getReservesSources?.nodes ?? [] )
+		.map( s => ( {
+			...s,
+			namePretty: `${ s.grades } ${ s.year }`
+		} ) )
 
 	return (
 		<>
