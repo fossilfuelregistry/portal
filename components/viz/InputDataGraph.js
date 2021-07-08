@@ -9,6 +9,7 @@ import { max, min } from 'd3-array'
 import Loading from "components/Loading"
 import { useUnitConversionGraph } from "./UnitConverter"
 import { Col, Row } from "antd"
+import { useSelector } from "react-redux"
 
 const DEBUG = false
 
@@ -18,12 +19,13 @@ const colors = [
 ]
 
 function InputDataGraphBase( {
-	data = [], allSources, fuel, comment, estimate, parentWidth, height = 300
+	data = [], fuel, estimate, parentWidth, height = 300
 } ) {
+	const allSources = useSelector( redux => redux.allSources )
 	const margin = { left: 0, top: 10 }
 	const { convertOil, convertGas } = useUnitConversionGraph( estimate )
 
-	if( !( data?.length > 0 ) ) return <Loading/>
+	if( !( data?.length > 0 ) ) return null
 
 	const years = []
 	const sources = []

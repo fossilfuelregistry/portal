@@ -2,13 +2,13 @@ import React, { useEffect, useMemo, useState } from "react"
 import { useQuery } from "@apollo/client"
 import GraphQLStatus from "components/GraphQLStatus"
 import { GQL_dataQuery } from "queries/country"
-import { Alert, notification } from "antd"
+import { Alert } from "antd"
 import useText from "lib/useText"
 import { useDispatch, useSelector } from "react-redux"
 import ForecastView from "./ForecastView"
 import { useUnitConversionGraph } from "../viz/UnitConverter"
 
-const DEBUG = false
+const DEBUG = true
 
 function LoadData() {
 	const dispatch = useDispatch()
@@ -35,10 +35,9 @@ function LoadData() {
 		return GQL_dataQuery( {
 			iso3166: country,
 			iso31662: region,
-			projectId: project,
-			sourceId: reservesSourceId
+			projectId: project
 		} )
-	}, [ country, region, project, productionSourceId ] )
+	}, [ country, region, project ] )
 
 	const { data: productionData, loading: loadingProduction, error: errorLoadingProduction }
 		= useQuery( queries.production, { skip: !productionSourceId } )
@@ -58,19 +57,9 @@ function LoadData() {
 		[ projectionData?.countryProductions?.nodes?.length, gwp ] )
 
 	const { data: reservesData, loading: loadingReserves, error: errorLoadingReserves }
-		= useQuery( queries.reserves, { skip: !reservesSourceId } )
+		= useQuery( queries.reserves, { skip: !productionSourceId } )
 	const reserves = useMemo( () => _co2( reservesData?.countryReserves?.nodes ),
 		[ reservesData?.countryReserves?.nodes?.length, gwp ] )
-
-	try {
-		//updateReserves( dataset, production, projection )
-	} catch( e ) {
-		console.log( e )
-		notification.warning( {
-			message: "Error during future production vs reserves calculation",
-			description: e.message
-		} )
-	}
 
 	// Figure out available years when data loaded.
 
@@ -115,7 +104,7 @@ function LoadData() {
 	// Figure out available grades when reserves loaded.
 
 	useEffect( () => {
-		DEBUG && console.log( 'useEffect Reserves', {} )
+		DEBUG && console.log( 'useEffect Reserve Grades', { reserves, reservesSourceId } )
 		if( !( reserves?.length > 0 ) ) return
 		const _grades = reserves.reduce( ( g, r ) => {
 			g[ r.grade ] = false
@@ -123,7 +112,7 @@ function LoadData() {
 		}, {} )
 		//console.log( _grades )
 		set_grades( _grades )
-	}, [ reserves?.length ] )
+	}, [ reserves?.length, reservesSourceId ] )
 
 	if( loadingProduction || errorLoadingProduction )
 		return <GraphQLStatus loading={ loadingProduction } error={ errorLoadingProduction }/>

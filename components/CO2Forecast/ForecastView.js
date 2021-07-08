@@ -1,17 +1,26 @@
 import React from "react"
-import { Col, Row } from "antd"
+import { Button, Col, Row } from "antd"
 import useText from "lib/useText"
 import InputSummary from "./InputSummary"
-import { useDispatch, useSelector } from "react-redux"
+import { useSelector } from "react-redux"
 import YearSummary from "./YearSummary"
 import FutureSummary from "./FutureSummary"
+import InputDataGraph from "components/viz/InputDataGraph"
+import CsvDownloader from "react-csv-downloader"
+import { sumOfCO2 } from "./calculate"
+import Download from "./Download"
 
 const DEBUG = true
 
+const _downloadable = datapoint => {
+	let downloadPoint = { ...datapoint }
+	delete downloadPoint.__typename
+	downloadPoint.co2 = sumOfCO2( datapoint.co2 )
+}
+
 function ForecastView( { production, projection, reserves, limits } ) {
-	const dispatch = useDispatch()
 	const { getText } = useText()
-	const gwp = useSelector( redux => redux.gwp )
+	const country = useSelector( redux => redux.country )
 
 	DEBUG && console.log( 'ForecastView', { production, projection, reserves, limits } )
 
@@ -35,6 +44,46 @@ function ForecastView( { production, projection, reserves, limits } ) {
 						</Col>
 
 					</Row>
+
+					<Row gutter={ [ 16, 16 ] }>
+						<Col xs={ 24 } md={ 12 } xxl={ 6 }>
+							<div className="graph-wrap">
+								<h4>{ getText( 'gas' ) + ' ' + getText( 'production' ) } e9m3</h4>
+								<InputDataGraph data={ production } fuel="gas" comment="PROD"/>
+								<Download data={ production } filename={ 'gas_production_' + country } fuel="gas">
+									<Button className="download" block>{ getText( 'download' ) }</Button>
+								</Download>
+							</div>
+						</Col>
+						<Col xs={ 24 } md={ 12 } xxl={ 6 }>
+							<div className="graph-wrap">
+								<h4>{ getText( 'gas' ) + ' ' + getText( 'reserves' ) } e9m3</h4>
+								<InputDataGraph data={ reserves } fuel="gas" comment="RES"/>
+								<Download data={ reserves } filename={ 'gas_reserves_' + country } fuel="gas">
+									<Button className="download" block>{ getText( 'download' ) }</Button>
+								</Download>
+							</div>
+						</Col>
+						<Col xs={ 24 } md={ 12 } xxl={ 6 }>
+							<div className="graph-wrap">
+								<h4>{ getText( 'oil' ) + ' ' + getText( 'production' ) } e6bbl</h4>
+								<InputDataGraph data={ production } fuel="oil" comment="PROD"/>
+								<Download data={ production } filename={ 'oil_production_' + country } fuel="oil">
+									<Button className="download" block>{ getText( 'download' ) }</Button>
+								</Download>
+							</div>
+						</Col>
+						<Col xs={ 24 } md={ 12 } xxl={ 6 }>
+							<div className="graph-wrap">
+								<h4>{ getText( 'oil' ) + ' ' + getText( 'reserves' ) } e6bbl</h4>
+								<InputDataGraph data={ reserves } fuel="oil" comment="RES"/>
+								<Download data={ reserves } filename={ 'oil_reserves_' + country } fuel="oil">
+									<Button className="download" block>{ getText( 'download' ) }</Button>
+								</Download>
+							</div>
+						</Col>
+					</Row>
+
 				</Col>
 			</Row>
 
@@ -43,10 +92,6 @@ function ForecastView( { production, projection, reserves, limits } ) {
                 background-color: #eeeeee;
                 padding: 16px;
                 border-radius: 8px;
-              }
-
-              .graph-wrap :global(.download) {
-                margin-top: 12px;
               }
 			` }
 			</style>

@@ -2,7 +2,7 @@ import { gql } from "@apollo/client/core"
 
 const _formatter = conditionObject => JSON.stringify( conditionObject ).replace( /"([^"]+)":/g, '$1:' ).replace( /\uFFFF/g, '\\\"' )
 
-export const GQL_dataQuery = ( { iso3166, iso31662, projectId, sourceId } ) => {
+export const GQL_dataQuery = ( { iso3166, iso31662, projectId } ) => {
 	const prod = _formatter( {
 		iso3166,
 		iso31662: iso31662 ?? '',
@@ -17,7 +17,6 @@ export const GQL_dataQuery = ( { iso3166, iso31662, projectId, sourceId } ) => {
 	} )
 	const res = _formatter( {
 		iso3166,
-		sourceId: parseInt( sourceId ),
 		iso31662: iso31662 ?? '',
 		projectId: projectId ?? '',
 	} )
