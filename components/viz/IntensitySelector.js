@@ -14,7 +14,6 @@ export default function CarbonIntensitySelector() {
 	useEffect( () => {
 		if( !constants?.length ) return
 		const co2Units = constants.filter( c => c.toUnit.startsWith( 'kgco2e' ) && !( c.fossilFuelType === 'gas' ) )
-		console.log( { co2Units, constants } )
 		const _options = co2Units.map( c => ( {
 			...c,
 			label: `${c.authority} ${c.modifier ?? ''} ${c.country?.toUpperCase() ?? ''}`

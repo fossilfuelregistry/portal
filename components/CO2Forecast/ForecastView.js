@@ -7,8 +7,9 @@ import YearSummary from "./YearSummary"
 import FutureSummary from "./FutureSummary"
 import InputDataGraph from "components/viz/InputDataGraph"
 import Download from "./Download"
+import CO2ForecastGraph from "../viz/CO2ForecastGraph"
 
-const DEBUG = true
+const DEBUG = false
 
 function ForecastView( { production, projection, reserves, limits } ) {
 	const { getText } = useText()
@@ -19,10 +20,17 @@ function ForecastView( { production, projection, reserves, limits } ) {
 	return (
 		<>
 			<Row gutter={ [ 16, 16 ] }>
-				<Col xs={ 24 } lg={ 14 } xxl={ 18 }/>
+				<Col xs={ 24 } lg={ 14 } xxl={ 18 }>
+					{ false && <CO2ForecastGraph
+						production={ production }
+						projection={ projection }
+						reserves={ reserves }
+						limits={ limits }
+					           /> }
+				</Col>
+
 				<Col xs={ 24 } lg={ 10 } xxl={ 6 }>
 					<Row gutter={ [ 16, 16 ] }>
-
 						<Col xs={ 24 } xl={ 24 }>
 							<FutureSummary dataset={ projection } limits={ limits }/>
 						</Col>
@@ -34,7 +42,6 @@ function ForecastView( { production, projection, reserves, limits } ) {
 						<Col xs={ 24 } xl={ 24 }>
 							<InputSummary dataset={ production }/>
 						</Col>
-
 					</Row>
 
 					<Row gutter={ [ 16, 16 ] }>

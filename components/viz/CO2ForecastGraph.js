@@ -10,8 +10,9 @@ import { bisector, max } from 'd3-array'
 import { withParentSize } from "@visx/responsive"
 import { getCO2, getFuelCO2 } from "./util"
 import useText from "lib/useText"
+import { useSelector } from "react-redux"
 
-//const DEBUG = true
+const DEBUG = true
 
 const colors = {
 	oil: { past: '#008080', reserves: '#70a494', contingent: '#b4c8a8' },
@@ -21,12 +22,13 @@ const colors = {
 //#008080,#70a494,#b4c8a8,#f6edbd,#edbb8a,#de8a5a,#ca562c
 
 function CO2ForecastGraphBase( {
-	data, projection, estimate, estimate_prod,
+	production, projection, reserves, limits,
 	parentWidth, cGrade, pGrade,
 	//tooltipLeft, tooltipTop, tooltipData,
 	hideTooltip, showTooltip
 } ) {
 	const { getText } = useText()
+	const projectionSourceId = useSelector( redux => redux.projectionSourceId )
 	const height = 500
 	const margin = { left: 0, top: 10 }
 
@@ -37,10 +39,6 @@ function CO2ForecastGraphBase( {
 	const getStable = d => getCO2( d.future.stable.production, estimate_prod )
 
 	const showReserves = false
-
-	//DEBUG && console.log( 'GRAPH', { estimate_prod, estimate, projection } )
-	let projectionType = projection
-	if( projection > 0 ) projectionType = 'authority'
 
 	const getFutureReserve = useCallback( ( d, fuel ) => {
 		//console.log( d.year, d, d.future[ projectionType ].reserves.oil.co2 )
@@ -107,7 +105,7 @@ function CO2ForecastGraphBase( {
 
 	if( !( maxCO2 > 0 ) ) return null // JSON.stringify( maxCO2 )
 
-	const productionData = data.map( d => ( {
+	const productionData = production.map( d => ( {
 		oil: getFuelCO2( d.production.oil, estimate_prod ),
 		gas: getFuelCO2( d.production.gas, estimate_prod ),
 		year: d.year

@@ -8,11 +8,11 @@ import { useDispatch, useSelector } from "react-redux"
 import ForecastView from "./ForecastView"
 import { useUnitConversionGraph } from "../viz/UnitConverter"
 
-const DEBUG = true
+const DEBUG = false
 
 function LoadData() {
 	const dispatch = useDispatch()
-	const { co2FromVolume } = useUnitConversionGraph()
+	const { co2FromVolume, reservesProduction } = useUnitConversionGraph()
 	const { getText } = useText()
 	const [ limits, set_limits ] = useState( {} )
 	const [ grades, set_grades ] = useState( {} )
@@ -54,41 +54,45 @@ function LoadData() {
 	const { data: projectionData, loading: loadingProjection, error: errorLoadingProjection }
 		= useQuery( queries.projection, { skip: !projectionSourceId } )
 	const projection = useMemo( () => _co2( projectionData?.countryProductions?.nodes ),
-		[ projectionData?.countryProductions?.nodes?.length, gwp ] )
+		[ projectionData?.countryProductions?.nodes, projectionSourceId, gwp ] )
 
 	const { data: reservesData, loading: loadingReserves, error: errorLoadingReserves }
 		= useQuery( queries.reserves, { skip: !productionSourceId } )
 	const reserves = useMemo( () => _co2( reservesData?.countryReserves?.nodes ),
-		[ reservesData?.countryReserves?.nodes?.length, gwp ] )
+		[ reservesData?.countryReserves?.nodes, gwp ] )
 
 	// Figure out available years when data loaded.
 
 	useEffect( () => {
-		DEBUG && console.log( 'useEffect Production.length', production?.length, { limits } )
+		DEBUG && console.log( 'useEffect Production', production, limits )
 		if( !production?.length > 0 ) return
 		const newLimits = production.reduce( ( limits, datapoint ) => {
-			limits.firstYear = ( limits.firstYear === undefined || datapoint.year < limits.firstYear ) ? datapoint.year : limits.firstYear
-			limits.lastYear = ( limits.lastYear === undefined || datapoint.year > limits.lastYear ) ? datapoint.year : limits.lastYear
+			if( datapoint.sourceId !== productionSourceId ) return limits
+			const l = limits[ datapoint.fossilFuelType ]
+			l.firstYear = Math.min( l.firstYear, datapoint.year )
+			l.lastYear = Math.max( l.lastYear, datapoint.year )
 			return limits
-		}, {} )
+		}, { oil: { firstYear: 10000, lastYear: 0 }, gas: { firstYear: 10000, lastYear: 0 } } )
 
 		set_limits( { ...limits, production: newLimits } )
-	}, [ production?.length ] )
+	}, [ production, productionSourceId ] )
 
 	useEffect( () => {
-		DEBUG && console.log( 'useEffect projection.length', { limits } )
+		DEBUG && console.log( 'useEffect projection', { projection, limits } )
 		if( !projection?.length > 0 ) return
 		const newLimits = projection.reduce( ( limits, datapoint ) => {
-			limits.firstYear = ( limits.firstYear === undefined || datapoint.year < limits.firstYear ) ? datapoint.year : limits.firstYear
-			limits.lastYear = ( limits.lastYear === undefined || datapoint.year > limits.lastYear ) ? datapoint.year : limits.lastYear
+			if( datapoint.sourceId !== projectionSourceId ) return limits
+			const l = limits[ datapoint.fossilFuelType ]
+			l.firstYear = Math.min( l.firstYear, datapoint.year )
+			l.lastYear = Math.max( l.lastYear, datapoint.year )
 			return limits
-		}, {} )
+		}, { oil: { firstYear: 10000, lastYear: 0 }, gas: { firstYear: 10000, lastYear: 0 } } )
 
 		set_limits( { ...limits, projection: newLimits } )
-	}, [ projection?.length ] )
+	}, [ projection, projectionSourceId ] )
 
 	useEffect( () => {
-		DEBUG && console.log( 'useEffect reserves.length', { limits } )
+		DEBUG && console.log( 'useEffect reserves', { limits } )
 		if( !reserves?.length > 0 ) return
 		const newLimits = reserves.reduce( ( limits, datapoint ) => {
 			limits.firstYear = ( limits.firstYear === undefined || datapoint.year < limits.firstYear ) ? datapoint.year : limits.firstYear
@@ -97,22 +101,27 @@ function LoadData() {
 		}, {} )
 
 		set_limits( { ...limits, reserves: newLimits } )
-	}, [ reserves?.length ] )
+	}, [ reserves ] )
 
-	DEBUG && console.log( { limits, production } )
+	DEBUG && console.log( { limits, production, projection } )
 
 	// Figure out available grades when reserves loaded.
 
 	useEffect( () => {
 		DEBUG && console.log( 'useEffect Reserve Grades', { reserves, reservesSourceId } )
 		if( !( reserves?.length > 0 ) ) return
-		const _grades = reserves.reduce( ( g, r ) => {
-			g[ r.grade ] = false
-			return g
-		}, {} )
+		const _grades = reserves
+			.filter( r => r.sourceId === reservesSourceId )
+			.reduce( ( g, r ) => {
+				g[ r.grade ] = false
+				return g
+			}, {} )
 		//console.log( _grades )
 		set_grades( _grades )
 	}, [ reserves?.length, reservesSourceId ] )
+	const projectedProduction = useMemo( () => {
+		return reservesProduction( projection, reserves, projectionSourceId, reservesSourceId, limits, grades )
+	}, [ projection, reserves, projectionSourceId, reservesSourceId, limits, grades ] )
 
 	if( loadingProduction || errorLoadingProduction )
 		return <GraphQLStatus loading={ loadingProduction } error={ errorLoadingProduction }/>
@@ -121,10 +130,8 @@ function LoadData() {
 	if( loadingReserves || errorLoadingReserves )
 		return <GraphQLStatus loading={ loadingReserves } error={ errorLoadingReserves }/>
 
-	const { firstYear, lastYear } = limits.production ?? {}
-
 	// Don't try to render a chart until all data looks good
-	if( !firstYear || !lastYear || !production?.length > 0 )
+	if( !limits.production?.oil?.lastYear || !limits.production?.gas?.lastYear || !production?.length > 0 )
 		return <Alert message={ getText( 'make_selections' ) } type="info" showIcon/>
 
 	DEBUG && console.log( 'CountryProduction', { firstYear, lastYear, grades } )
@@ -134,6 +141,7 @@ function LoadData() {
 			production={ production }
 			projection={ projection }
 			reserves={ reserves }
+			projectedProduction={ projectedProduction }
 			limits={ limits }
 		/>
 	)

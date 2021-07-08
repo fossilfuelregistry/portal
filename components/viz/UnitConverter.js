@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import Graph from 'graph-data-structure'
 import { useSelector } from "react-redux"
+import { sumOfCO2 } from "../CO2Forecast/calculate"
 
 const DEBUG = false
 
@@ -12,6 +13,7 @@ let conversion = []
 export const useUnitConversionGraph = () => {
 	const constants = useSelector( redux => redux.conversions )
 	const gwp = useSelector( redux => redux.gwp )
+	const stableProduction = useSelector( redux => redux.stableProduction )
 
 	useEffect( () => {
 		const _conversion = {}
@@ -204,5 +206,45 @@ export const useUnitConversionGraph = () => {
 		}
 	}
 
-	return { co2FromVolume, convertOil, convertGas }
+	const reservesProduction =
+		( projection, reserves, projectionSourceId, reservesSourceId, limits, grades ) => {
+			if( !projectionSourceId || !reservesSourceId ) return []
+			if( !projection?.length > 0 ) return []
+			if( !reserves?.length > 0 ) return []
+			if( !limits?.projection > 0 ) return []
+			console.log( { projection, reserves, projectionSourceId, reservesSourceId, limits, grades } )
+
+			// Find most recent reserves and sum up 'p' and 'c' grades.
+
+			const lastReserves = { oil: { p: 0, c: 0, year: 0 }, gas: { p: 0, c: 0, year: 0 } }
+			for( let i = reserves.length - 1; i >= 0; i-- ) { // Scan in reverse to find latest.
+				const r = reserves[ i ]
+				if( r.sourceId !== reservesSourceId ) continue
+				if( r.year < lastReserves[ r.fossilFuelType ].year ) continue
+				const grade = r.grade[ 1 ] // Disregard first character.
+				lastReserves[ r.fossilFuelType ].year = r.year
+				lastReserves[ r.fossilFuelType ][ grade ] += sumOfCO2( co2FromVolume( r ), 1 )
+			}
+			console.log( { lastReserves } )
+
+			let production = []
+
+			// Fill out gap between production and projection (if any)
+			for( let y = limits.production.lastYear; y < limits.projection.firstYear; y++ ) {
+				production.push( {
+					...stableProduction,
+					year: y
+				} )
+			}
+
+			console.log( { production } )
+
+			projection.forEach( p => {
+				if( p.sourceId != projectionSourceId ) return
+				//if(p.year)
+			} )
+			return projection
+		}
+
+	return { co2FromVolume, convertOil, convertGas, reservesProduction }
 }
