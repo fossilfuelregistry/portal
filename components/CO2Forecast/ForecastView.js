@@ -6,17 +6,9 @@ import { useSelector } from "react-redux"
 import YearSummary from "./YearSummary"
 import FutureSummary from "./FutureSummary"
 import InputDataGraph from "components/viz/InputDataGraph"
-import CsvDownloader from "react-csv-downloader"
-import { sumOfCO2 } from "./calculate"
 import Download from "./Download"
 
 const DEBUG = true
-
-const _downloadable = datapoint => {
-	let downloadPoint = { ...datapoint }
-	delete downloadPoint.__typename
-	downloadPoint.co2 = sumOfCO2( datapoint.co2 )
-}
 
 function ForecastView( { production, projection, reserves, limits } ) {
 	const { getText } = useText()
