@@ -227,23 +227,53 @@ export const useUnitConversionGraph = () => {
 			}
 			console.log( { lastReserves } )
 
-			let production = []
+			let prod = []
 
 			// Fill out gap between production and projection (if any)
-			for( let y = limits.production.lastYear; y < limits.projection.firstYear; y++ ) {
-				production.push( {
-					...stableProduction,
-					year: y
-				} )
+			const gapStart = Math.min( limits.production.oil.lastYear, limits.production.gas.lastYear )
+			const gapEnd = Math.max( limits.projection.oil.firstYear, limits.projection.gas.firstYear )
+			for( let y = gapStart; y < gapEnd; y++ ) {
+				if( limits.production.oil.lastYear <= y )
+					prod.push( { ...stableProduction.oil, year: y, fossilFuelType: 'oil', sourceId: projectionSourceId } )
+				if( limits.production.gas.lastYear <= y )
+					prod.push( { ...stableProduction.gas, year: y, fossilFuelType: 'gas', sourceId: projectionSourceId } )
 			}
 
-			console.log( { production } )
+			prod.forEach( p => p.co2 = co2FromVolume( p ) )
 
-			projection.forEach( p => {
-				if( p.sourceId != projectionSourceId ) return
-				//if(p.year)
+			projection.forEach( datapoint => {
+				if( datapoint.sourceId !== projectionSourceId ) return
+				let _dp = { ...datapoint }
+				_dp.co2 = co2FromVolume( datapoint )
+
+				const pointProduction = sumOfCO2( _dp.co2, 1 )
+				_dp.plannedProd = 0
+				_dp.continProd = 0
+
+				const fuelReserve = lastReserves[ datapoint.fossilFuelType ]
+
+				// Subtract production from planned reserves first, then from contingent.
+
+				if( fuelReserve.p > pointProduction ) {
+					_dp.plannedProd = pointProduction
+					fuelReserve.p -= _dp.plannedProd
+				} else if( fuelReserve.p > 0 ) {
+					_dp.continProd = pointProduction - fuelReserve.p
+					_dp.plannedProd = fuelReserve.p
+					fuelReserve.p = 0
+					if( _dp.continProd > fuelReserve.c ) _dp.continProd = fuelReserve.c
+					fuelReserve.c -= _dp.continProd
+				} else if( fuelReserve.c > 0 ) {
+					_dp.plannedProd = 0
+					_dp.continProd = Math.min( fuelReserve.c, pointProduction )
+					fuelReserve.c -= _dp.continProd
+				}
+				prod.push( _dp )
 			} )
-			return projection
+
+			console.log( { gapStart, gapEnd, prod, lastReserves } )
+
+			return prod
 		}
 
 	return { co2FromVolume, convertOil, convertGas, reservesProduction }

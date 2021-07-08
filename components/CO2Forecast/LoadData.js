@@ -22,13 +22,17 @@ function LoadData() {
 	const productionSourceId = useSelector( redux => redux.productionSourceId )
 	const projectionSourceId = useSelector( redux => redux.projectionSourceId )
 	const reservesSourceId = useSelector( redux => redux.reservesSourceId )
+	const stableProduction = useSelector( redux => redux.stableProduction )
 	const gwp = useSelector( redux => redux.gwp )
 
 	const _co2 = dataset => {
-		return ( dataset ?? [] ).map( datapoint => ( {
-			...datapoint,
-			co2: co2FromVolume( datapoint, datapoint.year === 2010 )
-		} ) )
+		return ( dataset ?? [] ).map( datapoint => {
+			let _d = { ...datapoint }
+			delete _d.id
+			delete _d.__typename
+			_d.co2 = co2FromVolume( datapoint, datapoint.year === 2010 )
+			return _d
+		} )
 	}
 
 	const queries = useMemo( () => {
@@ -53,8 +57,18 @@ function LoadData() {
 
 	const { data: projectionData, loading: loadingProjection, error: errorLoadingProjection }
 		= useQuery( queries.projection, { skip: !projectionSourceId } )
-	const projection = useMemo( () => _co2( projectionData?.countryProductions?.nodes ),
-		[ projectionData?.countryProductions?.nodes, projectionSourceId, gwp ] )
+	const projection = useMemo( () => {
+		// Synthesize stable projection datapoints if selected
+		if( projectionSourceId === 100 ) {
+			let stableProj = []
+			for( let year = 2021; year <= 2040; year++ ) {
+				stableProj.push( { ...stableProduction.oil, year, sourceId: 100 } )
+				stableProj.push( { ...stableProduction.gas, year, sourceId: 100 } )
+			}
+			return stableProj
+		} else
+			return _co2( projectionData?.countryProductions?.nodes )
+	}, [ projectionData?.countryProductions?.nodes, projectionSourceId, gwp ] )
 
 	const { data: reservesData, loading: loadingReserves, error: errorLoadingReserves }
 		= useQuery( queries.reserves, { skip: !productionSourceId } )
@@ -72,7 +86,7 @@ function LoadData() {
 			l.firstYear = Math.min( l.firstYear, datapoint.year )
 			l.lastYear = Math.max( l.lastYear, datapoint.year )
 			return limits
-		}, { oil: { firstYear: 10000, lastYear: 0 }, gas: { firstYear: 10000, lastYear: 0 } } )
+		}, { oil: { firstYear: 2040, lastYear: 0 }, gas: { firstYear: 2040, lastYear: 0 } } )
 
 		set_limits( { ...limits, production: newLimits } )
 	}, [ production, productionSourceId ] )
@@ -80,13 +94,14 @@ function LoadData() {
 	useEffect( () => {
 		DEBUG && console.log( 'useEffect projection', { projection, limits } )
 		if( !projection?.length > 0 ) return
+
 		const newLimits = projection.reduce( ( limits, datapoint ) => {
 			if( datapoint.sourceId !== projectionSourceId ) return limits
 			const l = limits[ datapoint.fossilFuelType ]
 			l.firstYear = Math.min( l.firstYear, datapoint.year )
 			l.lastYear = Math.max( l.lastYear, datapoint.year )
 			return limits
-		}, { oil: { firstYear: 10000, lastYear: 0 }, gas: { firstYear: 10000, lastYear: 0 } } )
+		}, { oil: { firstYear: 2040, lastYear: 0 }, gas: { firstYear: 2040, lastYear: 0 } } )
 
 		set_limits( { ...limits, projection: newLimits } )
 	}, [ projection, projectionSourceId ] )
@@ -133,8 +148,6 @@ function LoadData() {
 	// Don't try to render a chart until all data looks good
 	if( !limits.production?.oil?.lastYear || !limits.production?.gas?.lastYear || !production?.length > 0 )
 		return <Alert message={ getText( 'make_selections' ) } type="info" showIcon/>
-
-	DEBUG && console.log( 'CountryProduction', { firstYear, lastYear, grades } )
 
 	return (
 		<ForecastView
