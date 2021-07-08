@@ -4,7 +4,7 @@ import { useSelector } from "react-redux"
 import { useUnitConversionGraph } from "../viz/UnitConverter"
 import { addToTotal, sumOfCO2 } from "./calculate"
 
-const DEBUG = true
+const DEBUG = false
 
 function FutureSummary( { dataset, limits } ) {
 	const { getText } = useText()
@@ -40,12 +40,15 @@ function FutureSummary( { dataset, limits } ) {
 		gas: { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] }
 	}
 
-	dataset.forEach( d => {
-		if( d.year < year.first ) return
-		addToTotal( sourceTotal[ d.fossilFuelType ], d.co2 )
-	} )
+	dataset
+		.filter( d => d.sourceId === projectionSourceId )
+		.forEach( d => {
+			if( d.year < year.first ) return
+			//if( d.year > 2030 ) return
+			addToTotal( sourceTotal[ d.fossilFuelType ], d.co2 )
+		} )
 
-	DEBUG && console.log( { years, year, stable } )
+	DEBUG && console.log( { years, year, stable, dataset } )
 
 	const _ = v => Math.round( v )
 
@@ -64,12 +67,14 @@ function FutureSummary( { dataset, limits } ) {
 						<td align="right">{ getText( 'mid' ) }</td>
 						<td align="right">{ getText( 'high' ) }</td>
 					</tr>
+					{ projectionSourceId !== 100 &&
 					<tr>
 						<td>{ sourceName }</td>
 						<td align="right">{ _( sumOfCO2( sourceTotal, 0 ) ) }</td>
 						<td align="right">{ _( sumOfCO2( sourceTotal, 1 ) ) }</td>
 						<td align="right">{ _( sumOfCO2( sourceTotal, 2 ) ) }</td>
 					</tr>
+					}
 					<tr>
 						<td>{ getText( 'stable' ) }</td>
 						<td align="right">{ _( years * sumOfCO2( stable, 0 ) ) }</td>
