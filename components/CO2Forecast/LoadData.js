@@ -33,7 +33,7 @@ function LoadData() {
 				let _d = { ...datapoint }
 				delete _d.id
 				delete _d.__typename
-				_d.co2 = co2FromVolume( datapoint, datapoint.year === settings.year.start )
+				_d.co2 = co2FromVolume( datapoint )
 				return _d
 			} )
 	}
@@ -159,9 +159,7 @@ function LoadData() {
 		<ForecastView
 			production={ production }
 			projection={ projection }
-			reserves={ reserves }
 			projectedProduction={ projectedProduction }
-			limits={ limits }
 		/>
 	)
 }

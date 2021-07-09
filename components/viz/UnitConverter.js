@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import Graph from 'graph-data-structure'
 import { useSelector } from "react-redux"
-import { sumOfCO2 } from "../CO2Forecast/calculate"
+import { getPreferredGrades, sumOfCO2 } from "../CO2Forecast/calculate"
 
 const DEBUG = false
 
@@ -214,35 +214,51 @@ export const useUnitConversionGraph = () => {
 			if( !limits?.projection > 0 ) return []
 			console.log( { projection, reserves, projectionSourceId, reservesSourceId, limits, grades } )
 
-			// Find most recent reserves and sum up 'p' and 'c' grades.
+			// Find most recent preferred reserve
 
-			const lastReserves = { oil: { p: 0, c: 0, year: 0 }, gas: { p: 0, c: 0, year: 0 } }
+			const useGrades = getPreferredGrades( reserves, reservesSourceId )
+			const lastReserves = {
+				oil: { p: { year: 0, value: 0 }, c: { year: 0, value: 0 } },
+				gas: { p: { year: 0, value: 0 }, c: { year: 0, value: 0 } }
+			}
 			for( let i = reserves.length - 1; i >= 0; i-- ) { // Scan in reverse to find latest.
 				const r = reserves[ i ]
 				if( r.sourceId !== reservesSourceId ) continue
-				if( r.year < lastReserves[ r.fossilFuelType ].year ) continue
+				if( r.grade !== useGrades.pGrade && r.grade !== useGrades.cGrade ) continue
 				const grade = r.grade[ 1 ] // Disregard first character.
-				lastReserves[ r.fossilFuelType ].year = r.year
-				lastReserves[ r.fossilFuelType ][ grade ] += sumOfCO2( co2FromVolume( r ), 1 )
+				if( r.year < lastReserves[ r.fossilFuelType ][ grade ].year ) continue
+				lastReserves[ r.fossilFuelType ][ grade ].year = r.year
+				lastReserves[ r.fossilFuelType ][ grade ].value = sumOfCO2( co2FromVolume( r ), 1 )
 			}
-			console.log( { lastReserves } )
+			console.log( { reservesSourceId, useGrades, lastReserves } )
 
 			let prod = []
 
 			// Fill out gap between production and projection (if any)
 			const gapStart = Math.min( limits.production.oil.lastYear, limits.production.gas.lastYear )
-			const gapEnd = Math.max( limits.projection.oil.firstYear, limits.projection.gas.firstYear )
+			const gapEnd = Math.max( limits.projection.oil.firstYear, limits.projection.gas.firstYear, gapStart )
 			for( let y = gapStart; y < gapEnd; y++ ) {
 				if( limits.production.oil.lastYear <= y )
-					prod.push( { ...stableProduction.oil, year: y, fossilFuelType: 'oil', sourceId: projectionSourceId } )
+					prod.push( {
+						...stableProduction.oil,
+						year: y,
+						fossilFuelType: 'oil',
+						sourceId: projectionSourceId
+					} )
 				if( limits.production.gas.lastYear <= y )
-					prod.push( { ...stableProduction.gas, year: y, fossilFuelType: 'gas', sourceId: projectionSourceId } )
+					prod.push( {
+						...stableProduction.gas,
+						year: y,
+						fossilFuelType: 'gas',
+						sourceId: projectionSourceId
+					} )
 			}
 
 			prod.forEach( p => p.co2 = co2FromVolume( p ) )
 
 			projection.forEach( datapoint => {
 				if( datapoint.sourceId !== projectionSourceId ) return
+				if( datapoint.year <= gapEnd ) return
 				let _dp = { ...datapoint }
 				_dp.co2 = co2FromVolume( datapoint )
 
@@ -254,19 +270,19 @@ export const useUnitConversionGraph = () => {
 
 				// Subtract production from planned reserves first, then from contingent.
 
-				if( fuelReserve.p > pointProduction ) {
+				if( fuelReserve.p.value > pointProduction ) {
 					_dp.plannedProd = pointProduction
-					fuelReserve.p -= _dp.plannedProd
-				} else if( fuelReserve.p > 0 ) {
-					_dp.continProd = pointProduction - fuelReserve.p
-					_dp.plannedProd = fuelReserve.p
-					fuelReserve.p = 0
-					if( _dp.continProd > fuelReserve.c ) _dp.continProd = fuelReserve.c
-					fuelReserve.c -= _dp.continProd
-				} else if( fuelReserve.c > 0 ) {
+					fuelReserve.p.value -= _dp.plannedProd
+				} else if( fuelReserve.p.value > 0 ) {
+					_dp.continProd = pointProduction - fuelReserve.p.value
+					_dp.plannedProd = fuelReserve.p.value
+					fuelReserve.p.value = 0
+					if( _dp.continProd > fuelReserve.c.value ) _dp.continProd = fuelReserve.c.value
+					fuelReserve.c.value -= _dp.continProd
+				} else if( fuelReserve.c.value > 0 ) {
 					_dp.plannedProd = 0
-					_dp.continProd = Math.min( fuelReserve.c, pointProduction )
-					fuelReserve.c -= _dp.continProd
+					_dp.continProd = Math.min( fuelReserve.c.value, pointProduction )
+					fuelReserve.c.value -= _dp.continProd
 				}
 				prod.push( _dp )
 			} )

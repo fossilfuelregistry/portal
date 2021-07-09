@@ -1,3 +1,5 @@
+import settings from "settings"
+
 export function addToTotal( total, datapoint ) {
 	const scopes = Object.keys( datapoint )
 	const ranges = Object.keys( datapoint[ scopes[ 0 ] ] )
@@ -40,4 +42,22 @@ export function combineOilAndGas( dataset ) {
 	} )
 	newDataset.push( nextCombinedPoint )
 	return newDataset
+}
+
+export function getPreferredGrades( reserves, reservesSourceId ) {
+	let pGrade = -1, cGrade = -1
+	reserves.forEach( r => {
+		if( r.sourceId !== reservesSourceId ) return
+		if( r.grade?.[ 1 ] === 'p' ) {
+			pGrade = Math.max( pGrade, settings.gradesPreferenceOrder.indexOf( r.grade?.[ 0 ] ) )
+		}
+		if( r.grade?.[ 1 ] === 'c' ) {
+			cGrade = Math.max( cGrade, settings.gradesPreferenceOrder.indexOf( r.grade?.[ 0 ] ) )
+		}
+	} )
+	if( pGrade < 0 ) pGrade = '--'
+	else pGrade = settings.gradesPreferenceOrder[ pGrade ] + 'p'
+	if( cGrade < 0 ) cGrade = '--'
+	else cGrade = settings.gradesPreferenceOrder[ cGrade ] + 'c'
+	return { pGrade, cGrade }
 }

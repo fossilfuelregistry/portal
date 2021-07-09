@@ -22,8 +22,7 @@ const colors = {
 //#008080,#70a494,#b4c8a8,#f6edbd,#edbb8a,#de8a5a,#ca562c
 
 function CO2ForecastGraphBase( {
-	production, projection, reserves, limits, projectedProduction,
-	parentWidth, cGrade, pGrade
+	production, projection, projectedProduction, parentWidth
 } ) {
 	const { getText } = useText()
 	const projectionSourceId = useSelector( redux => redux.projectionSourceId )
@@ -44,7 +43,7 @@ function CO2ForecastGraphBase( {
 			gas: d.gas ? sumOfCO2( d.gas.co2, 1 ) : 0
 		} ) )
 
-	const projectionData = combineOilAndGas( projection )
+	const projectionData = combineOilAndGas( projection.filter( d => d.sourceId === projectionSourceId ) )
 		.filter( d => d.year >= settings.year.start )
 		.map( d => ( {
 			year: d.year,
@@ -200,25 +199,25 @@ function CO2ForecastGraphBase( {
 							<td>
 								<div className="blob gas p"/>
 							</td>
-							<td>{ getText( 'gas' ) }: { getText( 'against_reserves' ) } { pGrade }</td>
+							<td>{ getText( 'gas' ) }: { getText( 'against_reserves' ) }</td>
 						</tr>
 						<tr>
 							<td>
 								<div className="blob oil p"/>
 							</td>
-							<td>{ getText( 'oil' ) }: { getText( 'against_reserves' ) } { pGrade }</td>
+							<td>{ getText( 'oil' ) }: { getText( 'against_reserves' ) }</td>
 						</tr>
 						<tr>
 							<td>
 								<div className="blob gas c"/>
 							</td>
-							<td>{ getText( 'gas' ) }: { getText( 'against_contingent' ) } { cGrade }</td>
+							<td>{ getText( 'gas' ) }: { getText( 'against_contingent' ) }</td>
 						</tr>
 						<tr>
 							<td>
 								<div className="blob oil c"/>
 							</td>
-							<td>{ getText( 'oil' ) } : { getText( 'against_contingent' ) } { cGrade }</td>
+							<td>{ getText( 'oil' ) } : { getText( 'against_contingent' ) }</td>
 						</tr>
 					</tbody>
 				</table>
