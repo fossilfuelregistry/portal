@@ -1,6 +1,6 @@
 import { Select } from "antd"
 import { useRouter } from "next/router"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useDispatch } from "react-redux"
 import HelpModal from "../HelpModal"
 import useText from "../../lib/useText"
@@ -10,6 +10,10 @@ export default function SourceSelector( { sources, stateKey, placeholder } ) {
 	const { getText } = useText()
 	const [ selectedSourceOption, set_selectedSourceOption ] = useState()
 	const dispatch = useDispatch()
+
+	useEffect( () => {
+		set_selectedSourceOption( undefined )
+	}, [ sources ] )
 
 	return (
 		<div style={ { marginTop: 12 } }>
