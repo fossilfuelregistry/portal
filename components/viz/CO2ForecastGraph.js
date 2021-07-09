@@ -34,6 +34,7 @@ function CO2ForecastGraphBase( {
 	const getYear = d => d.year
 	const getY0 = d => d[ 0 ]
 	const getY1 = d => d[ 1 ]
+	const getProjection = d => d.co2
 
 	const productionData = combineOilAndGas( production )
 		.filter( d => d.year >= settings.year.start )
@@ -43,7 +44,22 @@ function CO2ForecastGraphBase( {
 			gas: d.gas ? sumOfCO2( d.gas.co2, 1 ) : 0
 		} ) )
 
-	const projProdData = projectionSourceId ? combineOilAndGas( projectedProduction ) : []
+	const projectionData = combineOilAndGas( projection )
+		.filter( d => d.year >= settings.year.start )
+		.map( d => ( {
+			year: d.year,
+			co2: ( d.oil ? sumOfCO2( d.oil.co2, 1 ) : 0 ) + ( d.gas ? sumOfCO2( d.gas.co2, 1 ) : 0 )
+		} ) )
+
+	const projProdData = ( projectionSourceId ? combineOilAndGas( projectedProduction ) : [] )
+		.filter( d => d.year >= settings.year.start )
+		.map( d => ( {
+			year: d.year,
+			oil_p: d.oil?.plannedProd ?? 0,
+			oil_c: d.oil?.continProd ?? 0,
+			gas_p: d.gas?.plannedProd ?? 0,
+			gas_c: d.gas?.continProd ?? 0
+		} ) )
 
 	// scale
 	const yearScale = scaleLinear( {
@@ -86,22 +102,10 @@ function CO2ForecastGraphBase( {
 
 					<AreaStack
 						keys={ [ 'oil_c', 'oil_p', 'gas_c', 'gas_p' ] }
-						data={ projProdData.map( d => {
-							//if( d.year === 2025 ) _log1_future( d.year, d.future.reserves )
-							return {
-								oil_p: sumOfCO2( d.oil.plannedProd, 1 ),
-								oil_c: sumOfCO2( d.oil.continProd, 1 ),
-								gas_p: sumOfCO2( d.gas.plannedProd, 1 ),
-								gas_c: sumOfCO2( d.gas.continProd, 1 )
-							}
-						} ) }
-						x={ d => {
-							const x = yearScale( getYear( d.data ) ) ?? 0
-							//console.log( { d, x } )
-							return x
-						} }
-						y0={ d => productionScale( getY0( d ) ) ?? 0 }
-						y1={ d => productionScale( getY1( d ) ) ?? 0 }
+						data={ projProdData }
+						x={ d => yearScale( getYear( d.data ) ) }
+						y0={ d => productionScale( getY0( d ) ) }
+						y1={ d => productionScale( getY1( d ) ) }
 					>
 						{ ( { stacks, path } ) =>
 							stacks.map( stack => {
@@ -124,14 +128,10 @@ function CO2ForecastGraphBase( {
 					<AreaStack
 						keys={ [ 'oil', 'gas' ] }
 						data={ productionData }
-						defined={ d => ( getY0( d ) > 0 || getY1( d ) > 0 ) && d.data.year >= settings.year.start }
-						x={ d => {
-							const x = yearScale( getYear( d.data ) ) ?? 0
-							//console.log( { d, x } )
-							return x
-						} }
-						y0={ d => productionScale( getY0( d ) ) ?? 0 }
-						y1={ d => productionScale( getY1( d ) ) ?? 0 }
+						defined={ d => ( getY0( d ) > 0 || getY1( d ) > 0 ) }
+						x={ d => yearScale( getYear( d.data ) ) }
+						y0={ d => productionScale( getY0( d ) ) }
+						y1={ d => productionScale( getY1( d ) ) }
 					>
 						{ ( { stacks, path } ) =>
 							stacks.map( stack => {
@@ -152,10 +152,10 @@ function CO2ForecastGraphBase( {
 					<LinePath
 						curve={ curveLinear }
 						className="projection auth"
-						data={ projection }
-						defined={ d => d.year >= settings.year.start && getAuth( d ) > 0 }
+						data={ projectionData }
+						defined={ d => getProjection( d ) > 0 }
 						x={ d => yearScale( getYear( d ) ) ?? 0 }
-						y={ d => productionScale( getAuth( d ) ) ?? 0 }
+						y={ d => productionScale( getProjection( d ) ) ?? 0 }
 						shapeRendering="geometricPrecision"
 					/>
 

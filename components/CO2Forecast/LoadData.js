@@ -27,13 +27,15 @@ function LoadData() {
 	const gwp = useSelector( redux => redux.gwp )
 
 	const _co2 = dataset => {
-		return ( dataset ?? [] ).map( datapoint => {
-			let _d = { ...datapoint }
-			delete _d.id
-			delete _d.__typename
-			_d.co2 = co2FromVolume( datapoint, datapoint.year === settings.year.start )
-			return _d
-		} )
+		return ( dataset ?? [] )
+			.filter( datapoint => datapoint.fossilFuelType === 'gas' || datapoint.fossilFuelType === 'oil' )
+			.map( datapoint => {
+				let _d = { ...datapoint }
+				delete _d.id
+				delete _d.__typename
+				_d.co2 = co2FromVolume( datapoint, datapoint.year === settings.year.start )
+				return _d
+			} )
 	}
 
 	const queries = useMemo( () => {
