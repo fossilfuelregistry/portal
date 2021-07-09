@@ -7,6 +7,7 @@ import useText from "lib/useText"
 import { useDispatch, useSelector } from "react-redux"
 import ForecastView from "./ForecastView"
 import { useUnitConversionGraph } from "../viz/UnitConverter"
+import settings from "settings"
 
 const DEBUG = false
 
@@ -30,7 +31,7 @@ function LoadData() {
 			let _d = { ...datapoint }
 			delete _d.id
 			delete _d.__typename
-			_d.co2 = co2FromVolume( datapoint, datapoint.year === 2010 )
+			_d.co2 = co2FromVolume( datapoint, datapoint.year === settings.year.start )
 			return _d
 		} )
 	}
@@ -61,7 +62,7 @@ function LoadData() {
 		// Synthesize stable projection datapoints if selected
 		if( projectionSourceId === 100 ) {
 			let stableProj = []
-			for( let year = 2021; year <= 2040; year++ ) {
+			for( let year = 2021; year <= settings.year.end; year++ ) {
 				stableProj.push( { ...stableProduction.oil, year, sourceId: 100 } )
 				stableProj.push( { ...stableProduction.gas, year, sourceId: 100 } )
 			}
@@ -86,7 +87,7 @@ function LoadData() {
 			l.firstYear = Math.min( l.firstYear, datapoint.year )
 			l.lastYear = Math.max( l.lastYear, datapoint.year )
 			return limits
-		}, { oil: { firstYear: 2040, lastYear: 0 }, gas: { firstYear: 2040, lastYear: 0 } } )
+		}, { oil: { firstYear: settings.year.end, lastYear: 0 }, gas: { firstYear: settings.year.end, lastYear: 0 } } )
 
 		set_limits( { ...limits, production: newLimits } )
 	}, [ production, productionSourceId ] )
@@ -101,7 +102,7 @@ function LoadData() {
 			l.firstYear = Math.min( l.firstYear, datapoint.year )
 			l.lastYear = Math.max( l.lastYear, datapoint.year )
 			return limits
-		}, { oil: { firstYear: 2040, lastYear: 0 }, gas: { firstYear: 2040, lastYear: 0 } } )
+		}, { oil: { firstYear: settings.year.end, lastYear: 0 }, gas: { firstYear: settings.year.end, lastYear: 0 } } )
 
 		set_limits( { ...limits, projection: newLimits } )
 	}, [ projection, projectionSourceId ] )
@@ -134,6 +135,9 @@ function LoadData() {
 		//console.log( _grades )
 		set_grades( _grades )
 	}, [ reserves?.length, reservesSourceId ] )
+
+	// Match projected production with reserves.
+
 	const projectedProduction = useMemo( () => {
 		return reservesProduction( projection, reserves, projectionSourceId, reservesSourceId, limits, grades )
 	}, [ projection, reserves, projectionSourceId, reservesSourceId, limits, grades ] )

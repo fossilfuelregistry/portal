@@ -11,22 +11,23 @@ import CO2ForecastGraph from "../viz/CO2ForecastGraph"
 
 const DEBUG = false
 
-function ForecastView( { production, projection, reserves, limits } ) {
+function ForecastView( { production, projection, reserves, projectedProduction, limits } ) {
 	const { getText } = useText()
 	const country = useSelector( redux => redux.country )
 
-	DEBUG && console.log( 'ForecastView', { production, projection, reserves, limits } )
+	DEBUG && console.log( 'ForecastView', { production, projection, reserves, projectedProduction, limits } )
 
 	return (
 		<>
 			<Row gutter={ [ 16, 16 ] }>
 				<Col xs={ 24 } lg={ 14 } xxl={ 18 }>
-					{ false && <CO2ForecastGraph
+					<CO2ForecastGraph
 						production={ production }
 						projection={ projection }
 						reserves={ reserves }
+						projectedProduction={ projectedProduction }
 						limits={ limits }
-					           /> }
+					/>
 				</Col>
 
 				<Col xs={ 24 } lg={ 10 } xxl={ 6 }>
