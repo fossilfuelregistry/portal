@@ -49,14 +49,8 @@ function LoadData() {
 	const { data: productionData, loading: loadingProduction, error: errorLoadingProduction }
 		= useQuery( queries.production, { skip: !productionSourceId } )
 
-	const production = useMemo( () => {
-		const p = _co2( productionData?.countryProductions?.nodes )
-		const reverse = [ ...p ].reverse()
-		const oil = reverse.find( d => d.fossilFuelType === 'oil' )
-		const gas = reverse.find( d => d.fossilFuelType === 'gas' )
-		dispatch( { type: 'STABLEPRODUCTION', payload: { oil, gas } } )
-		return p
-	}, [ productionData?.countryProductions?.nodes, gwp ] )
+	const production = useMemo( () => _co2( productionData?.countryProductions?.nodes ),
+		[ productionData?.countryProductions?.nodes, productionSourceId, gwp ] )
 
 	const { data: projectionData, loading: loadingProjection, error: errorLoadingProjection }
 		= useQuery( queries.projection, { skip: !projectionSourceId } )
@@ -64,7 +58,7 @@ function LoadData() {
 		// Synthesize stable projection datapoints if selected
 		if( projectionSourceId === 100 ) {
 			let stableProj = []
-			for( let year = 2021; year <= settings.year.end; year++ ) {
+			for( let year = 2020; year <= settings.year.end; year++ ) {
 				stableProj.push( { ...stableProduction.oil, year, sourceId: 100 } )
 				stableProj.push( { ...stableProduction.gas, year, sourceId: 100 } )
 			}
@@ -78,17 +72,25 @@ function LoadData() {
 	const reserves = useMemo( () => _co2( reservesData?.countryReserves?.nodes ),
 		[ reservesData?.countryReserves?.nodes, gwp ] )
 
+	// Find stable production
+	useEffect( () => {
+		const reverse = [ ...production ].reverse()
+		const oil = reverse.find( d => d.fossilFuelType === 'oil' )
+		const gas = reverse.find( d => d.fossilFuelType === 'gas' )
+		dispatch( { type: 'STABLEPRODUCTION', payload: { oil, gas } } )
+	}, [ production, productionSourceId, gwp ] )
+
 	// Figure out available years when data loaded.
 
 	useEffect( () => {
 		DEBUG && console.log( 'useEffect Production', production, limits )
 		if( !production?.length > 0 ) return
-		const newLimits = production.reduce( ( limits, datapoint ) => {
-			if( datapoint.sourceId !== productionSourceId ) return limits
-			const l = limits[ datapoint.fossilFuelType ]
+		const newLimits = production.reduce( ( _limits, datapoint ) => {
+			if( datapoint.sourceId !== productionSourceId ) return _limits
+			const l = _limits[ datapoint.fossilFuelType ]
 			l.firstYear = Math.min( l.firstYear, datapoint.year )
 			l.lastYear = Math.max( l.lastYear, datapoint.year )
-			return limits
+			return _limits
 		}, { oil: { firstYear: settings.year.end, lastYear: 0 }, gas: { firstYear: settings.year.end, lastYear: 0 } } )
 
 		set_limits( { ...limits, production: newLimits } )
@@ -98,12 +100,12 @@ function LoadData() {
 		DEBUG && console.log( 'useEffect projection', { projection, limits } )
 		if( !projection?.length > 0 ) return
 
-		const newLimits = projection.reduce( ( limits, datapoint ) => {
-			if( datapoint.sourceId !== projectionSourceId ) return limits
-			const l = limits[ datapoint.fossilFuelType ]
+		const newLimits = projection.reduce( ( _limits, datapoint ) => {
+			if( datapoint.sourceId !== projectionSourceId ) return _limits
+			const l = _limits[ datapoint.fossilFuelType ]
 			l.firstYear = Math.min( l.firstYear, datapoint.year )
 			l.lastYear = Math.max( l.lastYear, datapoint.year )
-			return limits
+			return _limits
 		}, { oil: { firstYear: settings.year.end, lastYear: 0 }, gas: { firstYear: settings.year.end, lastYear: 0 } } )
 
 		set_limits( { ...limits, projection: newLimits } )
@@ -112,10 +114,10 @@ function LoadData() {
 	useEffect( () => {
 		DEBUG && console.log( 'useEffect reserves', { limits } )
 		if( !reserves?.length > 0 ) return
-		const newLimits = reserves.reduce( ( limits, datapoint ) => {
-			limits.firstYear = ( limits.firstYear === undefined || datapoint.year < limits.firstYear ) ? datapoint.year : limits.firstYear
-			limits.lastYear = ( limits.lastYear === undefined || datapoint.year > limits.lastYear ) ? datapoint.year : limits.lastYear
-			return limits
+		const newLimits = reserves.reduce( ( _limits, datapoint ) => {
+			_limits.firstYear = ( _limits.firstYear === undefined || datapoint.year < _limits.firstYear ) ? datapoint.year : _limits.firstYear
+			_limits.lastYear = ( _limits.lastYear === undefined || datapoint.year > _limits.lastYear ) ? datapoint.year : _limits.lastYear
+			return _limits
 		}, {} )
 
 		set_limits( { ...limits, reserves: newLimits } )

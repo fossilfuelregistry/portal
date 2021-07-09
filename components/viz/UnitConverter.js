@@ -258,7 +258,7 @@ export const useUnitConversionGraph = () => {
 
 			projection.forEach( datapoint => {
 				if( datapoint.sourceId !== projectionSourceId ) return
-				if( datapoint.year <= gapEnd ) return
+				if( datapoint.year < gapEnd ) return
 				let _dp = { ...datapoint }
 				_dp.co2 = co2FromVolume( datapoint )
 
@@ -287,7 +287,7 @@ export const useUnitConversionGraph = () => {
 				prod.push( _dp )
 			} )
 
-			DEBUG && console.log( { gapStart, gapEnd, prod, lastReserves } )
+			console.log( { gapStart, gapEnd, prod, lastReserves } )
 
 			return prod
 		}

@@ -14,6 +14,7 @@ function FutureSummary( { dataset, limits } ) {
 	const projectionSourceId = useSelector( redux => redux.projectionSourceId )
 
 	if( !( dataset?.length > 0 ) ) return null
+	if( !stableProduction.oil || !stableProduction.gas ) return null
 
 	DEBUG && console.log( { projectionSourceId, allSources, limits, stableProduction } )
 

@@ -26,6 +26,7 @@ function CO2ForecastGraphBase( {
 } ) {
 	const { getText } = useText()
 	const projectionSourceId = useSelector( redux => redux.projectionSourceId )
+	const productionSourceId = useSelector( redux => redux.productionSourceId )
 
 	const height = 500
 	const margin = { left: 0, top: 10 }
@@ -35,7 +36,7 @@ function CO2ForecastGraphBase( {
 	const getY1 = d => d[ 1 ]
 	const getProjection = d => d.co2
 
-	const productionData = combineOilAndGas( production )
+	const productionData = combineOilAndGas( production.filter( d => d.sourceId === productionSourceId ) )
 		.filter( d => d.year >= settings.year.start )
 		.map( d => ( {
 			year: d.year,
@@ -60,6 +61,7 @@ function CO2ForecastGraphBase( {
 			gas_c: d.gas?.continProd ?? 0
 		} ) )
 
+	console.log( { production, productionData } )
 	// scale
 	const yearScale = scaleLinear( {
 		range: [ 0, parentWidth - margin.left ],
