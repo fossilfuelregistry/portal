@@ -159,6 +159,7 @@ function LoadData() {
 		<ForecastView
 			production={ production }
 			projection={ projection }
+			reserves={ reserves }
 			projectedProduction={ projectedProduction }
 		/>
 	)

@@ -212,7 +212,7 @@ export const useUnitConversionGraph = () => {
 			if( !projection?.length > 0 ) return []
 			if( !reserves?.length > 0 ) return []
 			if( !limits?.projection > 0 ) return []
-			console.log( { projection, reserves, projectionSourceId, reservesSourceId, limits, grades } )
+			DEBUG && console.log( { projection, reserves, projectionSourceId, reservesSourceId, limits, grades } )
 
 			// Find most recent preferred reserve
 
@@ -230,7 +230,7 @@ export const useUnitConversionGraph = () => {
 				lastReserves[ r.fossilFuelType ][ grade ].year = r.year
 				lastReserves[ r.fossilFuelType ][ grade ].value = sumOfCO2( co2FromVolume( r ), 1 )
 			}
-			console.log( { reservesSourceId, useGrades, lastReserves } )
+			DEBUG && console.log( { reservesSourceId, useGrades, lastReserves } )
 
 			let prod = []
 
@@ -287,7 +287,7 @@ export const useUnitConversionGraph = () => {
 				prod.push( _dp )
 			} )
 
-			console.log( { gapStart, gapEnd, prod, lastReserves } )
+			DEBUG && console.log( { gapStart, gapEnd, prod, lastReserves } )
 
 			return prod
 		}

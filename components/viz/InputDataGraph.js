@@ -6,7 +6,6 @@ import { curveLinear } from '@visx/curve'
 import { scaleLinear } from '@visx/scale'
 import { withParentSize } from "@visx/responsive"
 import { max, min } from 'd3-array'
-import Loading from "components/Loading"
 import { useUnitConversionGraph } from "./UnitConverter"
 import { Col, Row } from "antd"
 import { useSelector } from "react-redux"
