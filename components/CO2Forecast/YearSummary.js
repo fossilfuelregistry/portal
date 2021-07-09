@@ -13,7 +13,7 @@ function YearSummary( { dataset = [] } ) {
 
 	if( !( dataset?.length > 0 ) ) return null
 
-	const totals =  { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] }
+	const totals = { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] }
 
 	let lastOil, lastGas
 	dataset.forEach( d => {
@@ -21,13 +21,13 @@ function YearSummary( { dataset = [] } ) {
 		if( d.fossilFuelType === 'gas' ) lastGas = d
 	} )
 
-	addToTotal( totals, lastGas.co2 )
-	addToTotal( totals, lastOil.co2 )
+	addToTotal( totals, lastGas?.co2 ?? 0 )
+	addToTotal( totals, lastOil?.co2 ?? 0 )
 
 	DEBUG && console.log( { lastOil, lastGas, productionSourceId, dataset } )
 
 	let year = `(${ lastOil.year })`
-	if( lastOil.year !== lastGas.year ) year = `(${ lastOil.year } / ${ lastGas.year })`
+	if( lastGas?.year && ( lastOil.year !== lastGas.year ) ) year = `(${ lastOil.year } / ${ lastGas.year })`
 
 	return (
 		<div className="table-wrap">

@@ -2,6 +2,7 @@ import settings from "settings"
 
 export function addToTotal( total, datapoint ) {
 	const scopes = Object.keys( datapoint )
+	if( !scopes?.length ) return
 	const ranges = Object.keys( datapoint[ scopes[ 0 ] ] )
 
 	scopes.forEach( scope => {

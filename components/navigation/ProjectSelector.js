@@ -48,7 +48,6 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 					allowClear={ true }
 					placeholder={ getText( 'project' ) + '...' }
 					onChange={ async p => {
-						console.log( '____________', p )
 						set_selectedProjectOption( p )
 						dispatch( { type: 'PROJECT', payload: p?.value } )
 						const query = { ...router.query }

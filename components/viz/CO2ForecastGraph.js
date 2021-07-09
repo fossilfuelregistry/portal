@@ -12,7 +12,7 @@ import { combineOilAndGas, sumOfCO2 } from "../CO2Forecast/calculate"
 import { useSelector } from "react-redux"
 import settings from 'settings'
 
-const DEBUG = false
+const DEBUG = true
 
 const colors = {
 	oil: { past: '#008080', reserves: '#70a494', contingent: '#b4c8a8' },
@@ -69,7 +69,7 @@ function CO2ForecastGraphBase( {
 	} )
 
 	const maxCO2 = useMemo( () => {
-		let maxValue = max( productionData, d => d.oil + d.gas )
+		let maxValue = max( productionData, d => ( d.oil ?? 0 ) + ( d.gas ?? 0 ) )
 		DEBUG && console.log( { maxValue } )
 		return maxValue
 	}, [ productionData ] )

@@ -46,6 +46,7 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 					</Row>
 
 					<Row gutter={ [ 16, 16 ] }>
+						{ production?.length > 0 &&
 						<Col xs={ 24 } md={ 12 } xxl={ 6 }>
 							<div className="graph-wrap">
 								<h4>{ getText( 'gas' ) + ' ' + getText( 'production' ) } e9m3</h4>
@@ -54,7 +55,9 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 									<Button className="download" block>{ getText( 'download' ) }</Button>
 								</Download>
 							</div>
-						</Col>
+						</Col> }
+
+						{ reserves?.length > 0 &&
 						<Col xs={ 24 } md={ 12 } xxl={ 6 }>
 							<div className="graph-wrap">
 								<h4>{ getText( 'gas' ) + ' ' + getText( 'reserves' ) } e9m3</h4>
@@ -63,7 +66,9 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 									<Button className="download" block>{ getText( 'download' ) }</Button>
 								</Download>
 							</div>
-						</Col>
+						</Col> }
+
+						{ production?.length > 0 &&
 						<Col xs={ 24 } md={ 12 } xxl={ 6 }>
 							<div className="graph-wrap">
 								<h4>{ getText( 'oil' ) + ' ' + getText( 'production' ) } e6bbl</h4>
@@ -72,7 +77,9 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 									<Button className="download" block>{ getText( 'download' ) }</Button>
 								</Download>
 							</div>
-						</Col>
+						</Col> }
+
+						{ reserves?.length > 0 &&
 						<Col xs={ 24 } md={ 12 } xxl={ 6 }>
 							<div className="graph-wrap">
 								<h4>{ getText( 'oil' ) + ' ' + getText( 'reserves' ) } e6bbl</h4>
@@ -81,7 +88,8 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 									<Button className="download" block>{ getText( 'download' ) }</Button>
 								</Download>
 							</div>
-						</Col>
+						</Col> }
+
 					</Row>
 
 				</Col>
