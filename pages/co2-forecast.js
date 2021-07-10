@@ -1,11 +1,11 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useRef } from "react"
 import TopNavigation from "components/navigation/TopNavigation"
 import getConfig from 'next/config'
 import CountrySelector from "components/navigation/CountrySelector"
 import { Col, Row } from "antd"
 import useText from "lib/useText"
 import { NextSeo } from "next-seo"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import CarbonIntensitySelector from "components/viz/IntensitySelector"
 import HelpModal from "components/HelpModal"
 import LoadData from "components/CO2Forecast/LoadData"
@@ -13,16 +13,20 @@ import ProjectSelector from "components/navigation/ProjectSelector"
 import { useQuery } from "@apollo/client"
 import { GQL_productionSources, GQL_projectionSources, GQL_reservesSources } from "queries/general"
 import SourceSelector from "../components/navigation/SourceSelector"
+import { useRouter } from "next/router"
 
-const DEBUG = false
+const DEBUG = true
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
 export default function CO2ForecastPage() {
 	const { getText } = useText()
+	const router = useRouter()
+	const dispatch = useDispatch()
 	const country = useSelector( redux => redux.country )
 	const region = useSelector( redux => redux.region )
 	const project = useSelector( redux => redux.project )
+	const initialized = useRef( false )
 
 	const { data: _productionSources, loading: productionLoading } = useQuery( GQL_productionSources, {
 		variables: { iso3166: country, iso31662: region, projectId: project },
@@ -48,6 +52,27 @@ export default function CO2ForecastPage() {
 			...s,
 			namePretty: `${ s.grades } ${ s.year }`
 		} ) )
+
+	useEffect( () => {
+		if( initialized.current ) return
+		if( !country ) return
+		if( !_productionSources ) return
+		if( !_projectionSources ) return
+		if( !_reservesSources ) return
+
+		initialized.current = true
+
+		DEBUG && console.log( '...Query params', router.query )
+		const params = [ 'project', 'productionSourceId', 'reservesSourceId', 'projectionSourceId' ]
+		params.forEach( p => {
+			if( router.query[ p ] ) {
+				let value = router.query[ p ]
+				if( !isNaN( parseInt( value ) ) ) value = parseInt( value )
+				DEBUG && console.log( '    dispatch', p, value )
+				dispatch( { type: p.toUpperCase(), payload: value } )
+			}
+		} )
+	}, [ country, _productionSources, _projectionSources, _reservesSources ] )
 
 	useEffect( () => {
 		if( !reservesSources?.length > 0 ) return

@@ -54,14 +54,17 @@ function LoadData() {
 
 	const { data: projectionData, loading: loadingProjection, error: errorLoadingProjection }
 		= useQuery( queries.projection, { skip: !projectionSourceId } )
+
 	const projection = useMemo( () => {
+
 		// Synthesize stable projection datapoints if selected
-		if( projectionSourceId === 100 ) {
+		if( projectionSourceId === settings.stableProductionSourceId ) {
 			let stableProj = []
 			for( let year = 2020; year <= settings.year.end; year++ ) {
-				stableProj.push( { ...stableProduction.oil, year, sourceId: 100 } )
-				stableProj.push( { ...stableProduction.gas, year, sourceId: 100 } )
+				stableProj.push( { ...stableProduction.oil, year, sourceId: settings.stableProductionSourceId } )
+				stableProj.push( { ...stableProduction.gas, year, sourceId: settings.stableProductionSourceId } )
 			}
+			DEBUG && console.log( { stableProj } )
 			return stableProj
 		} else
 			return _co2( projectionData?.countryProductions?.nodes )
@@ -100,13 +103,25 @@ function LoadData() {
 		DEBUG && console.log( 'useEffect projection', { projection, limits } )
 		if( !projection?.length > 0 ) return
 
-		const newLimits = projection.reduce( ( _limits, datapoint ) => {
-			if( datapoint.sourceId !== projectionSourceId ) return _limits
-			const l = _limits[ datapoint.fossilFuelType ]
-			l.firstYear = Math.min( l.firstYear, datapoint.year )
-			l.lastYear = Math.max( l.lastYear, datapoint.year )
-			return _limits
-		}, { oil: { firstYear: settings.year.end, lastYear: 0 }, gas: { firstYear: settings.year.end, lastYear: 0 } } )
+		let newLimits
+
+		if( projectionSourceId === settings.stableProductionSourceId ) {
+			newLimits = {
+				oil: { firstYear: new Date().getFullYear()-1, lastYear: settings.year.end },
+				gas: { firstYear: new Date().getFullYear()-1, lastYear: settings.year.end }
+			}
+		} else {
+			newLimits = projection.reduce( ( _limits, datapoint ) => {
+				if( datapoint.sourceId !== projectionSourceId ) return _limits
+				const l = _limits[ datapoint.fossilFuelType ]
+				l.firstYear = Math.min( l.firstYear, datapoint.year )
+				l.lastYear = Math.max( l.lastYear, datapoint.year )
+				return _limits
+			}, {
+				oil: { firstYear: settings.year.end, lastYear: 0 },
+				gas: { firstYear: settings.year.end, lastYear: 0 }
+			} )
+		}
 
 		set_limits( { ...limits, projection: newLimits } )
 	}, [ projection, projectionSourceId ] )

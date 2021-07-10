@@ -3,6 +3,7 @@ import useText from "lib/useText"
 import { useSelector } from "react-redux"
 import { useUnitConversionGraph } from "../viz/UnitConverter"
 import { addToTotal, sumOfCO2 } from "./calculate"
+import settings from "settings"
 
 const DEBUG = false
 
@@ -68,7 +69,7 @@ function FutureSummary( { dataset, limits } ) {
 						<td align="right">{ getText( 'mid' ) }</td>
 						<td align="right">{ getText( 'high' ) }</td>
 					</tr>
-					{ projectionSourceId !== 100 &&
+					{ projectionSourceId !== settings.stableProductionSourceId &&
 					<tr>
 						<td>{ sourceName }</td>
 						<td align="right">{ _( sumOfCO2( sourceTotal, 0 ) ) }</td>

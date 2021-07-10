@@ -81,7 +81,7 @@ function CO2ForecastGraphBase( {
 
 	if( !( maxCO2 > 0 ) ) return null // JSON.stringify( maxCO2 )
 
-	DEBUG && console.log( { productionData, projProdData } )
+	DEBUG && console.log( { productionData, projectedProduction, projProdData } )
 
 	return (
 		<div className="graph">

@@ -3,5 +3,6 @@ export default {
 		start: 2010,
 		end: 2040
 	},
-	gradesPreferenceOrder: '3x12'
+	gradesPreferenceOrder: '3x12',
+	stableProductionSourceId: 100
 }

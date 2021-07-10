@@ -3,7 +3,7 @@ import Graph from 'graph-data-structure'
 import { useSelector } from "react-redux"
 import { getPreferredGrades, sumOfCO2 } from "../CO2Forecast/calculate"
 
-const DEBUG = false
+const DEBUG = true
 
 let graph
 let graphOil

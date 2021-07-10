@@ -20,7 +20,6 @@ export default function CountrySelector() {
 	const { getText } = useText()
 	const { trackEvent } = useTracker()
 
-
 	const { data: countriesData, loading: loadingCountries, error: errorLoadingCountries }
 		= useQuery( GQL_productionCountries )
 
