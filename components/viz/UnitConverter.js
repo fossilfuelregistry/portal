@@ -202,16 +202,17 @@ export const useUnitConversionGraph = () => {
 
 			return result
 		} catch( e ) {
-			throw new Error( "While looking for " + unit + " -> kgco2e conversion:\n" + e.message )
+			throw new Error( "While looking for " + volume + ' ' + unit + " -> kgco2e conversion:\n" + e.message )
 		}
 	}
 
 	const reservesProduction =
 		( projection, reserves, projectionSourceId, reservesSourceId, limits, grades ) => {
 			if( !projectionSourceId || !reservesSourceId ) return []
-			if( !projection?.length > 0 ) return []
-			if( !reserves?.length > 0 ) return []
-			if( !limits?.projection > 0 ) return []
+			if( !projection?.length > 1 ) return []
+			if( !reserves?.length > 1 ) return []
+			if( !limits?.production ) return []
+			if( !limits?.projection ) return []
 			DEBUG && console.log( { projection, reserves, projectionSourceId, reservesSourceId, limits, grades } )
 
 			// Find most recent preferred reserve
@@ -259,6 +260,11 @@ export const useUnitConversionGraph = () => {
 			projection.forEach( datapoint => {
 				if( datapoint.sourceId !== projectionSourceId ) return
 				if( datapoint.year < gapEnd ) return
+				if( !datapoint.volume || !datapoint.unit ) {
+					console.log( { projection } )
+					throw new Error( 'Malformed data point: ' + JSON.stringify( datapoint ) )
+				}
+
 				let _dp = { ...datapoint }
 				_dp.co2 = co2FromVolume( datapoint )
 

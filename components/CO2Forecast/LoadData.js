@@ -68,7 +68,7 @@ function LoadData() {
 			return stableProj
 		} else
 			return _co2( projectionData?.countryProductions?.nodes )
-	}, [ projectionData?.countryProductions?.nodes, projectionSourceId, gwp ] )
+	}, [ projectionData?.countryProductions?.nodes, projectionSourceId, stableProduction, gwp ] )
 
 	const { data: reservesData, loading: loadingReserves, error: errorLoadingReserves }
 		= useQuery( queries.reserves, { skip: !productionSourceId } )
