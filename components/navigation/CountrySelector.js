@@ -71,7 +71,7 @@ export default function CountrySelector() {
 				optionFilterProp="children"
 				onChange={ async v => {
 					set_selectedCountryOption( v )
-					dispatch( { type: 'COUNTRY', payload: v } )
+					dispatch( { type: 'COUNTRY', payload: v.value } )
 					await router.replace( {
 						pathname: router.pathname,
 						query: { ...router.query, country: v.value }
