@@ -255,14 +255,20 @@ export const useUnitConversionGraph = () => {
 					} )
 			}
 
-			prod.forEach( p => p.co2 = co2FromVolume( p ) )
+			prod.forEach( datapoint => {
+				if( !datapoint.volume || !datapoint.unit ) {
+					console.log( { prod } )
+					throw new Error( 'Malformed production data point: ' + JSON.stringify( datapoint ) )
+				}
+				return datapoint.co2 = co2FromVolume( datapoint )
+			} )
 
 			projection.forEach( datapoint => {
 				if( datapoint.sourceId !== projectionSourceId ) return
 				if( datapoint.year < gapEnd ) return
 				if( !datapoint.volume || !datapoint.unit ) {
 					console.log( { projection } )
-					throw new Error( 'Malformed data point: ' + JSON.stringify( datapoint ) )
+					throw new Error( 'Malformed projection data point: ' + JSON.stringify( datapoint ) )
 				}
 
 				let _dp = { ...datapoint }
