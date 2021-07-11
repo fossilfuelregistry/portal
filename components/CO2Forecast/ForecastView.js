@@ -45,54 +45,55 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 						</Col>
 					</Row>
 
-					<Row gutter={ [ 16, 16 ] }>
-						{ production?.length > 0 &&
-						<Col xs={ 24 } md={ 12 } xxl={ 6 }>
-							<div className="graph-wrap">
-								<h4>{ getText( 'gas' ) + ' ' + getText( 'production' ) } e9m3</h4>
-								<InputDataGraph data={ production } fuel="gas" comment="PROD"/>
-								<Download data={ production } filename={ 'gas_production_' + country } fuel="gas">
-									<Button className="download" block>{ getText( 'download' ) }</Button>
-								</Download>
-							</div>
-						</Col> }
-
-						{ reserves?.length > 0 &&
-						<Col xs={ 24 } md={ 12 } xxl={ 6 }>
-							<div className="graph-wrap">
-								<h4>{ getText( 'gas' ) + ' ' + getText( 'reserves' ) } e9m3</h4>
-								<InputDataGraph data={ reserves } fuel="gas" comment="RES"/>
-								<Download data={ reserves } filename={ 'gas_reserves_' + country } fuel="gas">
-									<Button className="download" block>{ getText( 'download' ) }</Button>
-								</Download>
-							</div>
-						</Col> }
-
-						{ production?.length > 0 &&
-						<Col xs={ 24 } md={ 12 } xxl={ 6 }>
-							<div className="graph-wrap">
-								<h4>{ getText( 'oil' ) + ' ' + getText( 'production' ) } e6bbl</h4>
-								<InputDataGraph data={ production } fuel="oil" comment="PROD"/>
-								<Download data={ production } filename={ 'oil_production_' + country } fuel="oil">
-									<Button className="download" block>{ getText( 'download' ) }</Button>
-								</Download>
-							</div>
-						</Col> }
-
-						{ reserves?.length > 0 &&
-						<Col xs={ 24 } md={ 12 } xxl={ 6 }>
-							<div className="graph-wrap">
-								<h4>{ getText( 'oil' ) + ' ' + getText( 'reserves' ) } e6bbl</h4>
-								<InputDataGraph data={ reserves } fuel="oil" comment="RES"/>
-								<Download data={ reserves } filename={ 'oil_reserves_' + country } fuel="oil">
-									<Button className="download" block>{ getText( 'download' ) }</Button>
-								</Download>
-							</div>
-						</Col> }
-
-					</Row>
-
 				</Col>
+			</Row>
+
+			<Row gutter={ [ 16, 16 ] }>
+
+				{ production?.length > 0 &&
+				<Col xs={ 24 } md={ 12 } xxl={ 6 }>
+					<div className="graph-wrap">
+						<h4>{ getText( 'gas' ) + ' ' + getText( 'production' ) } e9m3</h4>
+						<InputDataGraph data={ production } fuel="gas" comment="PROD"/>
+						<Download data={ production } filename={ 'gas_production_' + country } fuel="gas">
+							<Button className="download" block>{ getText( 'download' ) }</Button>
+						</Download>
+					</div>
+				</Col> }
+
+				{ reserves?.length > 0 &&
+				<Col xs={ 24 } md={ 12 } xxl={ 6 }>
+					<div className="graph-wrap">
+						<h4>{ getText( 'gas' ) + ' ' + getText( 'reserves' ) } e9m3</h4>
+						<InputDataGraph data={ reserves } fuel="gas" comment="RES"/>
+						<Download data={ reserves } filename={ 'gas_reserves_' + country } fuel="gas">
+							<Button className="download" block>{ getText( 'download' ) }</Button>
+						</Download>
+					</div>
+				</Col> }
+
+				{ production?.length > 0 &&
+				<Col xs={ 24 } md={ 12 } xxl={ 6 }>
+					<div className="graph-wrap">
+						<h4>{ getText( 'oil' ) + ' ' + getText( 'production' ) } e6bbl</h4>
+						<InputDataGraph data={ production } fuel="oil" comment="PROD"/>
+						<Download data={ production } filename={ 'oil_production_' + country } fuel="oil">
+							<Button className="download" block>{ getText( 'download' ) }</Button>
+						</Download>
+					</div>
+				</Col> }
+
+				{ reserves?.length > 0 &&
+				<Col xs={ 24 } md={ 12 } xxl={ 6 }>
+					<div className="graph-wrap">
+						<h4>{ getText( 'oil' ) + ' ' + getText( 'reserves' ) } e6bbl</h4>
+						<InputDataGraph data={ reserves } fuel="oil" comment="RES"/>
+						<Download data={ reserves } filename={ 'oil_reserves_' + country } fuel="oil">
+							<Button className="download" block>{ getText( 'download' ) }</Button>
+						</Download>
+					</div>
+				</Col> }
+
 			</Row>
 
 			<style jsx>{ `
