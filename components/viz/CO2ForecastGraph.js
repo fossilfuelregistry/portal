@@ -12,7 +12,7 @@ import { combineOilAndGas, sumOfCO2 } from "../CO2Forecast/calculate"
 import { useSelector } from "react-redux"
 import settings from 'settings'
 
-const DEBUG = true
+const DEBUG = false
 
 const colors = {
 	oil: { past: '#008080', reserves: '#70a494', contingent: '#b4c8a8' },
@@ -61,7 +61,7 @@ function CO2ForecastGraphBase( {
 			gas_c: d.gas?.continProd ?? 0
 		} ) )
 
-	console.log( { production, productionData } )
+	DEBUG && console.log( { production, productionData } )
 	// scale
 	const yearScale = scaleLinear( {
 		range: [ 0, parentWidth - margin.left ],

@@ -19,7 +19,9 @@ export default function SourceSelector( { sources, stateKey, placeholder } ) {
 	const dispatch = useDispatch()
 	const stateValue = useSelector( redux => redux[ stateKey ] )
 
-	console.log( '**********', stateKey, sources.length, stateValue, '*************' )
+	if( stateKey === 'productionSourceId' )
+		console.log( { stateKey, sources: sources.length, stateValue, selectedSourceOption } )
+
 	useEffect( () => {
 		if( router.query[ stateKey ] )
 			set_selectedSourceOption( router.query[ stateKey ] )
