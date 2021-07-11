@@ -27,7 +27,7 @@ export default function SourceSelector( { sources, stateKey, placeholder } ) {
 	useEffect( () => { // Make only source selected
 		if( !sources?.length === 1 ) return
 		const id = sources?.[ 0 ]?.sourceId
-		console.log( stateKey, '>>>>>>>>>> Single source:', sources )
+		DEBUG && console.log( stateKey, '>>>>>>>>>> Single source:', sources )
 		set_selectedSourceOption( id?.toString() )
 		co2PageUpdateQuery( store, router, stateKey, id )
 		dispatch( { type: stateKey.toUpperCase(), payload: parseInt( id ) } )
@@ -40,7 +40,7 @@ export default function SourceSelector( { sources, stateKey, placeholder } ) {
 		console.log( stateKey, { stateValue, selectedSourceOption, sources } )
 
 		if( sources?.length === 0 ) {
-			console.log( stateKey, '>>>>>>>>>> Source empty' )
+			DEBUG && console.log( stateKey, '>>>>>>>>>> Source empty' )
 			set_selectedSourceOption( undefined )
 			co2PageUpdateQuery( store, router, stateKey, undefined )
 			dispatch( { type: stateKey.toUpperCase(), payload: null } )
@@ -50,10 +50,10 @@ export default function SourceSelector( { sources, stateKey, placeholder } ) {
 		if( !sources.find( s => s.sourceId === parseInt( selectedSourceOption ) ) ) {
 			console.log( stateKey, '>>>>>>>>>> Reset' )
 			set_selectedSourceOption( undefined )
-			_updateQuery( store, router, stateKey, undefined )
-			console.log( stateKey, '>>>>>>>>>> Reset' )
+			co2PageUpdateQuery( store, router, stateKey, undefined )
+			DEBUG && console.log( stateKey, '>>>>>>>>>> Reset' )
 			set_selectedSourceOption( undefined )
-			_updateQuery( store, router, stateKey, undefined )
+			co2PageUpdateQuery( store, router, stateKey, undefined )
 		}
 	}, [ sources, stateValue, selectedSourceOption ] )
 

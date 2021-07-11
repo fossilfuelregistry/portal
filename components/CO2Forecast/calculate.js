@@ -65,7 +65,7 @@ export function getPreferredGrades( reserves, reservesSourceId ) {
 
 export async function co2PageUpdateQuery( store, router, parameter, value ) {
 	const params = [ 'country', 'region', 'project', 'productionSourceId', 'projectionSourceId', 'reservesSourceId' ]
-	const DEBUG = false
+	const DEBUG = true
 	const query = new URLSearchParams()
 	DEBUG && console.log( 'URL', parameter, '->', value, router, query.toString() )
 	params.forEach( p => {
@@ -76,8 +76,14 @@ export async function co2PageUpdateQuery( store, router, parameter, value ) {
 
 	if( value !== undefined )
 		query.set( parameter, value )
-	else
+	else if( typeof parameter == 'string' )
 		query.delete( parameter )
+	else if( typeof parameter == 'object' ) {
+		Object.keys( parameter ).forEach( p => {
+			if( parameter[ p ] === undefined ) query.delete( p )
+			else query.set( p, parameter[ p ] )
+		} )
+	}
 
 	let url = ''
 	if( router.locale !== router.defaultLocale ) url += '/' + router.locale

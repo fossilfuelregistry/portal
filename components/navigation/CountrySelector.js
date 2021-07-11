@@ -46,8 +46,6 @@ export default function CountrySelector() {
 			const name = countries.find( c => c.iso3166.toLowerCase() === country.toLowerCase() )?.[ 'name' ]
 			const newselectedCountryOption = { value: router.query.country, label: name }
 
-			console.log( '!!!!!! useEffect', newselectedCountryOption.value )
-
 			dispatch( { type: 'COUNTRY', payload: newselectedCountryOption.value } )
 			set_selectedCountryOption( newselectedCountryOption )
 			trackEvent( 'country', newselectedCountryOption.value )
@@ -78,8 +76,13 @@ export default function CountrySelector() {
 				onChange={ async v => {
 					set_selectedCountryOption( v )
 					dispatch( { type: 'COUNTRY', payload: v.value } )
-					console.log( '!!!!!! onChange', v.value )
-					await co2PageUpdateQuery( store, router, 'country', v?.value )
+					dispatch( { type: 'REGION', payload: undefined } )
+					dispatch( { type: 'PROJECT', payload: undefined } )
+					await co2PageUpdateQuery( store, router, {
+						project: undefined,
+						region: undefined,
+						country: v?.value
+					} )
 				} }
 				filterOption={ ( input, option ) =>
 					option.children?.toLowerCase().indexOf( input?.toLowerCase() ) >= 0
