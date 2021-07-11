@@ -4,31 +4,9 @@ import React, { useEffect, useState } from "react"
 import { useDispatch, useSelector, useStore } from "react-redux"
 import HelpModal from "../HelpModal"
 import useText from "../../lib/useText"
+import { co2PageUpdateQuery } from "components/CO2Forecast/calculate"
 
 const DEBUG = false
-const params = [ 'country', 'region', 'project', 'productionSourceId', 'projectionSourceId', 'reservesSourceId' ]
-
-async function _updateQuery( store, router, parameter, value ) {
-	const query = new URLSearchParams()
-	DEBUG && console.log( 'URL', parameter, '->', value, router, query.toString() )
-	params.forEach( p => {
-		const v = store.getState()[ p ]
-		if( !v ) return
-		query.set( p, v )
-	} )
-
-	if( value !== undefined )
-		query.set( parameter, value )
-	else
-		query.delete( parameter )
-
-	let url = ''
-	if( router.locale !== router.defaultLocale ) url += '/' + router.locale
-	url += router.route + '?' + query.toString()
-	DEBUG && console.log( 'URL >>>', url )
-
-	await router.replace( url, null, { shallow: true } )
-}
 
 export default function SourceSelector( { sources, stateKey, placeholder } ) {
 	const router = useRouter()
@@ -51,7 +29,7 @@ export default function SourceSelector( { sources, stateKey, placeholder } ) {
 		const id = sources?.[ 0 ]?.sourceId
 		console.log( stateKey, '>>>>>>>>>> Single source:', sources )
 		set_selectedSourceOption( id?.toString() )
-		_updateQuery( store, router, stateKey, id )
+		co2PageUpdateQuery( store, router, stateKey, id )
 		dispatch( { type: stateKey.toUpperCase(), payload: parseInt( id ) } )
 
 	}, [ sources?.length === 1 ] )
@@ -64,7 +42,7 @@ export default function SourceSelector( { sources, stateKey, placeholder } ) {
 		if( sources?.length === 0 ) {
 			console.log( stateKey, '>>>>>>>>>> Source empty' )
 			set_selectedSourceOption( undefined )
-			_updateQuery( store, router, stateKey, undefined )
+			co2PageUpdateQuery( store, router, stateKey, undefined )
 			dispatch( { type: stateKey.toUpperCase(), payload: null } )
 			return
 		}
@@ -91,7 +69,7 @@ export default function SourceSelector( { sources, stateKey, placeholder } ) {
 				onChange={ async value => {
 					set_selectedSourceOption( value )
 					dispatch( { type: stateKey.toUpperCase(), payload: parseInt( value ) } )
-					await _updateQuery( store, router, stateKey, value )
+					await co2PageUpdateQuery( store, router, stateKey, value )
 				} }
 			>
 				{ sources.map( s => {

@@ -62,3 +62,27 @@ export function getPreferredGrades( reserves, reservesSourceId ) {
 	else cGrade = settings.gradesPreferenceOrder[ cGrade ] + 'c'
 	return { pGrade, cGrade }
 }
+
+export async function co2PageUpdateQuery( store, router, parameter, value ) {
+	const params = [ 'country', 'region', 'project', 'productionSourceId', 'projectionSourceId', 'reservesSourceId' ]
+	const DEBUG = false
+	const query = new URLSearchParams()
+	DEBUG && console.log( 'URL', parameter, '->', value, router, query.toString() )
+	params.forEach( p => {
+		const v = store.getState()[ p ]
+		if( !v ) return
+		query.set( p, v )
+	} )
+
+	if( value !== undefined )
+		query.set( parameter, value )
+	else
+		query.delete( parameter )
+
+	let url = ''
+	if( router.locale !== router.defaultLocale ) url += '/' + router.locale
+	url += router.route + '?' + query.toString()
+	DEBUG && console.log( 'URL >>>', url )
+
+	await router.replace( url, null, { shallow: true } )
+}

@@ -6,32 +6,9 @@ import { useEffect, useState } from "react"
 import { useDispatch, useStore } from "react-redux"
 import useText from "lib/useText"
 import { GQL_projects } from "queries/general"
+import { co2PageUpdateQuery } from "../CO2Forecast/calculate"
 
 const DEBUG = false
-
-const params = [ 'country', 'region', 'project', 'productionSourceId', 'projectionSourceId', 'reservesSourceId' ]
-
-async function _updateQuery( store, router, parameter, value ) {
-	const query = new URLSearchParams()
-	DEBUG && console.log( 'URL', parameter, '->', value, router, query.toString() )
-	params.forEach( p => {
-		const v = store.getState()[ p ]
-		if( !v ) return
-		query.set( p, v )
-	} )
-
-	if( value !== undefined )
-		query.set( parameter, value )
-	else
-		query.delete( parameter )
-
-	let url = ''
-	if( router.locale !== router.defaultLocale ) url += '/' + router.locale
-	url += router.route + '?' + query.toString()
-	DEBUG && console.log( 'URL >>>', url )
-
-	await router.replace( url, null, { shallow: true } )
-}
 
 export default function ProjectSelector( { iso3166, iso31662 } ) {
 	const router = useRouter()
@@ -76,7 +53,7 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 					onChange={ async p => {
 						set_selectedProjectOption( p )
 						dispatch( { type: 'PROJECT', payload: p?.value } )
-						_updateQuery( store, router, 'project', p?.value )
+						await co2PageUpdateQuery( store, router, 'project', p?.value )
 					} }
 				>
 					{ projects.map( p => (

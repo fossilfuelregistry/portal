@@ -4,14 +4,16 @@ import GraphQLStatus from "../GraphQLStatus"
 import { Select } from "antd"
 import { useRouter } from "next/router"
 import { useEffect, useMemo, useState } from "react"
-import { useDispatch, useSelector } from "react-redux"
+import { useDispatch, useSelector, useStore } from "react-redux"
 import useText from "lib/useText"
 import useTracker from "lib/useTracker"
+import { co2PageUpdateQuery } from "../CO2Forecast/calculate"
 
 const DEBUG = false
 
 export default function CountrySelector() {
 	const router = useRouter()
+	const store = useStore()
 	const language = useSelector( redux => redux.language )
 	const [ selectedCountryOption, set_selectedCountryOption ] = useState()
 	const [ selectedRegionOption, set_selectedRegionOption ] = useState()
@@ -38,9 +40,13 @@ export default function CountrySelector() {
 	useEffect( () => {
 		if( !countries.length ) return
 		const { country } = router.query
+		if( !country ) return
+
 		if( country && ( !selectedCountryOption || selectedCountryOption.value !== country ) ) {
 			const name = countries.find( c => c.iso3166.toLowerCase() === country.toLowerCase() )?.[ 'name' ]
 			const newselectedCountryOption = { value: router.query.country, label: name }
+
+			console.log( '!!!!!! useEffect', newselectedCountryOption.value )
 
 			dispatch( { type: 'COUNTRY', payload: newselectedCountryOption.value } )
 			set_selectedCountryOption( newselectedCountryOption )
@@ -53,7 +59,7 @@ export default function CountrySelector() {
 				.map( r => ( { ...r, name: r[ language ] ?? r.en } ) )
 			set_regions( _regions )
 		}
-	}, [ router.query.country, countries?.length, selectedCountryOption?.value ] )
+	}, [ router.query.country, countries?.length ] )
 
 	DEBUG && console.log( 'CountrySelector', { countries, regions } )
 
@@ -72,10 +78,8 @@ export default function CountrySelector() {
 				onChange={ async v => {
 					set_selectedCountryOption( v )
 					dispatch( { type: 'COUNTRY', payload: v.value } )
-					await router.replace( {
-						pathname: router.pathname,
-						query: { ...router.query, country: v.value }
-					} )
+					console.log( '!!!!!! onChange', v.value )
+					await co2PageUpdateQuery( store, router, 'country', v?.value )
 				} }
 				filterOption={ ( input, option ) =>
 					option.children?.toLowerCase().indexOf( input?.toLowerCase() ) >= 0
@@ -85,7 +89,7 @@ export default function CountrySelector() {
 			</Select>
 
 			{ regions?.length > 0 &&
-			<div style={{ marginTop: 12 }}>
+			<div style={ { marginTop: 12 } }>
 				<Select
 					showSearch
 					style={ { minWidth: 120, width: '100%' } }
@@ -97,10 +101,7 @@ export default function CountrySelector() {
 					onChange={ async r => {
 						set_selectedRegionOption( r )
 						dispatch( { type: 'REGION', payload: r?.value } )
-						const query = { ...router.query }
-						delete query.region
-						if( r?.value ) query.region = r.value
-						await router.replace( { pathname: router.pathname, query } )
+						await co2PageUpdateQuery( store, router, 'region', r?.value )
 					} }
 				>
 					{ regions.map( r => (
