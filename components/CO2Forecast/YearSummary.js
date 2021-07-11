@@ -26,8 +26,8 @@ function YearSummary( { dataset = [] } ) {
 
 	DEBUG && console.log( { lastOil, lastGas, productionSourceId, dataset } )
 
-	let year = `(${ lastOil.year })`
-	if( lastGas?.year && ( lastOil.year !== lastGas.year ) ) year = `(${ lastOil.year } / ${ lastGas.year })`
+	let year = `(${ lastOil?.year })`
+	if( lastGas?.year && ( lastOil?.year !== lastGas.year ) ) year = `(${ lastOil?.year } / ${ lastGas?.year })`
 
 	return (
 		<div className="table-wrap">

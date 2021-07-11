@@ -5,7 +5,7 @@ import { useDispatch, useSelector, useStore } from "react-redux"
 import HelpModal from "../HelpModal"
 import useText from "../../lib/useText"
 
-const DEBUG = true
+const DEBUG = false
 const params = [ 'country', 'region', 'project', 'productionSourceId', 'projectionSourceId', 'reservesSourceId' ]
 
 async function _updateQuery( store, router, parameter, value ) {
@@ -38,13 +38,23 @@ export default function SourceSelector( { sources, stateKey, placeholder } ) {
 	const dispatch = useDispatch()
 	const stateValue = useSelector( redux => redux[ stateKey ] )
 
-	if( stateKey === 'productionSourceId' )
+	if( DEBUG && stateKey === 'productionSourceId' )
 		console.log( { stateKey, sources: sources.length, stateValue, selectedSourceOption } )
 
 	useEffect( () => {
 		if( router.query[ stateKey ] )
 			set_selectedSourceOption( router.query[ stateKey ] )
 	}, [ router.query[ stateKey ] ] )
+
+	useEffect( () => { // Make only source selected
+		if( !sources?.length === 1 ) return
+		const id = sources?.[ 0 ]?.sourceId
+		console.log( stateKey, '>>>>>>>>>> Single source:', sources )
+		set_selectedSourceOption( id?.toString() )
+		_updateQuery( store, router, stateKey, id )
+		dispatch( { type: stateKey.toUpperCase(), payload: parseInt( id ) } )
+
+	}, [ sources?.length === 1 ] )
 
 	useEffect( () => { // Clear selection if selected value is no longer available.
 		if( !stateValue ) return

@@ -31,7 +31,7 @@ query fossilFuelTypes {
 
 export const GQL_projects = gql`
 query projects($iso3166_: String!, $iso31662_: String = "") {
-  getProjects(iso3166_: $iso3166_, iso31662_: $iso31662_) { nodes { iso31662 projectId } }
+  getProjects(iso3166_: $iso3166_, iso31662_: $iso31662_) { nodes { iso31662 projectId firstYear lastYear } }
 }`
 
 export const GQL_productionSources = gql`

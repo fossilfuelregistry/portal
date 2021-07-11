@@ -3,14 +3,39 @@ import GraphQLStatus from "../GraphQLStatus"
 import { Select } from "antd"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
-import { useDispatch } from "react-redux"
+import { useDispatch, useStore } from "react-redux"
 import useText from "lib/useText"
 import { GQL_projects } from "queries/general"
 
 const DEBUG = false
 
+const params = [ 'country', 'region', 'project', 'productionSourceId', 'projectionSourceId', 'reservesSourceId' ]
+
+async function _updateQuery( store, router, parameter, value ) {
+	const query = new URLSearchParams()
+	DEBUG && console.log( 'URL', parameter, '->', value, router, query.toString() )
+	params.forEach( p => {
+		const v = store.getState()[ p ]
+		if( !v ) return
+		query.set( p, v )
+	} )
+
+	if( value !== undefined )
+		query.set( parameter, value )
+	else
+		query.delete( parameter )
+
+	let url = ''
+	if( router.locale !== router.defaultLocale ) url += '/' + router.locale
+	url += router.route + '?' + query.toString()
+	DEBUG && console.log( 'URL >>>', url )
+
+	await router.replace( url, null, { shallow: true } )
+}
+
 export default function ProjectSelector( { iso3166, iso31662 } ) {
 	const router = useRouter()
+	const store = useStore()
 	const [ selectedProjectOption, set_selectedProjectOption ] = useState()
 	const dispatch = useDispatch()
 	const { getText } = useText()
@@ -28,7 +53,8 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 	} )
 
 	const _projects = ( projData?.getProjects?.nodes ?? [] )
-		.filter( p => !!p.projectId ).map( p => p.projectId )
+		.filter( p => !!p.projectId && p.lastYear >= 2015 )
+		.map( p => p.projectId )
 	const projects = [ ...new Set( _projects ) ] // Deduplicate
 
 	DEBUG && console.log( 'ProjectSelector', { projData, loading, error, projects } )
@@ -50,10 +76,7 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 					onChange={ async p => {
 						set_selectedProjectOption( p )
 						dispatch( { type: 'PROJECT', payload: p?.value } )
-						const query = { ...router.query }
-						delete query.project
-						if( p?.value ) query.project = p.value
-						await router.replace( { pathname: router.pathname, query } )
+						_updateQuery( store, router, 'project', p?.value )
 					} }
 				>
 					{ projects.map( p => (
