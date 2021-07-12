@@ -59,6 +59,8 @@ function LoadData() {
 
 		// Synthesize stable projection datapoints if selected
 		if( projectionSourceId === settings.stableProductionSourceId ) {
+			if( !stableProduction?.oil ) return []
+
 			let stableProj = []
 			for( let year = 2020; year <= settings.year.end; year++ ) {
 				stableProj.push( { ...stableProduction.oil, year, sourceId: settings.stableProductionSourceId } )
@@ -66,6 +68,7 @@ function LoadData() {
 			}
 			DEBUG && console.log( { stableProj } )
 			return stableProj
+			debugger
 		} else
 			return _co2( projectionData?.countryProductions?.nodes )
 	}, [ projectionData?.countryProductions?.nodes, projectionSourceId, stableProduction, gwp ] )
@@ -107,8 +110,8 @@ function LoadData() {
 
 		if( projectionSourceId === settings.stableProductionSourceId ) {
 			newLimits = {
-				oil: { firstYear: new Date().getFullYear()-1, lastYear: settings.year.end },
-				gas: { firstYear: new Date().getFullYear()-1, lastYear: settings.year.end }
+				oil: { firstYear: new Date().getFullYear() - 1, lastYear: settings.year.end },
+				gas: { firstYear: new Date().getFullYear() - 1, lastYear: settings.year.end }
 			}
 		} else {
 			newLimits = projection.reduce( ( _limits, datapoint ) => {

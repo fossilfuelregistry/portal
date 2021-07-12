@@ -6,9 +6,9 @@ import HelpModal from "../HelpModal"
 import useText from "../../lib/useText"
 import { co2PageUpdateQuery } from "components/CO2Forecast/calculate"
 
-const DEBUG = false
+const DEBUG = true
 
-export default function SourceSelector( { sources, stateKey, placeholder } ) {
+export default function SourceSelector( { sources, loading, stateKey, placeholder } ) {
 	const router = useRouter()
 	const { getText } = useText()
 	const store = useStore()
@@ -19,13 +19,8 @@ export default function SourceSelector( { sources, stateKey, placeholder } ) {
 	if( DEBUG && stateKey === 'productionSourceId' )
 		console.log( { stateKey, sources: sources.length, stateValue, selectedSourceOption } )
 
-	useEffect( () => {
-		if( router.query[ stateKey ] )
-			set_selectedSourceOption( router.query[ stateKey ] )
-	}, [ router.query[ stateKey ] ] )
-
-	useEffect( () => { // Make only source selected
-		if( !sources?.length === 1 ) return
+	useEffect( () => { // If we have only a single option, preselect it.
+		if( !( sources?.length === 1 ) ) return
 		const id = sources?.[ 0 ]?.sourceId
 		DEBUG && console.log( stateKey, '>>>>>>>>>> Single source:', sources )
 		set_selectedSourceOption( id?.toString() )
@@ -35,11 +30,11 @@ export default function SourceSelector( { sources, stateKey, placeholder } ) {
 	}, [ sources?.length === 1 ] )
 
 	useEffect( () => { // Clear selection if selected value is no longer available.
-		if( !stateValue ) return
+		if( !stateValue || loading ) return
 
 		DEBUG && console.log( stateKey, { stateValue, selectedSourceOption, sources } )
 
-		if( sources?.length === 0 ) {
+		if( sources?.length === 0 && !loading ) {
 			DEBUG && console.log( stateKey, '>>>>>>>>>> Source empty' )
 			set_selectedSourceOption( undefined )
 			co2PageUpdateQuery( store, router, stateKey, undefined )
@@ -47,15 +42,18 @@ export default function SourceSelector( { sources, stateKey, placeholder } ) {
 			return
 		}
 
-		if( !sources.find( s => s.sourceId === parseInt( selectedSourceOption ) ) ) {
+		if( !sources.find( s => s.sourceId === stateValue ) ) {
 			console.log( stateKey, '>>>>>>>>>> Reset' )
 			set_selectedSourceOption( undefined )
 			co2PageUpdateQuery( store, router, stateKey, undefined )
 			DEBUG && console.log( stateKey, '>>>>>>>>>> Reset' )
 			set_selectedSourceOption( undefined )
 			co2PageUpdateQuery( store, router, stateKey, undefined )
+		} else {
+			set_selectedSourceOption( stateValue.toString() )
 		}
-	}, [ sources, stateValue, selectedSourceOption ] )
+
+	}, [ sources, loading, stateValue, selectedSourceOption ] )
 
 	return (
 		<div style={ { marginTop: 12 } }>

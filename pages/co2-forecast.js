@@ -124,6 +124,7 @@ export default function CO2ForecastPage() {
 							</h3>
 							<SourceSelector
 								sources={ productionSources }
+								loading={productionLoading}
 								stateKey="productionSourceId"
 								placeholder={ getText( 'data_source' ) }
 							/>
@@ -133,6 +134,7 @@ export default function CO2ForecastPage() {
 							<h3>{ getText( 'reserves' ) }</h3>
 							<SourceSelector
 								sources={ reservesSources }
+								loading={reservesLoading}
 								stateKey="reservesSourceId"
 								placeholder={ getText( 'reserves' ) }
 							/>
@@ -145,6 +147,7 @@ export default function CO2ForecastPage() {
 								</h3>
 								<SourceSelector
 									sources={ projectionSources }
+									loading={projectionLoading}
 									stateKey="projectionSourceId"
 									placeholder={ getText( 'projection' ) }
 								/>
