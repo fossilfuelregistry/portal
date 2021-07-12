@@ -3,7 +3,7 @@ import GraphQLStatus from "../GraphQLStatus"
 import { Select } from "antd"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
-import { useDispatch, useStore } from "react-redux"
+import { useDispatch, useSelector, useStore } from "react-redux"
 import useText from "lib/useText"
 import { GQL_projects } from "queries/general"
 import { co2PageUpdateQuery } from "../CO2Forecast/calculate"
@@ -15,14 +15,14 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 	const store = useStore()
 	const [ selectedProjectOption, set_selectedProjectOption ] = useState()
 	const dispatch = useDispatch()
+	const project = useSelector( redux => redux.project )
 	const { getText } = useText()
 
 	DEBUG && console.log( 'ProjectSelector', { iso3166, iso31662 } )
 
-	// Clear selection if country/region changes.
 	useEffect( () => {
-		set_selectedProjectOption( undefined )
-	}, [ iso3166, iso31662 ] )
+		set_selectedProjectOption( { value: project } )
+	}, [] )
 
 	const { data: projData, loading, error } = useQuery( GQL_projects, {
 		skip: !iso3166,

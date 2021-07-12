@@ -103,7 +103,11 @@ export default function CountrySelector() {
 					onChange={ async r => {
 						set_selectedRegionOption( r )
 						dispatch( { type: 'REGION', payload: r?.value } )
-						await co2PageUpdateQuery( store, router, 'region', r?.value )
+						dispatch( { type: 'PROJECT', payload: undefined } )
+						await co2PageUpdateQuery( store, router, {
+							project: undefined,
+							region: r.value
+						} )
 					} }
 				>
 					{ regions.map( r => (
