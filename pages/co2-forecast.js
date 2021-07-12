@@ -24,6 +24,7 @@ export default function CO2ForecastPage() {
 	const router = useRouter()
 	const dispatch = useDispatch()
 	const country = useSelector( redux => redux.country )
+	const countryName = useSelector( redux => redux.countryName )
 	const region = useSelector( redux => redux.region )
 	const project = useSelector( redux => redux.project )
 	const initialized = useRef( false )
@@ -43,7 +44,7 @@ export default function CO2ForecastPage() {
 		skip: !country
 	} )
 
-	const title = ( country?.label ? country.label + ' - ' : '' ) + getText( 'co2_effects_for_country' )
+	const title = ( countryName ? countryName + ' - ' : '' ) + getText( 'co2_effects_for_country' )
 
 	const productionSources = ( _productionSources?.getProductionSources?.nodes ?? [] )
 	const projectionSources = ( _projectionSources?.getProjectionSources?.nodes ?? [] )

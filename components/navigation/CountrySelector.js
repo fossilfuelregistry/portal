@@ -14,6 +14,7 @@ const DEBUG = false
 export default function CountrySelector() {
 	const router = useRouter()
 	const store = useStore()
+	const country = useSelector( redux => redux.country )
 	const language = useSelector( redux => redux.language )
 	const [ selectedCountryOption, set_selectedCountryOption ] = useState()
 	const [ selectedRegionOption, set_selectedRegionOption ] = useState()
@@ -35,18 +36,16 @@ export default function CountrySelector() {
 
 	DEBUG && console.log( countries.length, countriesData?.getProducingIso3166?.nodes?.length, language )
 
-	// Preload based on URL value
+	// Preload based on URL value which is initialized in Redux state
 
 	useEffect( () => {
 		if( !countries.length ) return
-		const { country } = router.query
 		if( !country ) return
 
 		if( country && ( !selectedCountryOption || selectedCountryOption.value !== country ) ) {
 			const name = countries.find( c => c.iso3166.toLowerCase() === country.toLowerCase() )?.[ 'name' ]
 			const newselectedCountryOption = { value: router.query.country, label: name }
 
-			dispatch( { type: 'COUNTRY', payload: newselectedCountryOption.value } )
 			set_selectedCountryOption( newselectedCountryOption )
 			trackEvent( 'country', newselectedCountryOption.value )
 
@@ -57,7 +56,7 @@ export default function CountrySelector() {
 				.map( r => ( { ...r, name: r[ language ] ?? r.en } ) )
 			set_regions( _regions )
 		}
-	}, [ router.query.country, countries?.length ] )
+	}, [ countries?.length ] )
 
 	DEBUG && console.log( 'CountrySelector', { countries, regions } )
 

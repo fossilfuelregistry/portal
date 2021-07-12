@@ -37,7 +37,7 @@ export default function SourceSelector( { sources, stateKey, placeholder } ) {
 	useEffect( () => { // Clear selection if selected value is no longer available.
 		if( !stateValue ) return
 
-		console.log( stateKey, { stateValue, selectedSourceOption, sources } )
+		DEBUG && console.log( stateKey, { stateValue, selectedSourceOption, sources } )
 
 		if( sources?.length === 0 ) {
 			DEBUG && console.log( stateKey, '>>>>>>>>>> Source empty' )

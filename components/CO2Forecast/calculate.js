@@ -67,7 +67,7 @@ export async function co2PageUpdateQuery( store, router, parameter, value ) {
 	const params = [ 'country', 'region', 'project', 'productionSourceId', 'projectionSourceId', 'reservesSourceId' ]
 	const DEBUG = true
 	const query = new URLSearchParams()
-	DEBUG && console.log( 'URL', parameter, '->', value, router, query.toString() )
+	DEBUG && console.log( 'URL', parameter, '->', value, router, query.toString(),store.getState() )
 	params.forEach( p => {
 		const v = store.getState()[ p ]
 		if( !v ) return
