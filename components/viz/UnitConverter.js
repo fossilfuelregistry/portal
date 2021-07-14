@@ -209,8 +209,8 @@ export const useUnitConversionGraph = () => {
 	const reservesProduction =
 		( projection, reserves, projectionSourceId, reservesSourceId, limits, grades ) => {
 			if( !projectionSourceId || !reservesSourceId ) return []
-			if( !projection?.length > 1 ) return []
-			if( !reserves?.length > 1 ) return []
+			if( !projection || projection.length < 1 ) return []
+			if( !reserves || reserves.length < 1 ) return []
 			if( !limits?.production ) return []
 			if( !limits?.projection ) return []
 			DEBUG && console.log( { projection, reserves, projectionSourceId, reservesSourceId, limits, grades } )

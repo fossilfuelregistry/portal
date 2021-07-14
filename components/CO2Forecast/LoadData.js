@@ -68,7 +68,6 @@ function LoadData() {
 			}
 			DEBUG && console.log( { stableProj } )
 			return stableProj
-			debugger
 		} else
 			return _co2( projectionData?.countryProductions?.nodes )
 	}, [ projectionData?.countryProductions?.nodes, projectionSourceId, stableProduction, gwp ] )

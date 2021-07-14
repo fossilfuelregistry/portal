@@ -36,27 +36,26 @@ export default function CountrySelector() {
 
 	DEBUG && console.log( countries.length, countriesData?.getProducingIso3166?.nodes?.length, language )
 
-	// Preload based on URL value which is initialized in Redux state
-
-	useEffect( () => {
+	useEffect( () => { // Preload based on URL value which is initialized in Redux state
 		if( !countries.length ) return
 		if( !country ) return
 
 		if( country && ( !selectedCountryOption || selectedCountryOption.value !== country ) ) {
 			const name = countries.find( c => c.iso3166.toLowerCase() === country.toLowerCase() )?.[ 'name' ]
-			const newselectedCountryOption = { value: router.query.country, label: name }
+			const newselectedCountryOption = { value: country, label: name }
 
 			set_selectedCountryOption( newselectedCountryOption )
 			trackEvent( 'country', newselectedCountryOption.value )
-
-			// Look for regions in the country
-
-			const _regions = ( countriesData?.getProducingIso3166?.nodes ?? [] )
-				.filter( r => r.iso3166 === country && !!r.iso31662 )
-				.map( r => ( { ...r, name: r[ language ] ?? r.en } ) )
-			set_regions( _regions )
 		}
 	}, [ countries?.length ] )
+
+	useEffect( () => { // Look for regions in the country
+		const _regions = ( countriesData?.getProducingIso3166?.nodes ?? [] )
+			.filter( r => r.iso3166 === country && !!r.iso31662 )
+			.map( r => ( { ...r, name: r[ language ] ?? r.en } ) )
+		set_regions( _regions )
+		if( _regions.length === 0 ) set_selectedRegionOption( undefined )
+	}, [ country ] )
 
 	DEBUG && console.log( 'CountrySelector', { countries, regions } )
 
@@ -106,7 +105,7 @@ export default function CountrySelector() {
 						dispatch( { type: 'PROJECT', payload: undefined } )
 						await co2PageUpdateQuery( store, router, {
 							project: undefined,
-							region: r.value
+							region: r?.value
 						} )
 					} }
 				>

@@ -21,8 +21,11 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 	DEBUG && console.log( 'ProjectSelector', { iso3166, iso31662 } )
 
 	useEffect( () => {
-		set_selectedProjectOption( { value: project } )
-	}, [] )
+		if( !project )
+			set_selectedProjectOption( undefined )
+		else
+			set_selectedProjectOption( { value: project } )
+	}, [ iso31662 ] )
 
 	const { data: projData, loading, error } = useQuery( GQL_projects, {
 		skip: !iso3166,
