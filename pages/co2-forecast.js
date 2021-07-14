@@ -14,6 +14,7 @@ import { useQuery } from "@apollo/client"
 import { GQL_productionSources, GQL_projectionSources, GQL_reservesSources } from "queries/general"
 import SourceSelector from "../components/navigation/SourceSelector"
 import { useRouter } from "next/router"
+import { getProducingCountries } from "../lib/getStaticProps"
 
 const DEBUG = true
 
@@ -124,7 +125,7 @@ export default function CO2ForecastPage() {
 							</h3>
 							<SourceSelector
 								sources={ productionSources }
-								loading={productionLoading}
+								loading={ productionLoading }
 								stateKey="productionSourceId"
 								placeholder={ getText( 'data_source' ) }
 							/>
@@ -134,7 +135,7 @@ export default function CO2ForecastPage() {
 							<h3>{ getText( 'reserves' ) }</h3>
 							<SourceSelector
 								sources={ reservesSources }
-								loading={reservesLoading}
+								loading={ reservesLoading }
 								stateKey="reservesSourceId"
 								placeholder={ getText( 'reserves' ) }
 							/>
@@ -147,7 +148,7 @@ export default function CO2ForecastPage() {
 								</h3>
 								<SourceSelector
 									sources={ projectionSources }
-									loading={projectionLoading}
+									loading={ projectionLoading }
 									stateKey="projectionSourceId"
 									placeholder={ getText( 'projection' ) }
 								/>
@@ -206,3 +207,15 @@ export default function CO2ForecastPage() {
 }
 
 export { getStaticProps } from 'lib/getStaticProps'
+
+// export async function getStaticPaths() {
+// 	const countries = getProducingCountries()
+// 	return {
+// 		paths: countries.map( c => ( {
+// 			params: {
+// 				country: c.iso3166
+// 			}
+// 		} ) ),
+// 		fallback: true
+// 	}
+// }
