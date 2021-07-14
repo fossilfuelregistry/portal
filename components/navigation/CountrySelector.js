@@ -45,6 +45,7 @@ export default function CountrySelector() {
 			const newselectedCountryOption = { value: country, label: name }
 
 			set_selectedCountryOption( newselectedCountryOption )
+			dispatch( { type: 'COUNTRYNAME', payload: name } )
 			trackEvent( 'country', newselectedCountryOption.value )
 		}
 	}, [ countries?.length ] )
