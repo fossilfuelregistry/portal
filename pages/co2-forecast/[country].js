@@ -1,11 +1,11 @@
-import React, { useEffect, useRef } from "react"
+import React, { useEffect } from "react"
 import TopNavigation from "components/navigation/TopNavigation"
 import getConfig from 'next/config'
 import CountrySelector from "components/navigation/CountrySelector"
 import { Col, Row } from "antd"
 import useText from "lib/useText"
 import { NextSeo } from "next-seo"
-import { useDispatch, useSelector } from "react-redux"
+import { useSelector } from "react-redux"
 import CarbonIntensitySelector from "components/viz/IntensitySelector"
 import HelpModal from "components/HelpModal"
 import LoadData from "components/CO2Forecast/LoadData"
@@ -13,23 +13,19 @@ import ProjectSelector from "components/navigation/ProjectSelector"
 import { useQuery } from "@apollo/client"
 import { GQL_productionSources, GQL_projectionSources, GQL_reservesSources } from "queries/general"
 import SourceSelector from "../../components/navigation/SourceSelector"
-import { useRouter } from "next/router"
 import { getProducingCountries } from "../../lib/getStaticProps"
 import { getPreferredReserveGrade } from "../../components/CO2Forecast/calculate"
 
-const DEBUG = true
+// const DEBUG = false
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
 export default function CO2ForecastPage() {
 	const { getText } = useText()
-	const router = useRouter()
-	const dispatch = useDispatch()
 	const country = useSelector( redux => redux.country )
 	const countryName = useSelector( redux => redux.countryName )
 	const region = useSelector( redux => redux.region )
 	const project = useSelector( redux => redux.project )
-	const initialized = useRef( false )
 
 	const { data: _productionSources, loading: productionLoading } = useQuery( GQL_productionSources, {
 		variables: { iso3166: country, iso31662: region, projectId: project },
@@ -190,13 +186,12 @@ export { getStaticProps } from 'lib/getStaticProps'
 
 export async function getStaticPaths() {
 	const countries = await getProducingCountries()
-	console.log( '--------------', countries )
 	return {
-		paths: countries.map( c => ( {
-			params: {
-				country: c.iso3166
-			}
-		} ) ),
+		paths: countries.flatMap( c => [
+			{ params: { country: c.iso3166 } },
+			{ params: { country: c.iso3166 }, locale: 'fr' },
+			{ params: { country: c.iso3166 }, locale: 'es' },
+		] ),
 		fallback: true
 	}
 }

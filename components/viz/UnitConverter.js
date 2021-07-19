@@ -299,7 +299,7 @@ export const useUnitConversionGraph = () => {
 				prod.push( _dp )
 			} )
 
-			console.log( { gapStart, gapEnd, prod, lastReserves } )
+			DEBUG && console.log( { gapStart, gapEnd, prod, lastReserves } )
 
 			return prod
 		}
