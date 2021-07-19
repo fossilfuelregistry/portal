@@ -21,6 +21,7 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 		console.log( { stateKey, sources: sources.length, stateValue, selectedSourceOption } )
 
 	useEffect( () => { // If we have only a single option, preselect it.
+		DEBUG && console.log( 'SourceSelector useEffect single', stateKey )
 		if( !( sources?.length === 1 ) ) return
 		const id = sources?.[ 0 ]?.sourceId
 		DEBUG && console.log( stateKey, '>>>>>>>>>> Single source:', sources )
@@ -32,8 +33,9 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 
 	useEffect( () => { // Clear selection if selected value is no longer available.
 		if( !stateValue || loading ) return
+		DEBUG && console.log( 'SourceSelector useEffect Clear selection' )
 
-		DEBUG && console.log( stateKey, { stateValue, selectedSourceOption, sources } )
+		DEBUG && console.log( stateKey, { stateValue, loading, selectedSourceOption, sources } )
 
 		if( sources?.length === 0 && !loading )
 			if( !firstInitialize.current ) {
@@ -48,17 +50,15 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 			}
 
 		if( !sources.find( s => s.sourceId === stateValue ) ) {
-			console.log( stateKey, '>>>>>>>>>> Reset' )
-			set_selectedSourceOption( undefined )
-			co2PageUpdateQuery( store, router, stateKey, undefined )
 			DEBUG && console.log( stateKey, '>>>>>>>>>> Reset' )
 			set_selectedSourceOption( undefined )
 			co2PageUpdateQuery( store, router, stateKey, undefined )
+			dispatch( { type: stateKey.toUpperCase(), payload: null } )
 		} else {
 			set_selectedSourceOption( stateValue.toString() )
 		}
 
-	}, [ sources, loading, stateValue, selectedSourceOption ] )
+	}, [ sources, sources?.length, loading, stateValue ] )
 
 	return (
 		<div style={ { marginTop: 12 } }>
