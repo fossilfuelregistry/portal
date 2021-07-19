@@ -9,7 +9,7 @@ import useText from "lib/useText"
 import useTracker from "lib/useTracker"
 import { co2PageUpdateQuery } from "../CO2Forecast/calculate"
 
-const DEBUG = false
+const DEBUG = true
 
 export default function CountrySelector() {
 	const router = useRouter()
@@ -35,6 +35,12 @@ export default function CountrySelector() {
 	}, [ countriesData?.getProducingIso3166?.nodes?.length, language ] )
 
 	DEBUG && console.log( countries.length, countriesData?.getProducingIso3166?.nodes?.length, language )
+
+	useEffect( () => { // Preload based on URL value which is initialized in Redux state
+		const qContry = router.query?.country
+		if( !qContry ) return
+		if( qContry !== country ) dispatch( { type: 'COUNTRY', payload: qContry } )
+	}, [ router.query?.country ] )
 
 	useEffect( () => { // Preload based on URL value which is initialized in Redux state
 		if( !countries.length ) return

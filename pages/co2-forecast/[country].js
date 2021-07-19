@@ -12,9 +12,9 @@ import LoadData from "components/CO2Forecast/LoadData"
 import ProjectSelector from "components/navigation/ProjectSelector"
 import { useQuery } from "@apollo/client"
 import { GQL_productionSources, GQL_projectionSources, GQL_reservesSources } from "queries/general"
-import SourceSelector from "../components/navigation/SourceSelector"
+import SourceSelector from "../../components/navigation/SourceSelector"
 import { useRouter } from "next/router"
-import { getProducingCountries } from "../lib/getStaticProps"
+import { getProducingCountries } from "../../lib/getStaticProps"
 
 const DEBUG = true
 
@@ -55,26 +55,26 @@ export default function CO2ForecastPage() {
 			namePretty: `${ s.grades } ${ s.year }`
 		} ) )
 
-	useEffect( () => {
-		if( initialized.current ) return
-		if( !country ) return
-		if( !_productionSources ) return
-		if( !_projectionSources ) return
-		if( !_reservesSources ) return
-
-		initialized.current = true
-
-		DEBUG && console.log( '...Query params', router.query )
-		const params = [ 'project', 'productionSourceId', 'reservesSourceId', 'projectionSourceId' ]
-		params.forEach( p => {
-			if( router.query[ p ] ) {
-				let value = router.query[ p ]
-				if( !isNaN( parseInt( value ) ) ) value = parseInt( value )
-				DEBUG && console.log( '    dispatch', p, value )
-				dispatch( { type: p.toUpperCase(), payload: value } )
-			}
-		} )
-	}, [ country, _productionSources, _projectionSources, _reservesSources ] )
+	// useEffect( () => {
+	// 	if( initialized.current ) return
+	// 	if( !country ) return
+	// 	if( !_productionSources ) return
+	// 	if( !_projectionSources ) return
+	// 	if( !_reservesSources ) return
+	//
+	// 	initialized.current = true
+	//
+	// 	DEBUG && console.log( '...Query params', router.query )
+	// 	const params = [ 'project', 'productionSourceId', 'reservesSourceId', 'projectionSourceId' ]
+	// 	params.forEach( p => {
+	// 		if( router.query[ p ] ) {
+	// 			let value = router.query[ p ]
+	// 			if( !isNaN( parseInt( value ) ) ) value = parseInt( value )
+	// 			DEBUG && console.log( '    dispatch', p, value )
+	// 			dispatch( { type: p.toUpperCase(), payload: value } )
+	// 		}
+	// 	} )
+	// }, [ country, _productionSources, _projectionSources, _reservesSources ] )
 
 	useEffect( () => {
 		if( !reservesSources?.length > 0 ) return
@@ -208,14 +208,15 @@ export default function CO2ForecastPage() {
 
 export { getStaticProps } from 'lib/getStaticProps'
 
-// export async function getStaticPaths() {
-// 	const countries = getProducingCountries()
-// 	return {
-// 		paths: countries.map( c => ( {
-// 			params: {
-// 				country: c.iso3166
-// 			}
-// 		} ) ),
-// 		fallback: true
-// 	}
-// }
+export async function getStaticPaths() {
+	const countries = await getProducingCountries()
+	console.log( '--------------', countries )
+	return {
+		paths: countries.map( c => ( {
+			params: {
+				country: c.iso3166
+			}
+		} ) ),
+		fallback: true
+	}
+}

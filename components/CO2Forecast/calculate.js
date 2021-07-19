@@ -64,12 +64,13 @@ export function getPreferredGrades( reserves, reservesSourceId ) {
 }
 
 export async function co2PageUpdateQuery( store, router, parameter, value ) {
-	const params = [ 'country', 'region', 'project', 'productionSourceId', 'projectionSourceId', 'reservesSourceId' ]
-	const DEBUG = false
+	const params = [ 'region', 'project', 'productionSourceId', 'projectionSourceId', 'reservesSourceId' ]
+	const DEBUG = true
 	const query = new URLSearchParams()
-	DEBUG && console.log( 'URL', parameter, '->', value, router, query.toString(),store.getState() )
+	const state = store.getState()
+	DEBUG && console.log( 'URL', parameter, '->', value, router, query.toString(),state )
 	params.forEach( p => {
-		const v = store.getState()[ p ]
+		const v = state[ p ]
 		if( !v ) return
 		query.set( p, v )
 	} )
@@ -87,7 +88,7 @@ export async function co2PageUpdateQuery( store, router, parameter, value ) {
 
 	let url = ''
 	if( router.locale !== router.defaultLocale ) url += '/' + router.locale
-	url += router.route + '?' + query.toString()
+	url += router.pathname.replace( /\[country\]/, state.country ) + '?' + query.toString()
 	DEBUG && console.log( 'URL >>>', url )
 
 	await router.replace( url, null, { shallow: true } )

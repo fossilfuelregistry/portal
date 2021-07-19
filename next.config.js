@@ -1,5 +1,5 @@
 /* eslint-disable */
-const withAntdLess = require('next-plugin-antd-less');
+const withAntdLess = require( 'next-plugin-antd-less' )
 const lessToJS = require( 'less-vars-to-js' )
 const fs = require( 'fs' )
 const path = require( 'path' )
@@ -23,4 +23,13 @@ module.exports = withAntdLess( {
 		locales: [ 'en', 'fr', 'es' ],
 		defaultLocale: 'en'
 	},
+	async redirects() {
+		return [
+			{
+				source: '/co2-forecast',
+				destination: '/co2-forecast/-',
+				permanent: false,
+			}
+		]
+	}
 } )

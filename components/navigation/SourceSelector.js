@@ -1,6 +1,6 @@
 import { Select } from "antd"
 import { useRouter } from "next/router"
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector, useStore } from "react-redux"
 import HelpModal from "../HelpModal"
 import useText from "../../lib/useText"
@@ -15,6 +15,7 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 	const [ selectedSourceOption, set_selectedSourceOption ] = useState()
 	const dispatch = useDispatch()
 	const stateValue = useSelector( redux => redux[ stateKey ] )
+	const firstInitialize = useRef( true ) // Used to NOT clear settings before sources loaded.
 
 	if( DEBUG && stateKey === 'productionSourceId' )
 		console.log( { stateKey, sources: sources.length, stateValue, selectedSourceOption } )
@@ -34,13 +35,17 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 
 		DEBUG && console.log( stateKey, { stateValue, selectedSourceOption, sources } )
 
-		if( sources?.length === 0 && !loading ) {
-			DEBUG && console.log( stateKey, '>>>>>>>>>> Source empty' )
-			set_selectedSourceOption( undefined )
-			co2PageUpdateQuery( store, router, stateKey, undefined )
-			dispatch( { type: stateKey.toUpperCase(), payload: null } )
-			return
-		}
+		if( sources?.length === 0 && !loading )
+			if( !firstInitialize.current ) {
+				DEBUG && console.log( stateKey, '>>>>>>>>>> Source empty' )
+				set_selectedSourceOption( undefined )
+				co2PageUpdateQuery( store, router, stateKey, undefined )
+				dispatch( { type: stateKey.toUpperCase(), payload: null } )
+				return
+			} else {
+				firstInitialize.current = false
+				return
+			}
 
 		if( !sources.find( s => s.sourceId === stateValue ) ) {
 			console.log( stateKey, '>>>>>>>>>> Reset' )
