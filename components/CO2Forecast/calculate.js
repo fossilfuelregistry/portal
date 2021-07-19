@@ -63,12 +63,32 @@ export function getPreferredGrades( reserves, reservesSourceId ) {
 	return { pGrade, cGrade }
 }
 
+// Get pref grade from the aggregated string in the get_reserves_sources backend function
+export function getPreferredReserveGrade( _grades ) {
+	let pGrade = -1, cGrade = -1
+	const grades = _grades.split( '/' )
+	grades.forEach( grade => {
+		if( grade?.[ 1 ] === 'p' ) {
+			pGrade = Math.max( pGrade, settings.gradesPreferenceOrder.indexOf( grade?.[ 0 ] ) )
+		}
+		if( grade?.[ 1 ] === 'c' ) {
+			cGrade = Math.max( cGrade, settings.gradesPreferenceOrder.indexOf( grade?.[ 0 ] ) )
+		}
+	} )
+	if( pGrade < 0 ) pGrade = '--'
+	else pGrade = settings.gradesPreferenceOrder[ pGrade ] + 'p'
+	if( cGrade < 0 ) cGrade = '--'
+	else cGrade = settings.gradesPreferenceOrder[ cGrade ] + 'c'
+
+	return  pGrade + '/' + cGrade
+}
+
 export async function co2PageUpdateQuery( store, router, parameter, value ) {
 	const params = [ 'region', 'project', 'productionSourceId', 'projectionSourceId', 'reservesSourceId' ]
 	const DEBUG = true
 	const query = new URLSearchParams()
 	const state = store.getState()
-	DEBUG && console.log( 'URL', parameter, '->', value, router, query.toString(),state )
+	DEBUG && console.log( 'URL', parameter, '->', value, router, query.toString(), state )
 	params.forEach( p => {
 		const v = state[ p ]
 		if( !v ) return
