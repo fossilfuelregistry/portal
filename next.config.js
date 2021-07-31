@@ -10,7 +10,6 @@ const themeVariables = lessToJS(
 )
 
 module.exports = withAntdLess( {
-	webpack5: true,
 	eslint: { ignoreDuringBuilds: true },
 	modifyVars: themeVariables,
 	publicRuntimeConfig: { themeVariables },

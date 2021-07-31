@@ -49,15 +49,19 @@ function LoadData() {
 	const { data: productionData, loading: loadingProduction, error: errorLoadingProduction }
 		= useQuery( queries.production, { skip: !productionSourceId } )
 
-	const production = useMemo( () => _co2( productionData?.countryProductions?.nodes ),
-		[ productionData?.countryProductions?.nodes, productionSourceId, gwp ] )
+	DEBUG && console.log( 'LoadData', { productionData } )
+
+	const production = useMemo( () => {
+		DEBUG && console.log( '_co2( productionData )', productionData?.countryProductions?.nodes )
+		return _co2( productionData?.countryProductions?.nodes )
+	}, [ productionData?.countryProductions?.nodes, productionData?.countryProductions?.nodes?.length, productionSourceId, gwp ] )
 
 	const { data: projectionData, loading: loadingProjection, error: errorLoadingProjection }
 		= useQuery( queries.projection, { skip: !projectionSourceId } )
 
 	const projection = useMemo( () => {
 
-		// Synthesize stable projection datapoints if selected
+		// Synthesize stable projection data points if selected
 		if( projectionSourceId === settings.stableProductionSourceId ) {
 			if( !stableProduction?.oil ) return []
 
