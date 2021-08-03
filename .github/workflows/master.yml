@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - Sprint2
 
 jobs:
   deploy-dev:
@@ -11,7 +12,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@Sprint2
 
       - name: Install SSH key
         run: echo $SSH_KEY | base64 --decode  > ./id_rsa
