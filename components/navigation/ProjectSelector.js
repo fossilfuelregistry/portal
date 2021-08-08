@@ -7,6 +7,7 @@ import { useDispatch, useSelector, useStore } from "react-redux"
 import useText from "lib/useText"
 import { GQL_projects } from "queries/general"
 import { co2PageUpdateQuery } from "../CO2Forecast/calculate"
+import { AreaChartOutlined, DotChartOutlined, EllipsisOutlined } from "@ant-design/icons"
 
 const DEBUG = false
 
@@ -34,8 +35,8 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 
 	const _projects = ( projData?.getProjects?.nodes ?? [] )
 		.filter( p => !!p.projectId && p.lastYear >= 2015 )
-		.map( p => p.projectId )
-	const projects = [ ...new Set( _projects ) ] // Deduplicate
+	//	.map( p => p.projectId )
+	const projects = _projects // [ ...new Set( _projects ) ] // Deduplicate
 
 	DEBUG && console.log( 'ProjectSelector', { projData, loading, error, projects } )
 
@@ -60,7 +61,7 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 					} }
 				>
 					{ projects.map( p => (
-						<Select.Option key={ p }>{ p }</Select.Option> ) ) }
+						<Select.Option key={ p.projectId }>{ p.projectId } { p.dataType==='dense' ? <AreaChartOutlined style={{ color:'#81ad7a' }}/> : <DotChartOutlined style={{ color:'#ff6500' }}/> }</Select.Option> ) ) }
 				</Select>
 			</div>
 			}
