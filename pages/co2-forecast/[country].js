@@ -5,7 +5,7 @@ import CountrySelector from "components/navigation/CountrySelector"
 import { Col, Row } from "antd"
 import useText from "lib/useText"
 import { NextSeo } from "next-seo"
-import { useSelector } from "react-redux"
+import { useSelector , useDispatch } from "react-redux"
 import CarbonIntensitySelector from "components/viz/IntensitySelector"
 import HelpModal from "components/HelpModal"
 import LoadData from "components/CO2Forecast/LoadData"
@@ -15,6 +15,8 @@ import { GQL_productionSources, GQL_projectionSources, GQL_reservesSources } fro
 import SourceSelector from "../../components/navigation/SourceSelector"
 import { getProducingCountries } from "../../lib/getStaticProps"
 import { getPreferredReserveGrade } from "../../components/CO2Forecast/calculate"
+import { useRouter } from "next/router"
+
 
 // const DEBUG = false
 
@@ -26,6 +28,8 @@ export default function CO2ForecastPage() {
 	const countryName = useSelector( redux => redux.countryName )
 	const region = useSelector( redux => redux.region )
 	const project = useSelector( redux => redux.project )
+	const router = useRouter()
+	const dispatch = useDispatch()
 
 	const { data: _productionSources, loading: productionLoading } = useQuery( GQL_productionSources, {
 		variables: { iso3166: country, iso31662: region, projectId: project },
@@ -57,6 +61,14 @@ export default function CO2ForecastPage() {
 		//dispatch()
 	}, [ reservesSources?.[ 0 ] ] )
 
+	useEffect( () => {
+		const qCountry = router.query?.country
+		if( qCountry === null || qCountry === '-' || qCountry === 'null' ) return
+		console.log( 'useEffect PRELOAD country', { country, qCountry } )
+		if( qCountry !== country ) dispatch( { type: 'COUNTRY', payload: qCountry } )
+	}, [ router.query?.country ] )
+	
+	console.log( router.locale, country )
 	return (
 		<>
 			<NextSeo
@@ -186,12 +198,13 @@ export { getStaticProps } from 'lib/getStaticProps'
 
 export async function getStaticPaths() {
 	const countries = await getProducingCountries()
+	countries.push( { iso3166: '-' } )
 	return {
 		paths: countries.flatMap( c => [
 			{ params: { country: c.iso3166 } },
 			{ params: { country: c.iso3166 }, locale: 'fr' },
 			{ params: { country: c.iso3166 }, locale: 'es' },
 		] ),
-		fallback: true
+		fallback: false
 	}
 }

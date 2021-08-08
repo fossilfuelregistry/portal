@@ -80,20 +80,22 @@ export function getPreferredReserveGrade( _grades ) {
 	if( cGrade < 0 ) cGrade = '--'
 	else cGrade = settings.gradesPreferenceOrder[ cGrade ] + 'c'
 
-	return  pGrade + '/' + cGrade
+	return pGrade + '/' + cGrade
 }
 
 export async function co2PageUpdateQuery( store, router, parameter, value ) {
 	const params = [ 'region', 'project', 'productionSourceId', 'projectionSourceId', 'reservesSourceId' ]
-	const DEBUG = true
+	const DEBUG = false
 	const query = new URLSearchParams()
 	const state = store.getState()
-	DEBUG && console.log( 'URL', parameter, '->', value, router, query.toString(), state )
+
 	params.forEach( p => {
 		const v = state[ p ]
 		if( !v ) return
 		query.set( p, v )
 	} )
+
+	DEBUG && console.log( 'URL', parameter, '->', { value, router, query, state } )
 
 	if( value !== undefined )
 		query.set( parameter, value )
@@ -101,6 +103,7 @@ export async function co2PageUpdateQuery( store, router, parameter, value ) {
 		query.delete( parameter )
 	else if( typeof parameter == 'object' ) {
 		Object.keys( parameter ).forEach( p => {
+			if( p === 'country' ) return // Handled below, goes to path instead of query
 			if( parameter[ p ] === undefined ) query.delete( p )
 			else query.set( p, parameter[ p ] )
 		} )

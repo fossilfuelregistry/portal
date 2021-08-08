@@ -3,7 +3,13 @@ name: Continous Deploy
 on:
   push:
     branches:
+      - master
       - Sprint2
+      - Sprint3
+      - Sprint4
+      - Sprint5
+      - Sprint6
+      - Sprint7
 
 jobs:
   deploy-dev:
@@ -12,8 +18,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@master
-        with:
-          ref: Sprint2
 
       - name: Install SSH key
         run: echo $SSH_KEY | base64 --decode  > ./id_rsa

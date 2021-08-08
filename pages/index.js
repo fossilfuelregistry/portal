@@ -151,7 +151,7 @@ export default function Home() {
 					block style={{ marginTop: 24 }}
 					onClick={() => {
 						set_country( undefined )
-						router.push( 'co2?country=' + country.isoA2?.toLowerCase() )
+						router.push( 'co2-forecast/' + country.isoA2?.toLowerCase() )
 					}}
 				>
 					{getText( 'goto_co2_forecast' )}

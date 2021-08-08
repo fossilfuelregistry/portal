@@ -27,7 +27,10 @@ export default function CountrySelector() {
 		= useQuery( GQL_productionCountries )
 
 	const countries = useMemo( () => {
-		DEBUG && console.log( 'CountrySelector useMemo', { language, countries: countriesData?.getProducingIso3166?.nodes } )
+		DEBUG && console.log( 'CountrySelector useMemo', {
+			language,
+			countries: countriesData?.getProducingIso3166?.nodes
+		} )
 		return ( countriesData?.getProducingIso3166?.nodes ?? [] )
 			.map( c => ( { ...c, name: c[ language ] ?? c.en } ) )
 			.filter( c => c.name !== null && c.iso31662 === '' ) // Exclude regions
@@ -37,19 +40,12 @@ export default function CountrySelector() {
 	DEBUG && console.log( '\n\n', countries.length, countriesData?.getProducingIso3166?.nodes?.length, language )
 
 	useEffect( () => { // Preload based on URL value which is initialized in Redux state
-		DEBUG && console.log( 'CountrySelector useEffect PRELOAD ISO3166', router.query?.country )
-		const qContry = router.query?.country
-		if( !qContry ) return
-		if( qContry !== country ) dispatch( { type: 'COUNTRY', payload: qContry } )
-	}, [ router.query?.country ] )
-
-	useEffect( () => { // Preload based on URL value which is initialized in Redux state
 		if( !countries.length ) return
-		if( !country ) return
-		DEBUG && console.log( 'CountrySelector useEffect COUNTRYNAME', router.query?.country )
+		if( !country || country === '-' || country === 'null' ) return
+		console.log( 'CountrySelector useEffect COUNTRYNAME', country, router.query?.country )
 
-		if( country && ( !selectedCountryOption || selectedCountryOption.value !== country ) ) {
-			const name = countries.find( c => c.iso3166.toLowerCase() === country.toLowerCase() )?.[ 'name' ]
+		if( !selectedCountryOption || selectedCountryOption.value !== country ) {
+			const name = countries.find( c => c.iso3166?.toLowerCase() === country.toLowerCase() )?.[ 'name' ]
 			const newselectedCountryOption = { value: country, label: name }
 
 			set_selectedCountryOption( newselectedCountryOption )
@@ -67,7 +63,7 @@ export default function CountrySelector() {
 		if( _regions.length === 0 ) set_selectedRegionOption( undefined )
 	}, [ country ] )
 
-	DEBUG && console.log( 'CountrySelector', { countries, regions } )
+	DEBUG && console.log( 'CountrySelector', { countries, regions, selectedCountryOption } )
 
 	if( loadingCountries || errorLoadingCountries )
 		return <GraphQLStatus loading={ loadingCountries } error={ errorLoadingCountries }/>
