@@ -42,9 +42,9 @@ function LoadData() {
 		return GQL_dataQuery( {
 			iso3166: country,
 			iso31662: region,
-			projectId: project
+			projectId: project?.projectId
 		} )
-	}, [ country, region, project ] )
+	}, [ country, region, project?.projectId ] )
 
 	const { data: productionData, loading: loadingProduction, error: errorLoadingProduction }
 		= useQuery( queries.production, { skip: !productionSourceId } )

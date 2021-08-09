@@ -7,7 +7,7 @@ import { useDispatch, useSelector, useStore } from "react-redux"
 import useText from "lib/useText"
 import { GQL_projects } from "queries/general"
 import { co2PageUpdateQuery } from "../CO2Forecast/calculate"
-import { AreaChartOutlined, DotChartOutlined, EllipsisOutlined } from "@ant-design/icons"
+import { AreaChartOutlined, DotChartOutlined } from "@ant-design/icons"
 
 const DEBUG = false
 
@@ -25,7 +25,7 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 		if( !project )
 			set_selectedProjectOption( undefined )
 		else
-			set_selectedProjectOption( { value: project } )
+			set_selectedProjectOption( { value: project.projectId } )
 	}, [ iso31662 ] )
 
 	const { data: projData, loading, error } = useQuery( GQL_projects, {
@@ -56,12 +56,19 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 					placeholder={ getText( 'project' ) + '...' }
 					onChange={ async p => {
 						set_selectedProjectOption( p )
-						dispatch( { type: 'PROJECT', payload: p?.value } )
+						let proj
+						if( p?.value ) proj = projects.find( pr => pr.projectId === p.value )
+						dispatch( { type: 'PROJECT', payload: proj } )
+						console.log( { p, proj, projects } )
 						await co2PageUpdateQuery( store, router, 'project', p?.value )
 					} }
 				>
 					{ projects.map( p => (
-						<Select.Option key={ p.projectId }>{ p.projectId } { p.dataType==='dense' ? <AreaChartOutlined style={{ color:'#81ad7a' }}/> : <DotChartOutlined style={{ color:'#ff6500' }}/> }</Select.Option> ) ) }
+						<Select.Option key={ p.projectId }>
+							{ p.projectId }{ ' ' }
+							{ p.dataType === 'dense' ? <AreaChartOutlined style={ { color: '#81ad7a' } }/> :
+								<DotChartOutlined style={ { color: '#ff6500' } }/> }
+						</Select.Option> ) ) }
 				</Select>
 			</div>
 			}

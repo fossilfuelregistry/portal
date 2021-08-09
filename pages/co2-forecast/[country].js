@@ -17,7 +17,6 @@ import { getProducingCountries } from "../../lib/getStaticProps"
 import { getPreferredReserveGrade } from "../../components/CO2Forecast/calculate"
 import { useRouter } from "next/router"
 
-
 // const DEBUG = false
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
@@ -32,17 +31,17 @@ export default function CO2ForecastPage() {
 	const dispatch = useDispatch()
 
 	const { data: _productionSources, loading: productionLoading } = useQuery( GQL_productionSources, {
-		variables: { iso3166: country, iso31662: region, projectId: project },
+		variables: { iso3166: country, iso31662: region, projectId: project?.projectId },
 		skip: !country
 	} )
 
 	const { data: _projectionSources, loading: projectionLoading } = useQuery( GQL_projectionSources, {
-		variables: { iso3166: country, iso31662: region, projectId: project },
+		variables: { iso3166: country, iso31662: region, projectId: project?.projectId },
 		skip: !country
 	} )
 
 	const { data: _reservesSources, loading: reservesLoading } = useQuery( GQL_reservesSources, {
-		variables: { iso3166: country, iso31662: region, projectId: project },
+		variables: { iso3166: country, iso31662: region, projectId: project?.projectId },
 		skip: !country
 	} )
 
@@ -68,7 +67,6 @@ export default function CO2ForecastPage() {
 		if( qCountry !== country ) dispatch( { type: 'COUNTRY', payload: qCountry } )
 	}, [ router.query?.country ] )
 	
-	console.log( router.locale, country )
 	return (
 		<>
 			<NextSeo
