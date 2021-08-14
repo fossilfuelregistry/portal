@@ -66,58 +66,32 @@ export const useConversionHooks = () => {
 		} )
 	}, [ conversionConstants?.length ] )
 
-	const convertOil = ( value, fromUnit, toUnit ) => {
+	const convertVolume = ( { volume, unit, fossilFuelType }, toUnit ) => {
 		try {
-			const path = graphOil.shortestPath( fromUnit, toUnit )
+			const graph = graphs[ fossilFuelType ]
+			const conversion = conversions[ fossilFuelType ]
+
+			const path = graph.shortestPath( unit, toUnit )
 
 			let factor = 1, low = 1, high = 1
 
 			for( let step = 1; step < path.length; step++ ) {
 				const from = path[ step - 1 ]
 				const to = path[ step ]
-
-				const conv = conversion[ from ][ to ].oil
+				const conv = conversion[ from + '>' + to ]
 
 				if( !conv ) throw new Error(
-					`Conversion data issue: From ${ from } to ${ to } for Oil is ${ JSON.stringify( conv ) }` )
+					`Conversion data issue: From ${ from } to ${ to } for ${fossilFuelType} is ${ JSON.stringify( conv ) }` )
 
 				factor *= conv.factor
 				low *= conv.low
 				high *= conv.high
 			}
 
-			return factor * value
+			return factor * volume
 		} catch( e ) {
-			console.log( e.message + ': ' + fromUnit, toUnit )
-			return value
-		}
-	}
-
-	const convertGas = ( value, fromUnit, toUnit ) => {
-		try {
-			const path = graphGas.shortestPath( fromUnit, toUnit )
-
-			let factor = 1, low = 1, high = 1
-
-			for( let step = 1; step < path.length; step++ ) {
-				const from = path[ step - 1 ]
-				const to = path[ step ]
-
-				const conv = conversion[ from ][ to ].gas
-
-				if( !conv ) throw new Error(
-					`Conversion data issue: From ${ from } to ${ to } for Gas is ${ JSON.stringify( conv ) }` )
-
-				factor *= conv.factor
-				low *= conv.low
-				high *= conv.high
-			}
-
-			return factor * value
-		} catch( e ) {
-			console.log( e.message + ': ' + fromUnit, toUnit )
-			//console.log( e.stack )
-			return value
+			console.log( e.message + ': ' + unit, toUnit )
+			return volume
 		}
 	}
 
@@ -305,5 +279,5 @@ export const useConversionHooks = () => {
 		}
 	}
 
-	return { co2FromVolume, convertOil, convertGas, reservesProduction, getCountryCurrentCO2 }
+	return { co2FromVolume, convertVolume, reservesProduction, getCountryCurrentCO2 }
 }

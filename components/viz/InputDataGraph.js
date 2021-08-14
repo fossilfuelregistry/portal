@@ -10,19 +10,17 @@ import { useConversionHooks } from "./conversionHooks"
 import { Col, Row } from "antd"
 import { useSelector } from "react-redux"
 
-const DEBUG = false
-
 const colors = [
 	'#008080', '#70a494', '#b4c8a8',
 	'#f6edbd', '#edbb8a', '#de8a5a', '#ca562c'
 ]
 
 function InputDataGraphBase( {
-	data = [], fuel, estimate, parentWidth, height = 300
+	data = [], fuel, parentWidth, height = 300
 } ) {
 	const allSources = useSelector( redux => redux.allSources )
 	const margin = { left: 0, top: 10 }
-	const { convertOil, convertGas } = useConversionHooks( estimate )
+	const { convertVolume } = useConversionHooks( )
 
 	if( !( data?.length > 0 ) ) return null
 
@@ -48,8 +46,8 @@ function InputDataGraphBase( {
 		}
 
 		let y
-		if( point.fossilFuelType === 'gas' ) y = convertGas( point.volume, point.unit, 'e9m3' )
-		if( point.fossilFuelType === 'oil' ) y = convertOil( point.volume, point.unit, 'e6bbl' )
+		if( point.fossilFuelType === 'gas' ) y = convertVolume( point, 'e9m3' )
+		if( point.fossilFuelType === 'oil' ) y = convertVolume( point, 'e6bbl' )
 
 		currentYearSet[ point.sourceId ] = y
 
