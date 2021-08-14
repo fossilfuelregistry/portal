@@ -1,0 +1,85 @@
+import React, { useEffect, useMemo, useState } from "react"
+import { Alert, Col, Row } from "antd"
+import ReactMarkdown from 'react-markdown'
+import useText from "lib/useText"
+import { useSelector } from "react-redux"
+import { useQuery } from "@apollo/client"
+import { GQL_sparseProject } from "queries/country"
+import GraphQLStatus from "../GraphQLStatus"
+import { useConversionHooks } from "components/viz/conversionHooks"
+
+const DEBUG = true
+
+function SparseProject() {
+	const { getText } = useText()
+	const { getCountryCurrentCO2 } = useConversionHooks()
+	const country = useSelector( redux => redux.country )
+	const project = useSelector( redux => redux.project )
+	const [ countryCO2Total, set_countryCO2Total ] = useState( 0 )
+	const { co2FromVolume } = useConversionHooks()
+
+	DEBUG && console.log( 'SparseProject', { country, project, countryCO2Total } )
+
+	useEffect( () => {
+		const asyncEffect = async() => {
+			set_countryCO2Total( await getCountryCurrentCO2( country ) )
+		}
+		asyncEffect()
+	}, [ country ] )
+
+	const { data, loading, error } = useQuery( GQL_sparseProject, {
+		variables: { iso3166: country, projectId: project.projectId },
+		skip: !project?.projectId
+	} )
+
+	DEBUG && console.log( 'SparseProject', { country, project, countryCO2Total, loading, error, data } )
+
+	const projectRows = data?.sparseProjects?.nodes ?? []
+	const theProject = projectRows[ 0 ] ?? {}
+
+	// Strip wikitext stuff.
+	const description = useMemo( () => {
+		if( !theProject?.description ) return ''
+		return theProject.description
+			.replace( /\[\[/g, '' )
+			.replace( /\]\]/g, '' )
+			.replace( /<ref>(.?)*<\/ref>/sg, '' )
+			.replace( /<ref name="(.?)*">(.?)*<\/ref>/sg, '' )
+			.replace( /<ref (.?)*\/>/sg, '' )
+	}, [ theProject?.description ] )
+
+	if( loading || error )
+		return <GraphQLStatus loading={ loading } error={ error }/>
+
+	try {
+		return (
+			<>
+				<Alert type="warning" message={ getText( 'sparse-data-warning' ) } showIcon={ true }/>
+				<br/>
+				<Row gutter={ [ 16, 16 ] }>
+					<Col xs={ 24 } lg={ 12 } xl={ 8 }>
+						{ getText( 'production' ) }: { theProject.volume } { theProject.unit } { theProject.fossilFuelType }
+						<br/>
+						{ getText( 'co2e scope3' ) }: { co2FromVolume( theProject ) }
+						<br/>
+						{ getText( 'country_production' ) }: { countryCO2Total }
+						<br/>
+					</Col>
+
+					<Col xs={ 24 } lg={ 12 } xl={ 8 }>
+						<h2>{ theProject.projectId }</h2>
+						<ReactMarkdown>{ description }</ReactMarkdown>
+					</Col>
+
+				</Row>
+
+				<style jsx>{ `
+				` }
+				</style>
+			</> )
+	} catch( e ) {
+		return <Alert message={ e.message } type="error" showIcon/>
+	}
+}
+
+export default SparseProject

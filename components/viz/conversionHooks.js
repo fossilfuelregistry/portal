@@ -1,19 +1,28 @@
 import { useEffect } from 'react'
 import Graph from 'graph-data-structure'
 import { useSelector } from "react-redux"
-import { getPreferredGrades, sumOfCO2 } from "../CO2Forecast/calculate"
+import { getPreferredGrades, sumOfCO2 } from "components/CO2Forecast/calculate"
+import { useApolloClient } from "@apollo/client"
+import { GQL_countryCurrentProduction } from "queries/country"
+import { notification } from "antd"
+import settings from "../../settings"
 
-const DEBUG = false
+const DEBUG = true
 
 let graph
 let graphOil
 let graphGas
 let conversion = []
 
-export const useUnitConversionGraph = () => {
+const fuelTypes = [ 'gas', 'oil', 'coal' ]
+const graphs = {}
+const conversions = {}
+
+export const useConversionHooks = () => {
 	const constants = useSelector( redux => redux.conversions )
 	const gwp = useSelector( redux => redux.gwp )
 	const stableProduction = useSelector( redux => redux.stableProduction )
+	const apolloClient = useApolloClient()
 
 	useEffect( () => {
 		const _conversion = {}
@@ -52,12 +61,38 @@ export const useUnitConversionGraph = () => {
 		constants.filter( c => c.fossilFuelType !== 'oil' ).forEach( conv => {
 			graphGas.addEdge( conv.fromUnit, conv.toUnit )
 		} )
-		// console.log( {
-		// 	all: graph?.serialize(),
-		// 	oil: graphOil?.serialize(),
-		// 	gas: graphGas?.serialize(),
-		// 	conversion
-		// } )
+	}, [ constants ] )
+
+	useEffect( () => {
+		constants.forEach( c => {
+			if( !conversions[ c.fromUnit ] ) conversions[ c.fromUnit ] = {}
+			conversions[ c.fromUnit ][ c.toUnit ] = {
+				factor: c.factor,
+				low: c.low,
+				high: c.high,
+				fuel: c.fossilFuelType
+			}
+		} )
+
+		// Build one Graph() per fuel type
+		fuelTypes.forEach( fuelType => {
+
+			graphs[ fuelType ] = Graph()
+			const thisFuelConversions = constants.filter( c => c.fossilFuelType === fuelType || c.fossilFuelType === null )
+			//console.log( t, constants.length, thisFuelConversions.length )
+
+			// Add all unique units as nodes
+			const allUnits = {}
+			thisFuelConversions.forEach( u => {
+				allUnits[ u.fromUnit ] = true
+				allUnits[ u.toUnit ] = true
+			} )
+			Object.keys( allUnits ).forEach( u => graphs[ fuelType ].addNode( u ) )
+
+			thisFuelConversions.forEach( conv => {
+				graphs[ fuelType ].addEdge( conv.fromUnit, conv.toUnit )
+			} )
+		} )
 	}, [ constants ] )
 
 	const convertOil = ( value, fromUnit, toUnit ) => {
@@ -137,7 +172,7 @@ export const useUnitConversionGraph = () => {
 				? graphOil.shortestPath( unit, gwp )
 				: graphGas.shortestPath( unit, gasToUnit )
 
-			//console.log( 'Path to ', { unit, path, conversion } )
+			console.log( 'Path to ', { unit, path, conversion } )
 			let factor1 = 1, low1 = 1, high1 = 1
 			for( let step = 1; step < path1.length; step++ ) {
 				const from = path1[ step - 1 ]
@@ -145,7 +180,7 @@ export const useUnitConversionGraph = () => {
 
 				const conv = conversion[ from ][ to ][ fossilFuelType ]
 				if( !conv ) throw new Error(
-					`Conversion data issue: From ${ from } to ${ to } for ${ fossilFuelType } is ${ JSON.stringify( conv ) }` )
+					`Conversion data issue Scope 1: From ${ from } to ${ to } for ${ fossilFuelType } is ${ JSON.stringify( conv ) }` )
 				const { factor: stepFactor, low: stepLow, high: stepHigh } = conv
 
 				factor1 *= stepFactor
@@ -176,7 +211,7 @@ export const useUnitConversionGraph = () => {
 
 				const conv = conversion[ from ][ to ][ fossilFuelType ]
 				if( !conv ) throw new Error(
-					`Conversion data issue: From ${ from } to ${ to } for ${ fossilFuelType } is ${ JSON.stringify( conv ) }` )
+					`Conversion data issue Scope 3: From ${ from } to ${ to } for ${ fossilFuelType } is ${ JSON.stringify( conv ) }` )
 				const { factor: stepFactor, low: stepLow, high: stepHigh } = conv
 
 				factor *= stepFactor
@@ -202,13 +237,22 @@ export const useUnitConversionGraph = () => {
 
 			return result
 		} catch( e ) {
+			if( console.trace ) console.trace()
+			console.log( 'Conversion Error!', { volume, unit, fossilFuelType } )
 			throw new Error( "While looking for " + volume + ' ' + unit + " -> kgco2e conversion:\n" + e.message )
 		}
 	}
 
 	const reservesProduction =
 		( projection, reserves, projectionSourceId, reservesSourceId, limits, grades ) => {
-			DEBUG && console.log( 'reservesProduction', { projection, reserves, projectionSourceId, reservesSourceId, limits, grades } )
+			DEBUG && console.log( 'reservesProduction', {
+				projection,
+				reserves,
+				projectionSourceId,
+				reservesSourceId,
+				limits,
+				grades
+			} )
 			if( !projectionSourceId ) return []
 			if( !projection || projection.length < 1 ) return []
 			if( !limits?.production ) return []
@@ -303,5 +347,26 @@ export const useUnitConversionGraph = () => {
 			return prod
 		}
 
-	return { co2FromVolume, convertOil, convertGas, reservesProduction }
+	const getCountryCurrentCO2 = async iso3166 => {
+		if( !iso3166 ) return 0
+		try {
+			const q = await apolloClient.query( {
+				query: GQL_countryCurrentProduction,
+				variables: { iso3166 }
+			} )
+			const prod = q.data?.getCountryCurrentProduction?.nodes ?? []
+			const principal = prod.filter( p => p.sourceId === settings.principalProductionSourceId )
+			let co2 = 0
+			principal.forEach( p => {
+				const calc = co2FromVolume( p )
+				DEBUG && console.log( { co2, calc, p } )
+				co2 += calc.scope1[ 1 ] + calc.scope3[ 1 ]
+			} )
+			return co2
+		} catch( e ) {
+			notification.error( { message: 'Failed to fetch country production', description: e.message } )
+		}
+	}
+
+	return { co2FromVolume, convertOil, convertGas, reservesProduction, getCountryCurrentCO2 }
 }

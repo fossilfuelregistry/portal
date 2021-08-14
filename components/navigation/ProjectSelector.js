@@ -2,7 +2,7 @@ import { useQuery } from "@apollo/client"
 import GraphQLStatus from "../GraphQLStatus"
 import { Select } from "antd"
 import { useRouter } from "next/router"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useDispatch, useSelector, useStore } from "react-redux"
 import useText from "lib/useText"
 import { GQL_projects } from "queries/general"
@@ -33,12 +33,35 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 		variables: { iso3166_: iso3166, iso31662_: iso31662 }
 	} )
 
-	const _projects = ( projData?.getProjects?.nodes ?? [] )
-		.filter( p => !!p.projectId && p.lastYear >= 2015 )
-	//	.map( p => p.projectId )
-	const projects = _projects // [ ...new Set( _projects ) ] // Deduplicate
+	const projects = useMemo( () => {
+		if( loading || error || !projData?.getProjects?.nodes?.length ) return []
 
-	DEBUG && console.log( 'ProjectSelector', { projData, loading, error, projects } )
+		// Remove non-current entries and get one entry per project..
+		const projects = new Map()
+		projData?.getProjects?.nodes?.forEach( p => {
+			const prev = projects.get( p.projectId )
+			if( prev?.lastYear > p.lastYear ) return
+			if( p.projectId?.length > 0 && p.lastYear >= 2015 ) projects.set( p.projectId, p )
+		} )
+
+		// Now that we have data, also see if we should set state from URL
+		if( router.query.project?.length > 0 ) {
+			const p = projects.get( router.query.project )
+			if( p ) {
+				dispatch( { type: 'PROJECT', payload: p } )
+				set_selectedProjectOption( p.projectId )
+			}
+		}
+
+		return Array.from( projects.values() )
+	}, [ projData?.getProjects?.nodes?.length ] )
+
+	DEBUG && console.log( 'ProjectSelector', {
+		projData: projData?.getProjects?.nodes?.length,
+		loading,
+		error,
+		projects
+	} )
 
 	if( loading || error )
 		return <GraphQLStatus loading={ loading } error={ error }/>
@@ -51,7 +74,6 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 					showSearch
 					style={ { minWidth: 120, width: '100%' } }
 					value={ selectedProjectOption }
-					labelInValue={ true }
 					allowClear={ true }
 					placeholder={ getText( 'project' ) + '...' }
 					onChange={ async p => {
@@ -60,7 +82,7 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 						if( p?.value ) proj = projects.find( pr => pr.projectId === p.value )
 						dispatch( { type: 'PROJECT', payload: proj } )
 						console.log( { p, proj, projects } )
-						await co2PageUpdateQuery( store, router, 'project', p?.value )
+						await co2PageUpdateQuery( store, router, 'project', p )
 					} }
 				>
 					{ projects.map( p => (

@@ -1,7 +1,7 @@
 import React from "react"
 import useText from "lib/useText"
 import { useSelector } from "react-redux"
-import { useUnitConversionGraph } from "../viz/UnitConverter"
+import { useConversionHooks } from "../viz/conversionHooks"
 import { addToTotal, sumOfCO2 } from "./calculate"
 import settings from "settings"
 
@@ -9,7 +9,7 @@ const DEBUG = false
 
 function FutureSummary( { dataset, limits } ) {
 	const { getText } = useText()
-	const { co2FromVolume } = useUnitConversionGraph()
+	const { co2FromVolume } = useConversionHooks()
 	const stableProduction = useSelector( redux => redux.stableProduction )
 	const allSources = useSelector( redux => redux.allSources )
 	const projectionSourceId = useSelector( redux => redux.projectionSourceId )

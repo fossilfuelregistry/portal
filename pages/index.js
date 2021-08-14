@@ -7,7 +7,7 @@ import { useRouter } from "next/router"
 import useText from "lib/useText"
 import { NextSeo } from "next-seo"
 import { findLastProductionYear, findLastReservesYear, getFuelCO2 } from "components/viz/util"
-import { useUnitConversionGraph } from "../components/viz/UnitConverter"
+import { useConversionHooks } from "../components/viz/conversionHooks"
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
@@ -22,7 +22,7 @@ export default function Home() {
 	const [ modalData, set_modalData ] = useState( undefined )
 	const [ tooltipVisible, set_tooltipVisible ] = useState( false )
 	const [ dataKeyName, set_dataKeyName ] = useState( 'production' )
-	const { co2FromVolume } = useUnitConversionGraph()
+	const { co2FromVolume } = useConversionHooks()
 
 	const handleChangeKeyName = useCallback( event => {
 		set_dataKeyName( event.target.value )

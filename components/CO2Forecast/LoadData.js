@@ -6,14 +6,14 @@ import { Alert } from "antd"
 import useText from "lib/useText"
 import { useDispatch, useSelector } from "react-redux"
 import ForecastView from "./ForecastView"
-import { useUnitConversionGraph } from "../viz/UnitConverter"
+import { useConversionHooks } from "../viz/conversionHooks"
 import settings from "settings"
 
 const DEBUG = false
 
 function LoadData() {
 	const dispatch = useDispatch()
-	const { co2FromVolume, reservesProduction } = useUnitConversionGraph()
+	const { co2FromVolume, reservesProduction } = useConversionHooks()
 	const { getText } = useText()
 	const [ limits, set_limits ] = useState( {} )
 	const [ grades, set_grades ] = useState( {} )

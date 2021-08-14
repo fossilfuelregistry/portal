@@ -12,10 +12,11 @@ import LoadData from "components/CO2Forecast/LoadData"
 import ProjectSelector from "components/navigation/ProjectSelector"
 import { useQuery } from "@apollo/client"
 import { GQL_productionSources, GQL_projectionSources, GQL_reservesSources } from "queries/general"
-import SourceSelector from "../../components/navigation/SourceSelector"
-import { getProducingCountries } from "../../lib/getStaticProps"
-import { getPreferredReserveGrade } from "../../components/CO2Forecast/calculate"
+import SourceSelector from "components/navigation/SourceSelector"
+import { getProducingCountries } from "lib/getStaticProps"
+import { getPreferredReserveGrade } from "components/CO2Forecast/calculate"
 import { useRouter } from "next/router"
+import SparseProject from "components/CO2Forecast/SparseProject"
 
 // const DEBUG = false
 
@@ -151,7 +152,9 @@ export default function CO2ForecastPage() {
 
 					</Row>
 
-					<LoadData/>
+					{project?.dataType !== 'sparse' && <LoadData/> }
+
+					{project?.dataType === 'sparse' && <SparseProject/> }
 
 				</div>
 

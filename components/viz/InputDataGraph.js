@@ -6,7 +6,7 @@ import { curveLinear } from '@visx/curve'
 import { scaleLinear } from '@visx/scale'
 import { withParentSize } from "@visx/responsive"
 import { max, min } from 'd3-array'
-import { useUnitConversionGraph } from "./UnitConverter"
+import { useConversionHooks } from "./conversionHooks"
 import { Col, Row } from "antd"
 import { useSelector } from "react-redux"
 
@@ -22,7 +22,7 @@ function InputDataGraphBase( {
 } ) {
 	const allSources = useSelector( redux => redux.allSources )
 	const margin = { left: 0, top: 10 }
-	const { convertOil, convertGas } = useUnitConversionGraph( estimate )
+	const { convertOil, convertGas } = useConversionHooks( estimate )
 
 	if( !( data?.length > 0 ) ) return null
 

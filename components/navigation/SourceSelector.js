@@ -5,6 +5,7 @@ import { useDispatch, useSelector, useStore } from "react-redux"
 import HelpModal from "../HelpModal"
 import useText from "../../lib/useText"
 import { co2PageUpdateQuery } from "components/CO2Forecast/calculate"
+import settings from "../../settings"
 
 const DEBUG = false
 
@@ -15,6 +16,7 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 	const [ selectedSourceOption, set_selectedSourceOption ] = useState()
 	const dispatch = useDispatch()
 	const stateValue = useSelector( redux => redux[ stateKey ] )
+	const project = useSelector( redux => redux.project )
 	const firstInitialize = useRef( true ) // Used to NOT clear settings before sources loaded.
 
 	if( DEBUG && stateKey === 'productionSourceId' )
@@ -23,6 +25,7 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 	useEffect( () => { // If we have only a single option, preselect it.
 		DEBUG && console.log( 'SourceSelector useEffect single', stateKey )
 		if( !( sources?.length === 1 ) ) return
+		if( project?.dataType === 'sparse' ) return
 		const id = sources?.[ 0 ]?.sourceId
 		DEBUG && console.log( stateKey, '>>>>>>>>>> Single source:', sources )
 		set_selectedSourceOption( id?.toString() )
@@ -58,7 +61,7 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 			set_selectedSourceOption( stateValue.toString() )
 		}
 
-	}, [ sources, sources?.length, loading, stateValue ] )
+	}, [ sources, sources?.length, loading, stateValue, project ] )
 
 	return (
 		<div style={ { marginTop: 12 } }>
@@ -75,21 +78,26 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 					await co2PageUpdateQuery( store, router, stateKey, value )
 				} }
 			>
-				{ sources.map( s => {
-					let name = s.name + ' (' + s.namePretty + ')'
-					if( s.name?.startsWith( 'name_' ) ) name = getText( s.name ) + ' (' + getText( s.namePretty ) + ')'
+				{ sources
+					.filter( s => {
+						// Do not show stable for sparse projects
+						return !( s.sourceId === settings?.stableProductionSourceId && project?.dataType === 'sparse' )
+					} )
+					.map( s => {
+						let name = s.name + ' (' + s.namePretty + ')'
+						if( s.name?.startsWith( 'name_' ) ) name = getText( s.name ) + ' (' + getText( s.namePretty ) + ')'
 
-					return (
-						<Select.Option key={ s.sourceId }>
-							{ name }
-							{ s.description?.startsWith( 'explanation_' ) &&
-							<HelpModal
-								title={ placeholder }
-								content={ s.description }
-							/>
-							}
-						</Select.Option> )
-				} ) }
+						return (
+							<Select.Option key={ s.sourceId }>
+								{ name }
+								{ s.description?.startsWith( 'explanation_' ) &&
+								<HelpModal
+									title={ placeholder }
+									content={ s.description }
+								/>
+								}
+							</Select.Option> )
+					} ) }
 			</Select>
 		</div>
 	)
