@@ -7,6 +7,7 @@ import { useQuery } from "@apollo/client"
 import { GQL_sparseProject } from "queries/country"
 import GraphQLStatus from "../GraphQLStatus"
 import { useConversionHooks } from "components/viz/conversionHooks"
+import OpenCorporateCard from "../OpenCorporateCard"
 
 const DEBUG = true
 
@@ -22,7 +23,8 @@ function SparseProject() {
 
 	useEffect( () => {
 		const asyncEffect = async() => {
-			set_countryCO2Total( await getCountryCurrentCO2( country ) )
+			const ct = await getCountryCurrentCO2( country )
+			set_countryCO2Total( ct )
 		}
 		asyncEffect()
 	}, [ country ] )
@@ -51,6 +53,9 @@ function SparseProject() {
 	if( loading || error )
 		return <GraphQLStatus loading={ loading } error={ error }/>
 
+	const co2 = co2FromVolume( theProject )
+	const projectCO2 = ( co2.scope1[ 1 ] || 0 ) + co2.scope3[ 1 ]
+	console.log( co2 )
 	try {
 		return (
 			<>
@@ -58,12 +63,19 @@ function SparseProject() {
 				<br/>
 				<Row gutter={ [ 16, 16 ] }>
 					<Col xs={ 24 } lg={ 12 } xl={ 8 }>
-						{ getText( 'production' ) }: { theProject.volume } { theProject.unit } { theProject.fossilFuelType }
+						{ getText( 'production' ) }: { theProject.volume } { theProject.unit } { theProject.fossilFuelType }, emissions {projectCO2} e9kgco2e
 						<br/>
-						{ getText( 'co2e scope3' ) }: { co2FromVolume( theProject ) }
+						{ getText( 'co2e_scope1' ) }: { JSON.stringify( co2.scope1 ) }
 						<br/>
-						{ getText( 'country_production' ) }: { countryCO2Total }
+						{ getText( 'co2e_scope3' ) }: { JSON.stringify( co2.scope3 ) }
 						<br/>
+						{ getText( 'country_production' ) }: { countryCO2Total.toFixed( 1 ) }
+						<br/>
+						{ getText( 'country_production' ) } %: { ( 100 * projectCO2 / countryCO2Total ).toFixed( 2 ) }
+					</Col>
+
+					<Col xs={ 24 } lg={ 12 } xl={ 8 }>
+						<OpenCorporateCard reference={theProject.ocOperatorId}/>
 					</Col>
 
 					<Col xs={ 24 } lg={ 12 } xl={ 8 }>

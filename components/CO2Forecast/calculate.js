@@ -118,3 +118,11 @@ export async function co2PageUpdateQuery( store, router, parameter, value ) {
 
 	await router.replace( url, null, { shallow: true } )
 }
+
+export function getFullFuelType( datapoint ) {
+	let fullFuelType = datapoint.fossilFuelType
+	if( datapoint.fossilFuelType?.length > 0 )
+		fullFuelType = datapoint.fossilFuelType + ( datapoint.subtype?.length > 0 ? settings.fuelTypeSeparator + datapoint.subtype : '' )
+	//console.log( 'fullFuelType', fullFuelType )
+	return fullFuelType
+}

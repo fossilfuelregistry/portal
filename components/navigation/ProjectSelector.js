@@ -78,8 +78,7 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 					placeholder={ getText( 'project' ) + '...' }
 					onChange={ async p => {
 						set_selectedProjectOption( p )
-						let proj
-						if( p?.value ) proj = projects.find( pr => pr.projectId === p.value )
+						const proj = projects.find( pr => pr.projectId === p )
 						dispatch( { type: 'PROJECT', payload: proj } )
 						console.log( { p, proj, projects } )
 						await co2PageUpdateQuery( store, router, 'project', p )

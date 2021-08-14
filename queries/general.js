@@ -6,7 +6,7 @@ query conversions {
     nodes {
       id authority description fossilFuelType
       fromUnit toUnit high factor low
-      country modifier
+      country modifier subtype
     }
   }
 }`

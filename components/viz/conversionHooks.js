@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import Graph from 'graph-data-structure'
 import { useSelector } from "react-redux"
-import { getPreferredGrades, sumOfCO2 } from "components/CO2Forecast/calculate"
+import { getFullFuelType, getPreferredGrades, sumOfCO2 } from "components/CO2Forecast/calculate"
 import { useApolloClient } from "@apollo/client"
 import { GQL_countryCurrentProduction } from "queries/country"
 import { notification } from "antd"
@@ -9,91 +9,62 @@ import settings from "../../settings"
 
 const DEBUG = true
 
-let graph
-let graphOil
-let graphGas
-let conversion = []
+let fuelTypes = [ 'gas', 'oil', 'coal' ] // Start with generic types, is extended later from DB data.
 
-const fuelTypes = [ 'gas', 'oil', 'coal' ]
+// One graph per fully qualified fuel type contains the possible conversion paths for that fuel.
 const graphs = {}
+// The corresponding conversion factors are in the conversions object.
 const conversions = {}
 
+const _toUnit = c => c.toUnit + ( ( c.modifier?.length > 0 ) ? settings.fuelTypeSeparator + c.modifier : '' )
+
 export const useConversionHooks = () => {
-	const constants = useSelector( redux => redux.conversions )
+	const conversionConstants = useSelector( redux => redux.conversions )
 	const gwp = useSelector( redux => redux.gwp )
 	const stableProduction = useSelector( redux => redux.stableProduction )
 	const apolloClient = useApolloClient()
 
-	useEffect( () => {
-		const _conversion = {}
-		constants.forEach( c => {
-			if( !_conversion[ c.fromUnit ] ) _conversion[ c.fromUnit ] = {}
-			if( !_conversion[ c.fromUnit ][ c.toUnit ] ) _conversion[ c.fromUnit ][ c.toUnit ] = {
-				oil: { factor: 1 },
-				gas: {}
-			}
-			if( !c.fossilFuelType || c.fossilFuelType === 'oil' )
-				_conversion[ c.fromUnit ][ c.toUnit ][ 'oil' ] = { factor: c.factor, low: c.low, high: c.high }
-			if( !c.fossilFuelType || c.fossilFuelType === 'gas' )
-				_conversion[ c.fromUnit ][ c.toUnit ][ 'gas' ] = { factor: c.factor, low: c.low, high: c.high }
-		} )
-		conversion = _conversion
-
-		// Find unique units
-		const _allUnits = {}
-		constants.forEach( u => {
-			_allUnits[ u.fromUnit ] = true
-			_allUnits[ u.toUnit ] = true
-		} )
-
-		graph = Graph()
-		graphOil = Graph()
-		graphGas = Graph()
-
-		Object.keys( _allUnits ).forEach( u => graph.addNode( u ) )
-
-		constants.forEach( conv => {
-			graph.addEdge( conv.fromUnit, conv.toUnit )
-		} )
-		constants.filter( c => c.fossilFuelType !== 'gas' ).forEach( conv => {
-			graphOil.addEdge( conv.fromUnit, conv.toUnit )
-		} )
-		constants.filter( c => c.fossilFuelType !== 'oil' ).forEach( conv => {
-			graphGas.addEdge( conv.fromUnit, conv.toUnit )
-		} )
-	}, [ constants ] )
+	// Build unit graphs for all fuels.
 
 	useEffect( () => {
-		constants.forEach( c => {
-			if( !conversions[ c.fromUnit ] ) conversions[ c.fromUnit ] = {}
-			conversions[ c.fromUnit ][ c.toUnit ] = {
-				factor: c.factor,
-				low: c.low,
-				high: c.high,
-				fuel: c.fossilFuelType
-			}
+		if( !( conversionConstants?.length > 0 ) ) return
+
+		conversionConstants.forEach( c => {
+			const fullFuelType = getFullFuelType( c )
+			// Extend fuelTypes with this full type?
+			if( !( c.fossilFuelType?.length > 0 ) || fuelTypes.includes( fullFuelType ) ) return
+			fuelTypes.push( fullFuelType )
 		} )
+		DEBUG && console.log( fuelTypes )
 
 		// Build one Graph() per fuel type
 		fuelTypes.forEach( fuelType => {
 
 			graphs[ fuelType ] = Graph()
-			const thisFuelConversions = constants.filter( c => c.fossilFuelType === fuelType || c.fossilFuelType === null )
-			//console.log( t, constants.length, thisFuelConversions.length )
+			conversions[ fuelType ] = {}
+			const thisFuelConversions = conversionConstants.filter( c => c.fullFuelType === fuelType || c.fossilFuelType === null )
 
 			// Add all unique units as nodes
 			const allUnits = {}
 			thisFuelConversions.forEach( u => {
 				allUnits[ u.fromUnit ] = true
-				allUnits[ u.toUnit ] = true
+				allUnits[ _toUnit( u ) ] = true
 			} )
 			Object.keys( allUnits ).forEach( u => graphs[ fuelType ].addNode( u ) )
 
+			DEBUG && console.log( { fuelType, allUnits, thisFuelConversions } )
+
 			thisFuelConversions.forEach( conv => {
-				graphs[ fuelType ].addEdge( conv.fromUnit, conv.toUnit )
+				graphs[ fuelType ].addEdge( conv.fromUnit, _toUnit( conv ) )
+				conversions[ fuelType ][ conv.fromUnit + '>' + _toUnit( conv ) ] = {
+					factor: conv.factor,
+					low: conv.low,
+					high: conv.high,
+					modifier: conv.modifier
+				}
 			} )
 		} )
-	}, [ constants ] )
+	}, [ conversionConstants?.length ] )
 
 	const convertOil = ( value, fromUnit, toUnit ) => {
 		try {
@@ -150,97 +121,62 @@ export const useConversionHooks = () => {
 		}
 	}
 
-	const co2FromVolume = ( { volume, unit, fossilFuelType }, log ) => {
-		if( !graphGas || !graphOil ) return { scope1: { co2: 0, range: [ 0, 0 ] }, scope3: { co2: 0, range: [ 0, 0 ] } }
+	const _co2Factors = ( unit, toUnit, fullFuelType ) => {
+		const graph = graphs[ fullFuelType ]
+		const conversion = conversions[ fullFuelType ]
+		if( !graph ) throw new Error( 'No conversion graph for ' + fullFuelType )
+		if( !conversion ) throw new Error( 'No conversion factors for ' + fullFuelType )
+
+		const path = graph.shortestPath( unit, toUnit )
+		console.log( 'Path ', { unit, toUnit, path, conversion } )
+
+		let factor = 1, low = 1, high = 1
+		for( let step = 1; step < path.length; step++ ) {
+			const from = path[ step - 1 ]
+			const to = path[ step ]
+			const conv = conversion[ from + '>' + to ]
+
+			if( !conv ) throw new Error(
+				`Conversion data issue: From ${ from } to ${ to } for ${ fullFuelType } is ${ JSON.stringify( conv ) }` )
+			const { factor: stepFactor, low: stepLow, high: stepHigh } = conv
+
+			factor *= stepFactor
+			low *= stepLow ?? stepFactor
+			high *= stepHigh ?? stepFactor
+		}
+		return { low, high, factor }
+	}
+
+	const co2FromVolume = ( { volume, unit, fossilFuelType, subtype }, log ) => {
+		const fullFuelType = getFullFuelType( { fossilFuelType, subtype } )
+		const graph = graphs[ fullFuelType ]
+		if( !graph ) return { low: 0, high: 0, factor: 0 }
+
+		let scope1 = {}, scope3
 
 		try {
-			// Scope 1
-			// For Scope 1 gas we need to find the general GWP instead of country specific one.
+			scope1 = _co2Factors( unit, 'kgco2e' + settings.fuelTypeSeparator + gwp, fullFuelType )
+		} catch( e ) {
+			console.log( 'Scope 1 Conversion Error!', { unit, fullFuelType, graph: graph.serialize() } )
+		}
 
-			const constant = constants.find( c => c.toUnit === gwp )
-			let gasToUnit = gwp
-			if( constant.country && constant.fossilFuelType === 'oil' ) {
-				const nonCountryConstant = constants.filter(
-					c => c.toUnit.startsWith( 'kgco2e' )
-						&& ( c.fossilFuelType === 'gas' || !c.fossilFuelType )
-						&& c.modifier === constant.modifier )
-				if( !nonCountryConstant ) throw new Error( "Failed to find a Gas GWP conversion constant corresponding to " + gwp )
-				gasToUnit = nonCountryConstant[ 0 ].toUnit
-			}
-
-			const path1 = ( fossilFuelType === 'oil' )
-				? graphOil.shortestPath( unit, gwp )
-				: graphGas.shortestPath( unit, gasToUnit )
-
-			console.log( 'Path to ', { unit, path, conversion } )
-			let factor1 = 1, low1 = 1, high1 = 1
-			for( let step = 1; step < path1.length; step++ ) {
-				const from = path1[ step - 1 ]
-				const to = path1[ step ]
-
-				const conv = conversion[ from ][ to ][ fossilFuelType ]
-				if( !conv ) throw new Error(
-					`Conversion data issue Scope 1: From ${ from } to ${ to } for ${ fossilFuelType } is ${ JSON.stringify( conv ) }` )
-				const { factor: stepFactor, low: stepLow, high: stepHigh } = conv
-
-				factor1 *= stepFactor
-				low1 *= stepLow ?? stepFactor
-				high1 *= stepHigh ?? stepFactor
-				if( log && DEBUG ) console.log( 'SCOPE 1', {
-					from,
-					to,
-					factor1,
-					low1,
-					high1,
-					volume,
-					value: 1e-9 * volume * factor1
-				} )
-			}
-
-			// Scope 3
-
-			const path = ( fossilFuelType === 'oil' )
-				? graphOil.shortestPath( unit, 'kgco2e' )
-				: graphGas.shortestPath( unit, 'kgco2e' )
-
-			//console.log( 'Path to ', { unit, path, conversion } )
-			let factor = 1, low = 1, high = 1
-			for( let step = 1; step < path.length; step++ ) {
-				const from = path[ step - 1 ]
-				const to = path[ step ]
-
-				const conv = conversion[ from ][ to ][ fossilFuelType ]
-				if( !conv ) throw new Error(
-					`Conversion data issue Scope 3: From ${ from } to ${ to } for ${ fossilFuelType } is ${ JSON.stringify( conv ) }` )
-				const { factor: stepFactor, low: stepLow, high: stepHigh } = conv
-
-				factor *= stepFactor
-				low *= stepLow ?? stepFactor
-				high *= stepHigh ?? stepFactor
-				if( log && DEBUG ) console.log( 'SCOPE 3', {
-					from,
-					to,
-					factor,
-					low,
-					high,
-					volume,
-					value: 1e-9 * volume * factor
-				} )
-			}
-
-			const result = {
-				scope1: [ volume * low1 / 1e9, volume * factor1 / 1e9, volume * high1 / 1e9 ],
-				scope3: [ volume * low / 1e9, volume * factor / 1e9, volume * high / 1e9 ]
-			}
-
-			if( log ) console.log( '.....co2', { result } )
-
-			return result
+		try {
+			scope3 = _co2Factors( unit, 'kgco2e', fullFuelType )
 		} catch( e ) {
 			if( console.trace ) console.trace()
-			console.log( 'Conversion Error!', { volume, unit, fossilFuelType } )
-			throw new Error( "While looking for " + volume + ' ' + unit + " -> kgco2e conversion:\n" + e.message )
+			console.log( 'Conversion Error!', { unit, fullFuelType, graph: graph.serialize() } )
+			throw new Error( "While looking for " + fullFuelType + ' ' + unit + ' -> ' + toUnit + " conversion:\n" + e.message )
 		}
+
+		DEBUG && console.log( { scope1, scope3 } )
+
+		const result = {
+			scope1: [ volume * scope1.low / 1e9, volume * scope1.factor / 1e9, volume * scope1.high / 1e9 ],
+			scope3: [ volume * scope3.low / 1e9, volume * scope3.factor / 1e9, volume * scope3.high / 1e9 ]
+		}
+
+		if( log ) console.log( '.....co2', { result } )
+		return result
 	}
 
 	const reservesProduction =
@@ -356,6 +292,7 @@ export const useConversionHooks = () => {
 			} )
 			const prod = q.data?.getCountryCurrentProduction?.nodes ?? []
 			const principal = prod.filter( p => p.sourceId === settings.principalProductionSourceId )
+			DEBUG && console.log( { principal } )
 			let co2 = 0
 			principal.forEach( p => {
 				const calc = co2FromVolume( p )
