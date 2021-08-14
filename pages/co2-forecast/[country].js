@@ -18,7 +18,7 @@ import { getPreferredReserveGrade } from "components/CO2Forecast/calculate"
 import { useRouter } from "next/router"
 import SparseProject from "components/CO2Forecast/SparseProject"
 
-// const DEBUG = false
+const DEBUG = false
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
@@ -64,7 +64,7 @@ export default function CO2ForecastPage() {
 	useEffect( () => {
 		const qCountry = router.query?.country
 		if( qCountry === null || qCountry === '-' || qCountry === 'null' ) return
-		console.log( 'useEffect PRELOAD country', { country, qCountry } )
+		DEBUG && console.log( 'useEffect PRELOAD country', { country, qCountry } )
 		if( qCountry !== country ) dispatch( { type: 'COUNTRY', payload: qCountry } )
 	}, [ router.query?.country ] )
 	

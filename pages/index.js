@@ -9,6 +9,8 @@ import { NextSeo } from "next-seo"
 import { findLastProductionYear, findLastReservesYear, getFuelCO2 } from "components/viz/util"
 import { useConversionHooks } from "../components/viz/conversionHooks"
 
+const DEBUG = false
+
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
 const GlobeNoSSR = dynamic( () => import( "components/geo/GlobeNoSSR" ),
@@ -37,13 +39,13 @@ export default function Home() {
 			if( data.production.length > 0 ) {
 				const lastProd = findLastProductionYear( data.production, 2 )
 				const lastRes = findLastReservesYear( data.reserves )
-				console.log( { lastProd, lastRes } )
+				DEBUG && console.log( { lastProd, lastRes } )
 				if( !!lastProd.yearData[ 0 ] && !!lastRes.yearData[ 0 ] ) {
 					data.countryProd = getFuelCO2( co2FromVolume( lastProd.yearData[ 0 ] ), 2 )
 						+ getFuelCO2( co2FromVolume( lastProd.yearData[ 1 ] ), 2 )
 					data.countryRes = getFuelCO2( co2FromVolume( lastRes.yearData[ 0 ] ), 2 )
 						+ getFuelCO2( co2FromVolume( lastRes.yearData[ 1 ] ), 2 )
-					console.log( data )
+					DEBUG && console.log( data )
 					set_modalData( data )
 				}
 			}

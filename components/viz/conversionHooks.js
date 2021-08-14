@@ -7,7 +7,7 @@ import { GQL_countryCurrentProduction } from "queries/country"
 import { notification } from "antd"
 import settings from "../../settings"
 
-const DEBUG = true
+const DEBUG = false
 
 let fuelTypes = [ 'gas', 'oil', 'coal' ] // Start with generic types, is extended later from DB data.
 
@@ -102,7 +102,7 @@ export const useConversionHooks = () => {
 		if( !conversion ) throw new Error( 'No conversion factors for ' + fullFuelType )
 
 		const path = graph.shortestPath( unit, toUnit )
-		console.log( 'Path ', { unit, toUnit, path, conversion } )
+		DEBUG && console.log( 'Path ', { unit, toUnit, path, conversion } )
 
 		let factor = 1, low = 1, high = 1
 		for( let step = 1; step < path.length; step++ ) {

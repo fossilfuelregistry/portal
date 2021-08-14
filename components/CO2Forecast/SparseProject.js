@@ -55,7 +55,7 @@ function SparseProject() {
 
 	const co2 = co2FromVolume( theProject )
 	const projectCO2 = ( co2.scope1[ 1 ] || 0 ) + co2.scope3[ 1 ]
-	console.log( co2 )
+
 	try {
 		return (
 			<>
