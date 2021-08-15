@@ -81,7 +81,7 @@ export const useConversionHooks = () => {
 				const conv = conversion[ from + '>' + to ]
 
 				if( !conv ) throw new Error(
-					`Conversion data issue: From ${ from } to ${ to } for ${fossilFuelType} is ${ JSON.stringify( conv ) }` )
+					`Conversion data issue: From ${ from } to ${ to } for ${ fossilFuelType } is ${ JSON.stringify( conv ) }` )
 
 				factor *= conv.factor
 				low *= conv.low
@@ -127,25 +127,30 @@ export const useConversionHooks = () => {
 		if( !graph ) return { low: 0, high: 0, factor: 0 }
 
 		let scope1 = {}, scope3
+		const toUnit = 'kgco2e' + settings.fuelTypeSeparator + gwp
 
 		try {
-			scope1 = _co2Factors( unit, 'kgco2e' + settings.fuelTypeSeparator + gwp, fullFuelType )
+			scope1 = _co2Factors( unit, toUnit, fullFuelType )
 		} catch( e ) {
-			console.log( 'Scope 1 Conversion Error!', { unit, fullFuelType, graph: graph.serialize() } )
+			console.log( `Scope 1 ${ toUnit } Conversion Error:  ${ e.message }`, {
+				unit, toUnit,
+				fullFuelType,
+				graph: graph.serialize()
+			} )
 		}
 
 		try {
 			scope3 = _co2Factors( unit, 'kgco2e', fullFuelType )
 		} catch( e ) {
 			if( console.trace ) console.trace()
-			console.log( 'Conversion Error!', { unit, fullFuelType, graph: graph.serialize() } )
-			throw new Error( "While looking for " + fullFuelType + ' ' + unit + ' -> ' + toUnit + " conversion:\n" + e.message )
+			console.log( 'Conversion to kgco2e Error: ' + e.message, { unit, fullFuelType, graph: graph.serialize() } )
+			throw new Error( "While looking for " + fullFuelType + ' ' + unit + " -> kgco2e conversion:\n" + e.message )
 		}
 
 		DEBUG && console.log( { scope1, scope3 } )
 
 		const result = {
-			scope1: [ volume * scope1.low / 1e9, volume * scope1.factor / 1e9, volume * scope1.high / 1e9 ],
+			scope1: [ volume * ( scope1.low || 0 ) / 1e9, volume * ( scope1.factor || 0 ) / 1e9, volume * ( scope1.high || 0 ) / 1e9 ],
 			scope3: [ volume * scope3.low / 1e9, volume * scope3.factor / 1e9, volume * scope3.high / 1e9 ]
 		}
 
@@ -259,23 +264,33 @@ export const useConversionHooks = () => {
 
 	const getCountryCurrentCO2 = async iso3166 => {
 		if( !iso3166 ) return 0
+
 		try {
 			const q = await apolloClient.query( {
 				query: GQL_countryCurrentProduction,
 				variables: { iso3166 }
 			} )
 			const prod = q.data?.getCountryCurrentProduction?.nodes ?? []
-			const principal = prod.filter( p => p.sourceId === settings.principalProductionSourceId )
+			const principal = prod.filter( p => p.sourceId === settings.principalProductionSourceId[ p.fossilFuelType ] )
 			DEBUG && console.log( { principal } )
-			let co2 = 0
+			let co2 = {}, total = 0
 			principal.forEach( p => {
+				DEBUG && console.log( co2 )
 				const calc = co2FromVolume( p )
-				DEBUG && console.log( { co2, calc, p } )
-				co2 += calc.scope1[ 1 ] + calc.scope3[ 1 ]
+				DEBUG && console.log( { calc, p } )
+				if( !co2[ p.fossilFuelType ] ) co2[ p.fossilFuelType ] = 0
+				co2[ p.fossilFuelType ] += calc.scope1[ 1 ] + calc.scope3[ 1 ]
+				total += calc.scope1[ 1 ] + calc.scope3[ 1 ]
 			} )
+			co2.total = total
+			DEBUG && console.log( 'Country Production', co2 )
 			return co2
 		} catch( e ) {
-			notification.error( { message: 'Failed to fetch country production', description: e.message } )
+			notification.error( {
+				message: 'Failed to fetch country production',
+				description: e.message,
+				duration: 20
+			} )
 		}
 	}
 

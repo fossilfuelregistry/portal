@@ -9,7 +9,7 @@ import GraphQLStatus from "../GraphQLStatus"
 import { useConversionHooks } from "components/viz/conversionHooks"
 import OpenCorporateCard from "../OpenCorporateCard"
 
-const DEBUG = true
+const DEBUG = false
 
 function SparseProject() {
 	const { getText } = useText()
@@ -69,9 +69,9 @@ function SparseProject() {
 						<br/>
 						{ getText( 'co2e_scope3' ) }: { JSON.stringify( co2.scope3 ) }
 						<br/>
-						{ getText( 'country_production' ) }: { countryCO2Total.toFixed( 1 ) }
+						{ getText( 'country_production' ) }: {  JSON.stringify( countryCO2Total ) }
 						<br/>
-						{ getText( 'country_production' ) } %: { ( 100 * projectCO2 / countryCO2Total ).toFixed( 2 ) }
+						{ getText( 'country_production' ) } %: { ( 100 * projectCO2 / countryCO2Total.total ).toFixed( 2 ) }
 					</Col>
 
 					<Col xs={ 24 } lg={ 12 } xl={ 8 }>

@@ -9,6 +9,6 @@ export default {
 	},
 	gradesPreferenceOrder: '3x12',
 	stableProductionSourceId: 100,
-	principalProductionSourceId: 2,
+	principalProductionSourceId: { oil: 2, gas: 2, coal: 1 },
 	fuelTypeSeparator: '|'
 }
