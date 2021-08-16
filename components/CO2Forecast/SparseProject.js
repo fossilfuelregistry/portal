@@ -9,6 +9,8 @@ import { useConversionHooks } from "components/viz/conversionHooks"
 import OpenCorporateCard from "../OpenCorporateCard"
 
 import { useRouter } from "next/router"
+import { ExportOutlined } from "@ant-design/icons"
+import BarStackChart from "components/viz/BarStackChart"
 
 const DEBUG = false
 
@@ -89,6 +91,9 @@ function SparseProject() {
 		return <GraphQLStatus loading={ loading } error={ error }/>
 
 	const co2 = co2FromVolume( theProject )
+	co2.scope1 = co2.scope1.map( c => Math.round( c * 100 ) / 100 )
+	co2.scope3 = co2.scope3.map( c => Math.round( c * 100 ) / 100 )
+
 	const projectCO2 = ( co2.scope1?.[ 1 ] || 0 ) + co2.scope3?.[ 1 ]
 
 	try {
@@ -110,12 +115,23 @@ function SparseProject() {
 						{ getText( 'country_production' ) } %: { ( 100 * projectCO2 / countryCO2Total.total ).toFixed( 2 ) }
 					</Col>
 
+					<Col xs={ 24 } lg={ 12 } xl={ 8 } style={ { height: 400 } }>
+						<BarStackChart
+							data={ [
+								{ label: 'LOW', scope1: co2.scope1[ 0 ], scope3: co2.scope3[ 0 ] },
+								{ label: 'MID', scope1: co2.scope1[ 1 ], scope3: co2.scope3[ 1 ] },
+								{ label: 'HIGH', scope1: co2.scope1[ 2 ], scope3: co2.scope3[ 2 ] },
+							] }
+							keys={ [ "scope3", "scope1" ] }
+						/>
+					</Col>
+
 					<Col xs={ 24 } lg={ 12 } xl={ 8 }>
 						<OpenCorporateCard reference={ theProject.ocOperatorId }/>
 					</Col>
 
 					<Col xs={ 24 } lg={ 12 } xl={ 8 }>
-						<h2>{ theProject.projectId }</h2>
+						<div><b>{ theProject.projectId } </b><a href={ theProject.linkUrl }><ExportOutlined/></a></div>
 						{ description }
 						{ localeDescription?.length > 0 &&
 						<>

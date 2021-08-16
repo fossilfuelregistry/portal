@@ -167,7 +167,7 @@ export const useConversionHooks = () => {
 				} )
 			}
 
-			console.log( 'Project Specific Scope1:', {
+			DEBUG && console.log( 'Project Specific Scope1:', {
 				scope1,
 				volume,
 				e6ProductionTons,
@@ -183,7 +183,7 @@ export const useConversionHooks = () => {
 			scope3: [ volume * scope3.low / 1e9, volume * scope3.factor / 1e9, volume * scope3.high / 1e9 ]
 		}
 
-		console.log( '.....co2', { result, scope1, volume1 } )
+		DEBUG && console.log( '.....co2', { result, scope1, volume1 } )
 		return result
 	}
 

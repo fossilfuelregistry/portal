@@ -2,8 +2,12 @@ import useText from "lib/useText"
 import { useEffect, useState } from "react"
 import { notification } from "antd"
 import settings from "../settings"
+import { ExportOutlined } from "@ant-design/icons"
+import getConfig from "next/config"
 
 const DEBUG = true
+
+const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
 export default function OpenCorporateCard( { reference } ) {
 	const { getText } = useText()
@@ -35,14 +39,32 @@ export default function OpenCorporateCard( { reference } ) {
 	return (
 		<>
 			{ company &&
-			<div className="oc-ard">
-				<h2>{ getText( 'operating_corporate_entity' ) }</h2>
-				<div><b><a href={settings.openCorporate.web + reference}>{ company.name }</a></b></div>
-				<div>{ company.registered_address_in_full }</div>
-				<div>{ getText( 'operating_corporate_entity_incorporation_date' ) }: { company.incorporation_date }</div>
-				<div>{ getText( 'operating_corporate_entity_type' ) }: { company.company_type }</div>
+			<div className="oc-card">
+				<div className="header">{ getText( 'operating_corporate_entity' ) }</div>
+				<div className="box">
+					<div>
+						<b>{ company.name }</b> <a href={ settings.openCorporate.web + reference }><ExportOutlined/></a>
+					</div>
+					<div>{ company.registered_address_in_full }</div>
+					<div>{ getText( 'operating_corporate_entity_incorporation_date' ) }: { company.incorporation_date }</div>
+					<div>{ getText( 'operating_corporate_entity_type' ) }: { company.company_type }</div>
+				</div>
 			</div>
 			}
+			<style jsx>{ `
+              .header {
+                font-size: 12px;
+                font-weight: bold;
+                color: dimgrey;
+              }
+
+              .box {
+                border: 1px solid rgba(0, 0, 0, 0.25);
+                border-radius: ${ theme[ '@border-radius-base' ] };
+                padding: 10px;
+              }
+			` }
+			</style>
 		</>
 	)
 }
