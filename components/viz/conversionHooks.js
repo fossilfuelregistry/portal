@@ -121,7 +121,7 @@ export const useConversionHooks = () => {
 		return { low, high, factor }
 	}
 
-	const co2FromVolume = ( { volume, unit, fossilFuelType, subtype }, log ) => {
+	const co2FromVolume = ( { volume, unit, fossilFuelType, subtype, methaneM3Ton }, log ) => {
 		const fullFuelType = getFullFuelType( { fossilFuelType, subtype } )
 		const graph = graphs[ fullFuelType ]
 		if( !graph ) return { low: 0, high: 0, factor: 0 }
@@ -147,14 +147,43 @@ export const useConversionHooks = () => {
 			throw new Error( "While looking for " + fullFuelType + ' ' + unit + " -> kgco2e conversion:\n" + e.message )
 		}
 
-		DEBUG && console.log( { scope1, scope3 } )
+		DEBUG && console.log( 'CO2 Factors:', { scope1, scope3, methaneM3Ton } )
+
+		let volume1 = volume
+		if( methaneM3Ton > 0 ) {
+			// Calculate Scope1 for sparse project from production volume
+			const e6ProductionTons = convertVolume( { volume, unit, fossilFuelType }, 'e6ton' )
+			const e6m3Methane = e6ProductionTons * methaneM3Ton
+			const e6feet3Methane = e6m3Methane * 35.31
+			volume1 = e6feet3Methane / 379.3 / 2.2 // SCF feet3 -> lb -> kg gives us e3ton
+
+			// Get new factors for gas
+			try {
+				scope1 = _co2Factors( 'e3ton', toUnit, 'gas' )
+			} catch( e ) {
+				console.log( `Scope 1 ${ toUnit } Project gas equiv  conversion error:  ${ e.message }`, {
+					unit, toUnit, graphs,
+					graph: graph.serialize()
+				} )
+			}
+
+			console.log( 'Project Specific Scope1:', {
+				scope1,
+				volume,
+				e6ProductionTons,
+				methaneM3Ton,
+				e6m3Methane,
+				volume1,
+				kgco2e: volume1 * scope1.factor
+			} )
+		}
 
 		const result = {
-			scope1: [ volume * ( scope1.low || 0 ) / 1e9, volume * ( scope1.factor || 0 ) / 1e9, volume * ( scope1.high || 0 ) / 1e9 ],
+			scope1: [ volume1 * ( scope1.low || 0 ) / 1e9, volume1 * ( scope1.factor || 0 ) / 1e9, volume1 * ( scope1.high || 0 ) / 1e9 ],
 			scope3: [ volume * scope3.low / 1e9, volume * scope3.factor / 1e9, volume * scope3.high / 1e9 ]
 		}
 
-		if( log ) console.log( '.....co2', { result } )
+		console.log( '.....co2', { result, scope1, volume1 } )
 		return result
 	}
 

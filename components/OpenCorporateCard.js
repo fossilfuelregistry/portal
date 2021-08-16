@@ -31,6 +31,7 @@ export default function OpenCorporateCard( { reference } ) {
 		}
 		asyncEffect()
 	}, [ reference ] )
+
 	return (
 		<>
 			{ company &&

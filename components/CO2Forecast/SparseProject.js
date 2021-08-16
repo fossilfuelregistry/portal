@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react"
-import { Alert, Col, Row } from "antd"
-import ReactMarkdown from 'react-markdown'
+import { Alert, Col, notification, Row } from "antd"
 import useText from "lib/useText"
 import { useSelector } from "react-redux"
 import { useQuery } from "@apollo/client"
@@ -9,14 +8,18 @@ import GraphQLStatus from "../GraphQLStatus"
 import { useConversionHooks } from "components/viz/conversionHooks"
 import OpenCorporateCard from "../OpenCorporateCard"
 
+import { useRouter } from "next/router"
+
 const DEBUG = false
 
 function SparseProject() {
 	const { getText } = useText()
+	const router = useRouter()
 	const { getCountryCurrentCO2 } = useConversionHooks()
 	const country = useSelector( redux => redux.country )
 	const project = useSelector( redux => redux.project )
 	const [ countryCO2Total, set_countryCO2Total ] = useState( 0 )
+	const [ localeDescription, set_localeDescription ] = useState()
 	const { co2FromVolume } = useConversionHooks()
 
 	DEBUG && console.log( 'SparseProject', { country, project, countryCO2Total } )
@@ -50,11 +53,43 @@ function SparseProject() {
 			.replace( /<ref (.?)*\/>/sg, '' )
 	}, [ theProject?.description ] )
 
+	useEffect( () => {
+		if( router.locale === 'en' ) return
+		if( !( description?.length > 0 ) ) {
+			return
+		}
+		const asyncEffect = async() => {
+			try {
+				const api = await fetch( 'https://translation.googleapis.com/language/translate/v2?key=' + process.env.NEXT_PUBLIC_GOOGLE_TRANSLATE_API_KEY, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify( {
+						source: 'en',
+						target: router.locale,
+						q: description
+					} )
+				} )
+				if( !api.ok ) throw new Error( 'Translation fail ' + api.statusText )
+				const resp = await api.json()
+				set_localeDescription( resp?.data?.translations?.[ 0 ]?.translatedText )
+			} catch( e ) {
+				console.log( e )
+				notification.error( {
+					message: "Failed to translate description",
+					description: e.message
+				} )
+			}
+		}
+		asyncEffect()
+	}, [ description ] )
+
 	if( loading || error )
 		return <GraphQLStatus loading={ loading } error={ error }/>
 
 	const co2 = co2FromVolume( theProject )
-	const projectCO2 = ( co2.scope1[ 1 ] || 0 ) + co2.scope3[ 1 ]
+	const projectCO2 = ( co2.scope1?.[ 1 ] || 0 ) + co2.scope3?.[ 1 ]
 
 	try {
 		return (
@@ -63,24 +98,31 @@ function SparseProject() {
 				<br/>
 				<Row gutter={ [ 16, 16 ] }>
 					<Col xs={ 24 } lg={ 12 } xl={ 8 }>
-						{ getText( 'production' ) }: { theProject.volume } { theProject.unit } { theProject.fossilFuelType }, emissions {projectCO2} e9kgco2e
+						{ getText( 'production' ) }: { theProject.volume } { theProject.unit } { theProject.fossilFuelType },
+						emissions { projectCO2.toFixed( 2 ) } e9kgco2e
 						<br/>
 						{ getText( 'co2e_scope1' ) }: { JSON.stringify( co2.scope1 ) }
 						<br/>
 						{ getText( 'co2e_scope3' ) }: { JSON.stringify( co2.scope3 ) }
 						<br/>
-						{ getText( 'country_production' ) }: {  JSON.stringify( countryCO2Total ) }
+						{ getText( 'country_production' ) }: { JSON.stringify( countryCO2Total ) }
 						<br/>
 						{ getText( 'country_production' ) } %: { ( 100 * projectCO2 / countryCO2Total.total ).toFixed( 2 ) }
 					</Col>
 
 					<Col xs={ 24 } lg={ 12 } xl={ 8 }>
-						<OpenCorporateCard reference={theProject.ocOperatorId}/>
+						<OpenCorporateCard reference={ theProject.ocOperatorId }/>
 					</Col>
 
 					<Col xs={ 24 } lg={ 12 } xl={ 8 }>
 						<h2>{ theProject.projectId }</h2>
-						<ReactMarkdown>{ description }</ReactMarkdown>
+						{ description }
+						{ localeDescription?.length > 0 &&
+						<>
+							<br/>
+							<br/>
+							<span dangerouslySetInnerHTML={ { __html: localeDescription } }/>
+						</> }
 					</Col>
 
 				</Row>

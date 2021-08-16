@@ -9,6 +9,7 @@
   "dependencies": {
     "@ant-design/icons": "^4.6.2",
     "@apollo/client": "3.3",
+    "@google-cloud/translate": "^6.2.6",
     "@visx/visx": "^1.18.1",
     "antd": "^4.16.10",
     "babel-eslint": "^10.1.0",
