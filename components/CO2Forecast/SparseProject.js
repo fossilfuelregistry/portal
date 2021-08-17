@@ -12,6 +12,7 @@ import { useRouter } from "next/router"
 import { ExportOutlined } from "@ant-design/icons"
 import BarStackChart from "components/viz/BarStackChart"
 import CountryProductionPieChart from "./CountryProductionPieChart"
+import HelpModal from "../HelpModal"
 
 const DEBUG = false
 
@@ -114,7 +115,10 @@ function SparseProject() {
 
 					<Col xs={ 24 } xl={ 12 }>
 						<div className="co2-card">
-							<div className="header">{ getText( 'emissions' ) } - { getText( 'project' ) }</div>
+							<div className="header">
+								{ getText( 'emissions' ) } - { getText( 'project' ) }
+								<HelpModal title="ranges" content="explanation_ranges"/>
+							</div>
 							<div className="box">
 								<div style={ { height: 400 } }>
 									<BarStackChart
