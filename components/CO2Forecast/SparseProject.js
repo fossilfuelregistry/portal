@@ -108,20 +108,25 @@ function SparseProject() {
 						<CountryProductionPieChart
 							project={ theProject }
 							emissions={ countryCO2Total }
-							co2={projectCO2}
+							co2={ projectCO2 }
 						/>
 					</Col>
 
 					<Col xs={ 24 } xl={ 12 }>
-						<div style={ { height: 400 } }>
-							<BarStackChart
-								data={ [
-									{ label: 'LOW', scope1: co2.scope1[ 0 ], scope3: co2.scope3[ 0 ] },
-									{ label: 'MID', scope1: co2.scope1[ 1 ], scope3: co2.scope3[ 1 ] },
-									{ label: 'HIGH', scope1: co2.scope1[ 2 ], scope3: co2.scope3[ 2 ] },
-								] }
-								keys={ [ "scope3", "scope1" ] }
-							/>
+						<div className="co2-card">
+							<div className="header">{ getText( 'emissions' ) } - { getText( 'project' ) }</div>
+							<div className="box">
+								<div style={ { height: 400 } }>
+									<BarStackChart
+										data={ [
+											{ label: 'LOW', scope1: co2.scope1[ 0 ], scope3: co2.scope3[ 0 ] },
+											{ label: 'MID', scope1: co2.scope1[ 1 ], scope3: co2.scope3[ 1 ] },
+											{ label: 'HIGH', scope1: co2.scope1[ 2 ], scope3: co2.scope3[ 2 ] },
+										] }
+										keys={ [ "scope3", "scope1" ] }
+									/>
+								</div>
+							</div>
 						</div>
 					</Col>
 
@@ -130,19 +135,34 @@ function SparseProject() {
 					</Col>
 
 					<Col xs={ 24 } xl={ 12 }>
-						<div><b>{ theProject.projectId } </b><a href={ theProject.linkUrl }><ExportOutlined/></a></div>
-						{ description }
-						{ localeDescription?.length > 0 &&
-						<>
-							<br/>
-							<br/>
-							<span dangerouslySetInnerHTML={ { __html: localeDescription } }/>
-						</> }
+						<div className="co2-card">
+							<div className="header">&nbsp;</div>
+							<div className="box">
+								<div>
+									<b>{ theProject.projectId } </b>
+									<a href={ theProject.linkUrl }><ExportOutlined/></a>
+								</div>
+								{ localeDescription?.length > 0 &&
+								<>
+									<span className="annotation">[{ getText( 'machine_translated_text' ) }]</span>
+									<span dangerouslySetInnerHTML={ { __html: localeDescription } }/>
+									<br/>
+									<br/>
+								</> }
+								{ localeDescription?.length > 0 && <span className="annotation">[{ getText( 'original_text' ) }]</span> }
+								{ description }
+							</div>
+						</div>
 					</Col>
 
 				</Row>
 
 				<style jsx>{ `
+                  .annotation {
+                    opacity: 0.7;
+                    font-size: 14px;
+                    margin-right: 12px;
+                  }
 				` }
 				</style>
 			</> )
