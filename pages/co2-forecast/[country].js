@@ -75,17 +75,17 @@ export default function CO2ForecastPage() {
 				description={ getText( 'a_service_from_gffr' ) }
 				openGraph={ {
 					url: 'https://fossilfuelregistry.org',
-					title: getText( 'gffr' ),
+					title: getText( 'grff' ),
 					description: title,
 					images: [
 						{
 							url: 'https://fossilfuelregistry.org/og1.jpg',
 							width: 1200,
 							height: 671,
-							alt: getText( 'gffr' ),
+							alt: getText( 'grff' ),
 						}
 					],
-					site_name: getText( 'gffr' ),
+					site_name: getText( 'grff' ),
 				} }
 			/>
 

@@ -60,17 +60,17 @@ export default function Home() {
 				description={getText( 'fossil_fuel_prod_reserves' )}
 				openGraph={{
 					url: 'https://fossilfuelregistry.org',
-					title: getText( 'gffr' ),
+					title: getText( 'grff' ),
 					description: getText( 'fossil_fuel_prod_reserves' ),
 					images: [
 						{
 							url: 'https://fossilfuelregistry.org/og1.jpg',
 							width: 1200,
 							height: 671,
-							alt: getText( 'gffr' ),
+							alt: getText( 'grff' ),
 						}
 					],
-					site_name: getText( 'gffr' ),
+					site_name: getText( 'grff' ),
 				}}
 			/>
 
