@@ -11,6 +11,7 @@ import OpenCorporateCard from "../OpenCorporateCard"
 import { useRouter } from "next/router"
 import { ExportOutlined } from "@ant-design/icons"
 import BarStackChart from "components/viz/BarStackChart"
+import CountryProductionPieChart from "./CountryProductionPieChart"
 
 const DEBUG = false
 
@@ -102,28 +103,26 @@ function SparseProject() {
 				<Alert type="warning" message={ getText( 'sparse-data-warning' ) } showIcon={ true }/>
 				<br/>
 				<Row gutter={ [ 16, 16 ] }>
+
 					<Col xs={ 24 } lg={ 12 } xl={ 8 }>
-						{ getText( 'production' ) }: { theProject.volume } { theProject.unit } { theProject.fossilFuelType },
-						emissions { projectCO2.toFixed( 2 ) } e9kgco2e
-						<br/>
-						{ getText( 'co2e_scope1' ) }: { JSON.stringify( co2.scope1 ) }
-						<br/>
-						{ getText( 'co2e_scope3' ) }: { JSON.stringify( co2.scope3 ) }
-						<br/>
-						{ getText( 'country_production' ) }: { JSON.stringify( countryCO2Total ) }
-						<br/>
-						{ getText( 'country_production' ) } %: { ( 100 * projectCO2 / countryCO2Total.total ).toFixed( 2 ) }
+						<CountryProductionPieChart
+							project={ theProject }
+							emissions={ countryCO2Total }
+							co2={projectCO2}
+						/>
 					</Col>
 
-					<Col xs={ 24 } lg={ 12 } xl={ 8 } style={ { height: 400 } }>
-						<BarStackChart
-							data={ [
-								{ label: 'LOW', scope1: co2.scope1[ 0 ], scope3: co2.scope3[ 0 ] },
-								{ label: 'MID', scope1: co2.scope1[ 1 ], scope3: co2.scope3[ 1 ] },
-								{ label: 'HIGH', scope1: co2.scope1[ 2 ], scope3: co2.scope3[ 2 ] },
-							] }
-							keys={ [ "scope3", "scope1" ] }
-						/>
+					<Col xs={ 24 } lg={ 12 } xl={ 8 }>
+						<div style={ { height: 400 } }>
+							<BarStackChart
+								data={ [
+									{ label: 'LOW', scope1: co2.scope1[ 0 ], scope3: co2.scope3[ 0 ] },
+									{ label: 'MID', scope1: co2.scope1[ 1 ], scope3: co2.scope3[ 1 ] },
+									{ label: 'HIGH', scope1: co2.scope1[ 2 ], scope3: co2.scope3[ 2 ] },
+								] }
+								keys={ [ "scope3", "scope1" ] }
+							/>
+						</div>
 					</Col>
 
 					<Col xs={ 24 } lg={ 12 } xl={ 8 }>

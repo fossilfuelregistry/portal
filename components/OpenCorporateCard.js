@@ -36,35 +36,19 @@ export default function OpenCorporateCard( { reference } ) {
 		asyncEffect()
 	}, [ reference ] )
 
-	return (
-		<>
-			{ company &&
-			<div className="oc-card">
-				<div className="header">{ getText( 'operating_corporate_entity' ) }</div>
-				<div className="box">
-					<div>
-						<b>{ company.name }</b> <a href={ settings.openCorporate.web + reference }><ExportOutlined/></a>
-					</div>
-					<div>{ company.registered_address_in_full }</div>
-					<div>{ getText( 'operating_corporate_entity_incorporation_date' ) }: { company.incorporation_date }</div>
-					<div>{ getText( 'operating_corporate_entity_type' ) }: { company.company_type }</div>
-				</div>
-			</div>
-			}
-			<style jsx>{ `
-              .header {
-                font-size: 12px;
-                font-weight: bold;
-                color: dimgrey;
-              }
+	if( !company ) return null
 
-              .box {
-                border: 1px solid rgba(0, 0, 0, 0.25);
-                border-radius: ${ theme[ '@border-radius-base' ] };
-                padding: 10px;
-              }
-			` }
-			</style>
-		</>
+	return (
+		<div className="co2-card">
+			<div className="header">{ getText( 'operating_corporate_entity' ) }</div>
+			<div className="box">
+				<div>
+					<b>{ company.name }</b> <a href={ settings.openCorporate.web + reference }><ExportOutlined/></a>
+				</div>
+				<div>{ company.registered_address_in_full }</div>
+				<div>{ getText( 'operating_corporate_entity_incorporation_date' ) }: { company.incorporation_date }</div>
+				<div>{ getText( 'operating_corporate_entity_type' ) }: { company.company_type }</div>
+			</div>
+		</div>
 	)
 }

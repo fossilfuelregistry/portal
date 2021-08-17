@@ -56,15 +56,15 @@ export default function Home() {
 		<div className="page">
 
 			<NextSeo
-				title={getText( 'gffr' )}
+				title={getText( 'grff' )}
 				description={getText( 'fossil_fuel_prod_reserves' )}
 				openGraph={{
-					url: 'https://gffr.journeyman.se',
+					url: 'https://fossilfuelregistry.org',
 					title: getText( 'gffr' ),
 					description: getText( 'fossil_fuel_prod_reserves' ),
 					images: [
 						{
-							url: 'https://gffr.journeyman.se/og1.jpg',
+							url: 'https://fossilfuelregistry.org/og1.jpg',
 							width: 1200,
 							height: 671,
 							alt: getText( 'gffr' ),
