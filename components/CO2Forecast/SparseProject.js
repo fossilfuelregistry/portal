@@ -104,7 +104,7 @@ function SparseProject() {
 				<br/>
 				<Row gutter={ [ 16, 16 ] }>
 
-					<Col xs={ 24 } lg={ 12 } xl={ 8 }>
+					<Col xs={ 24 } xl={ 12 }>
 						<CountryProductionPieChart
 							project={ theProject }
 							emissions={ countryCO2Total }
@@ -112,7 +112,7 @@ function SparseProject() {
 						/>
 					</Col>
 
-					<Col xs={ 24 } lg={ 12 } xl={ 8 }>
+					<Col xs={ 24 } xl={ 12 }>
 						<div style={ { height: 400 } }>
 							<BarStackChart
 								data={ [
@@ -125,11 +125,11 @@ function SparseProject() {
 						</div>
 					</Col>
 
-					<Col xs={ 24 } lg={ 12 } xl={ 8 }>
+					<Col xs={ 24 } xl={ 12 }>
 						<OpenCorporateCard reference={ theProject.ocOperatorId }/>
 					</Col>
 
-					<Col xs={ 24 } lg={ 12 } xl={ 8 }>
+					<Col xs={ 24 } xl={ 12 }>
 						<div><b>{ theProject.projectId } </b><a href={ theProject.linkUrl }><ExportOutlined/></a></div>
 						{ description }
 						{ localeDescription?.length > 0 &&
