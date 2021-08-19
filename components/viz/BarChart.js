@@ -4,7 +4,7 @@ import { Group } from "@visx/group";
 import { Text } from '@visx/text';
 import { withParentSize } from '@visx/responsive'
 import { scaleBand, scaleLinear } from "@visx/scale";
-import ChartAxes from "./ChartAxes";
+import RangeChartAxes from "./RangeChartAxes";
 import getConfig from "next/config";
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
@@ -44,7 +44,7 @@ function BarchartInternal( { parentWidth, parentHeight, data } ) {
 	return parentWidth < 10 ? null : (
 		<svg width={parentWidth} height={parentHeight}>
 			<Group left={horizontalMargin / 2} top={verticalMargin / 2}>
-				<ChartAxes
+				<RangeChartAxes
 					xScale={xScale}
 					yScale={yScale}
 					width={xMax}

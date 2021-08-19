@@ -78,10 +78,11 @@ export const GQL_sparseProject = gql`
 query sparseProject($projectId: String!, $iso3166: String!) {
   sparseProjects(condition: {projectId: $projectId, iso3166: $iso3166}) {
     nodes {
-      id iso3166 iso31662 linkUrl grade reservesUnit reservesGrade methaneM3Ton
+      id iso3166 iso31662 linkUrl methaneM3Ton
       geoPosition { ... on GeographyPoint { latitude longitude } }
-      fossilFuelType description locationName ocOperatorId operatorName productionCo2E productionMethod productionType projectId projection
-      quality region reserves sourceId sourceProjectId sourceProjectName subtype unit volume year
+      description locationName ocOperatorId operatorName productionCo2E
+      productionMethod productionType projectId region sourceProjectId sourceProjectName
+      sparseDataPoints { nodes { dataType fossilFuelType grade quality subtype unit volume year } }
     }
   }
 }`

@@ -5,8 +5,9 @@ import getConfig from "next/config";
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
 const axisTickLabelProps =  {
-	fontSize: 12,
-	fill: theme[ '@text-grey' ],
+	fontSize: 14,
+	fontWeight: 'bold',
+	fill: '#ffffff'
 }
 
 const axisTickLabelPropsY = ( yTickLabelOffset )  => ( {
@@ -14,25 +15,17 @@ const axisTickLabelPropsY = ( yTickLabelOffset )  => ( {
 	dx: ( -yTickLabelOffset / 4 ) * 3
 } )
 
-const ChartAxes = ( { xScale, yScale, width, height, yNumTicks, yTickLabelOffset } ) => {
+const RangeChartAxes = ( { xScale, yScale, width, height, yNumTicks, yTickLabelOffset } ) => {
 
 	const xNumTicks = width > 460 ? 6 : width > 370 ? 5 : 4
 
 	return (
 		<>
-			<GridRows scale={yScale} numTicks={yNumTicks} width={width} height={height} stroke={theme[ '@cf-borders' ]} />
-			<AxisLeft
-				scale={yScale}
-				numTicks={yNumTicks}
-				strokeWidth={0}
-				tickLength={yTickLabelOffset/4}
-				tickStroke={theme[ '@cf-borders' ]}
-				tickLabelProps={() => ( { ...axisTickLabelProps, ...axisTickLabelPropsY( yTickLabelOffset ) } )}
-			/>
 			<AxisBottom
 				scale={xScale}
-				top={height}
-				stroke={theme[ '@cf-borders' ]}
+				top={ height - 50}
+				hideAxisLine={true}
+				hideTicks={true}
 				tickStroke={theme[ '@cf-borders' ]}
 				tickLabelProps={() => ( { ...axisTickLabelProps, textAnchor: 'middle' } )}
 				numTicks={xNumTicks}
@@ -41,4 +34,4 @@ const ChartAxes = ( { xScale, yScale, width, height, yNumTicks, yTickLabelOffset
 	)
 }
 
-export default ChartAxes
+export default RangeChartAxes

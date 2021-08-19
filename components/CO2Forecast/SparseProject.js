@@ -57,6 +57,24 @@ function SparseProject() {
 			.replace( /<ref (.?)*\/>/sg, '' )
 	}, [ theProject?.description ] )
 
+	const co2 = useMemo( () => {
+		const points = theProject?.sparseDataPoints?.nodes ?? []
+		if( !points.length ) return 0
+
+		const lastYearProd = points.filter( p => p.dataType === 'PRODUCTION' ).reduce( ( last, point ) => {
+			if( point.year > last.year )
+				return point
+			else
+				return last
+		}, { year: 0 } )
+
+		const co2 = co2FromVolume( { ...lastYearProd, methaneM3Ton: theProject.methaneM3Ton } )
+		co2.scope1 = co2.scope1?.map( c => Math.round( c * 100 ) / 100 )
+		co2.scope3 = co2.scope3?.map( c => Math.round( c * 100 ) / 100 )
+		DEBUG && console.log( { theProject, points,  lastYearProd, co2 } )
+		return co2
+	}, [ theProject?.projectId ] )
+
 	useEffect( () => {
 		if( router.locale === 'en' ) return
 		if( !( description?.length > 0 ) ) {
@@ -92,12 +110,6 @@ function SparseProject() {
 	if( loading || error )
 		return <GraphQLStatus loading={ loading } error={ error }/>
 
-	const co2 = co2FromVolume( theProject )
-	co2.scope1 = co2.scope1.map( c => Math.round( c * 100 ) / 100 )
-	co2.scope3 = co2.scope3.map( c => Math.round( c * 100 ) / 100 )
-
-	const projectCO2 = ( co2.scope1?.[ 1 ] || 0 ) + co2.scope3?.[ 1 ]
-
 	try {
 		return (
 			<>
@@ -109,7 +121,7 @@ function SparseProject() {
 						<CountryProductionPieChart
 							project={ theProject }
 							emissions={ countryCO2Total }
-							co2={ projectCO2 }
+							co2={ ( co2.scope1?.[ 1 ] || 0 ) + co2.scope3?.[ 1 ] }
 						/>
 					</Col>
 
@@ -123,9 +135,21 @@ function SparseProject() {
 								<div style={ { height: 400 } }>
 									<BarStackChart
 										data={ [
-											{ label: 'LOW', scope1: co2.scope1[ 0 ], scope3: co2.scope3[ 0 ] },
-											{ label: 'MID', scope1: co2.scope1[ 1 ], scope3: co2.scope3[ 1 ] },
-											{ label: 'HIGH', scope1: co2.scope1[ 2 ], scope3: co2.scope3[ 2 ] },
+											{
+												label: getText( 'range-low' ).toUpperCase(),
+												scope1: co2.scope1[ 0 ],
+												scope3: co2.scope3[ 0 ]
+											},
+											{
+												label: getText( 'range-mid' ).toUpperCase(),
+												scope1: co2.scope1[ 1 ],
+												scope3: co2.scope3[ 1 ]
+											},
+											{
+												label: getText( 'range-high' ).toUpperCase(),
+												scope1: co2.scope1[ 2 ],
+												scope3: co2.scope3[ 2 ]
+											},
 										] }
 										keys={ [ "scope3", "scope1" ] }
 									/>
@@ -153,7 +177,8 @@ function SparseProject() {
 									<br/>
 									<br/>
 								</> }
-								{ localeDescription?.length > 0 && <span className="annotation">[{ getText( 'original_text' ) }]</span> }
+								{ localeDescription?.length > 0 &&
+								<span className="annotation">[{ getText( 'original_text' ) }]</span> }
 								{ description }
 							</div>
 						</div>
@@ -171,6 +196,7 @@ function SparseProject() {
 				</style>
 			</> )
 	} catch( e ) {
+		console.log( e )
 		return <Alert message={ e.message } type="error" showIcon/>
 	}
 }

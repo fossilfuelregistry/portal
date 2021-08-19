@@ -16,7 +16,7 @@ const PieChartInternal = ( { parentWidth, parentHeight, data, header, topNote, n
 	const minimumSize = Math.min( parentHeight, parentWidth )
 	const radius = minimumSize / 2 - margin
 	const pieSortValues = ( a, b ) => b - a
-	console.log( { parentHeight, minimumSize, radius } )
+
 	return (
 		<>
 			<svg width={ parentWidth } height={ parentHeight }>

@@ -154,7 +154,7 @@ export const useConversionHooks = () => {
 			// Calculate Scope1 for sparse project from production volume
 			const e6ProductionTons = convertVolume( { volume, unit, fossilFuelType }, 'e6ton' )
 			const e6m3Methane = e6ProductionTons * methaneM3Ton
-			const e6feet3Methane = e6m3Methane * 35.31
+			const e6feet3Methane = e6m3Methane * 35.31 * 200 // XXX XXX XXX
 			volume1 = e6feet3Methane / 379.3 / 2.2 // SCF feet3 -> lb -> kg gives us e3ton
 
 			// Get new factors for gas

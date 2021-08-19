@@ -4,7 +4,7 @@ import { Group } from "@visx/group"
 import { withParentSize } from '@visx/responsive'
 import { scaleBand, scaleLinear } from "@visx/scale"
 import { max } from 'd3-array'
-import ChartAxes from "./ChartAxes"
+import RangeChartAxes from "./RangeChartAxes"
 import getConfig from "next/config"
 import { scaleOrdinal } from "@visx/visx"
 
@@ -47,20 +47,12 @@ function BarStackInternal( { parentWidth, parentHeight, data, keys } ) {
 
 	const colorScale = scaleOrdinal( {
 		domain: keys,
-		range: [ '#008080', '#70a494', '#b4c8a8' ]
+		range: [ '#008080', '#de8a5a', '#b4c8a8' ]
 	} )
 
 	return parentWidth < 10 ? null : (
 		<svg width={ parentWidth } height={ parentHeight }>
 			<Group left={ horizontalMargin / 2 } top={ verticalMargin / 2 }>
-				<ChartAxes
-					xScale={ xScale }
-					yScale={ yScale }
-					width={ xMax }
-					height={ yMax }
-					yNumTicks={ 2 }
-					yTickLabelOffset={ horizontalMargin / 2 }
-				/>
 				<BarStack
 					data={ data }
 					keys={ keys }
@@ -71,19 +63,40 @@ function BarStackInternal( { parentWidth, parentHeight, data, keys } ) {
 				>
 					{ barStacks =>
 						barStacks.map( barStack =>
-							barStack.bars.map( bar => (
-								<rect
-									key={ `bar-stack-${ barStack.index }-${ bar.index }` }
-									x={ bar.x }
-									y={ bar.y }
-									height={ bar.height }
-									width={ bar.width }
-									fill={ bar.color }
-								/>
-							) ),
+							barStack.bars.map( bar => {
+								//console.log( bar )
+								return (
+									<React.Fragment key={ `bar-stack-${ barStack.index }-${ bar.index }` }>
+										<rect
+											x={ bar.x }
+											y={ bar.y }
+											height={ bar.height }
+											width={ bar.width }
+											fill={ bar.color }
+										/>
+										<text
+											x={ bar.x + bar.width/2 }
+											y={ bar.y + 20 }
+											fill="#ffffff"
+											fontSize={ 14 }
+											fontWeight={ 'bold' }
+											textAnchor="middle"
+										>
+											{ bar.bar.data[ bar.key ].toFixed( 1 ) }
+										</text>
+									</React.Fragment>
+								) } ),
 						)
 					}
 				</BarStack>
+				<RangeChartAxes
+					xScale={ xScale }
+					yScale={ yScale }
+					width={ xMax }
+					height={ yMax }
+					yNumTicks={ 2 }
+					yTickLabelOffset={ horizontalMargin / 2 }
+				/>
 			</Group>
 		</svg>
 	)
