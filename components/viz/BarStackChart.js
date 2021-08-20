@@ -82,7 +82,7 @@ function BarStackInternal( { parentWidth, parentHeight, data, keys } ) {
 											fontWeight={ 'bold' }
 											textAnchor="middle"
 										>
-											{ bar.bar.data[ bar.key ].toFixed( 1 ) }
+											{ bar.bar.data[ bar.key ]?.toFixed( 1 ) }
 										</text>
 									</React.Fragment>
 								) } ),

@@ -137,18 +137,18 @@ function SparseProject() {
 										data={ [
 											{
 												label: getText( 'range-low' ).toUpperCase(),
-												scope1: co2.scope1[ 0 ],
-												scope3: co2.scope3[ 0 ]
+												scope1: co2.scope1?.[ 0 ],
+												scope3: co2.scope3?.[ 0 ]
 											},
 											{
 												label: getText( 'range-mid' ).toUpperCase(),
-												scope1: co2.scope1[ 1 ],
-												scope3: co2.scope3[ 1 ]
+												scope1: co2.scope1?.[ 1 ],
+												scope3: co2.scope3?.[ 1 ]
 											},
 											{
 												label: getText( 'range-high' ).toUpperCase(),
-												scope1: co2.scope1[ 2 ],
-												scope3: co2.scope3[ 2 ]
+												scope1: co2.scope1?.[ 2 ],
+												scope3: co2.scope3?.[ 2 ]
 											},
 										] }
 										keys={ [ "scope3", "scope1" ] }

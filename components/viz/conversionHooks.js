@@ -17,6 +17,7 @@ const graphs = {}
 const conversions = {}
 
 const _toUnit = c => c.toUnit + ( ( c.modifier?.length > 0 ) ? settings.fuelTypeSeparator + c.modifier : '' )
+let __graph // For debug output in catch scope
 
 export const useConversionHooks = () => {
 	const conversionConstants = useSelector( redux => redux.conversions )
@@ -69,6 +70,7 @@ export const useConversionHooks = () => {
 	const convertVolume = ( { volume, unit, fossilFuelType }, toUnit ) => {
 		try {
 			const graph = graphs[ fossilFuelType ]
+			__graph = graph
 			const conversion = conversions[ fossilFuelType ]
 
 			const path = graph.shortestPath( unit, toUnit )
@@ -90,7 +92,8 @@ export const useConversionHooks = () => {
 
 			return factor * volume
 		} catch( e ) {
-			console.log( e.message + ': ' + unit, toUnit )
+			console.log( e.message + ': ' + unit, fossilFuelType, toUnit )
+			console.log( { graph: __graph.serialize() } )
 			return volume
 		}
 	}
@@ -154,25 +157,26 @@ export const useConversionHooks = () => {
 			// Calculate Scope1 for sparse project from production volume
 			const e6ProductionTons = convertVolume( { volume, unit, fossilFuelType }, 'e6ton' )
 			const e6m3Methane = e6ProductionTons * methaneM3Ton
-			const e6feet3Methane = e6m3Methane * 35.31 * 200 // XXX XXX XXX
-			volume1 = e6feet3Methane / 379.3 / 2.2 // SCF feet3 -> lb -> kg gives us e3ton
+			const e3tonMethane = convertVolume( { volume: e6m3Methane, unit: 'e6m3', fossilFuelType }, 'e3ton|sparse-scope1' )
+			volume1 = e3tonMethane
 
 			// Get new factors for gas
 			try {
 				scope1 = _co2Factors( 'e3ton', toUnit, 'gas' )
 			} catch( e ) {
-				console.log( `Scope 1 ${ toUnit } Project gas equiv  conversion error:  ${ e.message }`, {
+				console.log( `Scope 1 ${ toUnit } Project gas equiv conversion error:  ${ e.message }`, {
 					unit, toUnit, graphs,
 					graph: graph.serialize()
 				} )
 			}
 
-			DEBUG && console.log( 'Project Specific Scope1:', {
+			console.log( 'Project Specific Scope1:', {
 				scope1,
 				volume,
 				e6ProductionTons,
-				methaneM3Ton,
 				e6m3Methane,
+				methaneM3Ton,
+				e3tonMethane,
 				volume1,
 				kgco2e: volume1 * scope1.factor
 			} )
