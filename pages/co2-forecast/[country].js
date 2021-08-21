@@ -18,6 +18,7 @@ import { getPreferredReserveGrade } from "components/CO2Forecast/calculate"
 import { useRouter } from "next/router"
 import SparseProject from "components/CO2Forecast/SparseProject"
 import LeafletNoSSR from "../../components/geo/LeafletNoSSR"
+import { GQL_countryBorder } from "../../queries/country"
 
 const DEBUG = false
 
@@ -48,6 +49,11 @@ export default function CO2ForecastPage() {
 		skip: !country
 	} )
 
+	const { data: _border, loading: _borderLoading } = useQuery( GQL_countryBorder, {
+		variables: { isoA2: country?.toUpperCase() },
+		skip: !country
+	} )
+
 	const title = ( countryName ? countryName + ' - ' : '' ) + getText( 'co2_effects_for_country' )
 
 	const productionSources = ( _productionSources?.getProductionSources?.nodes ?? [] )
@@ -57,6 +63,7 @@ export default function CO2ForecastPage() {
 			...s,
 			namePretty: `${ getPreferredReserveGrade( s.grades ) } ${ s.year }`
 		} ) )
+	const borders = _border?.neCountries?.nodes?.[ 0 ]?.geometry
 
 	useEffect( () => {
 		if( !reservesSources?.length > 0 ) return
@@ -119,7 +126,10 @@ export default function CO2ForecastPage() {
 
 					<Row gutter={ [ 12, 12 ] } style={ { marginBottom: 26 } }>
 						<Col xs={ 24 }>
-							<LeafletNoSSR className="country-geo"/>
+							<LeafletNoSSR
+								className="country-geo"
+								outlineGeometry={borders}
+							/>
 						</Col>
 					</Row>
 

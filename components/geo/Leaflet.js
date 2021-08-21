@@ -23,9 +23,10 @@ const loadScript = ( scriptId, srcUrl, callback ) => {
 	if( existingScript && callback ) callback()
 }
 
-export default function Leaflet( { center, onMove, onMap, className } ) {
+export default function Leaflet( { center, onMove, onMap, className, outlineGeometry } ) {
 	const domRef = useRef()
 	const mapRef = useRef()
+	const outlineLayer = useRef()
 	const [ loaded, set_loaded ] = useState( 0 )
 
 	DEBUG && console.log( { center, onMove, onMap, className } )
@@ -65,7 +66,22 @@ export default function Leaflet( { center, onMove, onMap, className } ) {
 		}
 	}, [ domRef.current, loaded ] )
 
-	if( center?.lat === 0 && center?.lng === 0 ) return null
+	useEffect( () => {
+		if( loaded < 3 || !outlineGeometry ) return
+
+		try {
+			if( outlineLayer.current ) {
+				outlineLayer.current.removeFrom( mapRef.current )
+			}
+			outlineLayer.current = window.L.GeoJSON.geometryToLayer( outlineGeometry )
+			outlineLayer.current.addTo( mapRef.current )
+
+			mapRef.current.fitBounds( outlineLayer.current.getBounds() )
+		} catch( e ) {
+			console.log( e )
+			console.log( { outlineGeometry } )
+		}
+	}, [ domRef.current, loaded, outlineGeometry ] )
 
 	if( loaded < 3 ) return <Spinner/>
 

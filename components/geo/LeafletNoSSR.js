@@ -7,7 +7,7 @@ const DEBUG = true
 const LeafletWithNoSSR = dynamic( () => import( "components/geo/Leaflet" ),
 	{ ssr: false } )
 
-export default function LeafletNoSSR( { wells, className } ) {
+export default function LeafletNoSSR( { wells, className, outlineGeometry } ) {
 	const ipLocation = useSelector( r => r.ipLocation )
 
 	const [ center, set_center ] = useState( { lat: 0, lng: 0 } )
@@ -79,6 +79,7 @@ export default function LeafletNoSSR( { wells, className } ) {
 			onMove={ handleOnMove }
 			onMap={ set_map }
 			className={ className }
+			outlineGeometry={outlineGeometry}
 		/>
 	)
 }
