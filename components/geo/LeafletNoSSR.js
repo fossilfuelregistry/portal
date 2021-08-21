@@ -1,28 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-import TopNavigation from "components/navigation/TopNavigation"
-import getConfig from 'next/config'
 import dynamic from 'next/dynamic'
-import { gql, useQuery } from '@apollo/client'
 import { useSelector } from "react-redux"
 
-const DEBUG = false
+const DEBUG = true
 
-const theme = getConfig()?.publicRuntimeConfig?.themeVariables
-
-const Q_PRODUCTION = gql`
-query ProductionWells( $swLat: Float! $swLng: Float! $neLat: Float! $neLng: Float! ) {
-  findProductionIn(neLat: $neLat, neLng: $neLng, swLat: $swLat, swLng: $swLng) {
-    nodes {
-      id gasProduction oilProduction bottomHole
-      position { ... on GeometryPoint { x y } }
-    }
-  }
-}`
-
-const MapWithNoSSR = dynamic( () => import( "components/geo/Leaflet" ),
+const LeafletWithNoSSR = dynamic( () => import( "components/geo/Leaflet" ),
 	{ ssr: false } )
 
-export default function Wells() {
+export default function LeafletNoSSR( { wells, className } ) {
 	const ipLocation = useSelector( r => r.ipLocation )
 
 	const [ center, set_center ] = useState( { lat: 0, lng: 0 } )
@@ -33,28 +18,16 @@ export default function Wells() {
 	useEffect( () => {
 		if( !ipLocation ) return
 		set_center( ipLocation )
-	},
-	[ ipLocation?.lat, ipLocation?.lng ] )
+		DEBUG && console.log( { ipLocation } )
+	}, [ ipLocation?.lat, ipLocation?.lng ] )
 
 	const handleOnMove = useCallback( ( center, _bounds ) => {
-		console.log( _bounds )
+		DEBUG && console.log( { _bounds } )
 		set_bounds( _bounds )
 		set_center( { lat: center.lat, lng: center.lng } )
 	}, [ set_center ] )
 
-	const { data: production, loading: productionLoading } = useQuery( Q_PRODUCTION, {
-		variables: {
-			swLat: bounds?._southWest.lat,
-			swLng: bounds?._southWest.lng,
-			neLat: bounds?._northEast.lat,
-			neLng: bounds?._northEast.lng
-		},
-		skip: !bounds
-	} )
-
-	const wells = production?.findProductionIn?.nodes ?? []
-
-	if( map && wells.length > 0 ) {
+	if( map && wells?.length > 0 ) {
 		if( heatmap.current ) map.removeLayer( heatmap.current )
 
 		let lastWell = {}
@@ -88,7 +61,7 @@ export default function Wells() {
 			heatmap.current = window.L.featureGroup(
 				mergedWells.map( w => window.L.marker(
 					[ w.y, w.x ],
-				).bindPopup( `<b>${w.title}</b><br>Oil: ${w.oil?.toFixed( 1 )}<br>Gas: ${w.gas?.toFixed( 1 )}` ) )
+				).bindPopup( `<b>${ w.title }</b><br>Oil: ${ w.oil?.toFixed( 1 ) }<br>Gas: ${ w.gas?.toFixed( 1 ) }` ) )
 			).addTo( map )
 
 		// window.L.marker( [ well.position.y, well.position.x ] ).addTo( map )
@@ -96,27 +69,16 @@ export default function Wells() {
 		// const group = window.L.featureGroup( markers.current ).addTo( map )
 	}
 
+	DEBUG && console.log( { map, wells, center } )
+
+	if( !center?.lat ) return null
+
 	return (
-		<>
-			<div className="page">
-				<TopNavigation/>
-
-				<div className="map">
-					<MapWithNoSSR
-						className="wells"
-						center={center}
-						onMove={handleOnMove}
-						onMap={set_map}
-					/>
-				</div>
-
-				<style jsx>{`
-				`}
-				</style>
-
-			</div>
-		</>
+		<LeafletWithNoSSR
+			center={ center }
+			onMove={ handleOnMove }
+			onMap={ set_map }
+			className={ className }
+		/>
 	)
 }
-
-export { getStaticProps } from 'lib/getStaticProps'

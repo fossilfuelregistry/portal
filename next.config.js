@@ -15,6 +15,7 @@ module.exports = withAntdLess( {
 	publicRuntimeConfig: { themeVariables },
 	webpack: ( config ) => {
 		config.resolve.modules.push( path.resolve( './' ) )
+		config.resolve.alias[ 'mapbox-gl' ] = 'maplibre-gl'
 		return config
 	},
 	i18n: {

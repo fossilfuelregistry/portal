@@ -5,6 +5,7 @@ import Spinner from "./Spinner"
 const DEBUG = false
 
 const loadScript = ( scriptId, srcUrl, callback ) => {
+	DEBUG && console.log( 'Leaflet::loadScript', { scriptId, srcUrl, callback } )
 	const existingScript = document.getElementById( 'scriptId' )
 	if( !existingScript ) {
 		const script = document.createElement( 'script' )
@@ -22,10 +23,12 @@ const loadScript = ( scriptId, srcUrl, callback ) => {
 	if( existingScript && callback ) callback()
 }
 
-export default function Leaflet( { center, onMove, onMap } ) {
+export default function Leaflet( { center, onMove, onMap, className } ) {
 	const domRef = useRef()
 	const mapRef = useRef()
 	const [ loaded, set_loaded ] = useState( 0 )
+
+	DEBUG && console.log( { center, onMove, onMap, className } )
 
 	useEffect( () => {
 		loadScript( 'leaflet-script', 'https://unpkg.com/leaflet/dist/leaflet.js', () => set_loaded( l => l + 1 ) )
@@ -60,30 +63,24 @@ export default function Leaflet( { center, onMove, onMap } ) {
 				return
 			default:
 		}
-	},
-	[ domRef.current, loaded ] )
+	}, [ domRef.current, loaded ] )
 
 	if( center?.lat === 0 && center?.lng === 0 ) return null
 
 	if( loaded < 3 ) return <Spinner/>
 
 	return (
-		<div className="gffr-map">
+		<div className={ className }>
 			<Head>
-				{/* Load Leaflet CSS from CDN */}
+				{/* Load Leaflet CSS from CDN */ }
 				<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 			</Head>
 
-			<div className="leaflet-wrap" id="map" ref={domRef}/>
-
-			<style jsx>{`
-              .gffr-map .leaflet-wrap {
-                width: 100vw;
-                height: 80vh;
-              }
-			`}
-			</style>
-
+			<div
+				className="leaflet-wrap"
+				id="map"
+				ref={ domRef }
+			/>
 		</div>
 	)
 }

@@ -50,10 +50,11 @@ export default function CountryProductionPieChart( { project, emissions, co2 } )
 							/>
 						</div>
 					</Col>
-					<Col xs={ 10 } style={{ textAlign: 'center' }}>
+					{ !!project &&
+					<Col xs={ 10 } style={ { textAlign: 'center' } }>
 						<div style={ { height: 200 } }>
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" height="100%" width="100%">
-								<circle fill={colors.coal} className="cls-1" cx="50" cy="50" r={ projectRadius }/>
+								<circle fill={ colors.coal } className="cls-1" cx="50" cy="50" r={ projectRadius }/>
 								<text
 									y={ 80 }
 									fill="#000000d9"
@@ -62,8 +63,8 @@ export default function CountryProductionPieChart( { project, emissions, co2 } )
 									fontWeight={ 'bold' }
 									textAnchor="middle"
 								>
-									<tspan x={50}>{( ratio*100 ).toFixed( 2 )}%</tspan>
-									<tspan x={50} dy={16}>{ project.projectId }</tspan>
+									<tspan x={ 50 }>{ ( ratio * 100 ).toFixed( 2 ) }%</tspan>
+									<tspan x={ 50 } dy={ 16 }>{ project.projectId }</tspan>
 								</text>
 							</svg>
 						</div>
@@ -71,6 +72,7 @@ export default function CountryProductionPieChart( { project, emissions, co2 } )
 						<br/>
 						{ getText( 'emissions' ) }: { co2.toFixed( 2 ) } { getText( 'megaton' ) } CO²e
 					</Col>
+					}
 				</Row>
 			</div>
 		</div>

@@ -5,7 +5,7 @@ import CountrySelector from "components/navigation/CountrySelector"
 import { Col, Row } from "antd"
 import useText from "lib/useText"
 import { NextSeo } from "next-seo"
-import { useSelector , useDispatch } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import CarbonIntensitySelector from "components/viz/IntensitySelector"
 import HelpModal from "components/HelpModal"
 import LoadData from "components/CO2Forecast/LoadData"
@@ -17,6 +17,7 @@ import { getProducingCountries } from "lib/getStaticProps"
 import { getPreferredReserveGrade } from "components/CO2Forecast/calculate"
 import { useRouter } from "next/router"
 import SparseProject from "components/CO2Forecast/SparseProject"
+import LeafletNoSSR from "../../components/geo/LeafletNoSSR"
 
 const DEBUG = false
 
@@ -27,6 +28,7 @@ export default function CO2ForecastPage() {
 	const country = useSelector( redux => redux.country )
 	const countryName = useSelector( redux => redux.countryName )
 	const region = useSelector( redux => redux.region )
+	const productionSourceId = useSelector( redux => redux.productionSourceId )
 	const project = useSelector( redux => redux.project )
 	const router = useRouter()
 	const dispatch = useDispatch()
@@ -67,7 +69,7 @@ export default function CO2ForecastPage() {
 		DEBUG && console.log( 'useEffect PRELOAD country', { country, qCountry } )
 		if( qCountry !== country ) dispatch( { type: 'COUNTRY', payload: qCountry } )
 	}, [ router.query?.country ] )
-	
+
 	return (
 		<>
 			<NextSeo
@@ -105,43 +107,6 @@ export default function CO2ForecastPage() {
 							/>
 						</Col>
 
-						<Col xs={ 12 } lg={ 4 }>
-							<h3>
-								{ getText( 'data_source' ) }
-								<HelpModal title="data_source" content="explanation_countryhistoric"/>
-							</h3>
-							<SourceSelector
-								sources={ productionSources }
-								loading={ productionLoading }
-								stateKey="productionSourceId"
-								placeholder={ getText( 'data_source' ) }
-							/>
-						</Col>
-
-						<Col xs={ 12 } lg={ 5 }>
-							<h3>{ getText( 'reserves' ) }</h3>
-							<SourceSelector
-								sources={ reservesSources }
-								loading={ reservesLoading }
-								stateKey="reservesSourceId"
-								placeholder={ getText( 'reserves' ) }
-							/>
-						</Col>
-
-						<Col xs={ 12 } lg={ 5 }>
-							<div>
-								<h3>
-									{ getText( 'projection' ) }
-								</h3>
-								<SourceSelector
-									sources={ projectionSources }
-									loading={ projectionLoading }
-									stateKey="projectionSourceId"
-									placeholder={ getText( 'projection' ) }
-								/>
-							</div>
-						</Col>
-
 						<Col xs={ 24 } md={ 12 } lg={ 4 }>
 							<h3>
 								{ getText( 'carbon_intensity' ) }
@@ -152,9 +117,63 @@ export default function CO2ForecastPage() {
 
 					</Row>
 
-					{project?.dataType !== 'sparse' && <LoadData/> }
+					<Row gutter={ [ 12, 12 ] } style={ { marginBottom: 26 } }>
+						<Col xs={ 24 }>
+							<LeafletNoSSR className="country-geo"/>
+						</Col>
+					</Row>
 
-					{project?.dataType === 'sparse' && <SparseProject/> }
+					{ project?.dataType !== 'sparse' &&
+					<>
+						<Row gutter={ [ 12, 12 ] } style={ { marginBottom: 26 } }>
+
+							<Col xs={ 12 } lg={ 4 }>
+								<h3>
+									{ getText( 'data_source' ) }
+									<HelpModal title="data_source" content="explanation_countryhistoric"/>
+								</h3>
+								<SourceSelector
+									sources={ productionSources }
+									loading={ productionLoading }
+									stateKey="productionSourceId"
+									placeholder={ getText( 'data_source' ) }
+								/>
+							</Col>
+
+							{ !!productionSourceId &&
+							<>
+								<Col xs={ 12 } lg={ 5 }>
+									<h3>{ getText( 'reserves' ) }</h3>
+									<SourceSelector
+										sources={ reservesSources }
+										loading={ reservesLoading }
+										stateKey="reservesSourceId"
+										placeholder={ getText( 'reserves' ) }
+									/>
+								</Col>
+
+								<Col xs={ 12 } lg={ 5 }>
+									<div>
+										<h3>
+											{ getText( 'projection' ) }
+										</h3>
+										<SourceSelector
+											sources={ projectionSources }
+											loading={ projectionLoading }
+											stateKey="projectionSourceId"
+											placeholder={ getText( 'projection' ) }
+										/>
+									</div>
+								</Col>
+							</> }
+
+						</Row>
+
+						{ productionSourceId > 0 && <LoadData/> }
+
+					</> }
+
+					{ project?.dataType === 'sparse' && <SparseProject/> }
 
 				</div>
 
@@ -186,6 +205,11 @@ export default function CO2ForecastPage() {
                     width: 20px;
                     top: -4px;
                     transform: translateX(-6.5px);
+                  }
+                  
+                  .page :global(.country-geo) {
+                  		width: 100%;
+                  		height: 400px;
                   }
 				` }
 				</style>
