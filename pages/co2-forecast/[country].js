@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import TopNavigation from "components/navigation/TopNavigation"
 import getConfig from 'next/config'
 import CountrySelector from "components/navigation/CountrySelector"
@@ -17,8 +17,10 @@ import { getProducingCountries } from "lib/getStaticProps"
 import { getPreferredReserveGrade } from "components/CO2Forecast/calculate"
 import { useRouter } from "next/router"
 import SparseProject from "components/CO2Forecast/SparseProject"
-import LeafletNoSSR from "../../components/geo/LeafletNoSSR"
-import { GQL_countryBorder } from "../../queries/country"
+import LeafletNoSSR from "components/geo/LeafletNoSSR"
+import { GQL_countryBorder } from "queries/country"
+import CountryProductionPieChart from "components/CO2Forecast/CountryProductionPieChart"
+import { useConversionHooks } from "components/viz/conversionHooks"
 
 const DEBUG = false
 
@@ -26,11 +28,13 @@ const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
 export default function CO2ForecastPage() {
 	const { getText } = useText()
+	const { getCountryCurrentCO2 } = useConversionHooks()
 	const country = useSelector( redux => redux.country )
 	const countryName = useSelector( redux => redux.countryName )
 	const region = useSelector( redux => redux.region )
 	const productionSourceId = useSelector( redux => redux.productionSourceId )
 	const project = useSelector( redux => redux.project )
+	const [ countryCO2Total, set_countryCO2Total ] = useState( 0 )
 	const router = useRouter()
 	const dispatch = useDispatch()
 
@@ -64,6 +68,14 @@ export default function CO2ForecastPage() {
 			namePretty: `${ getPreferredReserveGrade( s.grades ) } ${ s.year }`
 		} ) )
 	const borders = _border?.neCountries?.nodes?.[ 0 ]?.geometry
+
+	useEffect( () => {
+		const asyncEffect = async() => {
+			const ct = await getCountryCurrentCO2( country )
+			set_countryCO2Total( ct )
+		}
+		asyncEffect()
+	}, [ country ] )
 
 	useEffect( () => {
 		if( !reservesSources?.length > 0 ) return
@@ -124,14 +136,21 @@ export default function CO2ForecastPage() {
 
 					</Row>
 
+					{ !project && !productionSourceId &&
 					<Row gutter={ [ 12, 12 ] } style={ { marginBottom: 26 } }>
-						<Col xs={ 24 }>
+						<Col xs={ 24 } lg={ 12 }>
 							<LeafletNoSSR
 								className="country-geo"
-								outlineGeometry={borders}
+								outlineGeometry={ borders }
+							/>
+						</Col>
+						<Col xs={ 24 } lg={ 12 }>
+							<CountryProductionPieChart
+								emissions={ countryCO2Total }
 							/>
 						</Col>
 					</Row>
+					}
 
 					{ project?.dataType !== 'sparse' &&
 					<>
@@ -216,10 +235,10 @@ export default function CO2ForecastPage() {
                     top: -4px;
                     transform: translateX(-6.5px);
                   }
-                  
+
                   .page :global(.country-geo) {
-                  		width: 100%;
-                  		height: 400px;
+                    width: 100%;
+                    height: 400px;
                   }
 				` }
 				</style>

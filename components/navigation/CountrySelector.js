@@ -80,6 +80,7 @@ export default function CountrySelector() {
 				onChange={ async v => {
 					set_selectedCountryOption( v )
 					dispatch( { type: 'COUNTRY', payload: v.value } )
+					dispatch( { type: 'COUNTRYNAME', payload: v.label } )
 					dispatch( { type: 'REGION', payload: undefined } )
 					dispatch( { type: 'PROJECT', payload: undefined } )
 					await co2PageUpdateQuery( store, router, {

@@ -40,7 +40,7 @@ export default function CountryProductionPieChart( { project, emissions, co2 } )
 			<div className="header">{ getText( 'emissions' ) } - { getText( 'current_annual_estimate' ) }</div>
 			<div className="box">
 				<Row align={ 'middle' }>
-					<Col xs={ 14 }>
+					<Col xs={ ( project ? 14 : 24 ) }>
 						<div style={ { height: 400 } }>
 							<PieChart
 								data={ pieChartData }
