@@ -4,7 +4,7 @@ import { Group } from "@visx/group"
 import { withParentSize } from '@visx/responsive'
 import { useTooltip } from '@visx/tooltip'
 
-const margin = 34, whiteSpace = 3, outerLabel = 2.2, innerLabel = 1.5
+const margin = 34, whiteSpace = 3, outerLabel = 1.4, innerLabel = 1.0
 
 const PieChartInternal = ( { parentWidth, parentHeight, data, header, topNote, note } ) => {
 
@@ -26,6 +26,7 @@ const PieChartInternal = ( { parentWidth, parentHeight, data, header, topNote, n
 						pieValue={ ( d ) => d.percentage }
 						pieSortValues={ pieSortValues }
 						outerRadius={ radius }
+						innerRadius={ 0.6*radius }
 						centroid={ ( ( xyCoords, arc ) => 'XXX' ) }
 					>
 						{ ( pie ) => {
@@ -89,8 +90,8 @@ const PieChartInternal = ( { parentWidth, parentHeight, data, header, topNote, n
 				<Group top={ parentHeight / 2 } left={ parentWidth / 2 }>
 					<text
 						x={ 0 }
-						y={ 10 }
-						fill="#ffffff"
+						y={ 20 }
+						fill="#000000d7"
 						fontSize={ 60 }
 						fontFamily={ 'sommet-rounded' }
 						fontWeight={ 'bold' }
@@ -100,8 +101,8 @@ const PieChartInternal = ( { parentWidth, parentHeight, data, header, topNote, n
 					</text>
 					<text
 						x={ 0 }
-						y={ 30 }
-						fill="#ffffff"
+						y={ 40 }
+						fill="#000000d7"
 						fontSize={ 16 }
 						fontWeight={ 'bold' }
 						textAnchor="middle"
@@ -110,8 +111,8 @@ const PieChartInternal = ( { parentWidth, parentHeight, data, header, topNote, n
 					</text>
 					<text
 						x={ 0 }
-						y={ -45 }
-						fill="#ffffff"
+						y={ -35 }
+						fill="#000000d7"
 						fontSize={ 16 }
 						fontWeight={ 'bold' }
 						textAnchor="middle"
