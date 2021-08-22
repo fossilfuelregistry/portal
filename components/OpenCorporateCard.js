@@ -18,7 +18,7 @@ export default function OpenCorporateCard( { reference } ) {
 		if( !( reference?.length > 0 ) ) return
 		const asyncEffect = async() => {
 			try {
-				const f = await fetch( settings.openCorporate.endpoint + reference, {
+				const f = await fetch( settings.openCorporate.endpoint + reference + '?api_token=' + process.env.NEXT_PUBLIC_OPENCORPORATES_API_TOKEN, {
 					headers: { 'Accept-Encoding': 'application/json' }
 				} )
 

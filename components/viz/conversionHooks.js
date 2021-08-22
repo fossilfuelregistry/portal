@@ -135,7 +135,7 @@ export const useConversionHooks = () => {
 		try {
 			scope1 = _co2Factors( unit, toUnit, fullFuelType )
 		} catch( e ) {
-			console.log( `Scope 1 ${ toUnit } Conversion Error:  ${ e.message }`, {
+			DEBUG && console.log( `Scope 1 ${ toUnit } Conversion Error:  ${ e.message }`, {
 				unit, toUnit,
 				fullFuelType,
 				graph: graph.serialize()

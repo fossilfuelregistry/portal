@@ -80,7 +80,12 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 						set_selectedProjectOption( p )
 						const proj = projects.find( pr => pr.projectId === p )
 						dispatch( { type: 'PROJECT', payload: proj } )
-						DEBUG && console.log( { p, proj, projects } )
+						console.log( { p, proj, projects } )
+
+						if( proj?.dataType === 'sparse' ) {
+							dispatch( { type: 'PRODUCTIONSOURCEID', payload: undefined } )
+						}
+
 						await co2PageUpdateQuery( store, router, 'project', p )
 					} }
 				>

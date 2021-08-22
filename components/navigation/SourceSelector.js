@@ -64,7 +64,7 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 	}, [ sources, sources?.length, loading, stateValue, project ] )
 
 	return (
-		<div style={ { marginTop: 12 } }>
+		<div>
 			<Select
 				showSearch
 				style={ { minWidth: 120, width: '100%' } }

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react"
 import TopNavigation from "components/navigation/TopNavigation"
 import getConfig from 'next/config'
 import CountrySelector from "components/navigation/CountrySelector"
-import { Col, Row } from "antd"
+import { Alert, Col, Row } from "antd"
 import useText from "lib/useText"
 import { NextSeo } from "next-seo"
 import { useDispatch, useSelector } from "react-redux"
@@ -89,6 +89,52 @@ export default function CO2ForecastPage() {
 		if( qCountry !== country ) dispatch( { type: 'COUNTRY', payload: qCountry } )
 	}, [ router.query?.country ] )
 
+	let templateId = 'totals', template
+	if( !project && productionSourceId > 0 )
+		templateId = 'dense-country'
+	if( project?.dataType === 'dense' )
+		templateId = "dense-project"
+	if( project?.dataType === 'sparse' )
+		templateId = 'sparse-project'
+
+	switch( templateId ) {
+
+		case "totals":
+			template = (
+				<Row gutter={ [ 12, 12 ] } style={ { marginBottom: 26 } }>
+					<Col xs={ 24 } lg={ 12 }>
+						<div className="geo-wrap">
+							<LeafletNoSSR
+								className="country-geo"
+								outlineGeometry={ borders }
+							/>
+						</div>
+					</Col>
+					<Col xs={ 24 } lg={ 12 }>
+						<CountryProductionPieChart
+							emissions={ countryCO2Total }
+						/>
+					</Col>
+				</Row> )
+			break
+
+		case "dense-country":
+		case "dense-project":
+			template = (
+				<>
+					{ productionSourceId > 0 && <LoadData/> }
+				</> )
+			break
+
+		case "sparse-project":
+			template = <SparseProject/>
+			break
+
+		default:
+			template = <Alert showIcon type="warning" message={ 'No template for ' + templateId }/>
+	}
+
+	console.log( 'TEMPLATE', templateId )
 	return (
 		<>
 			<NextSeo
@@ -117,92 +163,62 @@ export default function CO2ForecastPage() {
 
 					<Row gutter={ [ 12, 12 ] } style={ { marginBottom: 26 } }>
 
-						<Col xs={ 12 } lg={ 6 }>
-							<h3>{ getText( 'country' ) }</h3>
+						<Col xs={ 24 } lg={ 6 }>
+							<h4>{ getText( 'country' ) }</h4>
 							<CountrySelector/>
 							<ProjectSelector
 								iso3166={ country }
 								iso31662={ region ?? '' }
 							/>
-						</Col>
 
-						<Col xs={ 24 } md={ 12 } lg={ 4 }>
-							<h3>
+							<h4 className="selector">
 								{ getText( 'carbon_intensity' ) }
 								<HelpModal title="carbon_intensity" content="explanation_methanefactor"/>
-							</h3>
+							</h4>
 							<CarbonIntensitySelector/>
-						</Col>
 
-					</Row>
-
-					{ !project && !productionSourceId &&
-					<Row gutter={ [ 12, 12 ] } style={ { marginBottom: 26 } }>
-						<Col xs={ 24 } lg={ 12 }>
-							<LeafletNoSSR
-								className="country-geo"
-								outlineGeometry={ borders }
-							/>
-						</Col>
-						<Col xs={ 24 } lg={ 12 }>
-							<CountryProductionPieChart
-								emissions={ countryCO2Total }
-							/>
-						</Col>
-					</Row>
-					}
-
-					{ project?.dataType !== 'sparse' &&
-					<>
-						<Row gutter={ [ 12, 12 ] } style={ { marginBottom: 26 } }>
-
-							<Col xs={ 12 } lg={ 4 }>
-								<h3>
-									{ getText( 'data_source' ) }
-									<HelpModal title="data_source" content="explanation_countryhistoric"/>
-								</h3>
-								<SourceSelector
-									sources={ productionSources }
-									loading={ productionLoading }
-									stateKey="productionSourceId"
-									placeholder={ getText( 'data_source' ) }
-								/>
-							</Col>
-
-							{ !!productionSourceId &&
-							<>
-								<Col xs={ 12 } lg={ 5 }>
-									<h3>{ getText( 'reserves' ) }</h3>
+							{project?.dataType !== 'sparse' &&
+								<>
+									<h4 className="selector">
+										{ getText( 'data_source' ) }
+										<HelpModal title="data_source" content="explanation_countryhistoric"/>
+									</h4>
 									<SourceSelector
-										sources={ reservesSources }
-										loading={ reservesLoading }
-										stateKey="reservesSourceId"
-										placeholder={ getText( 'reserves' ) }
+										sources={ productionSources }
+										loading={ productionLoading }
+										stateKey="productionSourceId"
+										placeholder={ getText( 'data_source' ) }
 									/>
-								</Col>
+								</>
+							}
 
-								<Col xs={ 12 } lg={ 5 }>
-									<div>
-										<h3>
-											{ getText( 'projection' ) }
-										</h3>
-										<SourceSelector
-											sources={ projectionSources }
-											loading={ projectionLoading }
-											stateKey="projectionSourceId"
-											placeholder={ getText( 'projection' ) }
-										/>
-									</div>
-								</Col>
+							{ !!productionSourceId && project?.dataType !== 'sparse' &&
+							<>
+								<h4 className="selector">{ getText( 'reserves' ) }</h4>
+								<SourceSelector
+									sources={ reservesSources }
+									loading={ reservesLoading }
+									stateKey="reservesSourceId"
+									placeholder={ getText( 'reserves' ) }
+								/>
+
+								<h4 className="selector">
+									{ getText( 'projection' ) }
+								</h4>
+								<SourceSelector
+									sources={ projectionSources }
+									loading={ projectionLoading }
+									stateKey="projectionSourceId"
+									placeholder={ getText( 'projection' ) }
+								/>
 							</> }
 
-						</Row>
+						</Col>
 
-						{ productionSourceId > 0 && <LoadData/> }
-
-					</> }
-
-					{ project?.dataType === 'sparse' && <SparseProject/> }
+						<Col xs={ 24 } lg={ 18 }>
+							{ template }
+						</Col>
+					</Row>
 
 				</div>
 
@@ -221,8 +237,12 @@ export default function CO2ForecastPage() {
                     }
                   }
 
-                  h3 {
-                    margin-bottom: 12px !important;
+                  h4 {
+                    margin-bottom: 6px !important;
+                  }
+
+                  .selector {
+                    margin-top: 12px !important;
                   }
 
                   .co2 :global(.ant-slider-mark) {
@@ -234,6 +254,11 @@ export default function CO2ForecastPage() {
                     width: 20px;
                     top: -4px;
                     transform: translateX(-6.5px);
+                  }
+
+                  .page :global(.geo-wrap) {
+                    margin-top: 24px;
+                    position: relative;
                   }
 
                   .page :global(.country-geo) {
