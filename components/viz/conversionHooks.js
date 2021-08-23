@@ -247,7 +247,7 @@ export const useConversionHooks = () => {
 			}
 
 			prod.forEach( datapoint => {
-				if( !datapoint.volume || !datapoint.unit ) {
+				if( !datapoint.unit ) {
 					console.log( { prod } )
 					throw new Error( 'Malformed production data point: ' + JSON.stringify( datapoint ) )
 				}
@@ -257,7 +257,7 @@ export const useConversionHooks = () => {
 			projection.forEach( datapoint => {
 				if( datapoint.sourceId !== projectionSourceId ) return
 				if( datapoint.year < gapEnd ) return
-				if( !datapoint.volume || !datapoint.unit ) {
+				if( !datapoint.unit ) {
 					console.log( { projection } )
 					throw new Error( 'Malformed projection data point: ' + JSON.stringify( datapoint ) )
 				}

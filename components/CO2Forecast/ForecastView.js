@@ -7,20 +7,22 @@ import YearSummary from "./YearSummary"
 import FutureSummary from "./FutureSummary"
 import InputDataGraph from "components/viz/InputDataGraph"
 import Download from "./Download"
-import CO2ForecastGraph from "../viz/CO2ForecastGraph"
+import CO2ForecastGraph from "components/viz/CO2ForecastGraph"
+import LeafletNoSSR from "components/geo/LeafletNoSSR"
 
-const DEBUG = false
+const DEBUG = true
 
 function ForecastView( { production, projection, reserves, projectedProduction, limits } ) {
 	const { getText } = useText()
 	const country = useSelector( redux => redux.country )
+	const projectGeo = useSelector( redux => redux.projectGeo )
 
-	DEBUG && console.log( 'ForecastView', { production, projection, reserves, projectedProduction, limits } )
+	DEBUG && console.log( 'ForecastView', { production, projection, reserves, projectedProduction, limits, projectGeo } )
 
 	return (
 		<>
 			<Row gutter={ [ 16, 16 ] }>
-				<Col xs={ 24 } lg={ 14 } xxl={ 18 }>
+				<Col xs={ 24 } lg={ 14 } xxl={ 16 }>
 					<CO2ForecastGraph
 						production={ production }
 						projection={ projection }
@@ -30,7 +32,7 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 					/>
 				</Col>
 
-				<Col xs={ 24 } lg={ 10 } xxl={ 6 }>
+				<Col xs={ 24 } lg={ 10 } xxl={ 8 }>
 					<Row gutter={ [ 16, 16 ] }>
 						<Col xs={ 24 } xl={ 24 }>
 							<FutureSummary dataset={ projection } limits={ limits }/>
@@ -50,8 +52,18 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 
 			<Row gutter={ [ 16, 16 ] }>
 
+				{ !!projectGeo &&
+				<Col xs={ 24 } md={ 12 } xxl={ 12 }>
+					<div className="graph-wrap">
+						<LeafletNoSSR
+							className="project-geo"
+							outlineGeometry={ projectGeo }
+						/>
+					</div>
+				</Col> }
+
 				{ production?.length > 0 &&
-				<Col xs={ 24 } md={ 12 } xxl={ 6 }>
+				<Col xs={ 24 } md={ 12 } xxl={ 12 }>
 					<div className="graph-wrap">
 						<h4>{ getText( 'gas' ) + ' ' + getText( 'production' ) } e9m3</h4>
 						<InputDataGraph data={ production } fuel="gas" comment="PROD"/>
@@ -62,7 +74,7 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 				</Col> }
 
 				{ reserves?.length > 0 &&
-				<Col xs={ 24 } md={ 12 } xxl={ 6 }>
+				<Col xs={ 24 } md={ 12 } xxl={ 12 }>
 					<div className="graph-wrap">
 						<h4>{ getText( 'gas' ) + ' ' + getText( 'reserves' ) } e9m3</h4>
 						<InputDataGraph data={ reserves } fuel="gas" comment="RES"/>
@@ -73,7 +85,7 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 				</Col> }
 
 				{ production?.length > 0 &&
-				<Col xs={ 24 } md={ 12 } xxl={ 6 }>
+				<Col xs={ 24 } md={ 12 } xxl={ 12 }>
 					<div className="graph-wrap">
 						<h4>{ getText( 'oil' ) + ' ' + getText( 'production' ) } e6bbl</h4>
 						<InputDataGraph data={ production } fuel="oil" comment="PROD"/>
@@ -84,7 +96,7 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 				</Col> }
 
 				{ reserves?.length > 0 &&
-				<Col xs={ 24 } md={ 12 } xxl={ 6 }>
+				<Col xs={ 24 } md={ 12 } xxl={ 12 }>
 					<div className="graph-wrap">
 						<h4>{ getText( 'oil' ) + ' ' + getText( 'reserves' ) } e6bbl</h4>
 						<InputDataGraph data={ reserves } fuel="oil" comment="RES"/>

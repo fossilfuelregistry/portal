@@ -134,7 +134,6 @@ export default function CO2ForecastPage() {
 			template = <Alert showIcon type="warning" message={ 'No template for ' + templateId }/>
 	}
 
-	console.log( 'TEMPLATE', templateId )
 	return (
 		<>
 			<NextSeo

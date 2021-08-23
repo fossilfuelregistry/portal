@@ -76,7 +76,7 @@ export default function Leaflet( { center, onMove, onMap, className, outlineGeom
 			outlineLayer.current = window.L.GeoJSON.geometryToLayer( outlineGeometry )
 			outlineLayer.current.addTo( mapRef.current )
 
-			mapRef.current.fitBounds( outlineLayer.current.getBounds() )
+			mapRef.current.fitBounds( outlineLayer.current.getBounds(), { maxZoom: 6 } )
 		} catch( e ) {
 			console.log( e )
 			console.log( { outlineGeometry } )

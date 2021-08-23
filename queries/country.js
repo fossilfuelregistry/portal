@@ -92,3 +92,8 @@ query sparseProject($projectId: String!, $iso3166: String!) {
     }
   }
 }`
+
+export const GQL_projectGeo = gql`
+query projectGeo($projectId: String!, $iso3166: String!) {
+  projectGeo(projectId: $projectId, iso3166: $iso3166) {
+    geom { geojson } } }`

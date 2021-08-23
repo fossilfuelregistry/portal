@@ -1,4 +1,4 @@
-import { useQuery } from "@apollo/client"
+import { useApolloClient, useQuery } from "@apollo/client"
 import GraphQLStatus from "../GraphQLStatus"
 import { Select } from "antd"
 import { useRouter } from "next/router"
@@ -8,12 +8,14 @@ import useText from "lib/useText"
 import { GQL_projects } from "queries/general"
 import { co2PageUpdateQuery } from "../CO2Forecast/calculate"
 import { AreaChartOutlined, DotChartOutlined } from "@ant-design/icons"
+import { GQL_projectGeo } from "../../queries/country"
 
 const DEBUG = false
 
 export default function ProjectSelector( { iso3166, iso31662 } ) {
 	const router = useRouter()
 	const store = useStore()
+	const apolloClient = useApolloClient()
 	const [ selectedProjectOption, set_selectedProjectOption ] = useState()
 	const dispatch = useDispatch()
 	const project = useSelector( redux => redux.project )
@@ -81,6 +83,16 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 						const proj = projects.find( pr => pr.projectId === p )
 						dispatch( { type: 'PROJECT', payload: proj } )
 						console.log( { p, proj, projects } )
+
+						if( proj?.projectId?.length > 0 ) {
+							const q = await apolloClient.query( {
+								query: GQL_projectGeo,
+								variables: { iso3166, projectId: proj?.projectId }
+							} )
+							dispatch( { type: 'PROJECTGEO', payload: q.data?.projectGeo?.geom?.geojson } )
+						} else {
+							dispatch( { type: 'PROJECTGEO', payload: null } )
+						}
 
 						if( proj?.dataType === 'sparse' ) {
 							dispatch( { type: 'PRODUCTIONSOURCEID', payload: undefined } )
