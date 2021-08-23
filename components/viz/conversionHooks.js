@@ -157,7 +157,11 @@ export const useConversionHooks = () => {
 			// Calculate Scope1 for sparse project from production volume
 			const e6ProductionTons = convertVolume( { volume, unit, fossilFuelType }, 'e6ton' )
 			const e6m3Methane = e6ProductionTons * methaneM3Ton
-			const e3tonMethane = convertVolume( { volume: e6m3Methane, unit: 'e6m3', fossilFuelType }, 'e3ton|sparse-scope1' )
+			const e3tonMethane = convertVolume( {
+				volume: e6m3Methane,
+				unit: 'e6m3',
+				fossilFuelType
+			}, 'e3ton|sparse-scope1' )
 			volume1 = e3tonMethane
 
 			// Get new factors for gas
@@ -246,19 +250,19 @@ export const useConversionHooks = () => {
 					} )
 			}
 
-			prod.forEach( datapoint => {
+			prod.forEach( ( datapoint, index ) => {
 				if( !datapoint.unit ) {
-					console.log( { prod } )
+					console.log( { prod, index, datapoint } )
 					throw new Error( 'Malformed production data point: ' + JSON.stringify( datapoint ) )
 				}
 				return datapoint.co2 = co2FromVolume( datapoint )
 			} )
 
-			projection.forEach( datapoint => {
+			projection.forEach( ( datapoint, index ) => {
 				if( datapoint.sourceId !== projectionSourceId ) return
 				if( datapoint.year < gapEnd ) return
 				if( !datapoint.unit ) {
-					console.log( { projection } )
+					console.log( { projection, index, datapoint } )
 					throw new Error( 'Malformed projection data point: ' + JSON.stringify( datapoint ) )
 				}
 
