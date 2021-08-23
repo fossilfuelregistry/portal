@@ -9,7 +9,7 @@ import ForecastView from "./ForecastView"
 import { useConversionHooks } from "../viz/conversionHooks"
 import settings from "settings"
 
-const DEBUG = false
+const DEBUG = true
 
 function LoadData() {
 	const dispatch = useDispatch()
@@ -92,7 +92,7 @@ function LoadData() {
 	// Figure out available years when data loaded.
 
 	useEffect( () => {
-		DEBUG && console.log( 'useEffect Production', production, limits )
+		DEBUG && console.log( 'useEffect Production', production?.length, limits )
 		if( !production?.length > 0 ) return
 		const newLimits = production.reduce( ( _limits, datapoint ) => {
 			if( datapoint.sourceId !== productionSourceId ) return _limits
@@ -102,7 +102,8 @@ function LoadData() {
 			return _limits
 		}, { oil: { firstYear: settings.year.end, lastYear: 0 }, gas: { firstYear: settings.year.end, lastYear: 0 } } )
 
-		set_limits( { ...limits, production: newLimits } )
+		set_limits( l => ( { ...l, production: newLimits } ) )
+		DEBUG && console.log( 'useEffect Production', { newLimits } )
 	}, [ production, productionSourceId ] )
 
 	useEffect( () => {
@@ -129,7 +130,7 @@ function LoadData() {
 			} )
 		}
 
-		set_limits( { ...limits, projection: newLimits } )
+		set_limits( l => ( { ...l, projection: newLimits } ) )
 	}, [ projection, projectionSourceId ] )
 
 	useEffect( () => {
@@ -141,7 +142,7 @@ function LoadData() {
 			return _limits
 		}, {} )
 
-		set_limits( { ...limits, reserves: newLimits } )
+		set_limits( l => ( { ...l, reserves: newLimits } ) )
 	}, [ reserves ] )
 
 	DEBUG && console.log( { limits, production, projection } )
