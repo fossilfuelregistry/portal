@@ -4,6 +4,8 @@ import Spinner from "./Spinner"
 
 const DEBUG = false
 
+const projectBorderStyle = { "color": "#2b8d6e", "weight": 3, "opacity": 0.65 }
+
 const loadScript = ( scriptId, srcUrl, callback ) => {
 	DEBUG && console.log( 'Leaflet::loadScript', { scriptId, srcUrl, callback } )
 	const existingScript = document.getElementById( 'scriptId' )
@@ -23,11 +25,12 @@ const loadScript = ( scriptId, srcUrl, callback ) => {
 	if( existingScript && callback ) callback()
 }
 
-export default function Leaflet( { center, onMove, onMap, className, outlineGeometry, projects } ) {
+export default function Leaflet( { center, onMove, onMap, className, outlineGeometry, projects, projectBorders } ) {
 	const domRef = useRef()
 	const mapRef = useRef()
 	const outlineLayer = useRef()
 	const markerLayer = useRef()
+	const projectLayer = useRef()
 	const [ loaded, set_loaded ] = useState( 0 )
 
 	DEBUG && console.log( { center, onMove, onMap, className } )
@@ -55,12 +58,13 @@ export default function Leaflet( { center, onMove, onMap, className, outlineGeom
 					{ attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community' }
 				).addTo( mapRef.current )
 
-
 				mapRef.current.on( 'moveend', event => {
 					DEBUG && console.log( { event, center: mapRef.current.getCenter() } )
 					onMove?.( mapRef.current.getCenter(), mapRef.current.getBounds() )
 				} )
+
 				markerLayer.current = window.L.layerGroup().addTo( mapRef.current )
+				projectLayer.current = window.L.geoJSON( undefined, { style: projectBorderStyle } ).addTo( mapRef.current )
 
 				// FIX leaflet's default icon path problems with webpack
 				delete window.L.Icon.Default.prototype._getIconUrl
@@ -85,8 +89,12 @@ export default function Leaflet( { center, onMove, onMap, className, outlineGeom
 			}
 			outlineLayer.current = window.L.GeoJSON.geometryToLayer( outlineGeometry )
 			outlineLayer.current.addTo( mapRef.current )
-
-			mapRef.current.fitBounds( outlineLayer.current.getBounds(), { maxZoom: 6 } )
+			const bounds = outlineLayer.current.getBounds()
+			DEBUG && console.log( 'FIT!', outlineGeometry, bounds.isValid() )
+			DEBUG && console.log( JSON.stringify( bounds ) )
+			DEBUG && console.log( bounds )
+			mapRef.current.fitBounds( bounds, { maxZoom: 6 } )
+			DEBUG && console.log( 'FITTED' )
 		} catch( e ) {
 			console.log( e )
 			console.log( { outlineGeometry } )
@@ -107,6 +115,21 @@ export default function Leaflet( { center, onMove, onMap, className, outlineGeom
 			console.log( { projects } )
 		}
 	}, [ domRef.current, loaded, projects ] )
+
+	useEffect( () => {
+		if( loaded < 3 || !projects ) return
+		try {
+			projectLayer.current.clearLayers()
+
+			projectBorders.map( p => {
+				if( !p?.geom?.geojson ) return
+				projectLayer.current.addData( p.geom?.geojson )
+			} )
+		} catch( e ) {
+			console.log( e )
+			console.log( { projects } )
+		}
+	}, [ domRef.current, loaded, projectBorders ] )
 
 	if( loaded < 3 ) return <Spinner/>
 

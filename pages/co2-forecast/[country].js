@@ -56,7 +56,7 @@ export default function CO2ForecastPage() {
 	} )
 
 	const { data: _border, loading: _borderLoading } = useQuery( GQL_countryBorder, {
-		variables: { isoA2: country?.toUpperCase() },
+		variables: { isoA2: country?.toUpperCase(), iso3166: country },
 		skip: !country
 	} )
 
@@ -69,7 +69,9 @@ export default function CO2ForecastPage() {
 			...s,
 			namePretty: `${ getPreferredReserveGrade( s.grades ) } ${ s.year }`
 		} ) )
+
 	const borders = _border?.neCountries?.nodes?.[ 0 ]?.geometry?.geojson
+	const projectBorders = _border?.projectGeos?.nodes ?? []
 
 	useEffect( () => {
 		const asyncEffect = async() => {
@@ -107,6 +109,7 @@ export default function CO2ForecastPage() {
 								className="country-geo"
 								outlineGeometry={ borders }
 								projects={ highlightedProjects }
+								projectBorders={projectBorders}
 							/>
 						</div>
 					</Col>
