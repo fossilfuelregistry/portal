@@ -23,7 +23,7 @@ import CountryProductionPieChart from "components/CO2Forecast/CountryProductionP
 import { useConversionHooks } from "components/viz/conversionHooks"
 import LargestProjects from "../../components/CO2Forecast/LargestProjects"
 
-const DEBUG = true
+const DEBUG = false
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
@@ -117,9 +117,7 @@ export default function CO2ForecastPage() {
 					</Col>
 					<Col xs={ 24 } lg={ 12 }>
 						<LargestProjects
-							onHover={ projectId => {
-								set_highlightedProjects( [ { projectId } ] )
-							} }
+							onPositions={ set_highlightedProjects }
 						/>
 					</Col>
 				</Row> )
@@ -134,7 +132,7 @@ export default function CO2ForecastPage() {
 			break
 
 		case "sparse-project":
-			template = <SparseProject borders={borders}/>
+			template = <SparseProject borders={ borders }/>
 			break
 
 		default:

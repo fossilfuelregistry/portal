@@ -1,13 +1,12 @@
-import React, { useCallback } from "react"
+import React, { useCallback, useEffect } from "react"
 import useText from "lib/useText"
 import { useQuery } from "@apollo/client"
 import Link from 'next/link'
 import { GQL_largestProjects } from "queries/country"
 import { useDispatch, useSelector } from "react-redux"
 import { useRouter } from "next/router"
-import { notification } from "antd"
 
-export default function LargestProjects() {
+export default function LargestProjects( { onPositions } ) {
 	const { getText } = useText()
 	const router = useRouter()
 	const dispatch = useDispatch()
@@ -19,19 +18,16 @@ export default function LargestProjects() {
 	} )
 
 	const setProject = useCallback( async project => {
-		console.log( 'setProject', { project, country } )
-		try {
-
-			dispatch( { type: 'PROJECT', payload: project } )
-		} catch( e ) {
-			console.log( e )
-			notification.error( { message: 'Project load failed.', description: e.message } )
-		}
+		dispatch( { type: 'PROJECT', payload: project } )
 	}, [] )
 
-	if( loading || error || !data ) return null
-
 	const projects = data?.sparseProjects?.nodes ?? []
+
+	useEffect( () => {
+		onPositions?.( projects.map( p => p.geoPosition ) )
+	}, [ projects ] )
+
+	if( loading || error || !data ) return null
 	if( !projects.length ) return null
 
 	return (
