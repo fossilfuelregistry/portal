@@ -36,6 +36,7 @@ export default function CO2ForecastPage() {
 	const productionSourceId = useSelector( redux => redux.productionSourceId )
 	const project = useSelector( redux => redux.project )
 	const [ countryCO2Total, set_countryCO2Total ] = useState( 0 )
+	const [ highlightedProjects, set_highlightedProjects ] = useState( [] )
 	const router = useRouter()
 	const dispatch = useDispatch()
 
@@ -105,6 +106,7 @@ export default function CO2ForecastPage() {
 							<LeafletNoSSR
 								className="country-geo"
 								outlineGeometry={ borders }
+								projects={ highlightedProjects }
 							/>
 						</div>
 					</Col>
@@ -114,7 +116,11 @@ export default function CO2ForecastPage() {
 						/>
 					</Col>
 					<Col xs={ 24 } lg={ 12 }>
-						<LargestProjects/>
+						<LargestProjects
+							onHover={ projectId => {
+								set_highlightedProjects( [ { projectId } ] )
+							} }
+						/>
 					</Col>
 				</Row> )
 			break

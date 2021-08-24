@@ -23,7 +23,7 @@ const loadScript = ( scriptId, srcUrl, callback ) => {
 	if( existingScript && callback ) callback()
 }
 
-export default function Leaflet( { center, onMove, onMap, className, outlineGeometry } ) {
+export default function Leaflet( { center, onMove, onMap, className, outlineGeometry, projects } ) {
 	const domRef = useRef()
 	const mapRef = useRef()
 	const outlineLayer = useRef()
@@ -81,7 +81,7 @@ export default function Leaflet( { center, onMove, onMap, className, outlineGeom
 			console.log( e )
 			console.log( { outlineGeometry } )
 		}
-	}, [ domRef.current, loaded, outlineGeometry ] )
+	}, [ domRef.current, loaded, outlineGeometry, projects ] )
 
 	if( loaded < 3 ) return <Spinner/>
 
