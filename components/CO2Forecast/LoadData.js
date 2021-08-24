@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react"
 import { useQuery } from "@apollo/client"
 import GraphQLStatus from "components/GraphQLStatus"
 import { GQL_dataQuery } from "queries/country"
-import { Alert } from "antd"
+import { Alert, notification } from "antd"
 import useText from "lib/useText"
 import { useDispatch, useSelector } from "react-redux"
 import ForecastView from "./ForecastView"
@@ -27,15 +27,20 @@ function LoadData() {
 	const gwp = useSelector( redux => redux.gwp )
 
 	const _co2 = dataset => {
-		return ( dataset ?? [] )
-			.filter( datapoint => datapoint.fossilFuelType === 'gas' || datapoint.fossilFuelType === 'oil' )
-			.map( datapoint => {
-				let _d = { ...datapoint }
-				delete _d.id
-				delete _d.__typename
-				_d.co2 = co2FromVolume( datapoint )
-				return _d
-			} )
+		try {
+			return ( dataset ?? [] )
+				.filter( datapoint => datapoint.fossilFuelType === 'gas' || datapoint.fossilFuelType === 'oil' )
+				.map( datapoint => {
+					let _d = { ...datapoint }
+					delete _d.id
+					delete _d.__typename
+					_d.co2 = co2FromVolume( datapoint )
+					return _d
+				} )
+		} catch( e ) {
+			notification.error( { message: 'Application error', description: e.message } )
+			return dataset
+		}
 	}
 
 	const queries = useMemo( () => {
