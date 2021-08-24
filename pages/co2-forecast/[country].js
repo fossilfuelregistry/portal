@@ -95,11 +95,22 @@ export default function CO2ForecastPage() {
 		templateId = "dense-project"
 	if( project?.dataType === 'sparse' )
 		templateId = 'sparse-project'
+	if( !country )
+		templateId = 'intro'
 
 	DEBUG && console.log( 'Template select:', { templateId, project, productionSourceId } )
 
 	switch( templateId ) {
 
+		case 'intro':
+			template = (
+				<div>
+					<h2>Country emissions history and forcast</h2>
+					<p>Intro text about country / project levels, ranges etc goes here...</p>
+					<p>First select a country!</p>
+				</div>
+			)
+			break
 		case "totals":
 			template = (
 				<Row gutter={ [ 12, 12 ] } style={ { marginBottom: 26 } }>
