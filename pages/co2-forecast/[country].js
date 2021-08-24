@@ -104,7 +104,7 @@ export default function CO2ForecastPage() {
 
 		case 'intro':
 			template = (
-				<div>
+				<div style={ { padding: '0 24px' } }>
 					<h2>Country emissions history and forcast</h2>
 					<p>Intro text about country / project levels, ranges etc goes here...</p>
 					<p>First select a country!</p>
@@ -120,7 +120,7 @@ export default function CO2ForecastPage() {
 								className="country-geo"
 								outlineGeometry={ borders }
 								projects={ highlightedProjects }
-								projectBorders={projectBorders}
+								projectBorders={ projectBorders }
 							/>
 						</div>
 					</Col>
