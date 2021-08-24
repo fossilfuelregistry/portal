@@ -59,7 +59,7 @@ query countryReserves($iso3166: String!) {
 export const GQL_countryBorder = gql`
 query border($isoA2: String = "") {
   neCountries(condition: {isoA2: $isoA2}) {
-    nodes { geometry isoA2 }
+    nodes { geometry { geojson srid } isoA2 }
 }}`
 
 export const GQL_countryProductionByIso = gql`

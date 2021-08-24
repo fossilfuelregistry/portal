@@ -69,7 +69,7 @@ export default function CO2ForecastPage() {
 			...s,
 			namePretty: `${ getPreferredReserveGrade( s.grades ) } ${ s.year }`
 		} ) )
-	const borders = _border?.neCountries?.nodes?.[ 0 ]?.geometry
+	const borders = _border?.neCountries?.nodes?.[ 0 ]?.geometry?.geojson
 
 	useEffect( () => {
 		const asyncEffect = async() => {

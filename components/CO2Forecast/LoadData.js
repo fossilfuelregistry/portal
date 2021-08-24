@@ -9,7 +9,7 @@ import ForecastView from "./ForecastView"
 import { useConversionHooks } from "../viz/conversionHooks"
 import settings from "settings"
 
-const DEBUG = true
+const DEBUG = false
 
 function LoadData() {
 	const dispatch = useDispatch()
