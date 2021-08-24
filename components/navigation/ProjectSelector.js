@@ -27,8 +27,8 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 		if( !project )
 			set_selectedProjectOption( undefined )
 		else
-			set_selectedProjectOption( { value: project.projectId } )
-	}, [ iso31662 ] )
+			set_selectedProjectOption( project.projectId )
+	}, [ iso31662, project ] )
 
 	const { data: projData, loading, error } = useQuery( GQL_projects, {
 		skip: !iso3166,
@@ -53,10 +53,13 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 				dispatch( { type: 'PROJECT', payload: p } )
 				set_selectedProjectOption( p.projectId )
 			}
+		} else {
+			dispatch( { type: 'PROJECT', payload: undefined } )
+			set_selectedProjectOption( undefined )
 		}
 
 		return Array.from( projects.values() )
-	}, [ projData?.getProjects?.nodes?.length ] )
+	}, [ projData?.getProjects?.nodes?.length, router.query.project ] )
 
 	DEBUG && console.log( 'ProjectSelector', {
 		projData: projData?.getProjects?.nodes?.length,

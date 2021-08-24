@@ -21,6 +21,7 @@ import LeafletNoSSR from "components/geo/LeafletNoSSR"
 import { GQL_countryBorder } from "queries/country"
 import CountryProductionPieChart from "components/CO2Forecast/CountryProductionPieChart"
 import { useConversionHooks } from "components/viz/conversionHooks"
+import LargestProjects from "../../components/CO2Forecast/LargestProjects"
 
 const DEBUG = false
 
@@ -78,11 +79,6 @@ export default function CO2ForecastPage() {
 	}, [ country ] )
 
 	useEffect( () => {
-		if( !reservesSources?.length > 0 ) return
-		//dispatch()
-	}, [ reservesSources?.[ 0 ] ] )
-
-	useEffect( () => {
 		const qCountry = router.query?.country
 		if( qCountry === null || qCountry === '-' || qCountry === 'null' ) return
 		DEBUG && console.log( 'useEffect PRELOAD country', { country, qCountry } )
@@ -96,6 +92,8 @@ export default function CO2ForecastPage() {
 		templateId = "dense-project"
 	if( project?.dataType === 'sparse' )
 		templateId = 'sparse-project'
+
+	DEBUG && console.log( 'Template select:', { templateId, project, productionSourceId } )
 
 	switch( templateId ) {
 
@@ -114,6 +112,9 @@ export default function CO2ForecastPage() {
 						<CountryProductionPieChart
 							emissions={ countryCO2Total }
 						/>
+					</Col>
+					<Col xs={ 24 } lg={ 12 }>
+						<LargestProjects/>
 					</Col>
 				</Row> )
 			break
@@ -176,19 +177,19 @@ export default function CO2ForecastPage() {
 							</h4>
 							<CarbonIntensitySelector/>
 
-							{project?.dataType !== 'sparse' &&
-								<>
-									<h4 className="selector">
-										{ getText( 'data_source' ) }
-										<HelpModal title="data_source" content="explanation_countryhistoric"/>
-									</h4>
-									<SourceSelector
-										sources={ productionSources }
-										loading={ productionLoading }
-										stateKey="productionSourceId"
-										placeholder={ getText( 'data_source' ) }
-									/>
-								</>
+							{ project?.dataType !== 'sparse' &&
+							<>
+								<h4 className="selector">
+									{ getText( 'data_source' ) }
+									<HelpModal title="data_source" content="explanation_countryhistoric"/>
+								</h4>
+								<SourceSelector
+									sources={ productionSources }
+									loading={ productionLoading }
+									stateKey="productionSourceId"
+									placeholder={ getText( 'data_source' ) }
+								/>
+							</>
 							}
 
 							{ !!productionSourceId && project?.dataType !== 'sparse' &&

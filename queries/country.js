@@ -93,6 +93,15 @@ query sparseProject($projectId: String!, $iso3166: String!) {
   }
 }`
 
+export const GQL_largestProjects = gql`
+query largestProjects($iso3166:String!){
+  sparseProjects(
+    orderBy: PRODUCTION_CO2E_DESC
+    condition: {iso3166: $iso3166}
+    first: 10
+  ) { nodes { iso3166 projectId productionCo2E } }
+}`
+
 export const GQL_projectGeo = gql`
 query projectGeo($projectId: String!, $iso3166: String!) {
   projectGeo(projectId: $projectId, iso3166: $iso3166) {

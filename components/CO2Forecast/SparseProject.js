@@ -37,7 +37,7 @@ function SparseProject() {
 	}, [ country ] )
 
 	const { data, loading, error } = useQuery( GQL_sparseProject, {
-		variables: { iso3166: country, projectId: project.projectId },
+		variables: { iso3166: country, projectId: project?.projectId },
 		skip: !project?.projectId
 	} )
 

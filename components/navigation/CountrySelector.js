@@ -79,6 +79,7 @@ export default function CountrySelector() {
 				optionFilterProp="children"
 				onChange={ async v => {
 					set_selectedCountryOption( v )
+					set_selectedRegionOption( undefined )
 					dispatch( { type: 'COUNTRY', payload: v.value } )
 					dispatch( { type: 'COUNTRYNAME', payload: v.label } )
 					dispatch( { type: 'REGION', payload: undefined } )
