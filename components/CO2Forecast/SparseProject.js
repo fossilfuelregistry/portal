@@ -13,10 +13,11 @@ import { ExportOutlined } from "@ant-design/icons"
 import BarStackChart from "components/viz/BarStackChart"
 import CountryProductionPieChart from "./CountryProductionPieChart"
 import HelpModal from "../HelpModal"
+import LeafletNoSSR from "../geo/LeafletNoSSR"
 
 const DEBUG = false
 
-function SparseProject() {
+function SparseProject( { borders } ) {
 	const { getText } = useText()
 	const router = useRouter()
 	const { getCountryCurrentCO2 } = useConversionHooks()
@@ -71,7 +72,7 @@ function SparseProject() {
 		const co2 = co2FromVolume( { ...lastYearProd, methaneM3Ton: theProject.methaneM3Ton } )
 		co2.scope1 = co2.scope1?.map( c => Math.round( c * 100 ) / 100 )
 		co2.scope3 = co2.scope3?.map( c => Math.round( c * 100 ) / 100 )
-		DEBUG && console.log( { theProject, points,  lastYearProd, co2 } )
+		DEBUG && console.log( { theProject, points, lastYearProd, co2 } )
 		return co2
 	}, [ theProject?.projectId ] )
 
@@ -117,11 +118,21 @@ function SparseProject() {
 				<br/>
 				<Row gutter={ [ 16, 16 ] }>
 
+					<Col xs={ 24 } xxl={ 12 } />
+
 					<Col xs={ 24 } xxl={ 12 }>
 						<CountryProductionPieChart
 							project={ theProject }
 							emissions={ countryCO2Total }
 							co2={ ( co2.scope1?.[ 1 ] || 0 ) + co2.scope3?.[ 1 ] }
+						/>
+					</Col>
+
+					<Col xs={ 24 } xl={ 12 }>
+						<LeafletNoSSR
+							className="country-geo"
+							outlineGeometry={ borders }
+							projects={ [ theProject.geoPosition ] }
 						/>
 					</Col>
 
@@ -160,6 +171,9 @@ function SparseProject() {
 
 					<Col xs={ 24 } xl={ 12 }>
 						<OpenCorporateCard reference={ theProject.ocOperatorId }/>
+					</Col>
+
+					<Col xs={ 24 } xl={ 12 }>
 						<div className="co2-card">
 							<div className="header">&nbsp;</div>
 							<div className="box">

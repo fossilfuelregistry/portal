@@ -23,7 +23,7 @@ import CountryProductionPieChart from "components/CO2Forecast/CountryProductionP
 import { useConversionHooks } from "components/viz/conversionHooks"
 import LargestProjects from "../../components/CO2Forecast/LargestProjects"
 
-const DEBUG = false
+const DEBUG = true
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
@@ -134,7 +134,7 @@ export default function CO2ForecastPage() {
 			break
 
 		case "sparse-project":
-			template = <SparseProject/>
+			template = <SparseProject borders={borders}/>
 			break
 
 		default:

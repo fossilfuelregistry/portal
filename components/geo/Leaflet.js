@@ -27,6 +27,7 @@ export default function Leaflet( { center, onMove, onMap, className, outlineGeom
 	const domRef = useRef()
 	const mapRef = useRef()
 	const outlineLayer = useRef()
+	const markerLayer = useRef()
 	const [ loaded, set_loaded ] = useState( 0 )
 
 	DEBUG && console.log( { center, onMove, onMap, className } )
@@ -59,6 +60,15 @@ export default function Leaflet( { center, onMove, onMap, className, outlineGeom
 					DEBUG && console.log( { event, center: mapRef.current.getCenter() } )
 					onMove?.( mapRef.current.getCenter(), mapRef.current.getBounds() )
 				} )
+				markerLayer.current = window.L.layerGroup().addTo( mapRef.current )
+
+				// FIX leaflet's default icon path problems with webpack
+				delete window.L.Icon.Default.prototype._getIconUrl
+				window.L.Icon.Default.mergeOptions( {
+					iconRetinaUrl: '/leaflet/images/marker-icon-2x.png',
+					iconUrl: '/leaflet/images/marker-icon.png',
+					shadowUrl: '/leaflet/images/marker-shadow.png'
+				} )
 
 				onMap?.( mapRef.current )
 				return
@@ -81,7 +91,22 @@ export default function Leaflet( { center, onMove, onMap, className, outlineGeom
 			console.log( e )
 			console.log( { outlineGeometry } )
 		}
-	}, [ domRef.current, loaded, outlineGeometry, projects ] )
+	}, [ domRef.current, loaded, outlineGeometry ] )
+
+	useEffect( () => {
+		if( loaded < 3 || !projects ) return
+		try {
+			markerLayer.current.clearLayers()
+
+			projects.map( p => {
+				if( !p.geojson ) return
+				window.L.marker( [ p.geojson?.coordinates?.[ 1 ], p.geojson?.coordinates?.[ 0 ] ] ).addTo( markerLayer.current )
+			} )
+		} catch( e ) {
+			console.log( e )
+			console.log( { projects } )
+		}
+	}, [ domRef.current, loaded, projects ] )
 
 	if( loaded < 3 ) return <Spinner/>
 
