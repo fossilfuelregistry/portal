@@ -1,8 +1,8 @@
 import React, { useCallback } from "react"
 import useText from "lib/useText"
-import { useApolloClient, useQuery } from "@apollo/client"
+import { useQuery } from "@apollo/client"
 import Link from 'next/link'
-import { GQL_largestProjects, GQL_projectGeo, GQL_sparseProject } from "queries/country"
+import { GQL_largestProjects } from "queries/country"
 import { useDispatch, useSelector } from "react-redux"
 import { useRouter } from "next/router"
 import { notification } from "antd"
@@ -12,7 +12,6 @@ export default function LargestProjects() {
 	const router = useRouter()
 	const dispatch = useDispatch()
 	const country = useSelector( redux => redux.country )
-	const apolloClient = useApolloClient()
 
 	const { data, loading, error } = useQuery( GQL_largestProjects, {
 		variables: { iso3166: country },
