@@ -65,20 +65,24 @@ function LoadData() {
 		= useQuery( queries.projection, { skip: !projectionSourceId } )
 
 	const projection = useMemo( () => {
+		try {
+			// Synthesize stable projection data points if selected
+			if( projectionSourceId === settings.stableProductionSourceId ) {
+				if( !stableProduction?.oil ) return []
 
-		// Synthesize stable projection data points if selected
-		if( projectionSourceId === settings.stableProductionSourceId ) {
-			if( !stableProduction?.oil ) return []
-
-			let stableProj = []
-			for( let year = 2020; year <= settings.year.end; year++ ) {
-				stableProj.push( { ...stableProduction.oil, year, sourceId: settings.stableProductionSourceId } )
-				stableProj.push( { ...stableProduction.gas, year, sourceId: settings.stableProductionSourceId } )
-			}
-			DEBUG && console.log( { stableProj } )
-			return stableProj
-		} else
-			return _co2( projectionData?.countryProductions?.nodes )
+				let stableProj = []
+				for( let year = 2020; year <= settings.year.end; year++ ) {
+					stableProj.push( { ...stableProduction.oil, year, sourceId: settings.stableProductionSourceId } )
+					stableProj.push( { ...stableProduction.gas, year, sourceId: settings.stableProductionSourceId } )
+				}
+				DEBUG && console.log( { stableProj } )
+				return stableProj
+			} else
+				return _co2( projectionData?.countryProductions?.nodes )
+		} catch( e ) {
+			notification.error( { message: 'Error in calculation', description: e.message } )
+			return []
+		}
 	}, [ projectionData?.countryProductions?.nodes, projectionSourceId, stableProduction, gwp ] )
 
 	const { data: reservesData, loading: loadingReserves, error: errorLoadingReserves }
@@ -170,7 +174,12 @@ function LoadData() {
 	// Match projected production with reserves.
 
 	const projectedProduction = useMemo( () => {
-		return reservesProduction( projection, reserves, projectionSourceId, reservesSourceId, limits, grades )
+		try {
+			return reservesProduction( projection, reserves, projectionSourceId, reservesSourceId, limits, grades )
+		} catch( e ) {
+			notification.error( { message: 'Error in projected production calculation', description: e.message } )
+			return []
+		}
 	}, [ projection, reserves, projectionSourceId, reservesSourceId, limits, grades ] )
 
 	if( loadingProduction || errorLoadingProduction )
