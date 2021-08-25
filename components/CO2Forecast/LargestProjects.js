@@ -21,7 +21,7 @@ export default function LargestProjects( { onPositions } ) {
 		dispatch( { type: 'PROJECT', payload: project } )
 	}, [] )
 
-	const projects = ( data?.sparseProjects?.nodes ?? [] ).filter( p => p.productionCo2e > 0 )
+	const projects = ( data?.sparseProjects?.nodes ?? [] ).filter( p => p.productionCo2E > 0 )
 
 	useEffect( () => {
 		if( !( projects?.length > 0 ) ) return
