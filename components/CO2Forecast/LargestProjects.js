@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react"
+import React, { useCallback, useEffect, useMemo } from "react"
 import useText from "lib/useText"
 import { useQuery } from "@apollo/client"
 import Link from 'next/link'
@@ -21,7 +21,9 @@ export default function LargestProjects( { onPositions } ) {
 		dispatch( { type: 'PROJECT', payload: project } )
 	}, [] )
 
-	const projects = ( data?.sparseProjects?.nodes ?? [] ).filter( p => p.productionCo2E > 0 )
+	const projects = useMemo( () => {
+		return ( data?.sparseProjects?.nodes ?? [] ).filter( p => p.productionCo2E > 0 )
+	}, [ data?.sparseProjects?.nodes ] )
 
 	useEffect( () => {
 		if( !( projects?.length > 0 ) ) return

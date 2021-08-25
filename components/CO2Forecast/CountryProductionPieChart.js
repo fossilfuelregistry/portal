@@ -37,7 +37,7 @@ export default function CountryProductionPieChart( { project, emissions, co2 } )
 
 	return (
 		<div className="co2-card">
-			<div className="header">{ getText( 'emissions' ) } - { getText( 'current_annual_estimate' ) }</div>
+			<div className="header" title={project?.id}>{ getText( 'emissions' ) } - { getText( 'current_annual_estimate' ) }</div>
 			<div className="box">
 				<Row align={ 'middle' }>
 					<Col xs={ ( project ? 14 : 24 ) }>
