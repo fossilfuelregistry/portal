@@ -13,7 +13,7 @@ const colors = {
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
-export default function CountryProductionPieChart( { project, emissions, co2 } ) {
+export default function CountryProductionPieChart( { project, emissions, co2, produtionMegatons } ) {
 	const { getText } = useText()
 	const countryName = useSelector( redux => redux.countryName )
 
@@ -68,7 +68,7 @@ export default function CountryProductionPieChart( { project, emissions, co2 } )
 								</text>
 							</svg>
 						</div>
-						{ getText( 'production' ) }: { project.volume } { getText( 'megaton' ) } { project.fossilFuelType }
+						{ getText( 'production' ) }: { produtionMegatons } { getText( 'megaton' ) } { project.fossilFuelType }
 						<br/>
 						{ getText( 'emissions' ) }: { co2.toFixed( 2 ) } { getText( 'megaton' ) } CO²e
 					</Col>

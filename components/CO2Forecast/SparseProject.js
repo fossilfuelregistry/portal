@@ -25,7 +25,7 @@ function SparseProject( { borders } ) {
 	const project = useSelector( redux => redux.project )
 	const [ countryCO2Total, set_countryCO2Total ] = useState( 0 )
 	const [ localeDescription, set_localeDescription ] = useState()
-	const { co2FromVolume } = useConversionHooks()
+	const { co2FromVolume, convertVolume } = useConversionHooks()
 
 	DEBUG && console.log( 'SparseProject', { country, project, countryCO2Total } )
 
@@ -70,6 +70,7 @@ function SparseProject( { borders } ) {
 		}, { year: 0 } )
 
 		const co2 = co2FromVolume( { ...lastYearProd, methaneM3Ton: theProject.methaneM3Ton } )
+		co2.megatons = convertVolume( lastYearProd, 'e9ton' )
 		co2.scope1 = co2.scope1?.map( c => Math.round( c * 100 ) / 100 )
 		co2.scope3 = co2.scope3?.map( c => Math.round( c * 100 ) / 100 )
 		DEBUG && console.log( { theProject, points, lastYearProd, co2 } )
@@ -118,12 +119,13 @@ function SparseProject( { borders } ) {
 				<br/>
 				<Row gutter={ [ 16, 16 ] }>
 
-					<Col xs={ 24 } xxl={ 12 } />
+					<Col xs={ 24 } xxl={ 12 }/>
 
 					<Col xs={ 24 }>
 						<CountryProductionPieChart
 							project={ theProject }
 							emissions={ countryCO2Total }
+							produtionMegatons={co2.megatons}
 							co2={ ( co2.scope1?.[ 1 ] || 0 ) + co2.scope3?.[ 1 ] }
 						/>
 					</Col>
