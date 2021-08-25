@@ -226,34 +226,36 @@ export const useConversionHooks = () => {
 				lastReserves[ r.fossilFuelType ][ grade ].year = r.year
 				lastReserves[ r.fossilFuelType ][ grade ].value = sumOfCO2( co2FromVolume( r ), 1 )
 			}
-			DEBUG && console.log( { reservesSourceId, useGrades, lastReserves } )
 
 			let prod = []
-
 			// Fill out gap between production and projection (if any)
 			const gapStart = Math.min( limits.production.oil.lastYear, limits.production.gas.lastYear )
 			const gapEnd = Math.max( limits.projection.oil.firstYear, limits.projection.gas.firstYear, gapStart )
-			for( let y = gapStart; y < gapEnd; y++ ) {
-				if( limits.production.oil.lastYear <= y )
-					prod.push( {
-						...stableProduction.oil,
-						year: y,
-						fossilFuelType: 'oil',
-						sourceId: projectionSourceId
-					} )
-				if( limits.production.gas.lastYear <= y )
-					prod.push( {
-						...stableProduction.gas,
-						year: y,
-						fossilFuelType: 'gas',
-						sourceId: projectionSourceId
-					} )
+			DEBUG && console.log( { reservesSourceId, useGrades, lastReserves, limits, gapStart, gapEnd } )
+
+			if( gapStart > 0 ) {
+				for( let y = gapStart; y < gapEnd; y++ ) {
+					if( limits.production.oil.lastYear <= y )
+						prod.push( {
+							...stableProduction.oil,
+							year: y,
+							fossilFuelType: 'oil',
+							sourceId: projectionSourceId
+						} )
+					if( limits.production.gas.lastYear <= y )
+						prod.push( {
+							...stableProduction.gas,
+							year: y,
+							fossilFuelType: 'gas',
+							sourceId: projectionSourceId
+						} )
+				}
 			}
 
 			prod.forEach( ( datapoint, index ) => {
 				if( !datapoint.unit ) {
 					console.log( { prod, index, datapoint } )
-					throw new Error( 'Malformed production data point: ' + JSON.stringify( datapoint ) )
+					throw new Error( `Malformed production data, no unit: ` + JSON.stringify( datapoint ) )
 				}
 				return datapoint.co2 = co2FromVolume( datapoint )
 			} )
@@ -263,7 +265,7 @@ export const useConversionHooks = () => {
 				if( datapoint.year < gapEnd ) return
 				if( !datapoint.unit ) {
 					console.log( { projection, index, datapoint } )
-					throw new Error( 'Malformed projection data point: ' + JSON.stringify( datapoint ) )
+					throw new Error( `Malformed projection data, no unit: ` + JSON.stringify( datapoint ) )
 				}
 
 				let _dp = { ...datapoint }

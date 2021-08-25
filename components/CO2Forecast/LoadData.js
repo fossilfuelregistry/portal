@@ -111,6 +111,10 @@ function LoadData() {
 			return _limits
 		}, { oil: { firstYear: settings.year.end, lastYear: 0 }, gas: { firstYear: settings.year.end, lastYear: 0 } } )
 
+		// Check if no data
+		if( newLimits.oil.firstYear === settings.year.end ) newLimits.oil.firstYear = 0
+		if( newLimits.gas.firstYear === settings.year.end ) newLimits.gas.firstYear = 0
+
 		set_limits( l => ( { ...l, production: newLimits } ) )
 		DEBUG && console.log( 'useEffect Production', { newLimits } )
 	}, [ production, productionSourceId ] )
@@ -138,6 +142,10 @@ function LoadData() {
 				gas: { firstYear: settings.year.end, lastYear: 0 }
 			} )
 		}
+
+		// Check if no data
+		if( newLimits.oil.firstYear === settings.year.end ) newLimits.oil.firstYear = 0
+		if( newLimits.gas.firstYear === settings.year.end ) newLimits.gas.firstYear = 0
 
 		set_limits( l => ( { ...l, projection: newLimits } ) )
 	}, [ projection, projectionSourceId ] )
@@ -177,7 +185,11 @@ function LoadData() {
 		try {
 			return reservesProduction( projection, reserves, projectionSourceId, reservesSourceId, limits, grades )
 		} catch( e ) {
-			notification.error( { message: 'Error in projected production calculation', description: e.message } )
+			notification.error( {
+				message: 'Error in projected production calculation',
+				description: e.message,
+				duration: 20
+			} )
 			return []
 		}
 	}, [ projection, reserves, projectionSourceId, reservesSourceId, limits, grades ] )
