@@ -21,9 +21,10 @@ export default function LargestProjects( { onPositions } ) {
 		dispatch( { type: 'PROJECT', payload: project } )
 	}, [] )
 
-	const projects = data?.sparseProjects?.nodes ?? []
+	const projects = ( data?.sparseProjects?.nodes ?? [] ).filter( p => p.productionCo2e > 0 )
 
 	useEffect( () => {
+		if( !( projects?.length > 0 ) ) return
 		onPositions?.( projects.map( p => p.geoPosition ) )
 	}, [ projects ] )
 
