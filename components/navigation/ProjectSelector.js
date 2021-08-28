@@ -108,7 +108,7 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 					{ projects.map( p => (
 						<Select.Option key={ p.projectIdentifier }>
 							{ p.projectIdentifier }{ ' ' }
-							{ p.type === 'dense' ? <AreaChartOutlined style={ { color: '#81ad7a' } }/> :
+							{ p.type === 'DENSE' ? <AreaChartOutlined style={ { color: '#81ad7a' } }/> :
 								<DotChartOutlined style={ { color: '#ff6500' } }/> }
 						</Select.Option> ) ) }
 				</Select>

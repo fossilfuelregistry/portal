@@ -103,7 +103,7 @@ query largestProjects($iso3166:String!){
     orderBy: PRODUCTION_CO2E_DESC
     condition: {iso3166: $iso3166}
     first: 10
-  ) { nodes { iso3166 projectIdentifier productionCo2E geoPosition { geojson srid } } }
+  ) { nodes { iso3166 projectIdentifier productionCo2E projectType geoPosition { geojson srid } } }
 }`
 
 export const GQL_projectGeo = gql`
