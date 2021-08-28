@@ -18,6 +18,7 @@ export default function CountryProductionPieChart( { project, emissions, co2, pr
 	const countryName = useSelector( redux => redux.countryName )
 
 	const pieChartData = useMemo( () => {
+		if( !( emissions?.total > 0 ) ) return []
 		const slices = []
 		const total = emissions.total
 		for( const [ key, value ] of Object.entries( emissions ) ) {
@@ -32,12 +33,17 @@ export default function CountryProductionPieChart( { project, emissions, co2, pr
 		return slices
 	}, [ emissions ] )
 
-	const ratio = co2 / emissions.total
+	const ratio = co2 / ( emissions?.total ?? 1 )
 	const projectRadius = 83 * Math.sqrt( ratio )
 
 	return (
 		<div className="co2-card">
-			<div className="header" title={project?.id}>{ getText( 'emissions' ) } - { getText( 'current_annual_estimate' ) }</div>
+			<div
+				className="header"
+				title={ project?.id }
+			>
+				{ getText( 'emissions' ) } - { getText( 'current_annual_estimate' ) }
+			</div>
 			<div className="box">
 				<Row align={ 'middle' }>
 					<Col xs={ ( project ? 14 : 24 ) }>

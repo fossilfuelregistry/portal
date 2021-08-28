@@ -122,8 +122,10 @@ export default function Leaflet( { center, onMove, onMap, className, outlineGeom
 			projectLayer.current.clearLayers()
 
 			projectBorders.map( p => {
-				if( !p?.geom?.geojson ) return
-				projectLayer.current.addData( p.geom?.geojson )
+				if( p?.geom?.geojson )
+					projectLayer.current.addData( p.geom?.geojson )
+				else if( p?.geoPosition?.geojson )
+					projectLayer.current.addData( p.geoPosition?.geojson )
 			} )
 		} catch( e ) {
 			console.log( e )

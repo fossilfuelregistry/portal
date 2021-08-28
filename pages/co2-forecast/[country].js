@@ -11,7 +11,7 @@ import HelpModal from "components/HelpModal"
 import LoadData from "components/CO2Forecast/LoadData"
 import ProjectSelector from "components/navigation/ProjectSelector"
 import { useQuery } from "@apollo/client"
-import { GQL_productionSources, GQL_projectionSources, GQL_reservesSources } from "queries/general"
+import { GQL_countrySources, GQL_projectSources } from "queries/general"
 import SourceSelector from "components/navigation/SourceSelector"
 import { getProducingCountries } from "lib/getStaticProps"
 import { getPreferredReserveGrade } from "components/CO2Forecast/calculate"
@@ -23,7 +23,7 @@ import CountryProductionPieChart from "components/CO2Forecast/CountryProductionP
 import { useConversionHooks } from "components/viz/conversionHooks"
 import LargestProjects from "../../components/CO2Forecast/LargestProjects"
 
-const DEBUG = false
+const DEBUG = true
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
@@ -40,38 +40,53 @@ export default function CO2ForecastPage() {
 	const router = useRouter()
 	const dispatch = useDispatch()
 
-	const { data: _productionSources, loading: productionLoading } = useQuery( GQL_productionSources, {
-		variables: { iso3166: country, iso31662: region, projectId: project?.projectId },
+	const { data: _countrySources, loading: cLoad } = useQuery( GQL_countrySources, {
+		variables: { iso3166: country, iso31662: region },
 		skip: !country
 	} )
 
-	const { data: _projectionSources, loading: projectionLoading } = useQuery( GQL_projectionSources, {
-		variables: { iso3166: country, iso31662: region, projectId: project?.projectId },
-		skip: !country
+	const { data: _projectSources, loading: pLoad } = useQuery( GQL_projectSources, {
+		variables: { id: project?.id },
+		skip: !( project?.id > 0 )
 	} )
 
-	const { data: _reservesSources, loading: reservesLoading } = useQuery( GQL_reservesSources, {
-		variables: { iso3166: country, iso31662: region, projectId: project?.projectId },
-		skip: !country
-	} )
-
-	const { data: _border, loading: _borderLoading } = useQuery( GQL_countryBorder, {
+	const { data: _border } = useQuery( GQL_countryBorder, {
 		variables: { isoA2: country?.toUpperCase(), iso3166: country },
 		skip: !country
 	} )
 
+	const loading = cLoad || pLoad
+
 	const title = ( countryName ? countryName + ' - ' : '' ) + getText( 'co2_effects_for_country' )
 
-	const productionSources = ( _productionSources?.getProductionSources?.nodes ?? [] )
-	const projectionSources = ( _projectionSources?.getProjectionSources?.nodes ?? [] )
-	const reservesSources = ( _reservesSources?.getReservesSources?.nodes ?? [] )
-		.map( s => ( {
-			...s,
-			namePretty: `${ getPreferredReserveGrade( s.grades ) } ${ s.year }`
-		} ) )
+	let productionSources, projectionSources, reservesSources
+	if( project?.id > 0 ) {
+		productionSources = ( _projectSources?.getProjectSources?.nodes ?? [] )
+			.filter( s => s.dataType === 'PRODUCTION' )
+		projectionSources = ( _projectSources?.getProjectSources?.nodes ?? [] )
+			.filter( s => s.dataType === 'PROJECTION' )
+		reservesSources = ( _projectSources?.getProjectSources?.nodes ?? [] )
+			.filter( s => s.dataType === 'RESERVE' )
+			.map( s => ( {
+				...s,
+				namePretty: `${ getPreferredReserveGrade( s.grades ) } ${ s.year }`
+			} ) )
+	} else {
+		productionSources = ( _countrySources?.getCountrySources?.nodes ?? [] )
+			.filter( s => s.dataType === 'PRODUCTION' )
+		projectionSources = ( _countrySources?.getCountrySources?.nodes ?? [] )
+			.filter( s => s.dataType === 'PROJECTION' )
+		reservesSources = ( _countrySources?.getCountrySources?.nodes ?? [] )
+			.filter( s => s.dataType === 'RESERVE' )
+			.map( s => ( {
+				...s,
+				namePretty: `${ getPreferredReserveGrade( s.grades ) } ${ s.year }`
+			} ) )
+		DEBUG && console.log( { gql: _countrySources?.getProjectSources?.nodes, productionSources, projectionSources, reservesSources } )
+	}
 
 	const borders = _border?.neCountries?.nodes?.[ 0 ]?.geometry?.geojson
-	const projectBorders = _border?.projectGeos?.nodes ?? []
+	const projectBorders = _border?.projects?.nodes ?? []
 
 	useEffect( () => {
 		const asyncEffect = async() => {
@@ -203,7 +218,7 @@ export default function CO2ForecastPage() {
 								</h4>
 								<SourceSelector
 									sources={ productionSources }
-									loading={ productionLoading }
+									loading={ loading }
 									stateKey="productionSourceId"
 									placeholder={ getText( 'data_source' ) }
 								/>
@@ -215,7 +230,7 @@ export default function CO2ForecastPage() {
 								<h4 className="selector">{ getText( 'reserves' ) }</h4>
 								<SourceSelector
 									sources={ reservesSources }
-									loading={ reservesLoading }
+									loading={ loading }
 									stateKey="reservesSourceId"
 									placeholder={ getText( 'reserves' ) }
 								/>
@@ -225,7 +240,7 @@ export default function CO2ForecastPage() {
 								</h4>
 								<SourceSelector
 									sources={ projectionSources }
-									loading={ projectionLoading }
+									loading={ loading }
 									stateKey="projectionSourceId"
 									placeholder={ getText( 'projection' ) }
 								/>

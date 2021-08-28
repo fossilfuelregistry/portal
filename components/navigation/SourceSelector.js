@@ -7,7 +7,7 @@ import useText from "../../lib/useText"
 import { co2PageUpdateQuery } from "components/CO2Forecast/calculate"
 import settings from "../../settings"
 
-const DEBUG = false
+const DEBUG = true
 
 export default function SourceSelector( { sources, loading, stateKey, placeholder } ) {
 	const router = useRouter()

@@ -41,9 +41,9 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 		// Remove non-current entries and get one entry per project..
 		const projects = new Map()
 		projData?.getProjects?.nodes?.forEach( p => {
-			const prev = projects.get( p.projectId )
+			const prev = projects.get( p.projectIdentifier )
 			if( prev?.lastYear > p.lastYear ) return
-			if( p.projectId?.length > 0 && p.lastYear >= 2015 ) projects.set( p.projectId, p )
+			if( p.projectIdentifier?.length > 0 && p.lastYear >= 2015 ) projects.set( p.projectIdentifier, p )
 		} )
 
 		// Now that we have data, also see if we should set state from URL
@@ -51,12 +51,13 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 			const p = projects.get( router.query.project )
 			if( p ) {
 				dispatch( { type: 'PROJECT', payload: p } )
-				set_selectedProjectOption( p.projectId )
+				set_selectedProjectOption( p.projectIdentifier )
 			}
 		} else {
 			dispatch( { type: 'PROJECT', payload: undefined } )
 			set_selectedProjectOption( undefined )
 		}
+		DEBUG && console.log( 'ProjectSelector', { projects, gql: projData?.getProjects?.nodes } )
 
 		return Array.from( projects.values() )
 	}, [ projData?.getProjects?.nodes?.length, router.query.project ] )
@@ -105,9 +106,9 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 					} }
 				>
 					{ projects.map( p => (
-						<Select.Option key={ p.projectId }>
-							{ p.projectId }{ ' ' }
-							{ p.dataType === 'dense' ? <AreaChartOutlined style={ { color: '#81ad7a' } }/> :
+						<Select.Option key={ p.projectIdentifier }>
+							{ p.projectIdentifier }{ ' ' }
+							{ p.type === 'dense' ? <AreaChartOutlined style={ { color: '#81ad7a' } }/> :
 								<DotChartOutlined style={ { color: '#ff6500' } }/> }
 						</Select.Option> ) ) }
 				</Select>

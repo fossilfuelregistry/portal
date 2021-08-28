@@ -29,36 +29,23 @@ query fossilFuelTypes {
 	fossilFuelTypes { nodes }
 }`
 
+export const GQL_countrySources = gql`
+query countrySource( $iso3166: String = "", $iso31662: String = "") {
+  getCountrySources(iso3166_: $iso3166, iso31662_: $iso31662) {
+    nodes { dataPoints dataType description latestCurationAt name namePretty sourceId records url quality grade }
+  }
+}`
+
+export const GQL_projectSources = gql`
+query GQL_projectSources( $id:Int! ) {
+  getProjectSources(id: $id) {
+    nodes { dataPoints dataType description latestCurationAt name namePretty sourceId records url quality grade }
+  }
+}`
+
 export const GQL_projects = gql`
 query projects($iso3166_: String!, $iso31662_: String = "") {
-  getProjects(iso3166_: $iso3166_, iso31662_: $iso31662_) { nodes { iso31662 projectId firstYear lastYear dataType } }
-}`
-
-export const GQL_productionSources = gql`
-query productionSources($projectId: String = "", $iso31662: String = "", $iso3166: String = "") {
-  getProductionSources(
-    iso3166_: $iso3166
-    iso31662_: $iso31662
-    projectId_: $projectId
-  ) { nodes { sourceId name namePretty } }
-}`
-
-export const GQL_projectionSources = gql`
-query projectionSources($projectId: String = "", $iso31662: String = "", $iso3166: String = "") {
-  getProjectionSources(
-    iso3166_: $iso3166
-    iso31662_: $iso31662
-    projectId_: $projectId
-  ) { nodes { sourceId name namePretty } }
-}`
-
-export const GQL_reservesSources = gql`
-query reservesSources($projectId: String = "", $iso31662: String = "", $iso3166: String = "") {
-  getReservesSources(
-    iso3166_: $iso3166
-    iso31662_: $iso31662
-    projectId_: $projectId
-  ) { nodes { sourceId name namePretty grades year quality } }
+  getProjects(iso3166_: $iso3166_, iso31662_: $iso31662_) { nodes { projectIdentifier firstYear lastYear co2 type } }
 }`
 
 export const GQL_sources = gql`
