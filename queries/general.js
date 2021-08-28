@@ -29,13 +29,6 @@ query fossilFuelTypes {
 	fossilFuelTypes { nodes }
 }`
 
-export const GQL_countrySources = gql`
-query countrySource( $iso3166: String = "", $iso31662: String = "") {
-  getCountrySources(iso3166_: $iso3166, iso31662_: $iso31662) {
-    nodes { dataPoints dataType description latestCurationAt name namePretty sourceId records url quality grade }
-  }
-}`
-
 export const GQL_projectSources = gql`
 query GQL_projectSources( $id:Int! ) {
   getProjectSources(id: $id) {

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react"
 import { useQuery } from "@apollo/client"
 import GraphQLStatus from "components/GraphQLStatus"
-import { GQL_dataQuery } from "queries/country"
+import { GQL_countryProduction, GQL_countryProjection, GQL_countryReserves } from "queries/country"
 import { Alert, notification } from "antd"
 import useText from "lib/useText"
 import { useDispatch, useSelector } from "react-redux"
@@ -11,7 +11,7 @@ import settings from "settings"
 
 const DEBUG = false
 
-function LoadData() {
+function LoadCountryData() {
 	const dispatch = useDispatch()
 	const { co2FromVolume, reservesProduction } = useConversionHooks()
 	const { getText } = useText()
@@ -19,7 +19,6 @@ function LoadData() {
 	const [ grades, set_grades ] = useState( {} )
 	const country = useSelector( redux => redux.country )
 	const region = useSelector( redux => redux.region )
-	const project = useSelector( redux => redux.project )
 	const productionSourceId = useSelector( redux => redux.productionSourceId )
 	const projectionSourceId = useSelector( redux => redux.projectionSourceId )
 	const reservesSourceId = useSelector( redux => redux.reservesSourceId )
@@ -43,26 +42,30 @@ function LoadData() {
 		}
 	}
 
-	const queries = useMemo( () => {
-		return GQL_dataQuery( {
-			iso3166: country,
-			iso31662: region,
-			projectId: project?.projectId
-		} )
-	}, [ country, region, project?.projectId ] )
+	const {
+		data: productionData,
+		loading: loadingProduction,
+		error: errorLoadingProduction
+	} = useQuery( GQL_countryProduction, {
+		variables: { iso3166: country, iso31662: region ?? '' },
+		skip: !productionSourceId
+	} )
 
-	const { data: productionData, loading: loadingProduction, error: errorLoadingProduction }
-		= useQuery( queries.production, { skip: !productionSourceId } )
-
-	DEBUG && console.log( 'LoadData', { productionData } )
+	DEBUG && console.log( 'LoadCountryData', { productionData } )
 
 	const production = useMemo( () => {
-		DEBUG && console.log( '_co2( productionData )', productionData?.countryProductions?.nodes )
-		return _co2( productionData?.countryProductions?.nodes )
-	}, [ productionData?.countryProductions?.nodes, productionData?.countryProductions?.nodes?.length, productionSourceId, gwp ] )
+		DEBUG && console.log( '_co2( productionData )', productionData?.countryDataPoints?.nodes )
+		return _co2( productionData?.countryDataPoints?.nodes )
+	}, [ productionData?.countryDataPoints?.nodes, productionData?.countryDataPoints?.nodes?.length, productionSourceId, gwp ] )
 
-	const { data: projectionData, loading: loadingProjection, error: errorLoadingProjection }
-		= useQuery( queries.projection, { skip: !projectionSourceId } )
+	const {
+		data: projectionData,
+		loading: loadingProjection,
+		error: errorLoadingProjection
+	} = useQuery( GQL_countryProjection, {
+		variables: { iso3166: country, iso31662: region ?? '', sourceId: projectionSourceId },
+		skip: !projectionSourceId
+	} )
 
 	const projection = useMemo( () => {
 		try {
@@ -78,17 +81,24 @@ function LoadData() {
 				DEBUG && console.log( { stableProj } )
 				return stableProj
 			} else
-				return _co2( projectionData?.countryProductions?.nodes )
+				return _co2( projectionData?.countryDataPoints?.nodes )
 		} catch( e ) {
 			notification.error( { message: 'Error in calculation', description: e.message } )
 			return []
 		}
-	}, [ projectionData?.countryProductions?.nodes, projectionSourceId, stableProduction, gwp ] )
+	}, [ projectionData?.countryDataPoints?.nodes, projectionSourceId, stableProduction, gwp ] )
 
-	const { data: reservesData, loading: loadingReserves, error: errorLoadingReserves }
-		= useQuery( queries.reserves, { skip: !productionSourceId } )
-	const reserves = useMemo( () => _co2( reservesData?.countryReserves?.nodes ),
-		[ reservesData?.countryReserves?.nodes, gwp ] )
+	const {
+		data: reservesData,
+		loading: loadingReserves,
+		error: errorLoadingReserves
+	} = useQuery( GQL_countryReserves, {
+		variables: { iso3166: country, iso31662: region ?? '', sourceId: productionSourceId },
+		skip: !reservesSourceId
+	} )
+
+	const reserves = useMemo( () => _co2( reservesData?.countryDataPoints?.nodes ),
+		[ reservesData?.countryDataPoints?.nodes, gwp ] )
 
 	// Find stable production
 	useEffect( () => {
@@ -215,4 +225,4 @@ function LoadData() {
 	)
 }
 
-export default LoadData
+export default LoadCountryData

@@ -64,10 +64,9 @@ export function getPreferredGrades( reserves, reservesSourceId ) {
 }
 
 // Get pref grade from the aggregated string in the get_reserves_sources backend function
-export function getPreferredReserveGrade( _grades ) {
-	if( !_grades ) return ''
+export function getPreferredReserveGrade( grades ) {
+	if( !( grades?.length > 0 ) ) return ''
 	let pGrade = -1, cGrade = -1
-	const grades = _grades.split( '/' )
 	grades.forEach( grade => {
 		if( grade?.[ 1 ] === 'p' ) {
 			pGrade = Math.max( pGrade, settings.gradesPreferenceOrder.indexOf( grade?.[ 0 ] ) )

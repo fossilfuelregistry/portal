@@ -27,7 +27,7 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 		if( !project )
 			set_selectedProjectOption( undefined )
 		else
-			set_selectedProjectOption( project.projectId )
+			set_selectedProjectOption( project.projectIdentifier )
 	}, [ iso31662, project ] )
 
 	const { data: projData, loading, error } = useQuery( GQL_projects, {

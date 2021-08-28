@@ -1,58 +1,39 @@
 import { gql } from "@apollo/client/core"
 
-const _formatter = conditionObject => JSON.stringify( conditionObject ).replace( /"([^"]+)":/g, '$1:' ).replace( /\uFFFF/g, '\\\"' )
+export const GQL_countrySources = gql`
+query countrySource( $iso3166: String = "", $iso31662: String = "") {
+  getCountrySources(iso3166_: $iso3166, iso31662_: $iso31662) {
+    nodes { dataPoints dataType description latestCurationAt name namePretty sourceId year records url quality grades }
+  }
+}`
 
-export const GQL_dataQuery = ( { iso3166, iso31662, projectId } ) => {
-	const prod = _formatter( {
-		iso3166,
-		iso31662: iso31662 ?? '',
-		projectId: projectId ?? '',
-		projection: false
-	} )
-	const proj = _formatter( {
-		iso3166,
-		iso31662: iso31662 ?? '',
-		projectId: projectId ?? '',
-		projection: true
-	} )
-	const res = _formatter( {
-		iso3166,
-		iso31662: iso31662 ?? '',
-		projectId: projectId ?? '',
-	} )
-
-	return {
-		production: gql`
-		query countryProduction {
-		  countryProductions(
-			condition: ${ prod }
-			orderBy: YEAR_ASC
-		  ) { nodes { id iso3166 fossilFuelType sourceId unit volume year } }
-		}`,
-		projection: gql`
-		query countryProjection {
-		  countryProductions(
-			condition: ${ proj }
-			orderBy: YEAR_ASC
-		  ) { nodes { id iso3166 fossilFuelType sourceId unit volume year } }
-		}`,
-		reserves: gql`
-		query countryReserves {
-		  countryReserves(
-			condition: ${ res }
-			orderBy: YEAR_ASC
-		  ) { nodes { id iso3166 fossilFuelType grade sourceId unit volume quality year } }
-		}`
-	}
-}
-
-export const GQL_countryReservesByIso = gql`
-query countryReserves($iso3166: String!) {
-  countryReserves(
-  	condition: { iso3166: $iso3166 }
+export const GQL_countryReserves = gql`
+query reserves( $iso3166: String! $iso31662: String! ) {
+  countryDataPoints(
   	orderBy: YEAR_ASC
+    condition: { iso3166: $iso3166 iso31662: $iso31662 dataType: RESERVE }
   ) {
-    nodes { id iso3166 fossilFuelType grade sourceId unit volume quality year }
+    nodes { fossilFuelType volume year unit subtype sourceId quality }
+  }
+}`
+
+export const GQL_countryProduction = gql`
+query production( $iso3166: String! $iso31662: String! ) {
+  countryDataPoints(
+  	orderBy: YEAR_ASC
+    condition: { iso3166: $iso3166 iso31662: $iso31662 dataType: PRODUCTION }
+  ) {
+    nodes { fossilFuelType volume year unit subtype sourceId quality }
+  }
+}`
+
+export const GQL_countryProjection = gql`
+query projection( $iso3166: String! $iso31662: String! ) {
+  countryDataPoints(
+  	orderBy: YEAR_ASC
+    condition: { iso3166: $iso3166 iso31662: $iso31662 dataType: PROJECTION }
+  ) {
+    nodes { fossilFuelType volume year unit subtype sourceId quality }
   }
 }`
 
@@ -63,17 +44,6 @@ query border($isoA2: String!, $iso3166: String!) {
   }
   projects(condition: {iso3166: $iso3166}) {
     nodes { geoPosition { geojson srid } projectIdentifier }
-  }
-}`
-
-export const GQL_countryProductionByIso = gql`
-query countryProductions($iso3166: String!) {
-  countryProductions(
-  	condition: { iso3166: $iso3166 }
-    filter: {fossilFuelType: {in: ["oil", "gas"]}}
-  	orderBy: YEAR_ASC
-  ) {
-    nodes { id iso3166 fossilFuelType sourceId unit volume year projection }
   }
 }`
 
@@ -103,7 +73,7 @@ query largestProjects($iso3166:String!){
     orderBy: PRODUCTION_CO2E_DESC
     condition: {iso3166: $iso3166}
     first: 10
-  ) { nodes { iso3166 projectIdentifier productionCo2E projectType geoPosition { geojson srid } } }
+  ) { nodes { id iso3166 projectIdentifier productionCo2E projectType geoPosition { geojson srid } } }
 }`
 
 export const GQL_projectGeo = gql`

@@ -8,22 +8,22 @@ import { NextSeo } from "next-seo"
 import { useDispatch, useSelector } from "react-redux"
 import CarbonIntensitySelector from "components/viz/IntensitySelector"
 import HelpModal from "components/HelpModal"
-import LoadData from "components/CO2Forecast/LoadData"
+import LoadCountryData from "components/CO2Forecast/LoadCountryData"
 import ProjectSelector from "components/navigation/ProjectSelector"
 import { useQuery } from "@apollo/client"
-import { GQL_countrySources, GQL_projectSources } from "queries/general"
+import { GQL_projectSources } from "queries/general"
 import SourceSelector from "components/navigation/SourceSelector"
 import { getProducingCountries } from "lib/getStaticProps"
 import { getPreferredReserveGrade } from "components/CO2Forecast/calculate"
 import { useRouter } from "next/router"
 import SparseProject from "components/CO2Forecast/SparseProject"
 import LeafletNoSSR from "components/geo/LeafletNoSSR"
-import { GQL_countryBorder } from "queries/country"
+import { GQL_countryBorder, GQL_countrySources } from "queries/country"
 import CountryProductionPieChart from "components/CO2Forecast/CountryProductionPieChart"
 import { useConversionHooks } from "components/viz/conversionHooks"
 import LargestProjects from "../../components/CO2Forecast/LargestProjects"
 
-const DEBUG = true
+const DEBUG = false
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
@@ -82,7 +82,13 @@ export default function CO2ForecastPage() {
 				...s,
 				namePretty: `${ getPreferredReserveGrade( s.grades ) } ${ s.year }`
 			} ) )
-		DEBUG && console.log( { gql: _countrySources?.getProjectSources?.nodes, productionSources, projectionSources, reservesSources } )
+			.sort( ( a, b ) => Math.sign( ( b.quality ?? 0 ) - ( a.quality ?? 0 ) ) )
+		DEBUG && console.log( {
+			gql: _countrySources?.getProjectSources?.nodes,
+			productionSources,
+			projectionSources,
+			reservesSources
+		} )
 	}
 
 	const borders = _border?.neCountries?.nodes?.[ 0 ]?.geometry?.geojson
@@ -106,9 +112,9 @@ export default function CO2ForecastPage() {
 	let templateId = 'totals', template
 	if( !project && productionSourceId > 0 )
 		templateId = 'dense-country'
-	if( project?.dataType === 'dense' )
+	if( project?.dataType === 'DENSE' )
 		templateId = "dense-project"
-	if( project?.dataType === 'sparse' )
+	if( project?.dataType === 'SPARSE' )
 		templateId = 'sparse-project'
 	if( !country )
 		templateId = 'intro'
@@ -153,10 +159,16 @@ export default function CO2ForecastPage() {
 			break
 
 		case "dense-country":
+			template = (
+				<>
+					{ productionSourceId > 0 && <LoadCountryData/> }
+				</> )
+			break
+
 		case "dense-project":
 			template = (
 				<>
-					{ productionSourceId > 0 && <LoadData/> }
+					{ productionSourceId > 0 && <LoadCountryData/> }
 				</> )
 			break
 

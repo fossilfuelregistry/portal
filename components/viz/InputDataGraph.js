@@ -33,7 +33,6 @@ function InputDataGraphBase( {
 
 	data.forEach( point => {
 		if( point.fossilFuelType !== fuel ) return
-		if( point.projection ) return
 
 		if( !sources.includes( point.sourceId ) ) {
 			sources.push( point.sourceId )
