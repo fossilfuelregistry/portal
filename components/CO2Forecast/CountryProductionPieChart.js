@@ -74,7 +74,7 @@ export default function CountryProductionPieChart( { project, emissions, co2, pr
 								</text>
 							</svg>
 						</div>
-						{ getText( 'production' ) }: { produtionMegatons } { getText( 'megaton' ) } { project.fossilFuelType }
+						{ getText( 'production' ) }: { produtionMegatons.toFixed( 2 ) } { getText( 'megaton' ) } { project.fossilFuelType }
 						<br/>
 						{ getText( 'emissions' ) }: { co2.toFixed( 2 ) } { getText( 'megaton' ) } CO²e
 					</Col>

@@ -38,14 +38,13 @@ function SparseProject( { borders } ) {
 	}, [ country ] )
 
 	const { data, loading, error } = useQuery( GQL_sparseProject, {
-		variables: { iso3166: country, projectId: project?.projectId },
-		skip: !project?.projectId
+		variables: { id: project?.id },
+		skip: !( project?.id > 0 )
 	} )
 
 	DEBUG && console.log( 'SparseProject', { country, project, countryCO2Total, loading, error, data } )
 
-	const projectRows = data?.sparseProjects?.nodes ?? []
-	const theProject = projectRows[ 0 ] ?? {}
+	const theProject = data?.project ?? {}
 
 	// Strip wikitext stuff.
 	const description = useMemo( () => {
@@ -59,7 +58,7 @@ function SparseProject( { borders } ) {
 	}, [ theProject?.description ] )
 
 	const co2 = useMemo( () => {
-		const points = theProject?.sparseDataPoints?.nodes ?? []
+		const points = theProject?.projectDataPoints?.nodes ?? []
 		if( !points.length ) return 0
 
 		const lastYearProd = points.filter( p => p.dataType === 'PRODUCTION' ).reduce( ( last, point ) => {
@@ -73,9 +72,9 @@ function SparseProject( { borders } ) {
 		co2.megatons = convertVolume( lastYearProd, 'e9ton' )
 		co2.scope1 = co2.scope1?.map( c => Math.round( c * 100 ) / 100 )
 		co2.scope3 = co2.scope3?.map( c => Math.round( c * 100 ) / 100 )
-		DEBUG && console.log( { theProject, points, lastYearProd, co2 } )
+		DEBUG && console.log( 'SparseProject useMemo', { theProject, points, lastYearProd, co2 } )
 		return co2
-	}, [ theProject?.projectId ] )
+	}, [ theProject?.id ] )
 
 	useEffect( () => {
 		if( router.locale === 'en' ) return
@@ -125,7 +124,7 @@ function SparseProject( { borders } ) {
 						<CountryProductionPieChart
 							project={ theProject }
 							emissions={ countryCO2Total }
-							produtionMegatons={co2.megatons}
+							produtionMegatons={ co2.megatons }
 							co2={ ( co2.scope1?.[ 1 ] || 0 ) + co2.scope3?.[ 1 ] }
 						/>
 					</Col>
@@ -171,16 +170,18 @@ function SparseProject( { borders } ) {
 						</div>
 					</Col>
 
+					{ !!theProject.ocOperatorId &&
 					<Col xs={ 24 } xl={ 12 }>
 						<OpenCorporateCard reference={ theProject.ocOperatorId }/>
-					</Col>
+					</Col> }
 
+					{ !!description &&
 					<Col xs={ 24 } xl={ 12 }>
 						<div className="co2-card">
 							<div className="header">&nbsp;</div>
 							<div className="box">
 								<div>
-									<b>{ theProject.projectId } </b>
+									<b>{ theProject.projectIdentifier } </b>
 									<a href={ theProject.linkUrl }><ExportOutlined/></a>
 								</div>
 								{ localeDescription?.length > 0 &&
@@ -195,7 +196,7 @@ function SparseProject( { borders } ) {
 								{ description }
 							</div>
 						</div>
-					</Col>
+					</Col> }
 
 				</Row>
 

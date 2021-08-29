@@ -112,9 +112,9 @@ export default function CO2ForecastPage() {
 	let templateId = 'totals', template
 	if( !project && productionSourceId > 0 )
 		templateId = 'dense-country'
-	if( project?.dataType === 'DENSE' )
+	if( project?.type === 'DENSE' )
 		templateId = "dense-project"
-	if( project?.dataType === 'SPARSE' )
+	if( project?.type === 'SPARSE' )
 		templateId = 'sparse-project'
 	if( !country )
 		templateId = 'intro'
@@ -168,7 +168,7 @@ export default function CO2ForecastPage() {
 		case "dense-project":
 			template = (
 				<>
-					{ productionSourceId > 0 && <LoadCountryData/> }
+					{ productionSourceId > 0 && <LoadProjectData/> }
 				</> )
 			break
 

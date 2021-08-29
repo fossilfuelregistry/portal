@@ -55,15 +55,13 @@ query countryCurrentProduction($iso3166: String!) {
 }`
 
 export const GQL_sparseProject = gql`
-query sparseProject($projectId: String!, $iso3166: String!) {
-  sparseProjects(condition: {projectId: $projectId, iso3166: $iso3166}) {
-    nodes {
-      id iso3166 iso31662 linkUrl methaneM3Ton
-      geoPosition { geojson srid }
-      description locationName ocOperatorId operatorName productionCo2E
-      productionMethod productionType projectId region sourceProjectId sourceProjectName
-      sparseDataPoints { nodes { dataType fossilFuelType grade quality subtype unit volume year } }
-    }
+query sparseProject($id: Int!) {
+  project(id: $id) {
+    id dataYear description
+    geoPosition { geojson srid }
+    iso3166 iso31662 linkUrl locationName methaneM3Ton ocOperatorId operatorName productionCo2E
+    productionMethod productionType projectIdentifier projectType region sourceProjectId sourceProjectName
+    projectDataPoints { nodes { dataType fossilFuelType quality sourceId subtype unit volume year grade dataYear } }
   }
 }`
 

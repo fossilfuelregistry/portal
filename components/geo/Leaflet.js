@@ -106,8 +106,8 @@ export default function Leaflet( { center, onMove, onMap, className, outlineGeom
 		try {
 			markerLayer.current.clearLayers()
 
-			projects.map( p => {
-				if( !p.geojson ) return
+			projects?.map( p => {
+				if( !p?.geojson ) return
 				window.L.marker( [ p.geojson?.coordinates?.[ 1 ], p.geojson?.coordinates?.[ 0 ] ] ).addTo( markerLayer.current )
 			} )
 		} catch( e ) {
@@ -121,7 +121,7 @@ export default function Leaflet( { center, onMove, onMap, className, outlineGeom
 		try {
 			projectLayer.current.clearLayers()
 
-			projectBorders.map( p => {
+			projectBorders?.map( p => {
 				if( p?.geom?.geojson )
 					projectLayer.current.addData( p.geom?.geojson )
 				else if( p?.geoPosition?.geojson )
