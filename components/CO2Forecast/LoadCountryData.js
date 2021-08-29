@@ -64,7 +64,7 @@ function LoadCountryData() {
 		error: errorLoadingProjection
 	} = useQuery( GQL_countryProjection, {
 		variables: { iso3166: country, iso31662: region ?? '', sourceId: projectionSourceId },
-		skip: !projectionSourceId
+		skip: !country
 	} )
 
 	const projection = useMemo( () => {
@@ -94,7 +94,7 @@ function LoadCountryData() {
 		error: errorLoadingReserves
 	} = useQuery( GQL_countryReserves, {
 		variables: { iso3166: country, iso31662: region ?? '', sourceId: productionSourceId },
-		skip: !reservesSourceId
+		skip: !country
 	} )
 
 	const reserves = useMemo( () => _co2( reservesData?.countryDataPoints?.nodes ),
@@ -161,8 +161,8 @@ function LoadCountryData() {
 	}, [ projection, projectionSourceId ] )
 
 	useEffect( () => {
-		DEBUG && console.log( 'useEffect reserves', { limits } )
-		if( !reserves?.length > 0 ) return
+		DEBUG && console.log( 'useEffect reserves', { limits, reserves } )
+		if( !( reserves?.length > 0 ) ) return
 		const newLimits = reserves.reduce( ( _limits, datapoint ) => {
 			_limits.firstYear = ( _limits.firstYear === undefined || datapoint.year < _limits.firstYear ) ? datapoint.year : _limits.firstYear
 			_limits.lastYear = ( _limits.lastYear === undefined || datapoint.year > _limits.lastYear ) ? datapoint.year : _limits.lastYear
@@ -172,7 +172,7 @@ function LoadCountryData() {
 		set_limits( l => ( { ...l, reserves: newLimits } ) )
 	}, [ reserves ] )
 
-	DEBUG && console.log( { limits, production, projection } )
+	DEBUG && console.log( { limits, production, projection, reserves } )
 
 	// Figure out available grades when reserves loaded.
 
@@ -192,6 +192,10 @@ function LoadCountryData() {
 	// Match projected production with reserves.
 
 	const projectedProduction = useMemo( () => {
+		if( !productionSourceId ) return []
+		if( !projectionSourceId ) return []
+		if( !reservesSourceId ) return []
+		DEBUG && console.log( 'useMemo projectedProduction', { projection, reserves } )
 		try {
 			return reservesProduction( projection, reserves, projectionSourceId, reservesSourceId, limits, grades )
 		} catch( e ) {
@@ -202,7 +206,7 @@ function LoadCountryData() {
 			} )
 			return []
 		}
-	}, [ projection, reserves, projectionSourceId, reservesSourceId, limits, grades ] )
+	}, [ projection, reserves, productionSourceId, projectionSourceId, reservesSourceId, limits, grades ] )
 
 	if( loadingProduction || errorLoadingProduction )
 		return <GraphQLStatus loading={ loadingProduction } error={ errorLoadingProduction }/>

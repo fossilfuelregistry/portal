@@ -61,7 +61,7 @@ function CO2ForecastGraphBase( {
 			gas_c: d.gas?.continProd ?? 0
 		} ) )
 
-	DEBUG && console.log( { production, productionData } )
+	DEBUG && console.log( { production, productionData, projProdData, projectionSourceId, projectedProduction } )
 	// scale
 	const yearScale = scaleLinear( {
 		range: [ 0, parentWidth - margin.left ],
@@ -80,8 +80,6 @@ function CO2ForecastGraphBase( {
 	} )
 
 	if( !( maxCO2 > 0 ) ) return null // JSON.stringify( maxCO2 )
-
-	DEBUG && console.log( { projectionData, projectedProduction, projProdData } )
 
 	return (
 		<div className="graph">

@@ -13,7 +13,7 @@ query reserves( $iso3166: String! $iso31662: String! ) {
   	orderBy: YEAR_ASC
     condition: { iso3166: $iso3166 iso31662: $iso31662 dataType: RESERVE }
   ) {
-    nodes { fossilFuelType volume year unit subtype sourceId quality }
+    nodes { fossilFuelType volume year unit subtype sourceId quality grade }
   }
 }`
 

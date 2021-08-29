@@ -10,7 +10,7 @@ import Download from "./Download"
 import CO2ForecastGraph from "components/viz/CO2ForecastGraph"
 import LeafletNoSSR from "components/geo/LeafletNoSSR"
 
-const DEBUG = true
+const DEBUG = false
 
 function ForecastView( { production, projection, reserves, projectedProduction, limits } ) {
 	const { getText } = useText()

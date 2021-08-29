@@ -18,7 +18,7 @@ function _sumOfFuelCO2( fuel, range ) {
 	try {
 		return fuel.scope1[ range ] + fuel.scope3[ range ]
 	} catch( e ) {
-		throw new Error( 'Cannot calculate CO2 of ' + JSON.stringify( fuel ) )
+		throw new Error( e.message + '\nCannot calculate CO2 of ' + JSON.stringify( fuel ) )
 	}
 }
 
@@ -47,6 +47,7 @@ export function combineOilAndGas( dataset ) {
 
 export function getPreferredGrades( reserves, reservesSourceId ) {
 	let pGrade = -1, cGrade = -1
+
 	reserves.forEach( r => {
 		if( r.sourceId !== reservesSourceId ) return
 		if( r.grade?.[ 1 ] === 'p' ) {

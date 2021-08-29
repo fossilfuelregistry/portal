@@ -206,13 +206,14 @@ export const useConversionHooks = () => {
 				grades
 			} )
 			if( !projectionSourceId ) return []
-			if( !projection || projection.length < 1 ) return []
+			if( !( projection?.length > 1 ) ) return []
 			if( !limits?.production ) return []
 			if( !limits?.projection ) return []
 
 			// Find most recent preferred reserve
 
 			const useGrades = getPreferredGrades( reserves, reservesSourceId )
+
 			const lastReserves = {
 				oil: { p: { year: 0, value: 0 }, c: { year: 0, value: 0 } },
 				gas: { p: { year: 0, value: 0 }, c: { year: 0, value: 0 } }
@@ -231,7 +232,7 @@ export const useConversionHooks = () => {
 			// Fill out gap between production and projection (if any)
 			const gapStart = Math.min( limits.production.oil.lastYear, limits.production.gas.lastYear )
 			const gapEnd = Math.max( limits.projection.oil.firstYear, limits.projection.gas.firstYear, gapStart )
-			DEBUG && console.log( { reservesSourceId, useGrades, lastReserves, limits, gapStart, gapEnd } )
+			console.log( { reservesSourceId, useGrades, lastReserves, limits, gapStart, gapEnd } )
 
 			if( gapStart > 0 ) {
 				for( let y = gapStart; y < gapEnd; y++ ) {
