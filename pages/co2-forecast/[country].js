@@ -21,7 +21,8 @@ import LeafletNoSSR from "components/geo/LeafletNoSSR"
 import { GQL_countryBorder, GQL_countrySources } from "queries/country"
 import CountryProductionPieChart from "components/CO2Forecast/CountryProductionPieChart"
 import { useConversionHooks } from "components/viz/conversionHooks"
-import LargestProjects from "../../components/CO2Forecast/LargestProjects"
+import LargestProjects from "components/CO2Forecast/LargestProjects"
+import LoadProjectData from "components/CO2Forecast/LoadProjectData"
 
 const DEBUG = false
 
@@ -71,6 +72,7 @@ export default function CO2ForecastPage() {
 				...s,
 				namePretty: `${ getPreferredReserveGrade( s.grades ) } ${ s.year }`
 			} ) )
+		console.log( { _projectSources, productionSources, projectionSources, reservesSources } )
 	} else {
 		productionSources = ( _countrySources?.getCountrySources?.nodes ?? [] )
 			.filter( s => s.dataType === 'PRODUCTION' )

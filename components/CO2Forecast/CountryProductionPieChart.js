@@ -70,7 +70,7 @@ export default function CountryProductionPieChart( { project, emissions, co2, pr
 									textAnchor="middle"
 								>
 									<tspan x={ 50 }>{ ( ratio * 100 ).toFixed( 2 ) }%</tspan>
-									<tspan x={ 50 } dy={ 16 }>{ project.projectId }</tspan>
+									<tspan x={ 50 } dy={ 16 }>{ project.projectIdentifier }</tspan>
 								</text>
 							</svg>
 						</div>

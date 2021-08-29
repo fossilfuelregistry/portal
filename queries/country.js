@@ -7,16 +7,6 @@ query countrySource( $iso3166: String = "", $iso31662: String = "") {
   }
 }`
 
-export const GQL_countryReserves = gql`
-query reserves( $iso3166: String! $iso31662: String! ) {
-  countryDataPoints(
-  	orderBy: YEAR_ASC
-    condition: { iso3166: $iso3166 iso31662: $iso31662 dataType: RESERVE }
-  ) {
-    nodes { fossilFuelType volume year unit subtype sourceId quality grade }
-  }
-}`
-
 export const GQL_countryProduction = gql`
 query production( $iso3166: String! $iso31662: String! ) {
   countryDataPoints(
@@ -24,6 +14,16 @@ query production( $iso3166: String! $iso31662: String! ) {
     condition: { iso3166: $iso3166 iso31662: $iso31662 dataType: PRODUCTION }
   ) {
     nodes { fossilFuelType volume year unit subtype sourceId quality }
+  }
+}`
+
+export const GQL_countryReserves = gql`
+query reserves( $iso3166: String! $iso31662: String! ) {
+  countryDataPoints(
+  	orderBy: YEAR_ASC
+    condition: { iso3166: $iso3166 iso31662: $iso31662 dataType: RESERVE }
+  ) {
+    nodes { fossilFuelType volume year unit subtype sourceId quality grade }
   }
 }`
 
@@ -51,6 +51,36 @@ export const GQL_countryCurrentProduction = gql`
 query countryCurrentProduction($iso3166: String!) {
   getCountryCurrentProduction(iso3166_: $iso3166) {
     nodes { id fossilFuelType sourceId unit volume year }
+  }
+}`
+
+export const GQL_projectProduction = gql`
+query production( $id: Int! ) {
+  projectDataPoints(
+  	orderBy: YEAR_ASC
+    condition: { projectId: $id dataType: PRODUCTION }
+  ) {
+    nodes { fossilFuelType volume year unit subtype sourceId quality }
+  }
+}`
+
+export const GQL_projectReserves = gql`
+query reserves( $id: Int! ) {
+  projectDataPoints(
+  	orderBy: YEAR_ASC
+    condition: { projectId: $id dataType: RESERVE }
+  ) {
+    nodes { fossilFuelType volume year unit subtype sourceId quality grade }
+  }
+}`
+
+export const GQL_projectProjection = gql`
+query projection( $id: Int! ) {
+  projectDataPoints(
+  	orderBy: YEAR_ASC
+    condition: { projectId: $id dataType: PROJECTION }
+  ) {
+    nodes { fossilFuelType volume year unit subtype sourceId quality }
   }
 }`
 

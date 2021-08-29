@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react"
 import { useQuery } from "@apollo/client"
 import GraphQLStatus from "components/GraphQLStatus"
-import { GQL_countryProduction, GQL_countryProjection, GQL_countryReserves } from "queries/country"
+import { GQL_projectProduction, GQL_projectProjection, GQL_projectReserves } from "queries/country"
 import { Alert, notification } from "antd"
 import useText from "lib/useText"
 import { useDispatch, useSelector } from "react-redux"
@@ -11,14 +11,12 @@ import settings from "settings"
 
 const DEBUG = false
 
-function LoadCountryData() {
+function LoadProjectData() {
 	const dispatch = useDispatch()
 	const { co2FromVolume, reservesProduction } = useConversionHooks()
 	const { getText } = useText()
 	const [ limits, set_limits ] = useState( {} )
 	const [ grades, set_grades ] = useState( {} )
-	const country = useSelector( redux => redux.country )
-	const region = useSelector( redux => redux.region )
 	const project = useSelector( redux => redux.project )
 	const productionSourceId = useSelector( redux => redux.productionSourceId )
 	const projectionSourceId = useSelector( redux => redux.projectionSourceId )
@@ -47,26 +45,26 @@ function LoadCountryData() {
 		data: productionData,
 		loading: loadingProduction,
 		error: errorLoadingProduction
-	} = useQuery( GQL_countryProduction, {
-		variables: { iso3166: country, iso31662: region ?? '' },
-		skip: !productionSourceId
+	} = useQuery( GQL_projectProduction, {
+		variables: { id: project?.id },
+		skip: !project?.id
 	} )
 
-	DEBUG && console.log( 'LoadCountryData', { productionData } )
-
 	const production = useMemo( () => {
-		DEBUG && console.log( '_co2( productionData )', productionData?.countryDataPoints?.nodes )
-		return _co2( productionData?.countryDataPoints?.nodes )
-	}, [ productionData?.countryDataPoints?.nodes, productionData?.countryDataPoints?.nodes?.length, productionSourceId, gwp ] )
+		DEBUG && console.log( '_co2( productionData )', productionData?.projectDataPoints?.nodes )
+		return _co2( productionData?.projectDataPoints?.nodes )
+	}, [ productionData?.projectDataPoints?.nodes, productionData?.projectDataPoints?.nodes?.length, productionSourceId, gwp ] )
 
 	const {
 		data: projectionData,
 		loading: loadingProjection,
 		error: errorLoadingProjection
-	} = useQuery( GQL_countryProjection, {
-		variables: { iso3166: country, iso31662: region ?? '', sourceId: projectionSourceId },
-		skip: !country
+	} = useQuery( GQL_projectProjection, {
+		variables: { id: project?.id },
+		skip: !project?.id
 	} )
+
+	DEBUG && console.log( 'LoadProjectData', { productionData, production } )
 
 	const projection = useMemo( () => {
 		try {
@@ -82,24 +80,24 @@ function LoadCountryData() {
 				DEBUG && console.log( { stableProj } )
 				return stableProj
 			} else
-				return _co2( projectionData?.countryDataPoints?.nodes )
+				return _co2( projectionData?.projectDataPoints?.nodes )
 		} catch( e ) {
 			notification.error( { message: 'Error in calculation', description: e.message } )
 			return []
 		}
-	}, [ projectionData?.countryDataPoints?.nodes, projectionSourceId, stableProduction, gwp ] )
+	}, [ projectionData?.projectDataPoints?.nodes, projectionSourceId, stableProduction, gwp ] )
 
 	const {
 		data: reservesData,
 		loading: loadingReserves,
 		error: errorLoadingReserves
-	} = useQuery( GQL_countryReserves, {
-		variables: { iso3166: country, iso31662: region ?? '', sourceId: productionSourceId },
-		skip: !country
+	} = useQuery( GQL_projectReserves, {
+		variables: { id: project?.id },
+		skip: !project?.id
 	} )
 
-	const reserves = useMemo( () => _co2( reservesData?.countryDataPoints?.nodes ),
-		[ reservesData?.countryDataPoints?.nodes, gwp ] )
+	const reserves = useMemo( () => _co2( reservesData?.projectDataPoints?.nodes ),
+		[ reservesData?.projectDataPoints?.nodes, gwp ] )
 
 	// Find stable production
 	useEffect( () => {
@@ -173,7 +171,7 @@ function LoadCountryData() {
 		set_limits( l => ( { ...l, reserves: newLimits } ) )
 	}, [ reserves ] )
 
-	DEBUG && console.log( { limits, production, projection, reserves } )
+	DEBUG && console.log( { limits, project, production, projection, reserves } )
 
 	// Figure out available grades when reserves loaded.
 
@@ -230,4 +228,4 @@ function LoadCountryData() {
 	)
 }
 
-export default LoadCountryData
+export default LoadProjectData
