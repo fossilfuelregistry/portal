@@ -46,7 +46,7 @@ function LoadProjectData() {
 		loading: loadingProduction,
 		error: errorLoadingProduction
 	} = useQuery( GQL_projectProduction, {
-		variables: { id: project?.id },
+		variables: { forId: project?.id },
 		skip: !project?.id
 	} )
 
