@@ -77,6 +77,8 @@ function SparseProject( { borders } ) {
 	}, [ theProject?.id ] )
 
 	useEffect( () => {
+		// Translate description
+
 		if( router.locale === 'en' ) return
 		if( !( description?.length > 0 ) ) {
 			return

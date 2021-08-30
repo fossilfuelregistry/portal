@@ -72,7 +72,7 @@ export default function CO2ForecastPage() {
 				...s,
 				namePretty: `${ getPreferredReserveGrade( s.grades ) } ${ s.year }`
 			} ) )
-		console.log( { _projectSources, productionSources, projectionSources, reservesSources } )
+		DEBUG && console.log( { _projectSources, productionSources, projectionSources, reservesSources } )
 	} else {
 		productionSources = ( _countrySources?.getCountrySources?.nodes ?? [] )
 			.filter( s => s.dataType === 'PRODUCTION' )
@@ -224,7 +224,7 @@ export default function CO2ForecastPage() {
 							</h4>
 							<CarbonIntensitySelector/>
 
-							{ project?.dataType !== 'sparse' &&
+							{ project?.type !== 'SPARSE' &&
 							<>
 								<h4 className="selector">
 									{ getText( 'data_source' ) }
@@ -239,7 +239,7 @@ export default function CO2ForecastPage() {
 							</>
 							}
 
-							{ !!productionSourceId && project?.dataType !== 'sparse' &&
+							{ !!productionSourceId && project?.type !== 'SPARSE' &&
 							<>
 								<h4 className="selector">{ getText( 'reserves' ) }</h4>
 								<SourceSelector

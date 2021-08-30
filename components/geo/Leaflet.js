@@ -108,7 +108,9 @@ export default function Leaflet( { center, onMove, onMap, className, outlineGeom
 
 			projects?.map( p => {
 				if( !p?.geojson ) return
-				window.L.marker( [ p.geojson?.coordinates?.[ 1 ], p.geojson?.coordinates?.[ 0 ] ] ).addTo( markerLayer.current )
+				// TODO Highlight focused project
+				if( p.__typename === 'GeometryPoint' )
+					window.L.marker( [ p.geojson?.coordinates?.[ 1 ], p.geojson?.coordinates?.[ 0 ] ] ).addTo( markerLayer.current )
 			} )
 		} catch( e ) {
 			console.log( e )
