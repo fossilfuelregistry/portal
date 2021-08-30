@@ -5,7 +5,7 @@ import { Button, Modal } from 'antd'
 import { ExportOutlined } from "@ant-design/icons"
 import { useRouter } from "next/router"
 
-const DEBUG = true
+const DEBUG = false
 
 export default function Sources( { production, reserves, projection } ) {
 	const { getText } = useText()

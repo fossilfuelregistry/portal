@@ -81,7 +81,7 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 					style={ { minWidth: 120, width: '100%' } }
 					value={ selectedProjectOption }
 					allowClear={ true }
-					placeholder={ getText( 'project' ) + '...' }
+					placeholder={ getText( 'search_projects' ) + '...' }
 					onChange={ async p => {
 						set_selectedProjectOption( p )
 						const proj = projects.find( pr => pr.projectId === p )

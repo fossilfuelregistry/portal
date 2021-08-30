@@ -22,13 +22,13 @@ const colors = {
 //#008080,#70a494,#b4c8a8,#f6edbd,#edbb8a,#de8a5a,#ca562c
 
 function CO2ForecastGraphBase( {
-	production, projection, projectedProduction, parentWidth
+	production, projection, projectedProduction, parentWidth, parentHeight
 } ) {
 	const { getText } = useText()
 	const projectionSourceId = useSelector( redux => redux.projectionSourceId )
 	const productionSourceId = useSelector( redux => redux.productionSourceId )
 
-	const height = 500
+	const height = parentHeight
 	const margin = { left: 0, top: 10 }
 
 	const getYear = d => d.year
@@ -82,7 +82,7 @@ function CO2ForecastGraphBase( {
 	if( !( maxCO2 > 0 ) ) return null // JSON.stringify( maxCO2 )
 
 	return (
-		<div className="graph">
+		<div className="graph" style={{ height: height }}>
 			<svg width={ '100%' } height={ height }>
 				<Group left={ margin.left } top={ 0 }>
 					<AxisBottom

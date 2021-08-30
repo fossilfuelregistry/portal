@@ -7,7 +7,7 @@ import useText from "../../lib/useText"
 import { co2PageUpdateQuery } from "components/CO2Forecast/calculate"
 import settings from "../../settings"
 
-const DEBUG = false
+const DEBUG = true
 
 export default function SourceSelector( { sources, loading, stateKey, placeholder } ) {
 	const router = useRouter()
@@ -25,7 +25,6 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 	useEffect( () => { // If we have only a single option, preselect it.
 		DEBUG && console.log( 'SourceSelector useEffect single', stateKey )
 		if( !( sources?.length === 1 ) ) return
-		if( project?.dataType === 'sparse' ) return
 		const id = sources?.[ 0 ]?.sourceId
 		DEBUG && console.log( stateKey, '>>>>>>>>>> Single source:', sources )
 		set_selectedSourceOption( id?.toString() )
@@ -35,14 +34,14 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 	}, [ sources?.length === 1 ] )
 
 	useEffect( () => { // Clear selection if selected value is no longer available.
-		if( !stateValue || loading ) return
-		DEBUG && console.log( 'SourceSelector useEffect Clear selection' )
-
 		DEBUG && console.log( stateKey, { stateValue, loading, selectedSourceOption, sources } )
+
+		if( loading ) return
+		DEBUG && console.log( 'SourceSelector useEffect selection' )
 
 		if( sources?.length === 0 && !loading )
 			if( !firstInitialize.current ) {
-				DEBUG && console.log( stateKey, '>>>>>>>>>> Source empty' )
+				DEBUG && console.log( stateKey, '>>>>>>>>>> Sources empty' )
 				set_selectedSourceOption( undefined )
 				co2PageUpdateQuery( store, router, stateKey, undefined )
 				dispatch( { type: stateKey.toUpperCase(), payload: null } )
@@ -53,10 +52,18 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 			}
 
 		if( !sources.find( s => s.sourceId === stateValue ) ) {
-			DEBUG && console.log( stateKey, '>>>>>>>>>> Reset' )
-			set_selectedSourceOption( undefined )
-			co2PageUpdateQuery( store, router, stateKey, undefined )
-			dispatch( { type: stateKey.toUpperCase(), payload: null } )
+			let newSource
+			if( sources.length > 0 ) {
+				newSource = sources[ 0 ]
+				DEBUG && console.log( stateKey, '>>>>>>>>>> PREeset', newSource )
+			} else {
+				newSource = undefined
+				DEBUG && console.log( stateKey, '>>>>>>>>>> Reset' )
+			}
+			const newId = newSource?.sourceId?.toString()
+			set_selectedSourceOption( newId )
+			co2PageUpdateQuery( store, router, stateKey, newId )
+			dispatch( { type: stateKey.toUpperCase(), payload: parseInt( newId ) } )
 		} else {
 			set_selectedSourceOption( stateValue.toString() )
 		}

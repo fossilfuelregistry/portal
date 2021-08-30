@@ -77,8 +77,12 @@ export default function CO2ForecastPage() {
 	} else {
 		productionSources = ( _countrySources?.getCountrySources?.nodes ?? [] )
 			.filter( s => s.dataType === 'PRODUCTION' )
+			.sort( ( a, b ) => Math.sign( ( b.quality ?? 0 ) - ( a.quality ?? 0 ) ) )
+
 		projectionSources = ( _countrySources?.getCountrySources?.nodes ?? [] )
 			.filter( s => s.dataType === 'PROJECTION' )
+			.sort( ( a, b ) => Math.sign( ( b.quality ?? 0 ) - ( a.quality ?? 0 ) ) )
+
 		reservesSources = ( _countrySources?.getCountrySources?.nodes ?? [] )
 			.filter( s => s.dataType === 'RESERVE' )
 			.map( s => ( {
@@ -112,15 +116,13 @@ export default function CO2ForecastPage() {
 		if( qCountry !== country ) dispatch( { type: 'COUNTRY', payload: qCountry } )
 	}, [ router.query?.country ] )
 
-	let templateId = 'totals', template
-	if( !project && productionSourceId > 0 )
+	let templateId = 'intro', template
+	if( !project )
 		templateId = 'dense-country'
 	if( project?.type === 'DENSE' )
 		templateId = "dense-project"
 	if( project?.type === 'SPARSE' )
 		templateId = 'sparse-project'
-	if( !country )
-		templateId = 'intro'
 
 	DEBUG && console.log( 'Template select:', { templateId, project, productionSourceId } )
 
@@ -135,36 +137,36 @@ export default function CO2ForecastPage() {
 				</div>
 			)
 			break
-		case "totals":
-			template = (
-				<Row gutter={ [ 12, 12 ] } style={ { marginBottom: 26 } }>
-					<Col xs={ 24 } lg={ 12 }>
-						<div className="geo-wrap">
-							<LeafletNoSSR
-								className="country-geo"
-								outlineGeometry={ borders }
-								projects={ highlightedProjects }
-								projectBorders={ projectBorders }
-							/>
-						</div>
-					</Col>
-					<Col xs={ 24 } lg={ 12 }>
-						<CountryProductionPieChart
-							emissions={ countryCO2Total }
-						/>
-					</Col>
-					<Col xs={ 24 } lg={ 12 }>
-						<LargestProjects
-							onPositions={ set_highlightedProjects }
-						/>
-					</Col>
-				</Row> )
-			break
-
 		case "dense-country":
 			template = (
 				<>
+					<Row gutter={ [ 12, 12 ] } style={ { marginBottom: 26 } }>
+						<Col xs={ 24 } lg={ 12 } xxl={8}>
+							<CountryProductionPieChart
+								emissions={ countryCO2Total }
+							/>
+						</Col>
+
+						<Col xs={ 24 } lg={ 12 } xxl={8}>
+							<div className="geo-wrap">
+								<LeafletNoSSR
+									className="country-geo"
+									outlineGeometry={ borders }
+									projects={ highlightedProjects }
+									projectBorders={ projectBorders }
+								/>
+							</div>
+						</Col>
+
+						<Col xs={ 24 } lg={ 12 } xxl={8}>
+							<LargestProjects
+								onPositions={ set_highlightedProjects }
+							/>
+						</Col>
+					</Row>
+
 					{ productionSourceId > 0 && <LoadCountryData/> }
+
 					<Sources
 						production={ productionSources }
 						reserves={ reservesSources }
@@ -224,10 +226,6 @@ export default function CO2ForecastPage() {
 						<Col xs={ 24 } lg={ 6 }>
 							<h4>{ getText( 'country' ) }</h4>
 							<CountrySelector/>
-							<ProjectSelector
-								iso3166={ country }
-								iso31662={ region ?? '' }
-							/>
 
 							<h4 className="selector">
 								{ getText( 'carbon_intensity' ) }
