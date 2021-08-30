@@ -14,8 +14,9 @@ import BarStackChart from "components/viz/BarStackChart"
 import CountryProductionPieChart from "./CountryProductionPieChart"
 import HelpModal from "../HelpModal"
 import LeafletNoSSR from "../geo/LeafletNoSSR"
+import Sources from "./Sources"
 
-const DEBUG = false
+const DEBUG = true
 
 function SparseProject( { borders } ) {
 	const { getText } = useText()
@@ -23,6 +24,7 @@ function SparseProject( { borders } ) {
 	const { getCountryCurrentCO2 } = useConversionHooks()
 	const country = useSelector( redux => redux.country )
 	const project = useSelector( redux => redux.project )
+	const allSources = useSelector( redux => redux.allSources )
 	const [ countryCO2Total, set_countryCO2Total ] = useState( 0 )
 	const [ localeDescription, set_localeDescription ] = useState()
 	const { co2FromVolume, convertVolume } = useConversionHooks()
@@ -73,6 +75,13 @@ function SparseProject( { borders } ) {
 		co2.scope1 = co2.scope1?.map( c => Math.round( c * 100 ) / 100 )
 		co2.scope3 = co2.scope3?.map( c => Math.round( c * 100 ) / 100 )
 		DEBUG && console.log( 'SparseProject useMemo', { theProject, points, lastYearProd, co2 } )
+
+		const sources = points.reduce( ( s, p ) => {
+			if( !s.includes( p.sourceId ) ) s.push( p.sourceId )
+			return s
+		}, [] )
+		co2.sources = sources.map( id => allSources.find( s => s.sourceId === id ) )
+
 		return co2
 	}, [ theProject?.id ] )
 
@@ -199,6 +208,12 @@ function SparseProject( { borders } ) {
 							</div>
 						</div>
 					</Col> }
+
+					<Col xs={ 24 } xl={ 12 }>
+						<Sources
+							production={ co2.sources }
+						/>
+					</Col>
 
 				</Row>
 

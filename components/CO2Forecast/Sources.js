@@ -27,7 +27,7 @@ export default function Sources( { production, reserves, projection } ) {
 									title: (
 										<span>
 											{ s.namePretty?.startsWith( 'name_' ) ? getText( s.namePretty ) : s.namePretty }
-											{' '}
+											{ ' ' }
 											<a href={ s.url }><ExportOutlined/></a>
 										</span>
 									),
@@ -39,18 +39,20 @@ export default function Sources( { production, reserves, projection } ) {
 											</div>
 
 											{ s.documentUrl &&
-											<Button onClick={() => router.push( s.documentUrl ) }>
+											<Button onClick={ () => router.push( s.documentUrl ) }>
 												{ getText( 'document_repository' ) }
 											</Button>
 											}
 
+											{ s.latestCurationAt &&
 											<div style={ {
 												marginTop: 8,
 												marginBottom: 8,
 												fontSize: 12
 											} }
 											>{ getText( 'latest_curation_date' ) } { s.latestCurationAt }
-											</div>
+											</div> }
+
 										</>
 									)
 								} )
@@ -64,7 +66,7 @@ export default function Sources( { production, reserves, projection } ) {
 			)
 		} )
 
-	const _reserves = reserves.map( r => allSources.find( s => s.sourceId === r.sourceId ) )
+	const _reserves = reserves?.map( r => allSources.find( s => s.sourceId === r.sourceId ) )
 	DEBUG && console.log( { production, reserves: _reserves, projection } )
 
 	return (
@@ -72,18 +74,25 @@ export default function Sources( { production, reserves, projection } ) {
 			<div className="header">{ getText( 'data_sources' ) }</div>
 			<div className="box">
 				{ contextHolder }
+
+				{ production?.length &&
 				<div>
 					<b>{ getText( 'production' ) }: </b>
 					{ _renderSourceList( production ) }
-				</div>
+				</div> }
+
+				{ _reserves?.length &&
 				<div>
 					<b>{ getText( 'reserves' ) }: </b>
 					{ _renderSourceList( _reserves ) }
-				</div>
+				</div> }
+
+				{ projection?.length &&
 				<div>
 					<b>{ getText( 'projection' ) }: </b>
 					{ _renderSourceList( projection ) }
-				</div>
+				</div> }
+
 				<div>{ '' }</div>
 			</div>
 		</div>
