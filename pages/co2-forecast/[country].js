@@ -140,7 +140,7 @@ export default function CO2ForecastPage() {
 		case "dense-country":
 			template = (
 				<>
-					<Row gutter={ [ 12, 12 ] } style={ { marginBottom: 26 } }>
+					<Row gutter={ [ 32, 32 ] } style={ { marginBottom: 26 } }>
 						<Col xs={ 24 } lg={ 12 } xxl={8}>
 							<CountryProductionPieChart
 								emissions={ countryCO2Total }

@@ -21,7 +21,7 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 
 	return (
 		<>
-			<Row gutter={ [ 16, 16 ] }>
+			<Row gutter={ [ 32, 32 ] }>
 				<Col xs={ 24 } lg={ 14 } xxl={ 16 }>
 					<CO2ForecastGraph
 						production={ production }
@@ -50,7 +50,7 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 				</Col>
 			</Row>
 
-			<Row gutter={ [ 16, 16 ] }>
+			<Row gutter={ [ 32, 32 ] }>
 
 				{ !!projectGeo &&
 				<Col xs={ 24 } md={ 12 } xxl={ 12 }>
