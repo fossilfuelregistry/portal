@@ -82,7 +82,7 @@ function CO2ForecastGraphBase( {
 	if( !( maxCO2 > 0 ) ) return null // JSON.stringify( maxCO2 )
 
 	return (
-		<div className="graph" style={{ height: height }}>
+		<div className="graph" style={{ height: height, minHeight: 400 }}>
 			<svg width={ '100%' } height={ height }>
 				<Group left={ margin.left } top={ 0 }>
 					<AxisBottom
