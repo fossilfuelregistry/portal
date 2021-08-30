@@ -11,13 +11,6 @@ query conversions {
   }
 }`
 
-export const GQL_countries = gql`
-query countries {
-  getProducingCountries {
-    nodes { isoA2 name }
-  }
-}`
-
 export const GQL_productionCountries = gql`
 query producingCountries {
   getProducingIso3166 {

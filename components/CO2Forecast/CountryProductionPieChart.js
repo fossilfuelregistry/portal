@@ -56,7 +56,7 @@ export default function CountryProductionPieChart( { project, emissions, co2, pr
 							/>
 						</div>
 					</Col>
-					{ !!project &&
+					{ !!project && !!produtionMegatons &&
 					<Col xs={ 10 } style={ { textAlign: 'center' } }>
 						<div style={ { height: 200 } }>
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" height="100%" width="100%">
