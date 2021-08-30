@@ -24,7 +24,7 @@ query fossilFuelTypes {
 
 export const GQL_projectSources = gql`
 query projectSources( $id:Int! ) {
-  getProjectSources(id: $id) {
+  getProjectSources(forId: $id) {
     nodes { dataPoints dataType description latestCurationAt name namePretty sourceId records url quality grade }
   }
 }`
@@ -38,7 +38,7 @@ query projects($iso3166_: String!, $iso31662_: String = "") {
 export const GQL_sources = gql`
 query sources {
   sources {
-    nodes { description name sourceId url }
+    nodes { description name namePretty sourceId url }
   }
 }`
 

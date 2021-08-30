@@ -23,6 +23,7 @@ import CountryProductionPieChart from "components/CO2Forecast/CountryProductionP
 import { useConversionHooks } from "components/viz/conversionHooks"
 import LargestProjects from "components/CO2Forecast/LargestProjects"
 import LoadProjectData from "components/CO2Forecast/LoadProjectData"
+import Sources from "components/CO2Forecast/Sources"
 
 const DEBUG = false
 
@@ -164,6 +165,11 @@ export default function CO2ForecastPage() {
 			template = (
 				<>
 					{ productionSourceId > 0 && <LoadCountryData/> }
+					<Sources
+						production={ productionSources }
+						reserves={ reservesSources }
+						projection={ projectionSources }
+					/>
 				</> )
 			break
 
@@ -171,6 +177,11 @@ export default function CO2ForecastPage() {
 			template = (
 				<>
 					{ productionSourceId > 0 && <LoadProjectData/> }
+					<Sources
+						production={ productionSources }
+						reserves={ reservesSources }
+						projection={ projectionSources }
+					/>
 				</> )
 			break
 
