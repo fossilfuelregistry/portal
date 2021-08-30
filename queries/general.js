@@ -38,6 +38,6 @@ query projects($iso3166_: String!, $iso31662_: String = "") {
 export const GQL_sources = gql`
 query sources {
   sources {
-    nodes { description name namePretty sourceId url documentUrl }
+    nodes { description name namePretty sourceId url documentUrl latestCurationAt }
   }
 }`

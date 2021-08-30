@@ -2,11 +2,14 @@ import useText from "lib/useText"
 import React from "react"
 import { useSelector } from "react-redux"
 import { Button, Modal } from 'antd'
+import { ExportOutlined } from "@ant-design/icons"
+import { useRouter } from "next/router"
 
 const DEBUG = true
 
 export default function Sources( { production, reserves, projection } ) {
 	const { getText } = useText()
+	const router = useRouter()
 	const allSources = useSelector( redux => redux.allSources )
 	const [ modal, contextHolder ] = Modal.useModal()
 
@@ -22,13 +25,32 @@ export default function Sources( { production, reserves, projection } ) {
 								console.log( 'CLICK', { s, modal } )
 								modal.info( {
 									title: (
-										<a href={ s.url }>{ s.namePretty?.startsWith( 'name_' ) ? getText( s.namePretty ) : s.namePretty }</a>
+										<span>
+											{ s.namePretty?.startsWith( 'name_' ) ? getText( s.namePretty ) : s.namePretty }
+											{' '}
+											<a href={ s.url }><ExportOutlined/></a>
+										</span>
 									),
 									content: (
 										<>
-											{ s.description?.startsWith( 'explanation_' ) ? getText( s.description ) : s.description }
-											<br/>
-											{ getText( '' ) }
+											<div
+												style={ { marginBottom: 8 } }
+											>{ s.description?.startsWith( 'explanation_' ) ? getText( s.description ) : s.description }
+											</div>
+
+											{ s.documentUrl &&
+											<Button onClick={() => router.push( s.documentUrl ) }>
+												{ getText( 'document_repository' ) }
+											</Button>
+											}
+
+											<div style={ {
+												marginTop: 8,
+												marginBottom: 8,
+												fontSize: 12
+											} }
+											>{ getText( 'latest_curation_date' ) } { s.latestCurationAt }
+											</div>
 										</>
 									)
 								} )
