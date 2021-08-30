@@ -11,33 +11,36 @@ export default function Sources( { production, reserves, projection } ) {
 	const [ modal, contextHolder ] = Modal.useModal()
 
 	const _renderSourceList =
-		sources => sources.map( s =>
-			<React.Fragment key={ s.sourceId }>
-				<span>
-					<Button
-						size="small"
-						onClick={ () => {
-							console.log( 'CLICK', { s, modal } )
-							modal.info( {
-								title: (
-									<a href={ s.url }>{ s.namePretty?.startsWith( 'name_' ) ? getText( s.namePretty ) : s.namePretty }</a>
-								),
-								content: (
-									<>
-										{s.description?.startsWith( 'explanation_' ) ? getText( s.description ) : s.description}
-										<br/>
-										{getText( '' )}
-									</>
-								)
-							} )
-						} }
-					>
-						{ s.name?.startsWith( 'name_' ) ? getText( s.name ) : s.name }
-					</Button>
-					{ ' ' }
-				</span>
-			</React.Fragment>
-		)
+		sources => sources.map( s => {
+			if( !s?.sourceId ) return null
+			return (
+				<React.Fragment key={ s.sourceId }>
+					<span>
+						<Button
+							size="small"
+							onClick={ () => {
+								console.log( 'CLICK', { s, modal } )
+								modal.info( {
+									title: (
+										<a href={ s.url }>{ s.namePretty?.startsWith( 'name_' ) ? getText( s.namePretty ) : s.namePretty }</a>
+									),
+									content: (
+										<>
+											{ s.description?.startsWith( 'explanation_' ) ? getText( s.description ) : s.description }
+											<br/>
+											{ getText( '' ) }
+										</>
+									)
+								} )
+							} }
+						>
+							{ s.name?.startsWith( 'name_' ) ? getText( s.name ) : s.name }
+						</Button>
+						{ ' ' }
+					</span>
+				</React.Fragment>
+			)
+		} )
 
 	const _reserves = reserves.map( r => allSources.find( s => s.sourceId === r.sourceId ) )
 	DEBUG && console.log( { production, reserves: _reserves, projection } )
