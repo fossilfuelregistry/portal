@@ -20,14 +20,6 @@ export default function LargestProjects( { onPositions } ) {
 		skip: !country
 	} )
 
-	const setProject = useCallback( async project => {
-		dispatch( { type: 'PROJECT', payload: project } )
-		dispatch( { type: 'PRODUCTIONSOURCEID', payload: undefined } )
-		dispatch( { type: 'RESERVESSOURCEID', payload: undefined } )
-		dispatch( { type: 'PROJECTIONSOURCEID', payload: undefined } )
-		dispatch( { type: 'STABLEPRODUCTION', payload: undefined } )
-	}, [] )
-
 	const projects = useMemo( () => {
 		return ( data?.projects?.nodes ?? [] ).filter( p => p.productionCo2E > 0 )
 	}, [ data?.projects?.nodes ] )
@@ -43,7 +35,10 @@ export default function LargestProjects( { onPositions } ) {
 	return (
 		<div className="co2-card">
 			<div className="header">{ getText( 'largest_projects' ) }</div>
-			<div className="box" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+			<div
+				className="box"
+				style={ { display: 'flex', flexDirection: 'column', justifyContent: 'space-between' } }
+			>
 				<div>
 					{ projects.map( p => {
 						return (
@@ -57,7 +52,7 @@ export default function LargestProjects( { onPositions } ) {
 										}
 									} }
 								>
-									<a onClick={ () => setProject( p ) }>
+									<a>
 										{ p.projectType === 'DENSE' ?
 											<AreaChartOutlined style={ { color: '#81ad7a' } }/> :
 											<DotChartOutlined style={ { color: '#ff6500' } }/> }

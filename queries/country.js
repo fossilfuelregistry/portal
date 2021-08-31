@@ -84,8 +84,8 @@ query projection( $id: Int! ) {
   }
 }`
 
-export const GQL_sparseProject = gql`
-query sparseProject($id: Int!) {
+export const GQL_project = gql`
+query project($id: Int!) {
   project(id: $id) {
     id dataYear description
     geoPosition { geojson srid }

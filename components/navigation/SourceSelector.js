@@ -23,8 +23,8 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 		console.log( { stateKey, sources: sources.length, stateValue, selectedSourceOption } )
 
 	useEffect( () => { // If we have only a single option, preselect it.
-		DEBUG && console.log( 'SourceSelector useEffect single', stateKey )
 		if( !( sources?.length === 1 ) ) return
+		DEBUG && console.log( 'SourceSelector useEffect single', stateKey )
 		const id = sources?.[ 0 ]?.sourceId
 		DEBUG && console.log( stateKey, '>>>>>>>>>> Single source:', sources )
 		set_selectedSourceOption( id?.toString() )
@@ -37,7 +37,7 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 		DEBUG && console.log( stateKey, { stateValue, loading, selectedSourceOption, sources } )
 
 		if( loading ) return
-		DEBUG && console.log( 'SourceSelector useEffect selection' )
+		DEBUG && console.log( 'SourceSelector useEffect', stateKey )
 
 		if( sources?.length === 0 && !loading )
 			if( !firstInitialize.current ) {

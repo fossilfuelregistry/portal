@@ -76,19 +76,19 @@ export default function Sources( { production, reserves, projection } ) {
 			<div className="box" style={ { minHeight: 'unset' } }>
 				{ contextHolder }
 
-				{ production?.length &&
+				{ production?.length > 0&&
 				<div>
 					<b>{ getText( 'production' ) }: </b>
 					{ _renderSourceList( production ) }
 				</div> }
 
-				{ _reserves?.length &&
+				{ _reserves?.length > 0 &&
 				<div>
 					<b>{ getText( 'reserves' ) }: </b>
 					{ _renderSourceList( _reserves ) }
 				</div> }
 
-				{ projection?.length &&
+				{ projection?.length > 0 &&
 				<div>
 					<b>{ getText( 'projection' ) }: </b>
 					{ _renderSourceList( projection ) }

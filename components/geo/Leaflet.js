@@ -25,7 +25,16 @@ const loadScript = ( scriptId, srcUrl, callback ) => {
 	if( existingScript && callback ) callback()
 }
 
-export default function Leaflet( { center, onMove, onMap, className, outlineGeometry, projects, projectBorders } ) {
+export default function Leaflet( {
+	center,
+	onMove,
+	onMap,
+	className,
+	outlineGeometry,
+	projects,
+	projectBorders,
+	fitToProjects
+} ) {
 	const domRef = useRef()
 	const mapRef = useRef()
 	const outlineLayer = useRef()
@@ -119,7 +128,7 @@ export default function Leaflet( { center, onMove, onMap, className, outlineGeom
 	}, [ domRef.current, loaded, projects ] )
 
 	useEffect( () => {
-		if( loaded < 3 || !projects ) return
+		if( loaded < 3 || !projectBorders ) return
 		try {
 			projectLayer.current.clearLayers()
 
@@ -129,6 +138,11 @@ export default function Leaflet( { center, onMove, onMap, className, outlineGeom
 				else if( p?.geoPosition?.geojson )
 					projectLayer.current.addData( p.geoPosition?.geojson )
 			} )
+
+			if( fitToProjects ) {
+				const bounds = projectLayer.current.getBounds()
+				mapRef.current.fitBounds( bounds, { maxZoom: 6 } )
+			}
 		} catch( e ) {
 			console.log( e )
 			console.log( { projects } )

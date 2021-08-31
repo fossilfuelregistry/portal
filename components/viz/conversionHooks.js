@@ -21,9 +21,11 @@ let __graph // For debug output in catch scope
 
 export const useConversionHooks = () => {
 	const conversionConstants = useSelector( redux => redux.conversions )
+	const allSources = useSelector( redux => redux.allSources )
 	const gwp = useSelector( redux => redux.gwp )
 	const stableProduction = useSelector( redux => redux.stableProduction )
 	const apolloClient = useApolloClient()
+
 
 	// Build unit graphs for all fuels.
 
@@ -334,5 +336,31 @@ export const useConversionHooks = () => {
 		}
 	}
 
-	return { co2FromVolume, convertVolume, reservesProduction, getCountryCurrentCO2 }
+	const projectCO2 = ( project ) => {
+		const points = project?.projectDataPoints?.nodes ?? []
+		if( !points.length ) return 0
+
+		const lastYearProd = points.filter( p => p.dataType === 'PRODUCTION' ).reduce( ( last, point ) => {
+			if( point.year > last.year )
+				return point
+			else
+				return last
+		}, { year: 0 } )
+
+		const co2 = co2FromVolume( { ...lastYearProd, methaneM3Ton: project.methaneM3Ton } )
+		co2.megatons = convertVolume( lastYearProd, 'e9ton' )
+		co2.scope1 = co2.scope1?.map( c => Math.round( c * 100 ) / 100 )
+		co2.scope3 = co2.scope3?.map( c => Math.round( c * 100 ) / 100 )
+
+		const sources = points.reduce( ( s, p ) => {
+			if( !s.includes( p.sourceId ) ) s.push( p.sourceId )
+			return s
+		}, [] )
+
+		co2.sources = sources.map( id => allSources.find( s => s.sourceId === id ) )
+
+		return co2
+	}
+
+	return { co2FromVolume, convertVolume, reservesProduction, getCountryCurrentCO2, projectCO2 }
 }

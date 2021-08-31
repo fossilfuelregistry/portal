@@ -9,7 +9,6 @@ import { useDispatch, useSelector } from "react-redux"
 import CarbonIntensitySelector from "components/viz/IntensitySelector"
 import HelpModal from "components/HelpModal"
 import LoadCountryData from "components/CO2Forecast/LoadCountryData"
-import ProjectSelector from "components/navigation/ProjectSelector"
 import { useQuery } from "@apollo/client"
 import { GQL_projectSources } from "queries/general"
 import SourceSelector from "components/navigation/SourceSelector"
@@ -22,8 +21,8 @@ import { GQL_countryBorder, GQL_countrySources } from "queries/country"
 import CountryProductionPieChart from "components/CO2Forecast/CountryProductionPieChart"
 import { useConversionHooks } from "components/viz/conversionHooks"
 import LargestProjects from "components/CO2Forecast/LargestProjects"
-import LoadProjectData from "components/CO2Forecast/LoadProjectData"
 import Sources from "components/CO2Forecast/Sources"
+import DenseProject from "../../components/CO2Forecast/DenseProject"
 
 const DEBUG = false
 
@@ -119,12 +118,12 @@ export default function CO2ForecastPage() {
 	let templateId = 'intro', template
 	if( !project )
 		templateId = 'dense-country'
-	if( project?.projectType === 'DENSE' )
+	if( project?.type === 'DENSE' )
 		templateId = "dense-project"
-	if( project?.projectType === 'SPARSE' )
+	if( project?.type === 'SPARSE' )
 		templateId = 'sparse-project'
 
-	DEBUG && console.log( 'Template select:', { templateId, project, productionSourceId } )
+	console.log( 'Template select:', { templateId, project, productionSourceId } )
 
 	switch( templateId ) {
 
@@ -143,13 +142,13 @@ export default function CO2ForecastPage() {
 					<Divider><h4>{ getText( 'country_overview' ) }</h4></Divider>
 
 					<Row gutter={ [ 32, 32 ] } style={ { marginBottom: 26 } }>
-						<Col xs={ 24 } lg={ 12 } xxl={8}>
+						<Col xs={ 24 } lg={ 12 } xxl={ 8 }>
 							<CountryProductionPieChart
 								emissions={ countryCO2Total }
 							/>
 						</Col>
 
-						<Col xs={ 24 } lg={ 12 } xxl={8}>
+						<Col xs={ 24 } lg={ 12 } xxl={ 8 }>
 							<div className="geo-wrap">
 								<LeafletNoSSR
 									className="country-geo"
@@ -160,19 +159,19 @@ export default function CO2ForecastPage() {
 							</div>
 						</Col>
 
-						<Col xs={ 24 } lg={ 12 } xxl={8}>
+						<Col xs={ 24 } lg={ 12 } xxl={ 8 }>
 							<LargestProjects
 								onPositions={ set_highlightedProjects }
 							/>
 						</Col>
 					</Row>
 
-					<Divider style={{ marginTop: 48 }}><h4>{ getText( 'co2_forecast' ) }</h4></Divider>
+					<Divider style={ { marginTop: 48 } }><h4>{ getText( 'co2_forecast' ) }</h4></Divider>
 
 					{ productionSourceId > 0 && <LoadCountryData/> }
 
 					<div/>
-					<Divider style={{ marginTop: 48 }}/>
+					<Divider style={ { marginTop: 48 } }/>
 
 					<Sources
 						production={ productionSources }
@@ -183,17 +182,14 @@ export default function CO2ForecastPage() {
 			break
 
 		case "dense-project":
-			template = (
-				<>
-					<Divider style={{ marginTop: 48 }}><h4>{ getText( 'co2_forecast' ) }</h4></Divider>
-
-					{ productionSourceId > 0 && <LoadProjectData/> }
-					<Sources
-						production={ productionSources }
-						reserves={ reservesSources }
-						projection={ projectionSources }
-					/>
-				</> )
+			template =
+				<DenseProject
+					countryCO2Total={ countryCO2Total }
+					borders={borders}
+					productionSources={productionSources}
+					projectionSources={projectionSources}
+					reservesSources={reservesSources}
+				/>
 			break
 
 		case "sparse-project":

@@ -3,7 +3,7 @@ import { Alert, Col, notification, Row } from "antd"
 import useText from "lib/useText"
 import { useSelector } from "react-redux"
 import { useQuery } from "@apollo/client"
-import { GQL_sparseProject } from "queries/country"
+import { GQL_project } from "queries/country"
 import GraphQLStatus from "../GraphQLStatus"
 import { useConversionHooks } from "components/viz/conversionHooks"
 import OpenCorporateCard from "../OpenCorporateCard"
@@ -24,10 +24,9 @@ function SparseProject( { borders } ) {
 	const { getCountryCurrentCO2 } = useConversionHooks()
 	const country = useSelector( redux => redux.country )
 	const project = useSelector( redux => redux.project )
-	const allSources = useSelector( redux => redux.allSources )
 	const [ countryCO2Total, set_countryCO2Total ] = useState( 0 )
 	const [ localeDescription, set_localeDescription ] = useState()
-	const { co2FromVolume, convertVolume } = useConversionHooks()
+	const { projectCO2 } = useConversionHooks()
 
 	DEBUG && console.log( 'SparseProject', { country, project, countryCO2Total } )
 
@@ -39,7 +38,7 @@ function SparseProject( { borders } ) {
 		asyncEffect()
 	}, [ country ] )
 
-	const { data, loading, error } = useQuery( GQL_sparseProject, {
+	const { data, loading, error } = useQuery( GQL_project, {
 		variables: { id: project?.id },
 		skip: !( project?.id > 0 )
 	} )
@@ -60,28 +59,9 @@ function SparseProject( { borders } ) {
 	}, [ theProject?.description ] )
 
 	const co2 = useMemo( () => {
-		const points = theProject?.projectDataPoints?.nodes ?? []
-		if( !points.length ) return 0
-
-		const lastYearProd = points.filter( p => p.dataType === 'PRODUCTION' ).reduce( ( last, point ) => {
-			if( point.year > last.year )
-				return point
-			else
-				return last
-		}, { year: 0 } )
-
-		const co2 = co2FromVolume( { ...lastYearProd, methaneM3Ton: theProject.methaneM3Ton } )
-		co2.megatons = convertVolume( lastYearProd, 'e9ton' )
-		co2.scope1 = co2.scope1?.map( c => Math.round( c * 100 ) / 100 )
-		co2.scope3 = co2.scope3?.map( c => Math.round( c * 100 ) / 100 )
-		DEBUG && console.log( 'SparseProject useMemo', { theProject, points, lastYearProd, co2 } )
-
-		const sources = points.reduce( ( s, p ) => {
-			if( !s.includes( p.sourceId ) ) s.push( p.sourceId )
-			return s
-		}, [] )
-		co2.sources = sources.map( id => allSources.find( s => s.sourceId === id ) )
-
+		if( !theProject?.id ) return {}
+		const co2 = projectCO2( theProject )
+		DEBUG && console.log( 'SparseProject projectCO2', { theProject, co2 } )
 		return co2
 	}, [ theProject?.id ] )
 
