@@ -22,6 +22,10 @@ export default function LargestProjects( { onPositions } ) {
 
 	const setProject = useCallback( async project => {
 		dispatch( { type: 'PROJECT', payload: project } )
+		dispatch( { type: 'PRODUCTIONSOURCEID', payload: undefined } )
+		dispatch( { type: 'RESERVESSOURCEID', payload: undefined } )
+		dispatch( { type: 'PROJECTIONSOURCEID', payload: undefined } )
+		dispatch( { type: 'STABLEPRODUCTION', payload: undefined } )
 	}, [] )
 
 	const projects = useMemo( () => {

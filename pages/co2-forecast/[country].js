@@ -119,9 +119,9 @@ export default function CO2ForecastPage() {
 	let templateId = 'intro', template
 	if( !project )
 		templateId = 'dense-country'
-	if( project?.type === 'DENSE' )
+	if( project?.projectType === 'DENSE' )
 		templateId = "dense-project"
-	if( project?.type === 'SPARSE' )
+	if( project?.projectType === 'SPARSE' )
 		templateId = 'sparse-project'
 
 	DEBUG && console.log( 'Template select:', { templateId, project, productionSourceId } )
@@ -185,6 +185,8 @@ export default function CO2ForecastPage() {
 		case "dense-project":
 			template = (
 				<>
+					<Divider style={{ marginTop: 48 }}><h4>{ getText( 'co2_forecast' ) }</h4></Divider>
+
 					{ productionSourceId > 0 && <LoadProjectData/> }
 					<Sources
 						production={ productionSources }
@@ -201,7 +203,7 @@ export default function CO2ForecastPage() {
 		default:
 			template = <Alert showIcon type="warning" message={ 'No template for ' + templateId }/>
 	}
-
+	//debugger
 	return (
 		<>
 			<NextSeo

@@ -6,7 +6,7 @@ import SummaryRow from "./SummaryRow"
 import { addToTotal } from "./calculate"
 import settings from "../../settings"
 
-const DEBUG = true
+const DEBUG = false
 
 function YearSummary( { dataset = [] } ) {
 	const { getText } = useText()
