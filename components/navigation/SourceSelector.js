@@ -1,26 +1,30 @@
 import { Select } from "antd"
-import { useRouter } from "next/router"
 import React, { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector, useStore } from "react-redux"
 import HelpModal from "../HelpModal"
 import useText from "../../lib/useText"
 import { co2PageUpdateQuery } from "components/CO2Forecast/calculate"
 import settings from "../../settings"
+import { useRouter } from "next/router"
+import { useConversionHooks } from "components/viz/conversionHooks"
 
 const DEBUG = false
 
 export default function SourceSelector( { sources, loading, stateKey, placeholder } ) {
-	const router = useRouter()
 	const { getText } = useText()
 	const store = useStore()
+	const router = useRouter()
 	const [ selectedSourceOption, set_selectedSourceOption ] = useState()
 	const dispatch = useDispatch()
 	const stateValue = useSelector( redux => redux[ stateKey ] )
 	const project = useSelector( redux => redux.project )
 	const firstInitialize = useRef( true ) // Used to NOT clear settings before sources loaded.
 
+	const { pageQuery } = useConversionHooks()
+	const query = pageQuery()
+
 	if( DEBUG && stateKey === 'productionSourceId' )
-		console.log( { stateKey, sources: sources.length, stateValue, selectedSourceOption } )
+		console.log( { stateKey, sources: sources.length, stateValue, selectedSourceOption, query } )
 
 	useEffect( () => { // If we have only a single option, preselect it.
 		if( !( sources?.length === 1 ) ) return

@@ -2,26 +2,31 @@ import { useApolloClient, useQuery } from "@apollo/client"
 import GraphQLStatus from "../GraphQLStatus"
 import { Select } from "antd"
 import { useRouter } from "next/router"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { useDispatch, useSelector, useStore } from "react-redux"
 import useText from "lib/useText"
 import { GQL_projects } from "queries/general"
 import { co2PageUpdateQuery } from "../CO2Forecast/calculate"
 import { AreaChartOutlined, DotChartOutlined } from "@ant-design/icons"
-import { GQL_projectGeo } from "../../queries/country"
+import { GQL_projectGeo } from "queries/country"
+import { useConversionHooks } from "components/viz/conversionHooks"
 
 const DEBUG = false
 
 export default function ProjectSelector( { iso3166, iso31662 } ) {
-	const router = useRouter()
 	const store = useStore()
+	const router = useRouter()
 	const apolloClient = useApolloClient()
 	const [ selectedProjectOption, set_selectedProjectOption ] = useState()
+	const [ projects, set_projects ] = useState( [] )
 	const dispatch = useDispatch()
 	const project = useSelector( redux => redux.project )
 	const { getText } = useText()
 
-	DEBUG && console.log( 'ProjectSelector', { iso3166, iso31662 } )
+	const { pageQuery } = useConversionHooks()
+	const query = pageQuery()
+
+	DEBUG && console.log( 'ProjectSelector', { query, iso3166, iso31662 } )
 
 	useEffect( () => {
 		if( !project )
@@ -35,32 +40,34 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 		variables: { iso3166_: iso3166, iso31662_: iso31662 }
 	} )
 
-	const projects = useMemo( () => {
-		if( loading || error || !projData?.getProjects?.nodes?.length ) return []
+	useEffect( () => {
+		if( loading || error || !projData?.getProjects?.nodes?.length ) return
 
 		// Remove non-current entries and get one entry per project..
-		const projects = new Map()
+		const projs = new Map()
 		projData?.getProjects?.nodes?.forEach( p => {
-			const prev = projects.get( p.projectIdentifier )
+			const prev = projs.get( p.projectIdentifier )
 			if( prev?.lastYear > p.lastYear ) return
-			if( p.projectIdentifier?.length > 0 && p.lastYear >= 2015 ) projects.set( p.projectIdentifier, p )
+			if( p.projectIdentifier?.length > 0 && p.lastYear >= 2015 ) projs.set( p.projectIdentifier, p )
 		} )
 
 		// Now that we have data, also see if we should set state from URL
-		if( router.query.project?.length > 0 ) {
-			const p = projects.get( router.query.project )
+		if( query.project?.length > 0 ) {
+			const p = projs.get( query.project )
 			if( p ) {
 				dispatch( { type: 'PROJECT', payload: p } )
 				set_selectedProjectOption( p.projectIdentifier )
 			}
 		} else {
-			dispatch( { type: 'PROJECT', payload: undefined } )
-			set_selectedProjectOption( undefined )
+			if( project ) {
+				dispatch( { type: 'PROJECT', payload: undefined } )
+			}
 		}
-		DEBUG && console.log( 'ProjectSelector', { projects, gql: projData?.getProjects?.nodes } )
+		DEBUG && console.log( 'ProjectSelector', { projs, gql: projData?.getProjects?.nodes } )
 
-		return Array.from( projects.values() )
-	}, [ projData?.getProjects?.nodes?.length, router.query.project ] )
+		set_projects( Array.from( projs.values() ) )
+
+	}, [ projData?.getProjects?.nodes?.length, query.project ] )
 
 	DEBUG && console.log( 'ProjectSelector', {
 		projData: projData?.getProjects?.nodes?.length,

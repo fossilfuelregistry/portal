@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import Graph from 'graph-data-structure'
 import { useSelector } from "react-redux"
 import { getFullFuelType, getPreferredGrades, sumOfCO2 } from "components/CO2Forecast/calculate"
@@ -6,6 +6,7 @@ import { useApolloClient } from "@apollo/client"
 import { GQL_countryCurrentProduction } from "queries/country"
 import { notification } from "antd"
 import settings from "../../settings"
+import { useRouter } from "next/router"
 
 const DEBUG = false
 
@@ -25,7 +26,16 @@ export const useConversionHooks = () => {
 	const gwp = useSelector( redux => redux.gwp )
 	const stableProduction = useSelector( redux => redux.stableProduction )
 	const apolloClient = useApolloClient()
+	const router = useRouter()
+	const query = useRef( {} )
 
+	// Parse query from URL - this avoids delay in query params by next js router
+	useEffect( () => {
+		const urlQuery = new URLSearchParams( router.asPath.split( '?' )[ 1 ] )
+		Array.from( urlQuery.entries() ).forEach( ( [ key, value ] ) => {
+			query.current[ key ] = value
+		} )
+	}, [ router.asPath ] )
 
 	// Build unit graphs for all fuels.
 
@@ -68,6 +78,8 @@ export const useConversionHooks = () => {
 			} )
 		} )
 	}, [ conversionConstants?.length ] )
+
+	const pageQuery = () => { return { ...query.current, ...router.query } }
 
 	const convertVolume = ( { volume, unit, fossilFuelType }, toUnit ) => {
 		try {
@@ -362,5 +374,5 @@ export const useConversionHooks = () => {
 		return co2
 	}
 
-	return { co2FromVolume, convertVolume, reservesProduction, getCountryCurrentCO2, projectCO2 }
+	return { co2FromVolume, convertVolume, reservesProduction, getCountryCurrentCO2, projectCO2, pageQuery }
 }

@@ -17,18 +17,24 @@ export const client = new ApolloClient( {
 
 function GFFR( { Component, pageProps } ) {
 	const dispatch = useDispatch()
-	const router = useRouter()
-	const { trackView } = useTracker()
+	// const router = useRouter()
+	// const { trackView } = useTracker()
 
-	useEffect( () => {
-		const handleRouteChange = ( url ) => {
-			trackView( url )
-		}
-		router.events.on( 'routeChangeComplete', handleRouteChange )
-		return () => {
-			router.events.off( 'routeChangeComplete', handleRouteChange )
-		}
-	}, [ router.events ] )
+	// useEffect( () => {
+	// 	const handleRouteChange = url => {
+	// 		console.log( '*** routeChangeComplete ***', url )
+	// 		trackView( url )
+	// 	}
+	// 	const checkProject = url => {
+	// 		console.log( '*** routeChangeStart ***', url, router.query )
+	// 	}
+	// 	router.events.on( 'routeChangeStart', checkProject )
+	// 	router.events.on( 'routeChangeComplete', handleRouteChange )
+	// 	return () => {
+	// 		router.events.off( 'routeChangeStart', checkProject )
+	// 		router.events.off( 'routeChangeComplete', handleRouteChange )
+	// 	}
+	// }, [ router.events ] )
 
 	useEffect( () => {
 		getUserIP()

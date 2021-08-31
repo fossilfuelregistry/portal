@@ -96,7 +96,7 @@ export async function co2PageUpdateQuery( store, router, parameter, value ) {
 		query.set( p, v )
 	} )
 
-	if( state.project?.projectIdentifier ) query.set( 'project', state.project.projectIdentifier )
+	if( router.query.project ) query.set( 'project', router.query.project )
 
 	DEBUG && console.log( 'URL', parameter, '->', { value, router, query, state } )
 
@@ -115,7 +115,7 @@ export async function co2PageUpdateQuery( store, router, parameter, value ) {
 	let url = ''
 	if( router.locale !== router.defaultLocale ) url += '/' + router.locale
 	url += router.pathname.replace( /\[country\]/, state.country ) + '?' + query.toString()
-	DEBUG && console.log( 'URL >>>', router.asPath )
+	DEBUG && console.log( 'URL <<<', router.asPath )
 	if( url === router.asPath ) return
 	DEBUG && console.log( 'URL >>>', url )
 

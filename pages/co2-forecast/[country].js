@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import TopNavigation from "components/navigation/TopNavigation"
 import getConfig from 'next/config'
 import CountrySelector from "components/navigation/CountrySelector"
@@ -22,7 +22,7 @@ import CountryProductionPieChart from "components/CO2Forecast/CountryProductionP
 import { useConversionHooks } from "components/viz/conversionHooks"
 import LargestProjects from "components/CO2Forecast/LargestProjects"
 import Sources from "components/CO2Forecast/Sources"
-import DenseProject from "../../components/CO2Forecast/DenseProject"
+import DenseProject from "components/CO2Forecast/DenseProject"
 
 const DEBUG = false
 
@@ -30,7 +30,7 @@ const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
 export default function CO2ForecastPage() {
 	const { getText } = useText()
-	const { getCountryCurrentCO2 } = useConversionHooks()
+	const { getCountryCurrentCO2, pageQuery } = useConversionHooks()
 	const country = useSelector( redux => redux.country )
 	const countryName = useSelector( redux => redux.countryName )
 	const region = useSelector( redux => redux.region )
@@ -40,6 +40,8 @@ export default function CO2ForecastPage() {
 	const [ highlightedProjects, set_highlightedProjects ] = useState( [] )
 	const router = useRouter()
 	const dispatch = useDispatch()
+
+	const query = pageQuery()
 
 	const { data: _countrySources, loading: cLoad } = useQuery( GQL_countrySources, {
 		variables: { iso3166: country, iso31662: region },
@@ -61,6 +63,9 @@ export default function CO2ForecastPage() {
 	const title = ( countryName ? countryName + ' - ' : '' ) + getText( 'co2_effects_for_country' )
 
 	let productionSources, projectionSources, reservesSources
+
+	DEBUG && console.log( 'COUNTRY', { project, nextQuery: router.query, myQuery: query } )
+
 	if( project?.id > 0 ) {
 		productionSources = ( _projectSources?.getProjectSources?.nodes ?? [] )
 			.filter( s => s.dataType === 'PRODUCTION' )
@@ -90,7 +95,6 @@ export default function CO2ForecastPage() {
 			} ) )
 			.sort( ( a, b ) => Math.sign( ( b.quality ?? 0 ) - ( a.quality ?? 0 ) ) )
 		DEBUG && console.log( {
-			gql: _countrySources?.getProjectSources?.nodes,
 			productionSources,
 			projectionSources,
 			reservesSources
@@ -115,15 +119,15 @@ export default function CO2ForecastPage() {
 		if( qCountry !== country ) dispatch( { type: 'COUNTRY', payload: qCountry } )
 	}, [ router.query?.country ] )
 
-	let templateId = 'intro', template
-	if( !project )
+	let templateId = 'intro', template, proj = router.query.project
+	if( !project || !( proj?.length > 0 ) )
 		templateId = 'dense-country'
-	if( project?.type === 'DENSE' )
+	if( proj?.length > 0 && project?.type === 'DENSE' )
 		templateId = "dense-project"
-	if( project?.type === 'SPARSE' )
+	if( proj?.length > 0 && project?.type === 'SPARSE' )
 		templateId = 'sparse-project'
 
-	console.log( 'Template select:', { templateId, project, productionSourceId } )
+	DEBUG && console.log( 'Template select:', { templateId, project, productionSourceId } )
 
 	switch( templateId ) {
 
@@ -185,10 +189,10 @@ export default function CO2ForecastPage() {
 			template =
 				<DenseProject
 					countryCO2Total={ countryCO2Total }
-					borders={borders}
-					productionSources={productionSources}
-					projectionSources={projectionSources}
-					reservesSources={reservesSources}
+					borders={ borders }
+					productionSources={ productionSources }
+					projectionSources={ projectionSources }
+					reservesSources={ reservesSources }
 				/>
 			break
 
