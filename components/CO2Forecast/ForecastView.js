@@ -1,5 +1,5 @@
 import React from "react"
-import { Button, Col, Row } from "antd"
+import { Button, Col, Divider, Row } from "antd"
 import useText from "lib/useText"
 import InputSummary from "./InputSummary"
 import { useSelector } from "react-redux"
@@ -17,12 +17,19 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 	const country = useSelector( redux => redux.country )
 	const projectGeo = useSelector( redux => redux.projectGeo )
 
-	DEBUG && console.log( 'ForecastView', { production, projection, reserves, projectedProduction, limits, projectGeo } )
+	DEBUG && console.log( 'ForecastView', {
+		production,
+		projection,
+		reserves,
+		projectedProduction,
+		limits,
+		projectGeo
+	} )
 
 	return (
 		<>
 			<Row gutter={ [ 32, 32 ] }>
-				<Col xs={ 24 } lg={ 14 } xxl={ 16 }>
+				<Col xs={ 24 } xl={ 24 } xxl={ 16 }>
 					<CO2ForecastGraph
 						production={ production }
 						projection={ projection }
@@ -32,23 +39,23 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 					/>
 				</Col>
 
-				<Col xs={ 24 } lg={ 10 } xxl={ 8 }>
-					<Row gutter={ [ 16, 16 ] }>
-						<Col xs={ 24 } xl={ 24 }>
+				<Col xs={ 24 } xl={ 24 } xxl={ 8 }>
+					<Row gutter={ [ 32, 32 ] }>
+						<Col xs={ 24 } xl={ 12 } xxl={ 24 }>
 							<FutureSummary dataset={ projection } limits={ limits }/>
-						</Col>
-
-						<Col xs={ 24 } xl={ 24 }>
+							<div style={ { height: 32 } }/>
 							<YearSummary dataset={ production } limits={ limits }/>
 						</Col>
 
-						<Col xs={ 24 } xl={ 24 }>
+						<Col xs={ 24 } xl={ 12 } xxl={ 24 }>
 							<InputSummary dataset={ production }/>
 						</Col>
 					</Row>
 
 				</Col>
 			</Row>
+
+			<Divider style={{ marginTop: 48 }}><h4>{ getText( 'input_data_overview' ) }</h4></Divider>
 
 			<Row gutter={ [ 32, 32 ] }>
 

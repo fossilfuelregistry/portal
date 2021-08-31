@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react"
 import TopNavigation from "components/navigation/TopNavigation"
 import getConfig from 'next/config'
 import CountrySelector from "components/navigation/CountrySelector"
-import { Alert, Col, Row } from "antd"
+import { Alert, Col, Divider, Row } from "antd"
 import useText from "lib/useText"
 import { NextSeo } from "next-seo"
 import { useDispatch, useSelector } from "react-redux"
@@ -140,6 +140,8 @@ export default function CO2ForecastPage() {
 		case "dense-country":
 			template = (
 				<>
+					<Divider><h4>{ getText( 'country_overview' ) }</h4></Divider>
+
 					<Row gutter={ [ 32, 32 ] } style={ { marginBottom: 26 } }>
 						<Col xs={ 24 } lg={ 12 } xxl={8}>
 							<CountryProductionPieChart
@@ -165,7 +167,12 @@ export default function CO2ForecastPage() {
 						</Col>
 					</Row>
 
+					<Divider style={{ marginTop: 48 }}><h4>{ getText( 'co2_forecast' ) }</h4></Divider>
+
 					{ productionSourceId > 0 && <LoadCountryData/> }
+
+					<div/>
+					<Divider style={{ marginTop: 48 }}/>
 
 					<Sources
 						production={ productionSources }

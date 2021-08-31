@@ -4,6 +4,7 @@ import { useSelector } from "react-redux"
 import { Button, Modal } from 'antd'
 import { ExportOutlined } from "@ant-design/icons"
 import { useRouter } from "next/router"
+import ReactMarkdown from "react-markdown"
 
 const DEBUG = false
 
@@ -35,7 +36,7 @@ export default function Sources( { production, reserves, projection } ) {
 										<>
 											<div
 												style={ { marginBottom: 8 } }
-											>{ s.description?.startsWith( 'explanation_' ) ? getText( s.description ) : s.description }
+											>{ s.description?.startsWith( 'explanation_' ) ? <ReactMarkdown>{ getText( s.description ) }</ReactMarkdown> : s.description }
 											</div>
 
 											{ s.documentUrl &&
@@ -72,7 +73,7 @@ export default function Sources( { production, reserves, projection } ) {
 	return (
 		<div className="co2-card">
 			<div className="header">{ getText( 'data_sources' ) }</div>
-			<div className="box">
+			<div className="box" style={ { minHeight: 'unset' } }>
 				{ contextHolder }
 
 				{ production?.length &&

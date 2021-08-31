@@ -84,9 +84,16 @@ export default function CountrySelector() {
 					dispatch( { type: 'COUNTRYNAME', payload: v.label } )
 					dispatch( { type: 'REGION', payload: undefined } )
 					dispatch( { type: 'PROJECT', payload: undefined } )
+					dispatch( { type: 'PRODUCTIONSOURCEID', payload: undefined } )
+					dispatch( { type: 'RESERVESSOURCEID', payload: undefined } )
+					dispatch( { type: 'PROJECTIONSOURCEID', payload: undefined } )
+					dispatch( { type: 'STABLEPRODUCTION', payload: undefined } )
 					await co2PageUpdateQuery( store, router, {
 						project: undefined,
 						region: undefined,
+						productionSourceId: undefined,
+						reservesSourceId: undefined,
+						projectionSourceId: undefined,
 						country: v?.value
 					} )
 				} }
