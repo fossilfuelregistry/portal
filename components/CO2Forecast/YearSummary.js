@@ -4,8 +4,9 @@ import { useSelector } from "react-redux"
 import HelpModal from "../HelpModal"
 import SummaryRow from "./SummaryRow"
 import { addToTotal } from "./calculate"
+import settings from "../../settings"
 
-const DEBUG = false
+const DEBUG = true
 
 function YearSummary( { dataset = [] } ) {
 	const { getText } = useText()
@@ -15,19 +16,18 @@ function YearSummary( { dataset = [] } ) {
 
 	const totals = { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] }
 
-	let lastOil, lastGas
-	dataset.forEach( d => {
-		if( d.fossilFuelType === 'oil' ) lastOil = d
-		if( d.fossilFuelType === 'gas' ) lastGas = d
-	} )
+	let lastYearProd = {}
+	dataset
+		.filter( d => d.sourceId === productionSourceId )
+		.forEach( d => lastYearProd[ d.fossilFuelType ] = d )
 
-	addToTotal( totals, lastGas?.co2 ?? 0 )
-	addToTotal( totals, lastOil?.co2 ?? 0 )
+	settings.supportedFuels.forEach( fuel => addToTotal( totals, lastYearProd[ fuel ]?.co2 ?? 0 ) )
 
-	DEBUG && console.log( { lastOil, lastGas, productionSourceId, dataset } )
+	DEBUG && console.log( { lastYearProd, productionSourceId, dataset } )
 
-	let year = `(${ lastOil?.year })`
-	if( lastGas?.year && ( lastOil?.year !== lastGas.year ) ) year = `(${ lastOil?.year } / ${ lastGas?.year })`
+	let year = `(${ lastYearProd[ 'oil' ]?.year })`
+	if( lastYearProd[ 'gas' ]?.year && ( lastYearProd[ 'oil' ]?.year !== lastYearProd[ 'gas' ]?.year ) ) // Different last year?
+		year = `(${ lastYearProd[ 'oil' ]?.year } / ${ lastYearProd[ 'gas' ]?.year })`
 
 	return (
 		<div className="table-wrap">
