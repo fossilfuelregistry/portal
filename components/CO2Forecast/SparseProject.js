@@ -15,8 +15,11 @@ import CountryProductionPieChart from "./CountryProductionPieChart"
 import HelpModal from "../HelpModal"
 import LeafletNoSSR from "../geo/LeafletNoSSR"
 import Sources from "./Sources"
+import getConfig from "next/config"
 
 const DEBUG = false
+
+const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
 function SparseProject( { borders } ) {
 	const { getText } = useText()
@@ -104,15 +107,15 @@ function SparseProject( { borders } ) {
 	try {
 		return (
 			<>
-				<Divider><h4>{ getText( 'project_overview' ) } - { project.projectIdentifier }</h4></Divider>
-
 				<Button
 					block
-					style={ { marginBottom: 24 } }
+					style={ { marginTop: 34, marginBottom: 16, borderColor: theme[ '@primary-color' ], color: theme[ '@primary-color' ] } }
 					onClick={ goToCountryOverview }
 				>
 					{ getText( 'back_to_country_overview' ) }
 				</Button>
+
+				<Divider><h4>{ getText( 'project_overview' ) } - { project.projectIdentifier }</h4></Divider>
 
 				<Alert type="warning" message={ getText( 'sparse_data_warning' ) } showIcon={ true }/>
 

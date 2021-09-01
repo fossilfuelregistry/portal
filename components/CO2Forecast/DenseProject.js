@@ -10,8 +10,11 @@ import CountryProductionPieChart from "./CountryProductionPieChart"
 import LeafletNoSSR from "../geo/LeafletNoSSR"
 import Sources from "./Sources"
 import LoadProjectData from "./LoadProjectData"
+import getConfig from "next/config"
 
 const DEBUG = false
+
+const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
 function DenseProject( { countryCO2Total, borders, productionSources, projectionSources, reservesSources } ) {
 	const { getText } = useText()
@@ -51,15 +54,15 @@ function DenseProject( { countryCO2Total, borders, productionSources, projection
 	try {
 		return (
 			<>
-				<Divider><h4>{ getText( 'project_overview' ) } - { project.projectIdentifier }</h4></Divider>
-
 				<Button
 					block
-					style={ { marginBottom: 24 } }
+					style={ { marginTop: 34, marginBottom: 16, borderColor: theme[ '@primary-color' ], color: theme[ '@primary-color' ] } }
 					onClick={ goToCountryOverview }
 				>
 					{ getText( 'back_to_country_overview' ) }
 				</Button>
+
+				<Divider><h4>{ getText( 'project_overview' ) } - { project.projectIdentifier }</h4></Divider>
 
 				<Row gutter={ [ 32, 32 ] } style={ { marginBottom: 26 } }>
 					<Col xs={ 24 } xxl={ 12 }>
