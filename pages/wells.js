@@ -4,6 +4,7 @@ import getConfig from 'next/config'
 import dynamic from 'next/dynamic'
 import { gql, useQuery } from '@apollo/client'
 import { useSelector } from "react-redux"
+import useText from "../lib/useText"
 
 const DEBUG = false
 
@@ -24,6 +25,7 @@ const MapWithNoSSR = dynamic( () => import( "components/geo/Leaflet" ),
 
 export default function Wells() {
 	const ipLocation = useSelector( r => r.ipLocation )
+	const { getText } = useText()
 
 	const [ center, set_center ] = useState( { lat: 0, lng: 0 } )
 	const [ map, set_map ] = useState()
@@ -42,7 +44,7 @@ export default function Wells() {
 		set_center( { lat: center.lat, lng: center.lng } )
 	}, [ set_center ] )
 
-	const { data: production, loading: productionLoading } = useQuery( Q_PRODUCTION, {
+	const { data: production } = useQuery( Q_PRODUCTION, {
 		variables: {
 			swLat: bounds?._southWest.lat,
 			swLng: bounds?._southWest.lng,
@@ -88,7 +90,7 @@ export default function Wells() {
 			heatmap.current = window.L.featureGroup(
 				mergedWells.map( w => window.L.marker(
 					[ w.y, w.x ],
-				).bindPopup( `<b>${w.title}</b><br>Oil: ${w.oil?.toFixed( 1 )}<br>Gas: ${w.gas?.toFixed( 1 )}` ) )
+				).bindPopup( `<b>${ w.title }</b><br>Oil: ${ w.oil?.toFixed( 1 ) }<br>Gas: ${ w.gas?.toFixed( 1 ) }` ) )
 			).addTo( map )
 
 		// window.L.marker( [ well.position.y, well.position.x ] ).addTo( map )
@@ -101,17 +103,33 @@ export default function Wells() {
 			<div className="page">
 				<TopNavigation/>
 
-				<div className="map">
-					<MapWithNoSSR
-						className="wells"
-						center={center}
-						onMove={handleOnMove}
-						onMap={set_map}
-					/>
-				</div>
+				<div className="content">
+					<h3>{ getText( 'well_level_header' ) }</h3>
+					<br/>
+					<div>{ getText( 'well_level_intro' ) }</div>
+					<br/>
 
-				<style jsx>{`
-				`}
+					<div className="map">
+						<MapWithNoSSR
+							className="wells"
+							center={ center }
+							onMove={ handleOnMove }
+							onMap={ set_map }
+						/>
+					</div>
+				</div>
+				
+				<style jsx>{ `
+                  .content {
+                    margin-left: 40px;
+                    margin-right: 40px;
+                  }
+
+                  .map {
+                    position: relative;
+                    height: 80vh;
+                  }
+				` }
 				</style>
 
 			</div>

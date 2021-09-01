@@ -4,10 +4,10 @@ import { getUserIP } from "lib/getUserIp"
 import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client'
 import { ConfigProvider } from "antd"
 import { useDispatch } from "react-redux"
-import { useRouter } from "next/router"
-import useTracker from "../lib/useTracker"
+// import { useRouter } from "next/router"
+// import useTracker from "../lib/useTracker"
 
-// it should be require otherwise next-plugin-antd-less doesn't import global styles
+// It should be require here, otherwise next-plugin-antd-less doesn't import global styles
 require( 'assets/app.less' )
 
 export const client = new ApolloClient( {
