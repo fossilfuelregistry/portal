@@ -4,7 +4,7 @@ import useText from "lib/useText"
 import ReactMarkdown from "react-markdown"
 import Footer from "components/Footer"
 
-export default function About() {
+export default function ApiIntro() {
 	const { getText } = useText()
 
 	return (
@@ -12,8 +12,8 @@ export default function About() {
 			<TopNavigation/>
 
 			<div className="page-padding">
-				<h2>{ getText( 'about_header' ) }</h2>
-				<ReactMarkdown>{ getText( 'about_grff' ) }</ReactMarkdown>
+				<h2>{ getText( 'API_header' ) }</h2>
+				<ReactMarkdown>{ getText( 'API_intro' ) }</ReactMarkdown>
 			</div>
 
 			<Footer/>
