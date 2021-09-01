@@ -25,7 +25,7 @@ import Sources from "components/CO2Forecast/Sources"
 import DenseProject from "components/CO2Forecast/DenseProject"
 import Footer from "../../components/Footer"
 
-const DEBUG = true
+const DEBUG = false
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
