@@ -2,11 +2,10 @@ import React, { useMemo } from "react"
 import { BarStack } from "@visx/shape"
 import { Group } from "@visx/group"
 import { withParentSize } from '@visx/responsive'
-import { scaleBand, scaleLinear } from "@visx/scale"
+import { scaleBand, scaleLinear, scaleOrdinal } from "@visx/scale"
 import { max } from 'd3-array'
 import RangeChartAxes from "./RangeChartAxes"
 import getConfig from "next/config"
-import { scaleOrdinal } from "@visx/visx"
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
