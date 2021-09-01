@@ -105,7 +105,7 @@ function SparseProject( { borders } ) {
 	try {
 		return (
 			<>
-				<Alert type="warning" message={ getText( 'sparse-data-warning' ) } showIcon={ true }/>
+				<Alert type="warning" message={ getText( 'sparse_data_warning' ) } showIcon={ true }/>
 				<br/>
 				<Row gutter={ [ 16, 16 ] }>
 

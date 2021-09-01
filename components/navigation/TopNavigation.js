@@ -4,16 +4,6 @@ import NavigDrawer from "components/navigation/NavigDrawer"
 import { CgMenu } from 'react-icons/cg'
 import getConfig from 'next/config'
 import { useRouter } from 'next/router'
-import {
-	EmailIcon,
-	EmailShareButton,
-	FacebookIcon,
-	FacebookShareButton,
-	LinkedinIcon,
-	LinkedinShareButton,
-	TwitterIcon,
-	TwitterShareButton,
-} from "react-share"
 import useText from "lib/useText"
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
@@ -45,7 +35,7 @@ export default function TopNavigation( props ) {
 	}
 
 	return (
-		<div className="navigation">
+		<div className="navigation page-padding">
 			<Row gutter={ 12 } align="middle">
 				<Col>
 					<CgMenu onClick={ showDrawer }/>
@@ -62,7 +52,6 @@ export default function TopNavigation( props ) {
 
 			<style jsx>{ `
               .navigation {
-                padding: 28px 40px;
                 font-size: 32px;
                 line-height: 1;
               }
@@ -78,7 +67,6 @@ export default function TopNavigation( props ) {
 
               @media (max-width: ${ theme[ '@screen-sm' ] }) {
                 .navigation {
-                  padding: 16px 24px;
                   font-size: 22px;
                 }
               }

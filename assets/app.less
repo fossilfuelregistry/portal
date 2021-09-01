@@ -13,25 +13,46 @@ h1, h2, h3, h4, h5 {
   font-family: sommet-rounded, sans-serif;
 }
 
+.page-padding {
+  padding: 28px 40px;
+}
+
+.text-page {
+  padding-left: 24px;
+}
+
 @media (max-width: @screen-sm) {
   h1 {
     font-size: ceil(@font-size-sm * 2.71 * 0.6);
   }
 
   h2 {
-    font-size: ceil(@font-size-sm * 2.14 * 0.6);
+    font-size: ceil(@font-size-sm * 2.14 * 0.7);
   }
 
   h3 {
-    font-size: ceil(@font-size-sm * 1.71 * 0.6);
+    font-size: ceil(@font-size-sm * 1.71 * 0.8);
   }
 
   h4 {
-    font-size: ceil(@font-size-sm * 1.42 * 0.6);
+    font-size: ceil(@font-size-sm * 1.42 * 0.8);
   }
 
   h5 {
-    font-size: ceil(@font-size-sm * 1.14 * 0.6);
+    font-size: ceil(@font-size-sm * 1.14 * 0.9);
+  }
+
+  p {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: @screen-lg) {
+  .page-padding {
+    padding: 16px 24px;
+  }
+  .text-page {
+    padding: 0;
   }
 }
 

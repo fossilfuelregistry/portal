@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from "react"
+import React, { useCallback, useEffect, useRef, useState } from "react"
 import TopNavigation from "components/navigation/TopNavigation"
 import getConfig from 'next/config'
 import dynamic from 'next/dynamic'
 import { gql, useQuery } from '@apollo/client'
 import { useSelector } from "react-redux"
 import useText from "../lib/useText"
+import Footer from "../components/Footer"
 
 const DEBUG = false
 
@@ -118,7 +119,9 @@ export default function Wells() {
 						/>
 					</div>
 				</div>
-				
+
+				<Footer/>
+
 				<style jsx>{ `
                   .content {
                     margin-left: 40px;

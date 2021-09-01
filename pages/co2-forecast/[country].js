@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useState } from "react"
 import TopNavigation from "components/navigation/TopNavigation"
 import getConfig from 'next/config'
 import CountrySelector from "components/navigation/CountrySelector"
@@ -23,8 +23,9 @@ import { useConversionHooks } from "components/viz/conversionHooks"
 import LargestProjects from "components/CO2Forecast/LargestProjects"
 import Sources from "components/CO2Forecast/Sources"
 import DenseProject from "components/CO2Forecast/DenseProject"
+import Footer from "../../components/Footer"
 
-const DEBUG = false
+const DEBUG = true
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
@@ -120,7 +121,7 @@ export default function CO2ForecastPage() {
 	}, [ router.query?.country ] )
 
 	let templateId = 'intro', template, proj = router.query.project
-	if( !project || !( proj?.length > 0 ) )
+	if( country && ( !project || !( proj?.length > 0 ) ) )
 		templateId = 'dense-country'
 	if( proj?.length > 0 && project?.type === 'DENSE' )
 		templateId = "dense-project"
@@ -133,7 +134,7 @@ export default function CO2ForecastPage() {
 
 		case 'intro':
 			template = (
-				<div style={ { padding: '0 24px' } }>
+				<div className="text-page">
 					<h2>Country emissions history and forcast</h2>
 					<p>Intro text about country / project levels, ranges etc goes here...</p>
 					<p>First select a country!</p>
@@ -286,6 +287,8 @@ export default function CO2ForecastPage() {
 					</Row>
 
 				</div>
+
+				<Footer/>
 
 				<style jsx>{ `
                   .page {

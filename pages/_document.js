@@ -27,15 +27,9 @@ export default class MyDocument extends Document {
 						} }
 					/>
 
-					<script
-						async defer data-website-id="1c29de0e-0dd9-435f-a24d-13a32b9d3ef0"
-						src="https://gffr-log.journeyman.se/umami.js"
-					/>
-
 				</Head>
 				<body>
 					<Main/>
-					<Footer/>
 					<NextScript/>
 				</body>
 			</Html>
