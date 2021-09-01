@@ -6,7 +6,6 @@ import useText from "../../lib/useText"
 import { co2PageUpdateQuery } from "components/CO2Forecast/calculate"
 import settings from "../../settings"
 import { useRouter } from "next/router"
-import { useConversionHooks } from "components/viz/conversionHooks"
 
 const DEBUG = false
 
@@ -20,11 +19,10 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 	const project = useSelector( redux => redux.project )
 	const firstInitialize = useRef( true ) // Used to NOT clear settings before sources loaded.
 
-	const { pageQuery } = useConversionHooks()
-	const query = pageQuery()
+	const query = router.query
 
-	if( DEBUG && stateKey === 'productionSourceId' )
-		console.log( { stateKey, sources: sources.length, stateValue, selectedSourceOption, query } )
+	if( DEBUG )
+		console.log( { stateKey, sources: sources.length, stateValue, selectedSourceOption, query, router } )
 
 	useEffect( () => { // If we have only a single option, preselect it.
 		if( !( sources?.length === 1 ) ) return
@@ -43,7 +41,8 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 		if( loading ) return
 		DEBUG && console.log( 'SourceSelector useEffect', stateKey )
 
-		if( sources?.length === 0 && !loading )
+		// All sources gone?
+		if( sources?.length === 0 && !loading ) {
 			if( !firstInitialize.current ) {
 				DEBUG && console.log( stateKey, '>>>>>>>>>> Sources empty' )
 				set_selectedSourceOption( undefined )
@@ -54,7 +53,9 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 				firstInitialize.current = false
 				return
 			}
+		}
 
+		// The current source is no longer available?
 		if( !sources.find( s => s.sourceId === stateValue ) ) {
 			let newSource
 			if( sources.length > 0 ) {
@@ -68,10 +69,11 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 			set_selectedSourceOption( newId )
 			co2PageUpdateQuery( store, router, stateKey, newId )
 			dispatch( { type: stateKey.toUpperCase(), payload: parseInt( newId ) } )
+			return
 		} else {
 			set_selectedSourceOption( stateValue.toString() )
+			return
 		}
-
 	}, [ sources, sources?.length, loading, stateValue, project ] )
 
 	return (

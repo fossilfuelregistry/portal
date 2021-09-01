@@ -2,14 +2,13 @@ import { useApolloClient, useQuery } from "@apollo/client"
 import GraphQLStatus from "../GraphQLStatus"
 import { Select } from "antd"
 import { useRouter } from "next/router"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector, useStore } from "react-redux"
 import useText from "lib/useText"
 import { GQL_projects } from "queries/general"
 import { co2PageUpdateQuery } from "../CO2Forecast/calculate"
 import { AreaChartOutlined, DotChartOutlined } from "@ant-design/icons"
 import { GQL_projectGeo } from "queries/country"
-import { useConversionHooks } from "components/viz/conversionHooks"
 
 const DEBUG = false
 
@@ -23,8 +22,7 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 	const project = useSelector( redux => redux.project )
 	const { getText } = useText()
 
-	const { pageQuery } = useConversionHooks()
-	const query = pageQuery()
+	const query = router.query
 
 	DEBUG && console.log( 'ProjectSelector', { query, iso3166, iso31662 } )
 
@@ -33,6 +31,7 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 			set_selectedProjectOption( undefined )
 		else
 			set_selectedProjectOption( project.projectIdentifier )
+		co2PageUpdateQuery( store, router )
 	}, [ iso31662, project ] )
 
 	const { data: projData, loading, error } = useQuery( GQL_projects, {
@@ -54,9 +53,10 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 		// Now that we have data, also see if we should set state from URL
 		if( query.project?.length > 0 ) {
 			const p = projs.get( query.project )
-			if( p ) {
+			if( p && !window.projectInitialized ) { // Only set from URL once per page load
 				dispatch( { type: 'PROJECT', payload: p } )
 				set_selectedProjectOption( p.projectIdentifier )
+				window.projectInitialized = true
 			}
 		} else {
 			if( project ) {
@@ -91,7 +91,7 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 					placeholder={ getText( 'search_projects' ) + '...' }
 					onChange={ async p => {
 						set_selectedProjectOption( p )
-						const proj = projects.find( pr => pr.projectId === p )
+						const proj = projects.find( pr => pr.projectIdentifier === p )
 						dispatch( { type: 'PROJECT', payload: proj } )
 						console.log( { p, proj, projects } )
 
@@ -109,13 +109,13 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 							dispatch( { type: 'PRODUCTIONSOURCEID', payload: undefined } )
 						}
 
-						await co2PageUpdateQuery( store, router, 'project', p )
+						dispatch( { type: 'PROJECT', payload: proj } )
 					} }
 				>
 					{ projects.map( p => (
 						<Select.Option key={ p.projectIdentifier }>
 							{ p.projectIdentifier }{ ' ' }
-							{ p.type === 'DENSE' ? <AreaChartOutlined style={ { color: '#81ad7a' } }/> :
+							{ p.projectType === 'DENSE' ? <AreaChartOutlined style={ { color: '#81ad7a' } }/> :
 								<DotChartOutlined style={ { color: '#ff6500' } }/> }
 						</Select.Option> ) ) }
 				</Select>

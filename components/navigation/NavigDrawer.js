@@ -1,7 +1,6 @@
 import Link from 'next/link'
-import { Drawer, Select, } from 'antd'
+import { Drawer, } from 'antd'
 import useText from "lib/useText"
-import { useRouter } from "next/router"
 import {
 	EmailIcon,
 	EmailShareButton,
@@ -15,7 +14,6 @@ import {
 
 const NavigDrawer = ( { visible, onClose } ) => {
 	const { getText } = useText()
-	const router = useRouter()
 
 	return (
 		<div className="menu">

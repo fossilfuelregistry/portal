@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import Graph from 'graph-data-structure'
-import { useSelector } from "react-redux"
-import { getFullFuelType, getPreferredGrades, sumOfCO2 } from "components/CO2Forecast/calculate"
+import { useDispatch, useSelector, useStore } from "react-redux"
+import { co2PageUpdateQuery, getFullFuelType, getPreferredGrades, sumOfCO2 } from "components/CO2Forecast/calculate"
 import { useApolloClient } from "@apollo/client"
 import { GQL_countryCurrentProduction } from "queries/country"
 import { notification } from "antd"
@@ -24,9 +24,12 @@ export const useConversionHooks = () => {
 	const conversionConstants = useSelector( redux => redux.conversions )
 	const allSources = useSelector( redux => redux.allSources )
 	const gwp = useSelector( redux => redux.gwp )
+	const country = useSelector( redux => redux.country )
 	const stableProduction = useSelector( redux => redux.stableProduction )
 	const apolloClient = useApolloClient()
 	const router = useRouter()
+	const store = useStore()
+	const dispatch = useDispatch()
 	const query = useRef( {} )
 
 	// Parse query from URL - this avoids delay in query params by next js router
@@ -80,6 +83,16 @@ export const useConversionHooks = () => {
 	}, [ conversionConstants?.length ] )
 
 	const pageQuery = () => { return { ...query.current, ...router.query } }
+
+	const goToCountryOverview =  async () => {
+		dispatch( { type: 'REGION', payload: undefined } )
+		dispatch( { type: 'PROJECT', payload: undefined } )
+		dispatch( { type: 'PRODUCTIONSOURCEID', payload: undefined } )
+		dispatch( { type: 'RESERVESSOURCEID', payload: undefined } )
+		dispatch( { type: 'PROJECTIONSOURCEID', payload: undefined } )
+		dispatch( { type: 'STABLEPRODUCTION', payload: undefined } )
+		await co2PageUpdateQuery( store, router )
+	}
 
 	const convertVolume = ( { volume, unit, fossilFuelType }, toUnit ) => {
 		try {
@@ -374,5 +387,5 @@ export const useConversionHooks = () => {
 		return co2
 	}
 
-	return { co2FromVolume, convertVolume, reservesProduction, getCountryCurrentCO2, projectCO2, pageQuery }
+	return { co2FromVolume, convertVolume, reservesProduction, getCountryCurrentCO2, projectCO2, pageQuery, goToCountryOverview }
 }

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react"
-import { Alert, Col, notification, Row } from "antd"
+import { Alert, Button, Col, Divider, notification, Row } from "antd"
 import useText from "lib/useText"
 import { useSelector } from "react-redux"
 import { useQuery } from "@apollo/client"
@@ -16,17 +16,16 @@ import HelpModal from "../HelpModal"
 import LeafletNoSSR from "../geo/LeafletNoSSR"
 import Sources from "./Sources"
 
-const DEBUG = true
+const DEBUG = false
 
 function SparseProject( { borders } ) {
 	const { getText } = useText()
 	const router = useRouter()
-	const { getCountryCurrentCO2 } = useConversionHooks()
+	const { getCountryCurrentCO2, projectCO2, goToCountryOverview } = useConversionHooks()
 	const country = useSelector( redux => redux.country )
 	const project = useSelector( redux => redux.project )
 	const [ countryCO2Total, set_countryCO2Total ] = useState( 0 )
 	const [ localeDescription, set_localeDescription ] = useState()
-	const { projectCO2 } = useConversionHooks()
 
 	DEBUG && console.log( 'SparseProject', { country, project, countryCO2Total } )
 
@@ -105,8 +104,18 @@ function SparseProject( { borders } ) {
 	try {
 		return (
 			<>
+				<Divider><h4>{ getText( 'project_overview' ) } - { project.projectIdentifier }</h4></Divider>
+
+				<Button
+					block
+					style={ { marginBottom: 24 } }
+					onClick={ goToCountryOverview }
+				>
+					{ getText( 'back_to_country_overview' ) }
+				</Button>
+
 				<Alert type="warning" message={ getText( 'sparse_data_warning' ) } showIcon={ true }/>
-				<br/>
+
 				<Row gutter={ [ 16, 16 ] }>
 
 					<Col xs={ 24 } xxl={ 12 }/>

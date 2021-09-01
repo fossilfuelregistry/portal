@@ -86,7 +86,7 @@ export function getPreferredReserveGrade( grades ) {
 
 export async function co2PageUpdateQuery( store, router, parameter, value ) {
 	const params = [ 'region', 'productionSourceId', 'projectionSourceId', 'reservesSourceId' ]
-	const DEBUG = false
+	const DEBUG = true
 	const query = new URLSearchParams()
 	const state = store.getState()
 
@@ -96,7 +96,7 @@ export async function co2PageUpdateQuery( store, router, parameter, value ) {
 		query.set( p, v )
 	} )
 
-	if( router.query.project ) query.set( 'project', router.query.project )
+	if( state.project?.projectIdentifier ) query.set( 'project', state.project?.projectIdentifier )
 
 	DEBUG && console.log( 'URL', parameter, '->', { value, router, query, state } )
 

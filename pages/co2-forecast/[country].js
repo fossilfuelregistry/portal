@@ -123,9 +123,9 @@ export default function CO2ForecastPage() {
 	let templateId = 'intro', template, proj = router.query.project
 	if( country && ( !project || !( proj?.length > 0 ) ) )
 		templateId = 'dense-country'
-	if( proj?.length > 0 && project?.type === 'DENSE' )
+	if( proj?.length > 0 && project?.projectType === 'DENSE' )
 		templateId = "dense-project"
-	if( proj?.length > 0 && project?.type === 'SPARSE' )
+	if( proj?.length > 0 && project?.projectType === 'SPARSE' )
 		templateId = 'sparse-project'
 
 	DEBUG && console.log( 'Template select:', { templateId, project, productionSourceId } )

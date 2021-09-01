@@ -3,7 +3,7 @@ import useText from "lib/useText"
 import { useQuery } from "@apollo/client"
 import Link from 'next/link'
 import { GQL_largestProjects } from "queries/country"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { useRouter } from "next/router"
 import { AreaChartOutlined, DotChartOutlined } from "@ant-design/icons"
 import ProjectSelector from "../navigation/ProjectSelector"
@@ -11,6 +11,7 @@ import ProjectSelector from "../navigation/ProjectSelector"
 export default function LargestProjects( { onPositions } ) {
 	const { getText } = useText()
 	const router = useRouter()
+	const dispatch = useDispatch()
 	const country = useSelector( redux => redux.country )
 	const region = useSelector( redux => redux.region )
 
@@ -52,7 +53,9 @@ export default function LargestProjects( { onPositions } ) {
 										}
 									} }
 								>
-									<a>
+									<a
+										onClick={() => dispatch( { type: 'PROJECT', payload: p } ) }
+									>
 										{ p.projectType === 'DENSE' ?
 											<AreaChartOutlined style={ { color: '#81ad7a' } }/> :
 											<DotChartOutlined style={ { color: '#ff6500' } }/> }

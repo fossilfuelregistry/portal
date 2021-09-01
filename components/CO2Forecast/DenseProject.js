@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from "react"
-import { Alert, Col, Divider, Row } from "antd"
+import { Alert, Button, Col, Divider, Row } from "antd"
 import useText from "lib/useText"
 import { useSelector } from "react-redux"
 import { useQuery } from "@apollo/client"
@@ -17,7 +17,7 @@ function DenseProject( { countryCO2Total, borders, productionSources, projection
 	const { getText } = useText()
 	const country = useSelector( redux => redux.country )
 	const project = useSelector( redux => redux.project )
-	const { projectCO2 } = useConversionHooks()
+	const { projectCO2, goToCountryOverview } = useConversionHooks()
 	const productionSourceId = useSelector( redux => redux.productionSourceId )
 
 	DEBUG && console.log( 'DenseProject', { country, project, countryCO2Total } )
@@ -51,7 +51,15 @@ function DenseProject( { countryCO2Total, borders, productionSources, projection
 	try {
 		return (
 			<>
-				<Divider><h4>{ getText( 'project_overview' ) }</h4></Divider>
+				<Divider><h4>{ getText( 'project_overview' ) } - { project.projectIdentifier }</h4></Divider>
+
+				<Button
+					block
+					style={ { marginBottom: 24 } }
+					onClick={ goToCountryOverview }
+				>
+					{ getText( 'back_to_country_overview' ) }
+				</Button>
 
 				<Row gutter={ [ 32, 32 ] } style={ { marginBottom: 26 } }>
 					<Col xs={ 24 } xxl={ 12 }>
