@@ -1,17 +1,16 @@
-
 export function makeEstimate( scope, estimate ) {
-	if( estimate === 2 ) return scope.co2
-	if( estimate < 2 ) return scope.co2 - ( ( scope.co2 - scope.range[ 0 ] ) * ( 2 - estimate ) / 2 )
-	return scope.co2 + ( ( scope.range[ 1 ] - scope.co2 ) * ( estimate - 2 ) / 2 )
+	if( estimate === 2 ) return scope[ 1 ]
+	if( estimate < 2 ) return scope[ 1 ] - ( ( scope[ 1 ] - scope[ 0 ] ) * ( 2 - estimate ) / 2 )
+	return scope[ 1 ] + ( ( scope[ 2 ] - scope[ 1 ] ) * ( estimate - 2 ) / 2 )
 }
 
 export function getFuelScopeCO2( datapoint, estimate ) {
-	//console.log( { datapoint: JSON.stringify( datapoint ), estimate, e: makeEstimate( datapoint, estimate ) } )
+	console.log( { datapoint: JSON.stringify( datapoint ), estimate, e: makeEstimate( datapoint, estimate ) } )
 	return makeEstimate( datapoint, estimate )
 }
 
 export function getFuelCO2( datapoint, estimate ) {
-	//console.log( { datapoint } )
+	console.log( { datapoint } )
 	if( !datapoint ) return 0
 	return getFuelScopeCO2( datapoint.scope1, estimate ) + getFuelScopeCO2( datapoint.scope3, estimate )
 }

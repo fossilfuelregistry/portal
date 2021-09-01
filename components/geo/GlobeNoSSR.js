@@ -17,6 +17,7 @@ export default function GlobeNoSSR( { year, dataKeyName = 'production', onGlobeR
 				if( !f.ok ) throw new Error( 'Status ' + f.status + ' ' + f.statusText )
 				const data = await f.json()
 				set_countries( data )
+				//console.log( data.find( d => d.isoA2 === 'GB' ) )
 			} catch( e ) {
 				notification.error( {
 					message: "Failed to fetch global dataset.",
@@ -68,17 +69,17 @@ export default function GlobeNoSSR( { year, dataKeyName = 'production', onGlobeR
 
 	return (
 		<Globe
-			width={window.innerWidth - 40}
-			height={window.innerWidth - 40}
+			width={ window.innerWidth - 40 }
+			height={ window.innerWidth - 40 }
 			backgroundColor="#ffffff"
 			globeImageUrl="//unpkg.com/three-globe/example/img/earth-day.jpg"
-			onGlobeReady={onGlobeReady}
-			onPolygonClick={handleCountryClick}
-			polygonsData={polygons}
-			polygonAltitude={getAltitude}
-			polygonCapColor={() => 'rgba(20, 0, 0, 0.5)'}
-			polygonSideColor={() => 'rgba(0, 0, 0, 0.08)'}
-			polygonsTransitionDuration={duration}
+			onGlobeReady={ onGlobeReady }
+			onPolygonClick={ handleCountryClick }
+			polygonsData={ polygons }
+			polygonAltitude={ getAltitude }
+			polygonCapColor={ () => 'rgba(20, 0, 0, 0.5)' }
+			polygonSideColor={ () => 'rgba(0, 0, 0, 0.08)' }
+			polygonsTransitionDuration={ duration }
 		/>
 	)
 }

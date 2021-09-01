@@ -32,6 +32,7 @@ export default function Home() {
 
 	useEffect( () => {
 		if( country ) {
+			DEBUG && console.log( country )
 			const data = {}
 			// Arbitrarily pick EIA source
 			data.production = country.countryProductionsByIso3166?.nodes?.filter( p => p.sourceId === 2 ) ?? {}
