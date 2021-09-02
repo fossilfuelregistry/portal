@@ -57,6 +57,8 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 
 			<Divider style={{ marginTop: 48 }}><h4>{ getText( 'input_data_overview' ) }</h4></Divider>
 
+			<div className="tldr">{getText( 'input_data_overview_description' )}</div>
+
 			<Row gutter={ [ 32, 32 ] }>
 
 				{ !!projectGeo &&
@@ -120,6 +122,11 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
                 background-color: #eeeeee;
                 padding: 16px;
                 border-radius: 8px;
+              }
+              .tldr {
+              	max-width: 500px;
+              	padding-bottom: 32px;
+              	margin: 0 auto;
               }
 			` }
 			</style>
