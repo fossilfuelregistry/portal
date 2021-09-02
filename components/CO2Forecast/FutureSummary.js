@@ -37,7 +37,7 @@ function FutureSummary( { dataset, limits, projectionSources } ) {
 	year.first = Math.max( new Date().getFullYear(), year.first )
 	const years = 1 + year.last - year.first
 
-	const sources = projectionSources.filter( s => s.sourceId !== settings.stableProductionSourceId ).map( source => {
+	const sources = ( projectionSources ?? [] ).filter( s => s.sourceId !== settings.stableProductionSourceId ).map( source => {
 		const sourceTotal = {
 			oil: { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] },
 			gas: { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] }
