@@ -1,5 +1,4 @@
-import Document, { Html, Head, Main, NextScript } from 'next/document'
-import Footer from "components/Footer"
+import Document, { Head, Html, Main, NextScript } from 'next/document'
 
 export default class MyDocument extends Document {
 	render() {
@@ -21,9 +20,18 @@ export default class MyDocument extends Document {
 					/>
 
 					<script
+						async
+						src={ "https://www.googletagmanager.com/gtag/js?id=" + process.env.NEXT_PUBLIC_GA }
+					/>
+
+					<script
 						type="application/javascript"
 						dangerouslySetInnerHTML={ {
-							__html: `function OptanonWrapper() { }`
+							__html: `
+							window.dataLayer = window.dataLayer || [];
+							function gtag(){window.dataLayer.push(arguments);}
+							gtag('js', new Date());
+							gtag('config', '${ process.env.NEXT_PUBLIC_GA }');`
 						} }
 					/>
 
