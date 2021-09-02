@@ -109,7 +109,12 @@ function SparseProject( { borders } ) {
 			<>
 				<Button
 					block
-					style={ { marginTop: 34, marginBottom: 16, borderColor: theme[ '@primary-color' ], color: theme[ '@primary-color' ] } }
+					style={ {
+						marginTop: 34,
+						marginBottom: 16,
+						borderColor: theme[ '@primary-color' ],
+						color: theme[ '@primary-color' ]
+					} }
 					onClick={ goToCountryOverview }
 				>
 					{ getText( 'back_to_country_overview' ) }
@@ -143,7 +148,7 @@ function SparseProject( { borders } ) {
 					<Col xs={ 24 } xl={ 12 }>
 						<div className="co2-card">
 							<div className="header">
-								{ getText( 'emissions' ) } - { getText( 'project' ) }
+								{ getText( 'emissions' ) } - { getText( 'project' ) } - { getText( 'megaton' ) + ' CO²e' }
 								<HelpModal title="ranges" content="explanation_ranges"/>
 							</div>
 							<div className="box">

@@ -82,7 +82,7 @@ function CO2ForecastGraphBase( {
 	if( !( maxCO2 > 0 ) ) return null // JSON.stringify( maxCO2 )
 
 	return (
-		<div className="graph" style={{ height: height, minHeight: 400 }}>
+		<div className="graph" style={ { height: height, minHeight: 400 } }>
 			<svg width={ '100%' } height={ height }>
 				<Group left={ margin.left } top={ 0 }>
 					<AxisBottom
@@ -90,13 +90,19 @@ function CO2ForecastGraphBase( {
 						scale={ yearScale }
 						numTicks={ parentWidth > 520 ? 8 : 4 }
 						tickFormat={ x => `${ x.toFixed( 0 ) }` }
-						tickLabelProps={ () => ( {
-							dy: '0.25em',
-							fill: '#222',
-							fontFamily: 'Arial',
-							fontSize: 13,
-							textAnchor: 'middle',
-						} ) }
+						tickLabelProps={ ( label, pos, ticks ) => {
+							let dx = 0
+							if( pos === 0 ) dx = 15
+							if( pos === ticks?.length - 1 ) dx = -15
+							return {
+								dx,
+								dy: '0.25em',
+								fill: '#222',
+								fontFamily: 'Arial',
+								fontSize: 13,
+								textAnchor: 'middle',
+							}
+						} }
 					/>
 
 					<AreaStack

@@ -66,7 +66,6 @@ function BarStackInternal( { parentWidth, parentHeight, data, keys } ) {
 					{ barStacks =>
 						barStacks.map( barStack =>
 							barStack.bars.map( bar => {
-								console.log( bar )
 								const tx = bar.x + bar.width / 2
 								return (
 									<React.Fragment key={ `bar-stack-${ barStack.index }-${ bar.index }` }>
