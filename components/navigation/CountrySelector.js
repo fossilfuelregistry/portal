@@ -49,7 +49,7 @@ export default function CountrySelector() {
 
 			set_selectedCountryOption( newselectedCountryOption )
 			dispatch( { type: 'COUNTRYNAME', payload: name } )
-			trackEvent( 'country', newselectedCountryOption.value )
+			trackEvent( 'country', { iso3166: newselectedCountryOption.value, country: name } )
 		}
 	}, [ countries?.length ] )
 
