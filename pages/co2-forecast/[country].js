@@ -173,7 +173,7 @@ export default function CO2ForecastPage() {
 
 					<Divider style={ { marginTop: 48 } }><h4>{ getText( 'co2_forecast' ) }</h4></Divider>
 
-					{ productionSourceId > 0 && <LoadCountryData/> }
+					{ productionSourceId > 0 && <LoadCountryData projectionSources={ projectionSources }/> }
 
 					<div/>
 					<Divider style={ { marginTop: 48 } }/>

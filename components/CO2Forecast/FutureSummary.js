@@ -7,7 +7,7 @@ import settings from "settings"
 
 const DEBUG = false
 
-function FutureSummary( { dataset, limits } ) {
+function FutureSummary( { dataset, limits, projectionSources } ) {
 	const { getText } = useText()
 	const { co2FromVolume } = useConversionHooks()
 	const stableProduction = useSelector( redux => redux.stableProduction )
@@ -37,20 +37,23 @@ function FutureSummary( { dataset, limits } ) {
 	year.first = Math.max( new Date().getFullYear(), year.first )
 	const years = 1 + year.last - year.first
 
-	const sourceTotal = {
-		oil: { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] },
-		gas: { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] }
-	}
+	const sources = projectionSources.filter( s => s.sourceId !== settings.stableProductionSourceId ).map( source => {
+		const sourceTotal = {
+			oil: { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] },
+			gas: { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] }
+		}
 
-	dataset
-		.filter( d => d.sourceId === projectionSourceId )
-		.forEach( d => {
-			if( d.year < year.first ) return
-			//if( d.year > 2030 ) return
-			addToTotal( sourceTotal[ d.fossilFuelType ], d.co2 )
-		} )
+		dataset
+			.filter( d => d.sourceId === source.sourceId )
+			.forEach( d => {
+				if( d.year < year.first ) return
+				addToTotal( sourceTotal[ d.fossilFuelType ], d.co2 )
+			} )
 
-	DEBUG && console.log( { years, year, stable, dataset } )
+		return { ...source, total: sourceTotal }
+	} )
+
+	DEBUG && console.log( { years, year, stable, dataset, sources } )
 
 	const _ = v => Math.round( v )
 
@@ -69,14 +72,16 @@ function FutureSummary( { dataset, limits } ) {
 						<td align="right">{ getText( 'mid' ) }</td>
 						<td align="right">{ getText( 'high' ) }</td>
 					</tr>
-					{ projectionSourceId !== settings.stableProductionSourceId &&
-					<tr>
-						<td>{ sourceName }</td>
-						<td align="right">{ _( sumOfCO2( sourceTotal, 0 ) ) }</td>
-						<td align="right">{ _( sumOfCO2( sourceTotal, 1 ) ) }</td>
-						<td align="right">{ _( sumOfCO2( sourceTotal, 2 ) ) }</td>
-					</tr>
-					}
+
+					{ sources.map( source => (
+						<tr key={ source.sourceId }>
+							<td>{ source.name?.startsWith( 'name_' ) ? getText( source.name ) : source.name }</td>
+							<td align="right">{ _( sumOfCO2( source.total, 0 ) ) }</td>
+							<td align="right">{ _( sumOfCO2( source.total, 1 ) ) }</td>
+							<td align="right">{ _( sumOfCO2( source.total, 2 ) ) }</td>
+						</tr>
+					) ) }
+
 					<tr>
 						<td>{ getText( 'stable' ) }</td>
 						<td align="right">{ _( years * sumOfCO2( stable, 0 ) ) }</td>

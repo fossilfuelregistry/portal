@@ -12,7 +12,7 @@ import LeafletNoSSR from "components/geo/LeafletNoSSR"
 
 const DEBUG = false
 
-function ForecastView( { production, projection, reserves, projectedProduction, limits } ) {
+function ForecastView( { production, projection, reserves, projectedProduction, limits, projectionSources } ) {
 	const { getText } = useText()
 	const country = useSelector( redux => redux.country )
 	const projectGeo = useSelector( redux => redux.projectGeo )
@@ -42,7 +42,11 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 				<Col xs={ 24 } xl={ 24 } xxl={ 8 }>
 					<Row gutter={ [ 32, 32 ] }>
 						<Col xs={ 24 } xl={ 12 } xxl={ 24 }>
-							<FutureSummary dataset={ projection } limits={ limits }/>
+							<FutureSummary
+								dataset={ projection }
+								limits={ limits }
+								projectionSources={ projectionSources }
+							/>
 							<div style={ { height: 32 } }/>
 							<YearSummary dataset={ production } limits={ limits }/>
 						</Col>
@@ -55,9 +59,9 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 				</Col>
 			</Row>
 
-			<Divider style={{ marginTop: 48 }}><h4>{ getText( 'input_data_overview' ) }</h4></Divider>
+			<Divider style={ { marginTop: 48 } }><h4>{ getText( 'input_data_overview' ) }</h4></Divider>
 
-			<div className="tldr">{getText( 'input_data_overview_description' )}</div>
+			<div className="tldr">{ getText( 'input_data_overview_description' ) }</div>
 
 			<Row gutter={ [ 32, 32 ] }>
 
@@ -123,10 +127,11 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
                 padding: 16px;
                 border-radius: 8px;
               }
+
               .tldr {
-              	max-width: 500px;
-              	padding-bottom: 32px;
-              	margin: 0 auto;
+                max-width: 500px;
+                padding-bottom: 32px;
+                margin: 0 auto;
               }
 			` }
 			</style>

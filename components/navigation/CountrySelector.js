@@ -41,7 +41,7 @@ export default function CountrySelector() {
 	useEffect( () => { // Preload based on URL value which is initialized in Redux state
 		if( !countries.length ) return
 		if( !country || country === '-' || country === 'null' ) return
-		console.log( 'CountrySelector useEffect COUNTRYNAME', country, router.query?.country )
+		DEBUG && console.log( 'CountrySelector useEffect COUNTRYNAME', country, router.query?.country )
 
 		if( !selectedCountryOption || selectedCountryOption.value !== country ) {
 			const name = countries.find( c => c.iso3166?.toLowerCase() === country.toLowerCase() )?.[ 'name' ]
