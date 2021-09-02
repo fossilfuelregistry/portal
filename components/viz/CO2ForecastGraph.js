@@ -168,14 +168,16 @@ function CO2ForecastGraphBase( {
 						scale={ productionScale }
 						numTicks={ parentWidth > 520 ? 8 : 4 }
 						tickFormat={ x => x.toFixed( 0 ).toString() }
-						tickLabelProps={ () => ( {
-							dx: '0.25em',
-							dy: '0.25em',
-							fill: '#222',
-							fontFamily: 'Arial',
-							fontSize: 13,
-							textAnchor: 'start',
-						} ) }
+						tickLabelProps={ ( label, pos ) => {
+							return {
+								dx: '0.25em',
+								dy: pos === 0 ? -12 : 2,
+								fill: '#222',
+								fontFamily: 'Arial',
+								fontSize: 13,
+								textAnchor: 'start',
+							}
+						} }
 					/>
 
 					<text x="40" y="18" transform="rotate(0)" fontSize={ 13 }>
