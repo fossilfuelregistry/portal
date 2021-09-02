@@ -6,6 +6,7 @@ import { scaleBand, scaleLinear, scaleOrdinal } from "@visx/scale"
 import { max } from 'd3-array'
 import RangeChartAxes from "./RangeChartAxes"
 import getConfig from "next/config"
+import useText from "lib/useText"
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
@@ -16,6 +17,8 @@ const getX = ( d ) => d.label
 const getYtotal = ( d ) => Number( d.scope1 + d.scope3 ) // TODO Make more generic.
 
 function BarStackInternal( { parentWidth, parentHeight, data, keys } ) {
+	const { getText } = useText()
+
 	// bounds
 	const xMax = parentWidth - horizontalMargin / 2 // divide by 2 to only add margin on left side
 	const yMax = parentHeight - verticalMargin
@@ -46,7 +49,7 @@ function BarStackInternal( { parentWidth, parentHeight, data, keys } ) {
 
 	const colorScale = scaleOrdinal( {
 		domain: keys,
-		range: [ '#008080', '#de8a5a', '#b4c8a8' ]
+		range: Object.keys( theme ).filter( k => k.startsWith( '@grff-bars2' ) ).map( k => theme[ k ] )
 	} )
 
 	return parentWidth < 10 ? null : (
@@ -63,7 +66,8 @@ function BarStackInternal( { parentWidth, parentHeight, data, keys } ) {
 					{ barStacks =>
 						barStacks.map( barStack =>
 							barStack.bars.map( bar => {
-								//console.log( bar )
+								console.log( bar )
+								const tx = bar.x + bar.width / 2
 								return (
 									<React.Fragment key={ `bar-stack-${ barStack.index }-${ bar.index }` }>
 										<rect
@@ -74,17 +78,32 @@ function BarStackInternal( { parentWidth, parentHeight, data, keys } ) {
 											fill={ bar.color }
 										/>
 										<text
-											x={ bar.x + bar.width/2 }
-											y={ bar.y + 20 }
-											fill="#ffffff"
+											x={ tx }
+											y={ bar.y + ( bar.key === 'scope1' ? -17 : 17 ) }
+											fill={ bar.key === 'scope1' ? theme[ '@text-color' ] : "#ffffff" }
 											fontSize={ 14 }
 											fontWeight={ 'bold' }
 											textAnchor="middle"
 										>
-											{ bar.bar.data[ bar.key ]?.toFixed( 1 ) }
+											<tspan x={ tx }>{ bar.bar.data[ bar.key ]?.toFixed( 1 ) }</tspan>
+											<tspan x={ tx } dy={ 14 }>{ getText( bar.key ) }</tspan>
 										</text>
+
+										{bar.key === 'scope3' &&
+										<text
+											x={ tx }
+											y={ bar.y + bar.height - 10 }
+											fill={ "#ffffff" }
+											fontSize={ 14 }
+											fontWeight={ 'bold' }
+											textAnchor="middle"
+										>
+											{ ( bar.bar.data.scope1 + bar.bar.data.scope3 )?.toFixed( 1 ) }
+										</text> }
+
 									</React.Fragment>
-								) } ),
+								)
+							} ),
 						)
 					}
 				</BarStack>
