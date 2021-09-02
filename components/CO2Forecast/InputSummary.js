@@ -33,7 +33,7 @@ function InputSummary( { dataset = [] } ) {
 				<thead>
 					<tr>
 						<th colSpan={ 4 }>
-							{ getText( 'past_emissions' ) } e9 kg CO²e
+							{ getText( 'past_emissions' ) } { getText( 'megaton' ) } CO²e
 							<HelpModal title="ranges" content="explanation_ranges"/>
 						</th>
 					</tr>

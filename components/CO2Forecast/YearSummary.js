@@ -35,7 +35,7 @@ function YearSummary( { dataset = [] } ) {
 				<thead>
 					<tr>
 						<th colSpan={ 4 }>
-							{ getText( 'this_year' ) } { year } e9 kg CO²e
+							{ getText( 'this_year' ) } { year } { getText( 'megaton' ) } CO²e
 							<HelpModal title="ranges" content="explanation_ranges"/>
 						</th>
 					</tr>

@@ -59,7 +59,7 @@ function FutureSummary( { dataset, limits } ) {
 			<table>
 				<thead>
 					<tr>
-						<th colSpan={ 4 }>{ getText( 'future_emissions' ) } e9 kg CO²e</th>
+						<th colSpan={ 4 }>{ getText( 'future_emissions' ) } { getText( 'megaton' ) } CO²e</th>
 					</tr>
 				</thead>
 				<tbody>

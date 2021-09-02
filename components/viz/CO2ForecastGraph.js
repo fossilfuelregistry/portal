@@ -179,7 +179,7 @@ function CO2ForecastGraphBase( {
 					/>
 
 					<text x="40" y="18" transform="rotate(0)" fontSize={ 13 }>
-						CO²e (e6ton)
+						{ getText( 'megaton' ) } CO²e
 					</text>
 
 				</Group>
