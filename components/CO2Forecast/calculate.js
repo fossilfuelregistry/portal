@@ -16,13 +16,27 @@ export function addToTotal( total, datapoint ) {
 
 function _sumOfFuelCO2( fuel, range ) {
 	try {
-		return fuel.scope1[ range ] + fuel.scope3[ range ]
+		return fuel.scope1?.[ range ] + fuel.scope3?.[ range ]
 	} catch( e ) {
+		console.log( fuel )
+		console.trace()
 		throw new Error( e.message + '\nCannot calculate CO2 of ' + JSON.stringify( fuel ) )
 	}
 }
 
 export function sumOfCO2( datapoint, range ) {
+	if( datapoint.scope1 || datapoint.scope3 )
+		return _sumOfFuelCO2( datapoint, range )
+
+	let co2 = 0
+	settings.supportedFuels.forEach( fuel => {
+		if( datapoint[ fuel ] )
+			co2 += _sumOfFuelCO2( datapoint[ fuel ], range )
+	} )
+	return co2
+}
+
+export function __sumOfCO2( datapoint, range ) {
 	if( datapoint.oil ) {
 		return _sumOfFuelCO2( datapoint.oil, range ) + _sumOfFuelCO2( datapoint.gas, range )
 	} else {

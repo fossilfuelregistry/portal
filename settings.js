@@ -11,5 +11,5 @@ export default {
 	stableProductionSourceId: 100,
 	principalProductionSourceId: { oil: 2, gas: 2, coal: 1 },
 	fuelTypeSeparator: '|',
-	supportedFuels: [ 'oil', 'gas' ]
+	supportedFuels: [ 'oil', 'gas', 'coal' ]
 }

@@ -18,7 +18,9 @@ export default function Download( { data, filename, fuel, children } ) {
 			delete _d.__typename
 			delete _d.sourceId
 			_d.source = allSources.find( s => s.sourceId === d.sourceId )?.name
-			_d.co2 = sumOfCO2( d.co2, 1 )
+			if( d.co2?.scope1 || d.co2?.scope3 ) {
+				_d.co2 = sumOfCO2( d.co2, 1 )
+			}
 			return _d
 		} )
 

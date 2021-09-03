@@ -10,7 +10,7 @@ import { useRouter } from "next/router"
 
 const DEBUG = false
 
-let fuelTypes = [ 'gas', 'oil', 'coal' ] // Start with generic types, is extended later from DB data.
+let fuelTypes = [ ...settings.supportedFuels ] // Start with generic types, is extended later from DB data.
 
 let lastConversionPath = []
 let lastConversionLoggedTimer
@@ -161,6 +161,7 @@ export const useConversionHooks = () => {
 		lastConversionLoggedTimer = setTimeout( () => {
 			console.log( '----- Conversions logged -----' )
 			lastConversionPath.sort( ( a, b ) => a.localeCompare( b ) ).forEach( p => console.log( p ) )
+			lastConversionPath = []
 		}, 1000 )
 		return { low, high, factor }
 	}
@@ -191,7 +192,7 @@ export const useConversionHooks = () => {
 			throw new Error( "While looking for " + fullFuelType + ' ' + unit + " -> kgco2e conversion:\n" + e.message )
 		}
 
-		DEBUG && console.log( 'CO2 Factors:', { scope1, scope3, methaneM3Ton } )
+		DEBUG && console.log( 'CO2 Factors: ', { scope1, scope3, methaneM3Ton } )
 
 		let volume1 = volume
 		if( methaneM3Ton > 0 ) {
