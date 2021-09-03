@@ -12,6 +12,9 @@ const DEBUG = false
 
 let fuelTypes = [ 'gas', 'oil', 'coal' ] // Start with generic types, is extended later from DB data.
 
+let lastConversionPath = []
+let lastConversionLoggedTimer
+
 // One graph per fully qualified fuel type contains the possible conversion paths for that fuel.
 const graphs = {}
 // The corresponding conversion factors are in the conversions object.
@@ -82,9 +85,13 @@ export const useConversionHooks = () => {
 		} )
 	}, [ conversionConstants?.length ] )
 
-	const pageQuery = () => { return { ...query.current, ...router.query } }
+	const conversionPathLoggerReset = () => lastConversionPath = {}
 
-	const goToCountryOverview =  async () => {
+	const pageQuery = () => {
+		return { ...query.current, ...router.query }
+	}
+
+	const goToCountryOverview = async() => {
 		dispatch( { type: 'REGION', payload: undefined } )
 		dispatch( { type: 'PROJECT', payload: undefined } )
 		dispatch( { type: 'PRODUCTIONSOURCEID', payload: undefined } )
@@ -102,7 +109,7 @@ export const useConversionHooks = () => {
 
 			const path = graph.shortestPath( unit, toUnit )
 
-			let factor = 1, low = 1, high = 1
+			let factor = 1
 
 			for( let step = 1; step < path.length; step++ ) {
 				const from = path[ step - 1 ]
@@ -113,10 +120,7 @@ export const useConversionHooks = () => {
 					`Conversion data issue: From ${ from } to ${ to } for ${ fossilFuelType } is ${ JSON.stringify( conv ) }` )
 
 				factor *= conv.factor
-				low *= conv.low
-				high *= conv.high
 			}
-
 			return factor * volume
 		} catch( e ) {
 			console.log( e.message + ': ' + unit, fossilFuelType, toUnit )
@@ -132,6 +136,7 @@ export const useConversionHooks = () => {
 		if( !conversion ) throw new Error( 'No conversion factors for ' + fullFuelType )
 
 		const path = graph.shortestPath( unit, toUnit )
+		let pathAsString = unit + ' > '
 		DEBUG && console.log( 'Path ', { unit, toUnit, path, conversion } )
 
 		let factor = 1, low = 1, high = 1
@@ -147,7 +152,16 @@ export const useConversionHooks = () => {
 			factor *= stepFactor
 			low *= stepLow ?? stepFactor
 			high *= stepHigh ?? stepFactor
+			pathAsString += to + ' > '
 		}
+		const logString = '[' + fullFuelType + '] ' + pathAsString.substring( 0, pathAsString.length - 3 )
+		if( !lastConversionPath.includes( logString ) ) lastConversionPath.push( logString )
+
+		if( lastConversionLoggedTimer ) clearTimeout( lastConversionLoggedTimer )
+		lastConversionLoggedTimer = setTimeout( () => {
+			console.log( '----- Conversions logged -----' )
+			lastConversionPath.sort( ( a, b ) => a.localeCompare( b ) ).forEach( p => console.log( p ) )
+		}, 1000 )
 		return { low, high, factor }
 	}
 
@@ -157,13 +171,13 @@ export const useConversionHooks = () => {
 		if( !graph ) return { low: 0, high: 0, factor: 0 }
 
 		let scope1 = {}, scope3
-		const toUnit = 'kgco2e' + settings.fuelTypeSeparator + gwp
+		const toScope1Unit = 'kgco2e' + settings.fuelTypeSeparator + gwp
 
 		try {
-			scope1 = _co2Factors( unit, toUnit, fullFuelType )
+			scope1 = _co2Factors( unit, toScope1Unit, fullFuelType )
 		} catch( e ) {
-			DEBUG && console.log( `Scope 1 ${ toUnit } Conversion Error:  ${ e.message }`, {
-				unit, toUnit,
+			DEBUG && console.log( `Scope 1 ${ toScope1Unit } Conversion Error:  ${ e.message }`, {
+				unit, toUnit: toScope1Unit,
 				fullFuelType,
 				graph: graph.serialize()
 			} )
@@ -387,5 +401,14 @@ export const useConversionHooks = () => {
 		return co2
 	}
 
-	return { co2FromVolume, convertVolume, reservesProduction, getCountryCurrentCO2, projectCO2, pageQuery, goToCountryOverview }
+	return {
+		co2FromVolume,
+		convertVolume,
+		reservesProduction,
+		getCountryCurrentCO2,
+		projectCO2,
+		pageQuery,
+		goToCountryOverview,
+		conversionPathLoggerReset
+	}
 }
