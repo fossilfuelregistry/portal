@@ -2,13 +2,17 @@ import React from "react"
 import { Pie } from "@visx/shape"
 import { Group } from "@visx/group"
 import { withParentSize } from '@visx/responsive'
-import { useTooltip } from '@visx/tooltip'
+import { Tooltip, useTooltip } from "@visx/tooltip"
 
 const margin = 34, whiteSpace = 3, outerLabel = 1.4, innerLabel = 1.0
 
 const PieChartInternal = ( { parentWidth, parentHeight, data, header, topNote, note } ) => {
 
 	const {
+		tooltipOpen,
+		tooltipLeft,
+		tooltipTop,
+		tooltipData,
 		hideTooltip,
 		showTooltip
 	} = useTooltip()
@@ -24,10 +28,8 @@ const PieChartInternal = ( { parentWidth, parentHeight, data, header, topNote, n
 					<Pie
 						data={ data }
 						pieValue={ ( d ) => d.percentage }
-						pieSortValues={ pieSortValues }
 						outerRadius={ radius }
-						innerRadius={ 0.6*radius }
-						centroid={ ( ( xyCoords, arc ) => 'XXX' ) }
+						innerRadius={ 0.6 * radius }
 					>
 						{ ( pie ) => {
 							return pie.arcs.map( ( arc ) => {
@@ -44,43 +46,16 @@ const PieChartInternal = ( { parentWidth, parentHeight, data, header, topNote, n
 										<path
 											d={ arcPath }
 											fill={ arcFill }
-											onMouseLeave={ hideTooltip }
-											onMouseEnter={ () => {
+											onMouseLeave={ () => { hideTooltip() } }
+											onMouseEnter={ event  => {
+												console.log( { tooltipTop, tooltipLeft, centroidX, centroidY } )
 												showTooltip( {
-													tooltipLeft: ( ( parentWidth / 2 ) + 20 ) + textPosX,
-													tooltipTop: ( parentHeight / 2 ) + textPosY,
+													tooltipLeft: labelPosX + parentWidth/2,
+													tooltipTop: labelPosY - parentHeight/2,
 													tooltipData: arc.data
 												} )
 											} }
 										/>
-										{ hasSpaceForLabel && (
-											<text
-												x={ textPosX }
-												y={ textPosY }
-												dy=".33em"
-												fill="#757575"
-												fontSize={ 14 }
-												fontWeight={ 'bold' }
-												textAnchor="middle"
-												pointerEvents="none"
-											>
-												{ arc.data.quantity.toFixed( 1 ) }
-											</text>
-										) }
-										{ hasSpaceForLabel && (
-											<text
-												x={ labelPosX }
-												y={ labelPosY }
-												dy="0"
-												fill="#ffffff"
-												fontSize={ 14 }
-												fontWeight={ 'bold' }
-												textAnchor="middle"
-												pointerEvents="none"
-											>
-												{ arc.data.label.toUpperCase() }
-											</text>
-										) }
 									</g>
 								)
 							} )
@@ -122,6 +97,24 @@ const PieChartInternal = ( { parentWidth, parentHeight, data, header, topNote, n
 
 				</Group>
 			</svg>
+			{ tooltipData && tooltipOpen && (
+				<Tooltip style={ {
+					transition: 'transform 0.1s ease',
+					transform: `translate(calc(${ tooltipLeft }px - 50%), calc(${ tooltipTop }px - 50%))`,
+					backgroundColor: 'rgba(0,0,0,0.5',
+					borderRadius: 8,
+					padding: 12,
+					color: '#ffffff',
+					fontSize: '14px',
+					fontWeight: 'bold',
+					display: 'inline-block',
+					pointerEvents: 'none'
+				} }
+				>
+					{ tooltipData.label }<br/>
+					{ tooltipData.quantity?.toFixed( 1 ) }
+				</Tooltip>
+			) }
 		</>
 	)
 }

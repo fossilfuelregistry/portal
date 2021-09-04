@@ -4,11 +4,13 @@ import getConfig from "next/config"
 import PieChart from "components/viz/PieChart"
 import { useSelector } from "react-redux"
 import { Button, Col, Row } from "antd"
+import settings from "../../settings"
 
+const c = settings.gradient6
 const colors = {
-	oil: '#2b8d6e',
-	gas: '#dc8c3d',
-	coal: '#3497b6'
+	oil: { scope1: c[ 0 ], scope3: c[ 1 ] },
+	gas: { scope1: c[ 2 ], scope3: c[ 3 ] },
+	coal: { scope1: c[ 4 ], scope3: c[ 5 ] }
 }
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
@@ -39,14 +41,20 @@ export default function CountryProductionPieChart( { project, emissions, product
 		const _total = currentEmissions?.totalCO2
 		set_total( _total )
 
-		const slices = currentEmissions?.production?.map( p => {
-			const quantity = p.co2?.scope1?.[ 1 ] + p.co2?.scope3?.[ 1 ]
-			return {
-				label: p.fossilFuelType,
-				quantity,
-				percentage: Math.round( ( quantity * 100 ) / _total ),
-				fillColor: colors[ p.fossilFuelType ]
-			}
+		const slices = currentEmissions?.production?.flatMap( p => {
+			const q1 = p.co2?.scope1?.[ 1 ] ?? 0
+			const q3 = p.co2?.scope3?.[ 1 ] ?? 0
+			return [ {
+				label: p.fossilFuelType?.toUpperCase() + ' ' + getText( 'scope3' ),
+				quantity: q3,
+				percentage: Math.round( ( q3 * 100 ) / _total ),
+				fillColor: colors[ p.fossilFuelType ].scope3
+			}, {
+				label: p.fossilFuelType?.toUpperCase() + ' ' + getText( 'scope1' ),
+				quantity: q1,
+				percentage: Math.round( ( q1 * 100 ) / _total ),
+				fillColor: colors[ p.fossilFuelType ].scope1
+			} ]
 		} )
 		console.log( { emissions, slices } )
 		set_pieChartData( slices )
