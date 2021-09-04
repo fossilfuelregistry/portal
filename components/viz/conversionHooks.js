@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Graph from 'graph-data-structure'
 import { useDispatch, useSelector, useStore } from "react-redux"
 import { co2PageUpdateQuery, getFullFuelType, getPreferredGrades, sumOfCO2 } from "components/CO2Forecast/calculate"
@@ -7,18 +7,12 @@ import { GQL_countryCurrentProduction } from "queries/country"
 import { notification } from "antd"
 import settings from "../../settings"
 import { useRouter } from "next/router"
+import useText from "../../lib/useText"
 
 const DEBUG = false
 
-let fuelTypes = [ ...settings.supportedFuels ] // Start with generic types, is extended later from DB data.
-
 let lastConversionPath = []
 let lastConversionLoggedTimer
-
-// One graph per fully qualified fuel type contains the possible conversion paths for that fuel.
-const graphs = {}
-// The corresponding conversion factors are in the conversions object.
-const conversions = {}
 
 const _toUnit = c => c.toUnit + ( ( c.modifier?.length > 0 ) ? settings.fuelTypeSeparator + c.modifier : '' )
 let __graph // For debug output in catch scope
@@ -30,6 +24,10 @@ export const useConversionHooks = () => {
 	const country = useSelector( redux => redux.country )
 	const stableProduction = useSelector( redux => redux.stableProduction )
 	const apolloClient = useApolloClient()
+	const [ graphs, set_graphs ] = useState() // One graph per fully qualified fuel type contains the possible conversion paths for that fuel.
+	const [ conversions, set_conversions ] = useState( {} ) // The corresponding conversion factors are in the conversions object.
+
+	const { getText } = useText()
 	const router = useRouter()
 	const store = useStore()
 	const dispatch = useDispatch()
@@ -44,23 +42,23 @@ export const useConversionHooks = () => {
 	}, [ router.asPath ] )
 
 	// Build unit graphs for all fuels.
-
 	useEffect( () => {
 		if( !( conversionConstants?.length > 0 ) ) return
+		let _graphs = {}, _conversions = {}, fuels = [ ...settings.supportedFuels ]
 
 		conversionConstants.forEach( c => {
 			const fullFuelType = getFullFuelType( c )
 			// Extend fuelTypes with this full type?
-			if( !( c.fossilFuelType?.length > 0 ) || fuelTypes.includes( fullFuelType ) ) return
-			fuelTypes.push( fullFuelType )
+			if( !( c.fossilFuelType?.length > 0 ) || fuels.includes( fullFuelType ) ) return
+			fuels.push( fullFuelType )
 		} )
-		DEBUG && console.log( fuelTypes )
+		DEBUG && console.log( fuels )
 
 		// Build one Graph() per fuel type
-		fuelTypes.forEach( fuelType => {
+		fuels.forEach( fuelType => {
 
-			graphs[ fuelType ] = Graph()
-			conversions[ fuelType ] = {}
+			_graphs[ fuelType ] = Graph()
+			_conversions[ fuelType ] = {}
 			const thisFuelConversions = conversionConstants.filter( c => c.fullFuelType === fuelType || c.fossilFuelType === null )
 
 			// Add all unique units as nodes
@@ -69,13 +67,13 @@ export const useConversionHooks = () => {
 				allUnits[ u.fromUnit ] = true
 				allUnits[ _toUnit( u ) ] = true
 			} )
-			Object.keys( allUnits ).forEach( u => graphs[ fuelType ].addNode( u ) )
+			Object.keys( allUnits ).forEach( u => _graphs[ fuelType ].addNode( u ) )
 
 			DEBUG && console.log( { fuelType, allUnits, thisFuelConversions } )
 
 			thisFuelConversions.forEach( conv => {
-				graphs[ fuelType ].addEdge( conv.fromUnit, _toUnit( conv ) )
-				conversions[ fuelType ][ conv.fromUnit + '>' + _toUnit( conv ) ] = {
+				_graphs[ fuelType ].addEdge( conv.fromUnit, _toUnit( conv ) )
+				_conversions[ fuelType ][ conv.fromUnit + '>' + _toUnit( conv ) ] = {
 					factor: conv.factor,
 					low: conv.low,
 					high: conv.high,
@@ -83,6 +81,10 @@ export const useConversionHooks = () => {
 				}
 			} )
 		} )
+
+		DEBUG && console.log( { l: conversionConstants?.length, _graphs, _conversions, _fuels: fuels } )
+		set_graphs( _graphs )
+		set_conversions( _conversions )
 	}, [ conversionConstants?.length ] )
 
 	const conversionPathLoggerReset = () => lastConversionPath = {}
@@ -102,6 +104,8 @@ export const useConversionHooks = () => {
 	}
 
 	const convertVolume = ( { volume, unit, fossilFuelType }, toUnit ) => {
+		if( graphs === undefined ) return 0
+
 		try {
 			const graph = graphs[ fossilFuelType ]
 			__graph = graph
@@ -123,8 +127,9 @@ export const useConversionHooks = () => {
 			}
 			return factor * volume
 		} catch( e ) {
-			console.log( e.message + ': ' + unit, fossilFuelType, toUnit )
-			console.log( { graph: __graph.serialize() } )
+			//console.trace()
+			console.log( `Conversion problem: ${ volume } ${ unit } ${ fossilFuelType } -> ${ toUnit }, ${ e.message }` )
+			console.log( { graph: __graph?.serialize() } )
 			return volume
 		}
 	}
@@ -166,10 +171,16 @@ export const useConversionHooks = () => {
 		return { low, high, factor }
 	}
 
-	const co2FromVolume = ( { volume, unit, fossilFuelType, subtype, methaneM3Ton }, log ) => {
+	const co2FromVolume = ( { volume, unit, fossilFuelType, subtype, methaneM3Ton } ) => {
+		if( graphs === undefined ) return { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] }
+
 		const fullFuelType = getFullFuelType( { fossilFuelType, subtype } )
 		const graph = graphs[ fullFuelType ]
-		if( !graph ) return { low: 0, high: 0, factor: 0 }
+		if( !graph ) {
+			console.log( 'No unit conversion graph for ' + fullFuelType )
+			console.log( graphs )
+			throw new Error( 'No unit conversion graph for ' + fullFuelType + ' in ' + Object.keys( graphs ) )
+		}
 
 		let scope1 = {}, scope3
 		const toScope1Unit = 'kgco2e' + settings.fuelTypeSeparator + gwp
@@ -353,20 +364,29 @@ export const useConversionHooks = () => {
 				variables: { iso3166 }
 			} )
 			const prod = q.data?.getCountryCurrentProduction?.nodes ?? []
-			const principal = prod.filter( p => p.sourceId === settings.principalProductionSourceId[ p.fossilFuelType ] )
-			DEBUG && console.log( { principal } )
-			let co2 = {}, total = 0
-			principal.forEach( p => {
-				DEBUG && console.log( co2 )
-				const calc = co2FromVolume( p )
-				DEBUG && console.log( { calc, p } )
-				if( !co2[ p.fossilFuelType ] ) co2[ p.fossilFuelType ] = 0
-				co2[ p.fossilFuelType ] += calc.scope1[ 1 ] + calc.scope3[ 1 ]
-				total += calc.scope1[ 1 ] + calc.scope3[ 1 ]
+
+			const sourceIds = prod.reduce( ( s, p ) => {
+				if( !s.includes( p.sourceId ) ) s.push( p.sourceId )
+				return s
+			}, [] )
+
+			// Calculate total production and CO2 for all available sources.
+			const sourceProd = sourceIds.map( sid => {
+				const p = prod.filter( p => p.sourceId === sid ).map( p => ( { ...p } ) )
+				let totalCO2 = 0
+				p.forEach( p => {
+					p.co2 = co2FromVolume( p )
+					totalCO2 += p.co2?.scope1?.[ 1 ] + p.co2?.scope3?.[ 1 ]
+				} )
+				return {
+					sourceId: sid,
+					production: p,
+					totalCO2
+				}
 			} )
-			co2.total = total
-			DEBUG && console.log( 'Country Production', co2 )
-			return co2
+
+			console.log( 'Country Production', { sourceProd, prod } )
+			return sourceProd
 		} catch( e ) {
 			notification.error( {
 				message: 'Failed to fetch country production',
@@ -380,26 +400,56 @@ export const useConversionHooks = () => {
 		const points = project?.projectDataPoints?.nodes ?? []
 		if( !points.length ) return 0
 
-		const lastYearProd = points.filter( p => p.dataType === 'PRODUCTION' ).reduce( ( last, point ) => {
-			if( point.year > last.year )
-				return point
-			else
-				return last
-		}, { year: 0 } )
+		const productionPerFuel = { totalCO2: 0, fuels: [] }
 
-		const co2 = co2FromVolume( { ...lastYearProd, methaneM3Ton: project.methaneM3Ton } )
-		co2.megatons = convertVolume( lastYearProd, 'e9ton' )
-		co2.scope1 = co2.scope1?.map( c => Math.round( c * 100 ) / 100 )
-		co2.scope3 = co2.scope3?.map( c => Math.round( c * 100 ) / 100 )
+		settings.supportedFuels.forEach( fuel => {
+			const fuelData = points.filter( p => p.fossilFuelType === fuel && p.dataType === 'PRODUCTION' )
+			const lastYearProd = fuelData.reduce( ( last, point ) => {
+				if( point.year > last.year )
+					return point
+				else
+					return last
+			}, { year: 0 } )
 
-		const sources = points.reduce( ( s, p ) => {
-			if( !s.includes( p.sourceId ) ) s.push( p.sourceId )
-			return s
-		}, [] )
+			if( lastYearProd.year === 0 ) return
+			const co2 = co2FromVolume( { ...lastYearProd, methaneM3Ton: project.methaneM3Ton } )
 
-		co2.sources = sources.map( id => allSources.find( s => s.sourceId === id ) )
+			let targetUnit
 
-		return co2
+			switch( fuel ) {
+				case 'oil':
+					targetUnit = 'e6bbl'
+					break
+				case 'gas':
+					targetUnit = 'e6m3'
+					break
+				case 'coal':
+					'e6ton'
+					break
+				default:
+			}
+
+			co2.lastYear = lastYearProd.year
+
+			co2.productionVolume = convertVolume( lastYearProd, targetUnit )
+
+			co2.scope1 = co2.scope1?.map( c => Math.round( c * 100 ) / 100 )
+			co2.scope3 = co2.scope3?.map( c => Math.round( c * 100 ) / 100 )
+
+			const sources = fuelData.reduce( ( s, p ) => {
+				if( !s.includes( p.sourceId ) ) s.push( p.sourceId )
+				return s
+			}, [] )
+
+			co2.productionString = co2.productionVolume?.toFixed( 1 ) + ' ' + getText( targetUnit ) + ' ' + getText( fuel )
+			co2.sources = sources.map( id => allSources.find( s => s.sourceId === id ) )
+			productionPerFuel[ fuel ] = co2
+			productionPerFuel.fuels.push( fuel )
+			productionPerFuel.totalCO2 += co2.scope1?.[ 1 ]
+			productionPerFuel.totalCO2 += co2.scope3?.[ 1 ]
+		} )
+		console.log( 'CO2', productionPerFuel )
+		return productionPerFuel
 	}
 
 	return {

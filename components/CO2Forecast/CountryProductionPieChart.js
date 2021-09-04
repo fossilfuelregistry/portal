@@ -1,9 +1,9 @@
 import useText from "lib/useText"
-import { useMemo } from "react"
+import { useEffect, useState } from "react"
 import getConfig from "next/config"
 import PieChart from "components/viz/PieChart"
 import { useSelector } from "react-redux"
-import { Col, Row } from "antd"
+import { Button, Col, Row } from "antd"
 
 const colors = {
 	oil: '#2b8d6e',
@@ -13,27 +13,46 @@ const colors = {
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
-export default function CountryProductionPieChart( { project, emissions, co2, produtionMegatons } ) {
+export default function CountryProductionPieChart( { project, emissions, production } ) {
 	const { getText } = useText()
+	const [ sources, set_sources ] = useState( [] )
+	const [ sourceId, set_sourceId ] = useState()
+	const [ total, set_total ] = useState( 0 )
+	const [ pieChartData, set_pieChartData ] = useState( [] )
 	const countryName = useSelector( redux => redux.countryName )
+	const allSources = useSelector( redux => redux.allSources )
 
-	const pieChartData = useMemo( () => {
-		if( !( emissions?.total > 0 ) ) return []
-		const slices = []
-		const total = emissions.total
-		for( const [ key, value ] of Object.entries( emissions ) ) {
-			if( key === 'total' ) continue
-			slices.push( {
-				label: key,
-				quantity: value,
-				percentage: Math.round( ( value * 100 ) / total ),
-				fillColor: colors[ key ]
-			} )
+	useEffect( () => {
+		if( !( emissions?.[ 0 ]?.totalCO2 > 0 ) ) return
+
+		const mySources = emissions.map( s => allSources.find( as => as.sourceId === s.sourceId ) )
+		set_sources( mySources )
+
+		let currentSourceId = sourceId
+		if( !currentSourceId
+			|| mySources.find( s => s.sourceId === currentSourceId ) === undefined ) {
+			currentSourceId = mySources[ 0 ].sourceId
+			set_sourceId( currentSourceId )
 		}
-		return slices
-	}, [ emissions ] )
 
-	const ratio = co2 / ( emissions?.total ?? 1 )
+		const currentEmissions = emissions.find( e => e.sourceId === currentSourceId )
+		const _total = currentEmissions?.totalCO2
+		set_total( _total )
+
+		const slices = currentEmissions?.production?.map( p => {
+			const quantity = p.co2?.scope1?.[ 1 ] + p.co2?.scope3?.[ 1 ]
+			return {
+				label: p.fossilFuelType,
+				quantity,
+				percentage: Math.round( ( quantity * 100 ) / _total ),
+				fillColor: colors[ p.fossilFuelType ]
+			}
+		} )
+		console.log( { emissions, slices } )
+		set_pieChartData( slices )
+	}, [ emissions, sourceId ] )
+
+	const ratio = ( production?.totalCO2 ?? 0 ) / ( emissions?.total ?? 1 )
 	const projectRadius = 83 * Math.sqrt( ratio )
 
 	return (
@@ -51,15 +70,29 @@ export default function CountryProductionPieChart( { project, emissions, co2, pr
 							<PieChart
 								data={ pieChartData }
 								topNote={ countryName + ' ' + getText( 'total' ) }
-								header={ emissions?.total?.toFixed( 0 ) }
+								header={ total?.toFixed( 0 ) }
 								note={ getText( 'megaton' ) + ' CO²e' }
 							/>
 						</div>
+
+						<div className="sources">
+							{ sources.map( s => (
+								<Button
+									key={ s.sourceId }
+									onClick={ () => set_sourceId( s.sourceId ) }
+									type={ s.sourceId === sourceId ? 'primary' : '' }
+								>
+									{ s.name }
+								</Button>
+							) ) }
+						</div>
+
 					</Col>
-					{ !!project && !!produtionMegatons &&
+
+					{ !!project && !!production?.totalCO2 &&
 					<Col xs={ 10 } style={ { textAlign: 'center' } }>
 						<div style={ { height: 200 } }>
-							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" height="100%" width="100%">
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 10 100 100" height="100%" width="100%">
 								<circle fill={ colors.coal } className="cls-1" cx="50" cy="50" r={ projectRadius }/>
 								<text
 									y={ 80 }
@@ -74,13 +107,28 @@ export default function CountryProductionPieChart( { project, emissions, co2, pr
 								</text>
 							</svg>
 						</div>
-						{ getText( 'production' ) }: { produtionMegatons.toFixed( 2 ) } { getText( 'megaton' ) } { project.fossilFuelType }
+						{ getText( 'production' ) } { production[ production.fuels[ 0 ] ].lastYear }:
 						<br/>
-						{ getText( 'emissions' ) }: { co2.toFixed( 2 ) } { getText( 'megaton' ) } CO²e
+						{ production.fuels.map( f => <div key={ f }>{ production[ f ]?.productionString }</div> ) }
+						{ getText( 'emissions' ) }:
+						<br/>
+						{ production.totalCO2?.toFixed( 2 ) } { getText( 'megaton' ) } CO²e
 					</Col>
 					}
 				</Row>
 			</div>
+
+			<style jsx>{ `
+              .sources {
+                text-align: center;
+              }
+
+              .sources :global(button) {
+                margin-left: 6px;
+                margin-right: 6px;
+              }
+			` }
+			</style>
 		</div>
 	)
 }

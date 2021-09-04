@@ -12,7 +12,7 @@ import Sources from "./Sources"
 import LoadProjectData from "./LoadProjectData"
 import getConfig from "next/config"
 
-const DEBUG = false
+const DEBUG = true
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
@@ -34,7 +34,7 @@ function DenseProject( { countryCO2Total, borders, productionSources, projection
 
 	const theProject = data?.project ?? {}
 
-	const co2 = useMemo( () => {
+	const production = useMemo( () => {
 		if( !theProject?.id ) return {}
 		const co2 = projectCO2( theProject )
 		DEBUG && console.log( 'DenseProject projectCO2', { theProject, co2 } )
@@ -69,8 +69,7 @@ function DenseProject( { countryCO2Total, borders, productionSources, projection
 						<CountryProductionPieChart
 							project={ project }
 							emissions={ countryCO2Total }
-							produtionMegatons={ co2.megatons }
-							co2={ ( co2.scope1?.[ 1 ] || 0 ) + co2.scope3?.[ 1 ] }
+							production={ production }
 						/>
 					</Col>
 
