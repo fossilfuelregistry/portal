@@ -131,7 +131,7 @@ function SparseProject( { borders } ) {
 					<Col xs={ 24 }>
 						<CountryProductionPieChart
 							project={ theProject }
-							emissions={ countryCO2Total }
+							currentProduction={ countryCO2Total }
 							productionMegatons={ co2.megatons }
 							co2={ ( co2.scope1?.[ 1 ] || 0 ) + co2.scope3?.[ 1 ] }
 						/>

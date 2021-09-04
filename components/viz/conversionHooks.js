@@ -59,7 +59,9 @@ export const useConversionHooks = () => {
 
 			_graphs[ fuelType ] = Graph()
 			_conversions[ fuelType ] = {}
-			const thisFuelConversions = conversionConstants.filter( c => c.fullFuelType === fuelType || c.fossilFuelType === null )
+			const thisFuelConversions = conversionConstants
+				.filter( c => !c.country || c.country === country ) // Nullish or current country
+				.filter( c => c.fullFuelType === fuelType || c.fossilFuelType === null )
 
 			// Add all unique units as nodes
 			const allUnits = {}
@@ -85,7 +87,7 @@ export const useConversionHooks = () => {
 		DEBUG && console.log( { l: conversionConstants?.length, _graphs, _conversions, _fuels: fuels } )
 		set_graphs( _graphs )
 		set_conversions( _conversions )
-	}, [ conversionConstants?.length ] )
+	}, [ conversionConstants?.length, country ] )
 
 	const conversionPathLoggerReset = () => lastConversionPath = {}
 
@@ -142,7 +144,6 @@ export const useConversionHooks = () => {
 
 		const path = graph.shortestPath( unit, toUnit )
 		let pathAsString = unit + ' > '
-		DEBUG && console.log( 'Path ', { unit, toUnit, path, conversion } )
 
 		let factor = 1, low = 1, high = 1
 		for( let step = 1; step < path.length; step++ ) {
@@ -159,6 +160,8 @@ export const useConversionHooks = () => {
 			high *= stepHigh ?? stepFactor
 			pathAsString += to + ' > '
 		}
+		fullFuelType.startsWith( 'c' ) && console.log( fullFuelType + ' Path ', { factor, unit, toUnit, path, conversion } )
+
 		const logString = '[' + fullFuelType + '] ' + pathAsString.substring( 0, pathAsString.length - 3 )
 		if( !lastConversionPath.includes( logString ) ) lastConversionPath.push( logString )
 
@@ -424,7 +427,7 @@ export const useConversionHooks = () => {
 					targetUnit = 'e6m3'
 					break
 				case 'coal':
-					'e6ton'
+					targetUnit = 'e6ton'
 					break
 				default:
 			}

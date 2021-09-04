@@ -68,7 +68,7 @@ function DenseProject( { countryCO2Total, borders, productionSources, projection
 					<Col xs={ 24 } xxl={ 12 }>
 						<CountryProductionPieChart
 							project={ project }
-							emissions={ countryCO2Total }
+							currentProduction={ countryCO2Total }
 							production={ production }
 						/>
 					</Col>

@@ -19,7 +19,7 @@ const PieChartInternal = ( { parentWidth, parentHeight, data, header, topNote, n
 
 	const minimumSize = Math.min( parentHeight, parentWidth )
 	const radius = minimumSize / 2 - margin
-	const pieSortValues = ( a, b ) => b - a
+	//const pieSortValues = ( a, b ) => b - a
 
 	return (
 		<>
@@ -47,8 +47,8 @@ const PieChartInternal = ( { parentWidth, parentHeight, data, header, topNote, n
 											d={ arcPath }
 											fill={ arcFill }
 											onMouseLeave={ () => { hideTooltip() } }
-											onMouseEnter={ event  => {
-												console.log( { tooltipTop, tooltipLeft, centroidX, centroidY } )
+											onMouseEnter={ ()  => {
+												//console.log( { tooltipTop, tooltipLeft, centroidX, centroidY } )
 												showTooltip( {
 													tooltipLeft: labelPosX + parentWidth/2,
 													tooltipTop: labelPosY - parentHeight/2,
@@ -99,7 +99,7 @@ const PieChartInternal = ( { parentWidth, parentHeight, data, header, topNote, n
 			</svg>
 			{ tooltipData && tooltipOpen && (
 				<Tooltip style={ {
-					transition: 'transform 0.1s ease',
+					transition: 'all 0.2s ease',
 					transform: `translate(calc(${ tooltipLeft }px - 50%), calc(${ tooltipTop }px - 50%))`,
 					backgroundColor: 'rgba(0,0,0,0.5',
 					borderRadius: 8,

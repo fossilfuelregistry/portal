@@ -6,6 +6,7 @@ import { useSelector } from "react-redux"
 import { Button, Col, Row } from "antd"
 import settings from "../../settings"
 
+const DEBUG = false
 const c = settings.gradient6
 const colors = {
 	oil: { scope1: c[ 0 ], scope3: c[ 1 ] },
@@ -15,7 +16,7 @@ const colors = {
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
-export default function CountryProductionPieChart( { project, emissions, production } ) {
+export default function CountryProductionPieChart( { project, currentProduction, production } ) {
 	const { getText } = useText()
 	const [ sources, set_sources ] = useState( [] )
 	const [ sourceId, set_sourceId ] = useState()
@@ -25,9 +26,9 @@ export default function CountryProductionPieChart( { project, emissions, product
 	const allSources = useSelector( redux => redux.allSources )
 
 	useEffect( () => {
-		if( !( emissions?.[ 0 ]?.totalCO2 > 0 ) ) return
+		if( !( currentProduction?.[ 0 ]?.totalCO2 > 0 ) ) return
 
-		const mySources = emissions.map( s => allSources.find( as => as.sourceId === s.sourceId ) )
+		const mySources = currentProduction.map( s => allSources.find( as => as.sourceId === s.sourceId ) )
 		set_sources( mySources )
 
 		let currentSourceId = sourceId
@@ -37,11 +38,12 @@ export default function CountryProductionPieChart( { project, emissions, product
 			set_sourceId( currentSourceId )
 		}
 
-		const currentEmissions = emissions.find( e => e.sourceId === currentSourceId )
+		const currentEmissions = currentProduction.find( e => e.sourceId === currentSourceId )
 		const _total = currentEmissions?.totalCO2
 		set_total( _total )
 
 		const slices = currentEmissions?.production?.flatMap( p => {
+			console.log( p )
 			const q1 = p.co2?.scope1?.[ 1 ] ?? 0
 			const q3 = p.co2?.scope3?.[ 1 ] ?? 0
 			return [ {
@@ -56,11 +58,11 @@ export default function CountryProductionPieChart( { project, emissions, product
 				fillColor: colors[ p.fossilFuelType ].scope1
 			} ]
 		} )
-		console.log( { emissions, slices } )
+		DEBUG && console.log( { emissions: currentProduction, slices } )
 		set_pieChartData( slices )
-	}, [ emissions, sourceId ] )
+	}, [ currentProduction, sourceId ] )
 
-	const ratio = ( production?.totalCO2 ?? 0 ) / ( emissions?.total ?? 1 )
+	const ratio = ( production?.totalCO2 ?? 0 ) / ( currentProduction?.total ?? 1 )
 	const projectRadius = 83 * Math.sqrt( ratio )
 
 	return (

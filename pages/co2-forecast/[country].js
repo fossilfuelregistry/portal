@@ -37,7 +37,7 @@ export default function CO2ForecastPage() {
 	const region = useSelector( redux => redux.region )
 	const productionSourceId = useSelector( redux => redux.productionSourceId )
 	const project = useSelector( redux => redux.project )
-	const [ countryCO2Total, set_countryCO2Total ] = useState( 0 )
+	const [ countryCurrentProduction, set_countryCurrentProduction ] = useState( 0 )
 	const [ highlightedProjects, set_highlightedProjects ] = useState( [] )
 	const router = useRouter()
 	const dispatch = useDispatch()
@@ -108,7 +108,7 @@ export default function CO2ForecastPage() {
 	useEffect( () => {
 		const asyncEffect = async() => {
 			const ct = await getCountryCurrentCO2( country )
-			set_countryCO2Total( ct )
+			set_countryCurrentProduction( ct )
 		}
 		asyncEffect()
 	}, [ country ] )
@@ -149,7 +149,7 @@ export default function CO2ForecastPage() {
 					<Row gutter={ [ 32, 32 ] } style={ { marginBottom: 26 } }>
 						<Col xs={ 24 } lg={ 12 } xxl={ 8 }>
 							<CountryProductionPieChart
-								emissions={ countryCO2Total }
+								currentProduction={ countryCurrentProduction }
 							/>
 						</Col>
 
@@ -189,7 +189,7 @@ export default function CO2ForecastPage() {
 		case "dense-project":
 			template =
 				<DenseProject
-					countryCO2Total={ countryCO2Total }
+					countryCurrentProduction={ countryCurrentProduction }
 					borders={ borders }
 					productionSources={ productionSources }
 					projectionSources={ projectionSources }
