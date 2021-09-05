@@ -46,12 +46,14 @@ const PieChartInternal = ( { parentWidth, parentHeight, data, header, topNote, n
 										<path
 											d={ arcPath }
 											fill={ arcFill }
-											onMouseLeave={ () => { hideTooltip() } }
-											onMouseEnter={ ()  => {
+											onMouseLeave={ () => {
+												hideTooltip()
+											} }
+											onMouseEnter={ () => {
 												//console.log( { tooltipTop, tooltipLeft, centroidX, centroidY } )
 												showTooltip( {
-													tooltipLeft: labelPosX + parentWidth/2,
-													tooltipTop: labelPosY - parentHeight/2,
+													tooltipLeft: labelPosX + parentWidth / 2,
+													tooltipTop: labelPosY - parentHeight / 2,
 													tooltipData: arc.data
 												} )
 											} }
@@ -112,7 +114,7 @@ const PieChartInternal = ( { parentWidth, parentHeight, data, header, topNote, n
 				} }
 				>
 					{ tooltipData.label }<br/>
-					{ tooltipData.quantity?.toFixed( 1 ) }
+					{ tooltipData.quantity?.toFixed( 1 ) } ({ tooltipData.year })
 				</Tooltip>
 			) }
 		</>

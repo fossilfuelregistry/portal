@@ -64,7 +64,7 @@ export default function CountryProductionPieChart( { project, currentProduction,
 				fillColor: colors[ p.fossilFuelType ].scope1
 			} ]
 		} )
-		DEBUG && console.log( { emissions: currentProduction, slices } )
+		console.log( { emissions: currentProduction, slices } )
 		set_pieChartData( slices )
 	}, [ currentProduction, sourceId, gwp ] )
 

@@ -380,13 +380,14 @@ export const useConversionHooks = () => {
 							if( sumP.unit && sumP.unit !== p1.unit )
 								throw new Error( 'Multiple data points for same fuel and year cannot have different units.' )
 							sumP.unit = p1.unit
+							sumP.year = p1.year
 							sumP.volume += p1.volume
 							return sumP
-						}, { volume: 0, unit: undefined } )
+						}, { volume: 0, unit: undefined, year: undefined } )
 					return {
 						...fp,
 						fossilFuelType: fuel,
-						sourceId: sid
+						sourceId: sid,
 					}
 				} )
 				.filter( fp => fp.volume > 0 ) // Remove fuels that current sourceId doesn't have
