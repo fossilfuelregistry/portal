@@ -23,7 +23,7 @@ import { useConversionHooks } from "components/viz/conversionHooks"
 import LargestProjects from "components/CO2Forecast/LargestProjects"
 import Sources from "components/CO2Forecast/Sources"
 import DenseProject from "components/CO2Forecast/DenseProject"
-import Footer from "../../components/Footer"
+import Footer from "components/Footer"
 
 const DEBUG = false
 
@@ -35,6 +35,7 @@ export default function CO2ForecastPage() {
 	const country = useSelector( redux => redux.country )
 	const countryName = useSelector( redux => redux.countryName )
 	const region = useSelector( redux => redux.region )
+	const gwp = useSelector( redux => redux.gwp )
 	const productionSourceId = useSelector( redux => redux.productionSourceId )
 	const project = useSelector( redux => redux.project )
 	const [ countryCurrentProduction, set_countryCurrentProduction ] = useState( 0 )
@@ -111,7 +112,7 @@ export default function CO2ForecastPage() {
 			set_countryCurrentProduction( ct )
 		}
 		asyncEffect()
-	}, [ country ] )
+	}, [ country, gwp ] )
 
 	useEffect( () => {
 		const qCountry = router.query?.country

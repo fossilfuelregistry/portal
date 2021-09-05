@@ -160,7 +160,13 @@ export const useConversionHooks = () => {
 			high *= stepHigh ?? stepFactor
 			pathAsString += to + ' > '
 		}
-		fullFuelType.startsWith( 'c' ) && console.log( fullFuelType + ' Path ', { factor, unit, toUnit, path, conversion } )
+		DEBUG && fullFuelType.startsWith( 'c' ) && console.log( fullFuelType + ' Path ', {
+			factor,
+			unit,
+			toUnit,
+			path,
+			conversion
+		} )
 
 		const logString = '[' + fullFuelType + '] ' + pathAsString.substring( 0, pathAsString.length - 3 )
 		if( !lastConversionPath.includes( logString ) ) lastConversionPath.push( logString )
@@ -358,6 +364,30 @@ export const useConversionHooks = () => {
 			return prod
 		}
 
+	const calcCountryProductionCO2 = prod => {
+		// Find available sources
+		const sourceIds = prod.reduce( ( s, p ) => {
+			if( !s.includes( p.sourceId ) ) s.push( p.sourceId )
+			return s
+		}, [] )
+
+		// Calculate total production and CO2 for all available sources.
+		const sourceProd = sourceIds.map( sid => {
+			const p = prod.filter( p => p.sourceId === sid ).map( p => ( { ...p } ) )
+			let totalCO2 = 0
+			p.forEach( p => {
+				p.co2 = co2FromVolume( p )
+				totalCO2 += p.co2?.scope1?.[ 1 ] + p.co2?.scope3?.[ 1 ]
+			} )
+			return {
+				sourceId: sid,
+				production: p,
+				totalCO2
+			}
+		} )
+		return sourceProd
+	}
+
 	const getCountryCurrentCO2 = async iso3166 => {
 		if( !iso3166 ) return 0
 
@@ -367,28 +397,8 @@ export const useConversionHooks = () => {
 				variables: { iso3166 }
 			} )
 			const prod = q.data?.getCountryCurrentProduction?.nodes ?? []
-
-			const sourceIds = prod.reduce( ( s, p ) => {
-				if( !s.includes( p.sourceId ) ) s.push( p.sourceId )
-				return s
-			}, [] )
-
-			// Calculate total production and CO2 for all available sources.
-			const sourceProd = sourceIds.map( sid => {
-				const p = prod.filter( p => p.sourceId === sid ).map( p => ( { ...p } ) )
-				let totalCO2 = 0
-				p.forEach( p => {
-					p.co2 = co2FromVolume( p )
-					totalCO2 += p.co2?.scope1?.[ 1 ] + p.co2?.scope3?.[ 1 ]
-				} )
-				return {
-					sourceId: sid,
-					production: p,
-					totalCO2
-				}
-			} )
-
-			console.log( 'Country Production', { sourceProd, prod } )
+			const sourceProd = calcCountryProductionCO2( prod )
+			DEBUG && console.log( 'Country Production', { sourceProd, prod } )
 			return sourceProd
 		} catch( e ) {
 			notification.error( {
@@ -459,6 +469,7 @@ export const useConversionHooks = () => {
 		co2FromVolume,
 		convertVolume,
 		reservesProduction,
+		calcCountryProductionCO2,
 		getCountryCurrentCO2,
 		projectCO2,
 		pageQuery,

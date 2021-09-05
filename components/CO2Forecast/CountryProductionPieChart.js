@@ -23,6 +23,7 @@ export default function CountryProductionPieChart( { project, currentProduction,
 	const [ total, set_total ] = useState( 0 )
 	const [ pieChartData, set_pieChartData ] = useState( [] )
 	const countryName = useSelector( redux => redux.countryName )
+	const gwp = useSelector( redux => redux.gwp )
 	const allSources = useSelector( redux => redux.allSources )
 
 	useEffect( () => {
@@ -43,7 +44,7 @@ export default function CountryProductionPieChart( { project, currentProduction,
 		set_total( _total )
 
 		const slices = currentEmissions?.production?.flatMap( p => {
-			console.log( p )
+			DEBUG && console.log( 'CountryProductionPieChart', p )
 			const q1 = p.co2?.scope1?.[ 1 ] ?? 0
 			const q3 = p.co2?.scope3?.[ 1 ] ?? 0
 			return [ {
@@ -60,7 +61,7 @@ export default function CountryProductionPieChart( { project, currentProduction,
 		} )
 		DEBUG && console.log( { emissions: currentProduction, slices } )
 		set_pieChartData( slices )
-	}, [ currentProduction, sourceId ] )
+	}, [ currentProduction, sourceId, gwp ] )
 
 	const ratio = ( production?.totalCO2 ?? 0 ) / ( currentProduction?.total ?? 1 )
 	const projectRadius = 83 * Math.sqrt( ratio )
