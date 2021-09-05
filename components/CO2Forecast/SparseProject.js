@@ -95,6 +95,16 @@ function SparseProject( { borders, countryCurrentProduction } ) {
 	if( loading || error )
 		return <GraphQLStatus loading={ loading } error={ error }/>
 
+	const allFuelsCO2 = { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] }
+	const _addElements = ( a, b ) => {
+		a.forEach( ( v, i ) => a[ i ] += b[ i ] )
+	}
+	co2.fuels.forEach( fuel => {
+		_addElements( allFuelsCO2.scope1, co2[ fuel ].scope1 )
+		_addElements( allFuelsCO2.scope3, co2[ fuel ].scope3 )
+	} )
+	DEBUG && console.log( 'SparseProject', co2, allFuelsCO2 )
+
 	try {
 		return (
 			<>
@@ -147,18 +157,18 @@ function SparseProject( { borders, countryCurrentProduction } ) {
 										data={ [
 											{
 												label: getText( 'range-low' ).toUpperCase(),
-												scope1: co2.scope1?.[ 0 ],
-												scope3: co2.scope3?.[ 0 ]
+												scope1: allFuelsCO2.scope1?.[ 0 ],
+												scope3: allFuelsCO2.scope3?.[ 0 ]
 											},
 											{
 												label: getText( 'range-mid' ).toUpperCase(),
-												scope1: co2.scope1?.[ 1 ],
-												scope3: co2.scope3?.[ 1 ]
+												scope1: allFuelsCO2.scope1?.[ 1 ],
+												scope3: allFuelsCO2.scope3?.[ 1 ]
 											},
 											{
 												label: getText( 'range-high' ).toUpperCase(),
-												scope1: co2.scope1?.[ 2 ],
-												scope3: co2.scope3?.[ 2 ]
+												scope1: allFuelsCO2.scope1?.[ 2 ],
+												scope3: allFuelsCO2.scope3?.[ 2 ]
 											},
 										] }
 										keys={ [ "scope3", "scope1" ] }
