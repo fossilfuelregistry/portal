@@ -7,6 +7,7 @@ import { Button, Col, Row } from "antd"
 import settings from "../../settings"
 
 const DEBUG = false
+
 const c = settings.gradient6
 const colors = {
 	oil: { scope1: c[ 0 ], scope3: c[ 1 ] },
@@ -50,11 +51,15 @@ export default function CountryProductionPieChart( { project, currentProduction,
 			return [ {
 				label: p.fossilFuelType?.toUpperCase() + ' ' + getText( 'scope3' ),
 				quantity: q3,
+				year: p.year,
+				subtype: p.subtype,
 				percentage: Math.round( ( q3 * 100 ) / _total ),
 				fillColor: colors[ p.fossilFuelType ].scope3
 			}, {
 				label: p.fossilFuelType?.toUpperCase() + ' ' + getText( 'scope1' ),
 				quantity: q1,
+				year: p.year,
+				subtype: p.subtype,
 				percentage: Math.round( ( q1 * 100 ) / _total ),
 				fillColor: colors[ p.fossilFuelType ].scope1
 			} ]
@@ -63,8 +68,11 @@ export default function CountryProductionPieChart( { project, currentProduction,
 		set_pieChartData( slices )
 	}, [ currentProduction, sourceId, gwp ] )
 
-	const ratio = ( production?.totalCO2 ?? 0 ) / ( currentProduction?.total ?? 1 )
+	const countryEmission = currentProduction.find( p => p.sourceId === sourceId )?.totalCO2
+	const ratio = ( production?.totalCO2 ?? 0 ) / ( countryEmission ?? 1 )
 	const projectRadius = 83 * Math.sqrt( ratio )
+
+	DEBUG && console.log( 'ratio', { ratio, production, currentProduction } )
 
 	return (
 		<div className="co2-card">
@@ -104,7 +112,7 @@ export default function CountryProductionPieChart( { project, currentProduction,
 					<Col xs={ 10 } style={ { textAlign: 'center' } }>
 						<div style={ { height: 200 } }>
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 10 100 100" height="100%" width="100%">
-								<circle fill={ colors.coal } className="cls-1" cx="50" cy="50" r={ projectRadius }/>
+								<circle fill={ colors[ production.fuels[ 0 ] ]?.scope3 } className="cls-1" cx="50" cy="50" r={ projectRadius }/>
 								<text
 									y={ 80 }
 									fill="#000000d9"

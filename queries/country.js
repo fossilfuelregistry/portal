@@ -50,7 +50,7 @@ query border($isoA2: String!, $iso3166: String!) {
 export const GQL_countryCurrentProduction = gql`
 query countryCurrentProduction($iso3166: String!) {
   getCountryCurrentProduction(iso3166_: $iso3166) {
-    nodes { id fossilFuelType sourceId unit volume year }
+    nodes { id fossilFuelType sourceId unit volume year subtype }
   }
 }`
 

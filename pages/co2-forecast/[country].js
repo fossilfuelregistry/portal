@@ -110,6 +110,7 @@ export default function CO2ForecastPage() {
 		const asyncEffect = async() => {
 			const ct = await getCountryCurrentCO2( country )
 			set_countryCurrentProduction( ct )
+			console.log( { ct } )
 		}
 		asyncEffect()
 	}, [ country, gwp ] )
@@ -199,7 +200,10 @@ export default function CO2ForecastPage() {
 			break
 
 		case "sparse-project":
-			template = <SparseProject borders={ borders }/>
+			template = <SparseProject
+				countryCurrentProduction={ countryCurrentProduction }
+				borders={ borders }
+			           />
 			break
 
 		default:

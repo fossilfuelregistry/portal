@@ -21,31 +21,22 @@ const DEBUG = false
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
-function SparseProject( { borders } ) {
+function SparseProject( { borders, countryCurrentProduction } ) {
 	const { getText } = useText()
 	const router = useRouter()
-	const { getCountryCurrentCO2, projectCO2, goToCountryOverview } = useConversionHooks()
+	const { projectCO2, goToCountryOverview } = useConversionHooks()
 	const country = useSelector( redux => redux.country )
 	const project = useSelector( redux => redux.project )
-	const [ countryCO2Total, set_countryCO2Total ] = useState( 0 )
 	const [ localeDescription, set_localeDescription ] = useState()
 
-	DEBUG && console.log( 'SparseProject', { country, project, countryCO2Total } )
-
-	useEffect( () => {
-		const asyncEffect = async() => {
-			const ct = await getCountryCurrentCO2( country )
-			set_countryCO2Total( ct )
-		}
-		asyncEffect()
-	}, [ country ] )
+	DEBUG && console.log( 'SparseProject', { country, project } )
 
 	const { data, loading, error } = useQuery( GQL_project, {
 		variables: { id: project?.id },
 		skip: !( project?.id > 0 )
 	} )
 
-	DEBUG && console.log( 'SparseProject', { country, project, countryCO2Total, loading, error, data } )
+	DEBUG && console.log( 'SparseProject', { country, project, loading, error, data } )
 
 	const theProject = data?.project ?? {}
 
@@ -131,9 +122,8 @@ function SparseProject( { borders } ) {
 					<Col xs={ 24 }>
 						<CountryProductionPieChart
 							project={ theProject }
-							currentProduction={ countryCO2Total }
-							productionMegatons={ co2.megatons }
-							co2={ ( co2.scope1?.[ 1 ] || 0 ) + co2.scope3?.[ 1 ] }
+							currentProduction={ countryCurrentProduction }
+							production={ co2 }
 						/>
 					</Col>
 

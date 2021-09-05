@@ -155,12 +155,15 @@ export const useConversionHooks = () => {
 				`Conversion data issue: From ${ from } to ${ to } for ${ fullFuelType } is ${ JSON.stringify( conv ) }` )
 			const { factor: stepFactor, low: stepLow, high: stepHigh } = conv
 
+			//const DEBUG = fullFuelType === 'coal'
+			DEBUG && console.log( from, to, stepFactor )
+
 			factor *= stepFactor
 			low *= stepLow ?? stepFactor
 			high *= stepHigh ?? stepFactor
 			pathAsString += to + ' > '
 		}
-		DEBUG && fullFuelType.startsWith( 'c' ) && console.log( fullFuelType + ' Path ', {
+		DEBUG && console.log( fullFuelType + ' Path ', {
 			factor,
 			unit,
 			toUnit,
@@ -180,7 +183,7 @@ export const useConversionHooks = () => {
 		return { low, high, factor }
 	}
 
-	const co2FromVolume = ( { volume, unit, fossilFuelType, subtype, methaneM3Ton } ) => {
+	const co2FromVolume = ( { volume, unit, fossilFuelType, subtype, methaneM3Ton, sourceId } ) => {
 		if( graphs === undefined ) return { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] }
 
 		const fullFuelType = getFullFuelType( { fossilFuelType, subtype } )
@@ -212,6 +215,7 @@ export const useConversionHooks = () => {
 			throw new Error( "While looking for " + fullFuelType + ' ' + unit + " -> kgco2e conversion:\n" + e.message )
 		}
 
+		//const DEBUG = fossilFuelType === 'coal' //&& sourceId === 2
 		DEBUG && console.log( 'CO2 Factors: ', { scope1, scope3, methaneM3Ton } )
 
 		let volume1 = volume
@@ -224,19 +228,10 @@ export const useConversionHooks = () => {
 				unit: 'e6m3',
 				fossilFuelType
 			}, 'e3ton|sparse-scope1' )
-			volume1 = e3tonMethane
-
-			// Get new factors for gas
-			try {
-				scope1 = _co2Factors( 'e3ton', toUnit, 'gas' )
-			} catch( e ) {
-				console.log( `Scope 1 ${ toUnit } Project gas equiv conversion error:  ${ e.message }`, {
-					unit, toUnit, graphs,
-					graph: graph.serialize()
-				} )
-			}
-
-			console.log( 'Project Specific Scope1:', {
+			volume1 = e3tonMethane * 1000000
+			const toUnit = 'kgco2e' + settings.fuelTypeSeparator + gwp
+			scope1 = _co2Factors( 'ch4kg', toUnit, 'coal' )
+			DEBUG && console.log( 'Project Specific Scope1:', {
 				scope1,
 				volume,
 				e6ProductionTons,
@@ -253,7 +248,7 @@ export const useConversionHooks = () => {
 			scope3: [ volume * scope3.low / 1e9, volume * scope3.factor / 1e9, volume * scope3.high / 1e9 ]
 		}
 
-		DEBUG && console.log( '.....co2', { result, scope1, volume1 } )
+		DEBUG && console.log( '.....co2', { result, volume1, unit } )
 		return result
 	}
 
@@ -373,15 +368,40 @@ export const useConversionHooks = () => {
 
 		// Calculate total production and CO2 for all available sources.
 		const sourceProd = sourceIds.map( sid => {
-			const p = prod.filter( p => p.sourceId === sid ).map( p => ( { ...p } ) )
+
+			const p = prod.filter( p => p.sourceId === sid )
+
+			// Sum up all fuel subtypes
+			const fuelProd = settings.supportedFuels
+				.map( fuel => {
+					const fp = p
+						.filter( p => p.fossilFuelType === fuel )
+						.reduce( ( sumP, p1 ) => {
+							if( sumP.unit && sumP.unit !== p1.unit )
+								throw new Error( 'Multiple data points for same fuel and year cannot have different units.' )
+							sumP.unit = p1.unit
+							sumP.volume += p1.volume
+							return sumP
+						}, { volume: 0, unit: undefined } )
+					return {
+						...fp,
+						fossilFuelType: fuel,
+						sourceId: sid
+					}
+				} )
+				.filter( fp => fp.volume > 0 ) // Remove fuels that current sourceId doesn't have
+
 			let totalCO2 = 0
-			p.forEach( p => {
+			fuelProd.forEach( p => {
 				p.co2 = co2FromVolume( p )
 				totalCO2 += p.co2?.scope1?.[ 1 ] + p.co2?.scope3?.[ 1 ]
 			} )
+
+			DEBUG && console.log( 'fuelProd', sid, fuelProd )
+
 			return {
 				sourceId: sid,
-				production: p,
+				production: fuelProd,
 				totalCO2
 			}
 		} )
@@ -398,9 +418,10 @@ export const useConversionHooks = () => {
 			} )
 			const prod = q.data?.getCountryCurrentProduction?.nodes ?? []
 			const sourceProd = calcCountryProductionCO2( prod )
-			DEBUG && console.log( 'Country Production', { sourceProd, prod } )
+			console.log( 'Country Production', { sourceProd, prod } )
 			return sourceProd
 		} catch( e ) {
+			console.log( e )
 			notification.error( {
 				message: 'Failed to fetch country production',
 				description: e.message,
