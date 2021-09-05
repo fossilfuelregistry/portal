@@ -30,6 +30,8 @@ const PieChartInternal = ( { parentWidth, parentHeight, data, header, topNote, n
 						pieValue={ ( d ) => d.percentage }
 						outerRadius={ radius }
 						innerRadius={ 0.6 * radius }
+						cornerRadius={3}
+						padAngle={0.005}
 					>
 						{ ( pie ) => {
 							return pie.arcs.map( ( arc ) => {
