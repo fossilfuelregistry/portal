@@ -59,8 +59,27 @@ export const useConversionHooks = () => {
 
 			_graphs[ fuelType ] = Graph()
 			_conversions[ fuelType ] = {}
+
+			// Build list of constants where we have a country specific override.
+			const countrySpecificConstants = conversionConstants.filter( c => c.country === country )
+
 			const thisFuelConversions = conversionConstants
-				.filter( c => !c.country || c.country === country ) // Nullish or current country
+				.filter( c => {
+					if( c.country === country ) return true
+					if( c.country ) return false // Not current country then!
+					// When constant.country is nullish we need to see if there is a country override.
+					// In that case skip it.
+					let hasOverride = false
+					countrySpecificConstants.forEach( csc => {
+						if( csc.fossilFuelType !== c.fossilFuelType ) return
+						if( csc.fromUnit !== c.fromUnit ) return
+						if( csc.toUnit !== c.toUnit ) return
+						if( csc.subtype !== c.subtype ) return
+						if( csc.modifier !== c.modifier ) return
+						hasOverride = true // Everything matches!
+					} )
+					return !hasOverride
+				} )
 				.filter( c => c.fullFuelType === fuelType || c.fossilFuelType === null )
 
 			// Add all unique units as nodes
@@ -79,7 +98,8 @@ export const useConversionHooks = () => {
 					factor: conv.factor,
 					low: conv.low,
 					high: conv.high,
-					modifier: conv.modifier
+					modifier: conv.modifier,
+					country: conv.country
 				}
 			} )
 		} )
@@ -161,8 +181,9 @@ export const useConversionHooks = () => {
 			factor *= stepFactor
 			low *= stepLow ?? stepFactor
 			high *= stepHigh ?? stepFactor
-			pathAsString += to + ' > '
+			pathAsString += to + ( conv.country ? '(' + conv.country + ')' : '' ) + ' > '
 		}
+
 		DEBUG && console.log( fullFuelType + ' Path ', {
 			factor,
 			unit,
