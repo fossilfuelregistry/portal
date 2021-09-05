@@ -12,25 +12,25 @@ import Sources from "./Sources"
 import LoadProjectData from "./LoadProjectData"
 import getConfig from "next/config"
 
-const DEBUG = true
+const DEBUG = false
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
-function DenseProject( { countryCO2Total, borders, productionSources, projectionSources, reservesSources } ) {
+function DenseProject( { countryCurrentProduction, borders, productionSources, projectionSources, reservesSources } ) {
 	const { getText } = useText()
 	const country = useSelector( redux => redux.country )
 	const project = useSelector( redux => redux.project )
 	const { projectCO2, goToCountryOverview } = useConversionHooks()
 	const productionSourceId = useSelector( redux => redux.productionSourceId )
 
-	DEBUG && console.log( 'DenseProject', { country, project, countryCO2Total } )
+	DEBUG && console.log( 'DenseProject', { country, project, countryCurrentProduction } )
 
 	const { data, loading, error } = useQuery( GQL_project, {
 		variables: { id: project?.id },
 		skip: !( project?.id > 0 )
 	} )
 
-	DEBUG && console.log( 'DenseProject', { country, project, countryCO2Total, loading, error, data } )
+	DEBUG && console.log( 'DenseProject', { country, project, loading, error, data } )
 
 	const theProject = data?.project ?? {}
 
@@ -68,7 +68,7 @@ function DenseProject( { countryCO2Total, borders, productionSources, projection
 					<Col xs={ 24 } xxl={ 12 }>
 						<CountryProductionPieChart
 							project={ project }
-							currentProduction={ countryCO2Total }
+							currentProduction={ countryCurrentProduction }
 							production={ production }
 						/>
 					</Col>

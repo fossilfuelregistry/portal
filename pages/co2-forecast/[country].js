@@ -200,10 +200,11 @@ export default function CO2ForecastPage() {
 			break
 
 		case "sparse-project":
-			template = <SparseProject
-				countryCurrentProduction={ countryCurrentProduction }
-				borders={ borders }
-			           />
+			template =
+				<SparseProject
+					countryCurrentProduction={ countryCurrentProduction }
+					borders={ borders }
+				/>
 			break
 
 		default:
