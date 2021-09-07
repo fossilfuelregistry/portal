@@ -78,7 +78,7 @@ function DenseProject( { countryCurrentProduction, borders, productionSources, p
 							<LeafletNoSSR
 								className="country-geo"
 								outlineGeometry={ borders }
-								projectBorders={ [ theProject ] }
+								projects={ [ theProject ] }
 								fitToProjects={ true }
 							/>
 						</div>

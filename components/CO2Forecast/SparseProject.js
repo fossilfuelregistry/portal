@@ -141,7 +141,7 @@ function SparseProject( { borders, countryCurrentProduction } ) {
 						<LeafletNoSSR
 							className="country-geo"
 							outlineGeometry={ borders }
-							projects={ [ theProject.geoPosition ] }
+							projects={ [ theProject ] }
 						/>
 					</Col>
 

@@ -18,7 +18,7 @@ export default function LargestProjects( { onPositions, onGeoClick } ) {
 	const country = useSelector( redux => redux.country )
 	const region = useSelector( redux => redux.region )
 	const countryTotalCO2 = useSelector( redux => redux.countryTotalCO2 )
-	const [ filters, set_filters ] = useState( {} )
+	const [ filters, set_filters ] = useState( { oil: true, gas: true, coal: true } )
 
 	const { data, loading, error } = useQuery( GQL_largestProjects, {
 		variables: { iso3166: country },
@@ -63,7 +63,6 @@ export default function LargestProjects( { onPositions, onGeoClick } ) {
 									unCheckedChildren={ <FuelIcon fuel={ fuel } height={ 22 } padding={ 3 }/> }
 									checked={ filters[ fuel ] !== false }
 									onChange={ checked => {
-										console.log( checked )
 										set_filters( { ...filters, [ fuel ]: checked } )
 									} }
 								/>
