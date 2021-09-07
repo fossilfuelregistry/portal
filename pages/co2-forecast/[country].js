@@ -160,15 +160,18 @@ export default function CO2ForecastPage() {
 								<LeafletNoSSR
 									className="country-geo"
 									outlineGeometry={ borders }
-									projects={ highlightedProjects }
-									projectBorders={ projectBorders }
+									highlightedProjects={ highlightedProjects }
+									projects={ projectBorders }
 								/>
 							</div>
 						</Col>
 
 						<Col xs={ 24 } lg={ 12 } xxl={ 8 }>
 							<LargestProjects
-								onPositions={ set_highlightedProjects }
+								onGeoClick={ geo => {
+									set_highlightedProjects( [ geo ] )
+									console.log( geo )
+								} }
 							/>
 						</Col>
 					</Row>

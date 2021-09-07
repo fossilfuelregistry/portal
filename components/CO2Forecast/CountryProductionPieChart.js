@@ -2,7 +2,7 @@ import useText from "lib/useText"
 import { useEffect, useState } from "react"
 import getConfig from "next/config"
 import PieChart from "components/viz/PieChart"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { Button, Col, Row } from "antd"
 import settings from "../../settings"
 
@@ -21,10 +21,11 @@ export default function CountryProductionPieChart( { project, currentProduction,
 	const { getText } = useText()
 	const [ sources, set_sources ] = useState( [] )
 	const [ sourceId, set_sourceId ] = useState()
-	const [ total, set_total ] = useState( 0 )
 	const [ pieChartData, set_pieChartData ] = useState( [] )
+	const dispatch = useDispatch()
 	const countryName = useSelector( redux => redux.countryName )
 	const gwp = useSelector( redux => redux.gwp )
+	const total = useSelector( redux => redux.countryTotalCO2 )
 	const allSources = useSelector( redux => redux.allSources )
 
 	useEffect( () => {
@@ -42,7 +43,7 @@ export default function CountryProductionPieChart( { project, currentProduction,
 
 		const currentEmissions = currentProduction.find( e => e.sourceId === currentSourceId )
 		const _total = currentEmissions?.totalCO2
-		set_total( _total )
+		dispatch( { type: 'COUNTRYTOTALCO2', payload: _total } )
 
 		const slices = currentEmissions?.production?.flatMap( p => {
 			DEBUG && console.log( 'CountryProductionPieChart', p )
@@ -69,7 +70,7 @@ export default function CountryProductionPieChart( { project, currentProduction,
 	}, [ currentProduction, sourceId, gwp ] )
 
 	if( !currentProduction ) return null
-	
+
 	const countryEmission = currentProduction?.find( p => p.sourceId === sourceId )?.totalCO2
 	const ratio = ( production?.totalCO2 ?? 0 ) / ( countryEmission ?? 1 )
 	const projectRadius = 83 * Math.sqrt( ratio )

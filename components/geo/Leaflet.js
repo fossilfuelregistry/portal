@@ -32,7 +32,7 @@ export default function Leaflet( {
 	className,
 	outlineGeometry,
 	projects,
-	projectBorders,
+	highlightedProjects,
 	fitToProjects
 } ) {
 	const domRef = useRef()
@@ -40,6 +40,7 @@ export default function Leaflet( {
 	const outlineLayer = useRef()
 	const markerLayer = useRef()
 	const projectLayer = useRef()
+	const highlightGroup = useRef()
 	const [ loaded, set_loaded ] = useState( 0 )
 
 	DEBUG && console.log( { center, onMove, onMap, className } )
@@ -73,6 +74,7 @@ export default function Leaflet( {
 				} )
 
 				markerLayer.current = window.L.layerGroup().addTo( mapRef.current )
+				highlightGroup.current = window.L.layerGroup().addTo( mapRef.current )
 				projectLayer.current = window.L.geoJSON( undefined, { style: projectBorderStyle } ).addTo( mapRef.current )
 
 				// FIX leaflet's default icon path problems with webpack
@@ -111,28 +113,29 @@ export default function Leaflet( {
 	}, [ domRef.current, loaded, outlineGeometry ] )
 
 	useEffect( () => {
-		if( loaded < 3 || !projects ) return
+		if( loaded < 3 ) return
 		try {
-			markerLayer.current.clearLayers()
+			highlightGroup.current?.clearLayers()
+			if( !highlightedProjects?.[ 0 ]?.geojson ) return
 
-			projects?.map( p => {
-				if( !p?.geojson ) return
-				// TODO Highlight focused project
-				if( p.__typename === 'GeometryPoint' )
-					window.L.marker( [ p.geojson?.coordinates?.[ 1 ], p.geojson?.coordinates?.[ 0 ] ] ).addTo( markerLayer.current )
-			} )
+			const highlight = window.L.GeoJSON.geometryToLayer( highlightedProjects[ 0 ].geojson )
+			highlightGroup.current.addLayer( highlight )
+			const bounds = highlight.getBounds()
+
+			console.log( 'HIGHLIGHT', { highlightGroup, highlightedProjects, bounds } )
+			mapRef.current.fitBounds( bounds, { maxZoom: 7 } )
 		} catch( e ) {
 			console.log( e )
-			console.log( { projects } )
+			console.log( { highlightedProjects } )
 		}
-	}, [ domRef.current, loaded, projects ] )
+	}, [ domRef.current, loaded, highlightedProjects ] )
 
 	useEffect( () => {
-		if( loaded < 3 || !projectBorders ) return
+		if( loaded < 3 || !projects ) return
 		try {
 			projectLayer.current.clearLayers()
 
-			projectBorders?.map( p => {
+			projects?.map( p => {
 				if( p?.geom?.geojson )
 					projectLayer.current.addData( p.geom?.geojson )
 				else if( p?.geoPosition?.geojson )
@@ -147,7 +150,7 @@ export default function Leaflet( {
 			console.log( e )
 			console.log( { projects } )
 		}
-	}, [ domRef.current, loaded, projectBorders ] )
+	}, [ domRef.current, loaded, projects ] )
 
 	if( loaded < 3 ) return <Spinner/>
 
