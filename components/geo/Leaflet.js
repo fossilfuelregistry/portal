@@ -118,12 +118,18 @@ export default function Leaflet( {
 			highlightGroup.current?.clearLayers()
 			if( !highlightedProjects?.[ 0 ]?.geojson ) return
 
-			const highlight = window.L.GeoJSON.geometryToLayer( highlightedProjects[ 0 ].geojson )
-			highlightGroup.current.addLayer( highlight )
-			const bounds = highlight.getBounds()
+			if( highlightedProjects[ 0 ].geojson.type === 'Point' ) {
+				mapRef.current.setView( window.L.GeoJSON.coordsToLatLng( highlightedProjects[ 0 ].geojson.coordinates ) )
+				mapRef.current.setZoom( 11 )
+				//console.log( window.L.GeoJSON.coordsToLatLng( highlightedProjects[ 0 ].geojson.coordinates ) )
+			} else {
+				const highlight = window.L.GeoJSON.geometryToLayer( highlightedProjects[ 0 ].geojson )
+				highlightGroup.current.addLayer( highlight )
+				const bounds = highlight.getBounds()
 
-			console.log( 'HIGHLIGHT', { highlightGroup, highlightedProjects, bounds } )
-			mapRef.current.fitBounds( bounds, { maxZoom: 7 } )
+				console.log( 'HIGHLIGHT', { highlightGroup, highlightedProjects, bounds } )
+				mapRef.current.fitBounds( bounds, { maxZoom: 7 } )
+			}
 		} catch( e ) {
 			console.log( e )
 			console.log( { highlightedProjects } )
