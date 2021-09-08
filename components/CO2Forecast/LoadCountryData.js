@@ -26,23 +26,52 @@ function LoadCountryData( { projectionSources } ) {
 	const gwp = useSelector( redux => redux.gwp )
 
 	const _co2 = dataset => {
+		if( !( dataset?.length > 0 ) ) return []
+
 		try {
-			//.filter( datapoint => settings.supportedFuels.includes( datapoint.fossilFuelType ) )
-			return ( dataset ?? [] )
-				.filter( datapoint => datapoint.fossilFuelType === 'gas' || datapoint.fossilFuelType === 'oil' || datapoint.fossilFuelType === 'coal' )
-				.map( datapoint => {
-					let log = false
-					if( datapoint.year === 2019 && datapoint.sourceId === productionSourceId && !datapoint.grade ) {
-						log = true
-					}
-					let _d = { ...datapoint }
-					delete _d.id
-					delete _d.__typename
-					_d.co2 = co2FromVolume( datapoint, log )
-					return _d
-				} )
+			const onlySupportedFuelPoints = dataset.filter( datapoint => settings.supportedFuels.includes( datapoint.fossilFuelType ) )
+
+			// Now squash multiple year entries into one.
+			const singlePointPerYear = []
+			let aggregatePoint = { ...onlySupportedFuelPoints[ 0 ] }
+
+			onlySupportedFuelPoints.forEach( datapoint => {
+
+				if( aggregatePoint.year !== datapoint.year
+					|| aggregatePoint.fossilFuelType !== datapoint.fossilFuelType
+					|| aggregatePoint.sourceId !== datapoint.sourceId ) {
+					singlePointPerYear.push( aggregatePoint )
+					aggregatePoint = { ...datapoint }
+					return
+				}
+
+				if( aggregatePoint.unit !== datapoint.unit ) {
+					console.log( { aggregatePoint, datapoint } )
+					throw new Error( 'Multiple data points for same fuel / source / year cannot have different units.' )
+				}
+
+				//console.log( 'Aggregating', { aggregatePoint, datapoint } )
+				aggregatePoint.subtype = null
+				aggregatePoint.volume += datapoint.volume
+			} )
+
+			singlePointPerYear.push( aggregatePoint )
+
+			singlePointPerYear.forEach( datapoint => {
+				let log = false
+				if( datapoint.year === 2019 && datapoint.sourceId === productionSourceId && !datapoint.grade ) {
+					log = true
+				}
+				delete datapoint.id
+				delete datapoint.__typename
+
+				datapoint.co2 = co2FromVolume( datapoint, log )
+			} )
+
+			return singlePointPerYear
+
 		} catch( e ) {
-			notification.error( { message: 'Application error', description: e.message } )
+			notification.error( { message: 'Application error', description: e.message, duration: 20 } )
 			return dataset
 		}
 	}

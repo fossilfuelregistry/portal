@@ -204,7 +204,7 @@ export const useConversionHooks = () => {
 		return { low, high, factor }
 	}
 
-	const co2FromVolume = ( { volume, unit, fossilFuelType, subtype, methaneM3Ton, year }, log ) => {
+	const co2FromVolume = ( { volume, unit, fossilFuelType, subtype, methaneM3Ton }, log ) => {
 		if( graphs === undefined ) return { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] }
 
 		const fullFuelType = getFullFuelType( { fossilFuelType, subtype } )
