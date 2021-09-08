@@ -3,17 +3,15 @@ import GraphQLStatus from "../GraphQLStatus"
 import { Select } from "antd"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
-import { useDispatch, useSelector, useStore } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import useText from "lib/useText"
 import { GQL_projects } from "queries/general"
-import { co2PageUpdateQuery } from "../CO2Forecast/calculate"
 import { AreaChartOutlined, DotChartOutlined } from "@ant-design/icons"
 import { GQL_projectGeo } from "queries/country"
 
 const DEBUG = false
 
 export default function ProjectSelector( { iso3166, iso31662 } ) {
-	const store = useStore()
 	const router = useRouter()
 	const apolloClient = useApolloClient()
 	const [ selectedProjectOption, set_selectedProjectOption ] = useState()
@@ -27,11 +25,12 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 	DEBUG && console.log( 'ProjectSelector', { query, iso3166, iso31662 } )
 
 	useEffect( () => {
-		if( !project )
+		DEBUG && console.log( 'ProjectSelector useEffect 1', { project } )
+		if( !project || project === 'loading' )
 			set_selectedProjectOption( undefined )
 		else
 			set_selectedProjectOption( project.projectIdentifier )
-		co2PageUpdateQuery( store, router )
+		//co2PageUpdateQuery( store, router )
 	}, [ iso31662, project ] )
 
 	const { data: projData, loading, error } = useQuery( GQL_projects, {
@@ -41,6 +40,7 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 
 	useEffect( () => {
 		if( loading || error || !projData?.getProjects?.nodes?.length ) return
+		DEBUG && console.log( 'ProjectSelector useEffect 2', { project, query } )
 
 		// Remove non-current entries and get one entry per project..
 		const projs = new Map()

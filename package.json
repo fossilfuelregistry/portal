@@ -17,7 +17,7 @@
     "clone": "^2.1.2",
     "dayjs": "^1.10.6",
     "graph-data-structure": "^2.0.0",
-    "graphql": "^15.5.2",
+    "graphql": "^15.5.3",
     "isomorphic-unfetch": "^3.1.0",
     "leaflet": "^1.7.1",
     "less": "4.1.1",
@@ -34,7 +34,7 @@
     "react-globe.gl": "^2.18.10",
     "react-icons": "^4.2.0",
     "react-markdown": "^7.0.1",
-    "react-redux": "^7.2.4",
+    "react-redux": "^7.2.5",
     "react-share": "^4.4.0",
     "react-singleton-hook": "^3.2.1",
     "react-spring": "^9.2.4",
@@ -43,7 +43,7 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^16.7.10",
+    "@types/node": "^16.7.13",
     "eslint": "7.32.0",
     "eslint-plugin-babel": "5.3.1",
     "eslint-plugin-import": "2.24.2",
@@ -53,6 +53,6 @@
     "eslint-plugin-simple-import-sort": "7.0.0",
     "next-plugin-antd-less": "^1.4.2",
     "typescript": "^4.4.2",
-    "webpack": "^5.51.2"
+    "webpack": "^5.52.0"
   }
 }

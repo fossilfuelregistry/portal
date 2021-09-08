@@ -110,7 +110,10 @@ export async function co2PageUpdateQuery( store, router, parameter, value ) {
 		query.set( p, v )
 	} )
 
-	if( state.project?.projectIdentifier ) query.set( 'project', state.project?.projectIdentifier )
+	if( state.project === 'loading' && router.query.project?.length > 0 )
+		query.set( 'project', router.query.project )
+	else if( state.project?.projectIdentifier )
+		query.set( 'project', state.project?.projectIdentifier )
 
 	DEBUG && console.log( 'URL', parameter, '->', { value, router, query, state } )
 
