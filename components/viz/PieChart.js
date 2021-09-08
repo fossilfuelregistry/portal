@@ -5,11 +5,11 @@ import { withParentSize } from '@visx/responsive'
 import { Tooltip, useTooltip } from "@visx/tooltip"
 import { Glyph } from '@visx/glyph'
 
-const margin = 34, whiteSpace = 3, outerLabel = 1.4, innerLabel = 1.0
+const margin = 34, whiteSpace = 3, outerLabel = 1.4, innerLabel = 0.95
 
 const GlyphGas = ( { left, top, size } ) => (
 	<Glyph left={ left } top={ top } size={ size }>
-		<g transform="scale(0.8)">
+		<g transform="scale(0.7)">
 			<path
 				className="gas glyph"
 				d="M10.1-2.8C9.1-8.5,6.9-13,4.7-16.3c-0.9-1.4-3.1-3.9-4.2-4.9l0,0h0c0-0.1-0.1-0.1-0.1-0.1C0.2-21.3,0-21.2,0-21v0
@@ -23,7 +23,7 @@ const GlyphGas = ( { left, top, size } ) => (
 
 const GlyphOil = ( { left, top, size } ) => (
 	<Glyph left={ left } top={ top } size={ size }>
-		<g transform="scale(0.7)">
+		<g transform="scale(0.6)">
 			<path
 				className="oil glyph"
 				d="M11.4,1.4C10-9-1.9-24-1.9-24s-12,15-13.3,25.4c-0.1,0.4-0.1,2-0.1,2.1c0.1,7.3,6.1,13.2,13.4,13.2c7.4,0,13.5-6,13.5-13.5
@@ -36,7 +36,7 @@ const GlyphOil = ( { left, top, size } ) => (
 
 const GlyphCoal = ( { left, top, size } ) => (
 	<Glyph left={ left } top={ top } size={ size }>
-		<g transform="scale(0.5)">
+		<g transform="scale(0.4)">
 			<polygon className="coal glyph" points="0.9,-0.4 -21.5,-10.8 -27.9,6.9 -14.5,21.4 	"/>
 			<polygon className="coal glyph" points="12.4,15.8 4,2.8 -10.4,23.3 14.7,26.1 	"/>
 			<polygon className="coal glyph" points="2.1,-4.7 2.8,-22.3 -17.7,-13.9 	"/>
@@ -81,7 +81,7 @@ const PieChartInternal = ( { parentWidth, parentHeight, data, header, topNote, n
 								const textPosY = centroidY > 0 ? centroidY * outerLabel + whiteSpace : centroidY < 0 ? centroidY * outerLabel - whiteSpace : centroidY
 								const labelPosX = centroidX > 0 ? centroidX * innerLabel + whiteSpace : centroidX < 0 ? centroidX * innerLabel - whiteSpace : centroidX
 								const labelPosY = centroidY > 0 ? centroidY * innerLabel + whiteSpace : centroidY < 0 ? centroidY * innerLabel - whiteSpace : centroidY
-								const hasSpaceForLabel = arc.endAngle - arc.startAngle >= 0.15
+								const hasSpaceForLabel = arc.endAngle - arc.startAngle >= 0.17
 								const arcPath = pie.path( arc )
 								const arcFill = arc.data.fillColor
 								return (
