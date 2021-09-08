@@ -27,13 +27,18 @@ function LoadCountryData( { projectionSources } ) {
 
 	const _co2 = dataset => {
 		try {
+			//.filter( datapoint => settings.supportedFuels.includes( datapoint.fossilFuelType ) )
 			return ( dataset ?? [] )
-				.filter( datapoint => datapoint.fossilFuelType === 'gas' || datapoint.fossilFuelType === 'oil' )
+				.filter( datapoint => datapoint.fossilFuelType === 'gas' || datapoint.fossilFuelType === 'oil' || datapoint.fossilFuelType === 'coal' )
 				.map( datapoint => {
+					let log = false
+					if( datapoint.year === 2019 && datapoint.sourceId === productionSourceId && !datapoint.grade ) {
+						log = true
+					}
 					let _d = { ...datapoint }
 					delete _d.id
 					delete _d.__typename
-					_d.co2 = co2FromVolume( datapoint )
+					_d.co2 = co2FromVolume( datapoint, log )
 					return _d
 				} )
 		} catch( e ) {
@@ -111,35 +116,42 @@ function LoadCountryData( { projectionSources } ) {
 	// Figure out available years when data loaded.
 
 	useEffect( () => {
-		DEBUG && console.log( 'useEffect Production', production?.length, limits )
-		if( !production?.length > 0 ) return
+		if( !( production?.length > 0 ) ) return
+		console.log( 'useEffect Production', production?.length, limits )
+		const reduced = {}
+		settings.supportedFuels.forEach( fuel => reduced[ fuel ] = { firstYear: settings.year.end, lastYear: 0 } )
+
 		const newLimits = production.reduce( ( _limits, datapoint ) => {
 			if( datapoint.sourceId !== productionSourceId ) return _limits
 			const l = _limits[ datapoint.fossilFuelType ]
 			l.firstYear = Math.min( l.firstYear, datapoint.year )
 			l.lastYear = Math.max( l.lastYear, datapoint.year )
 			return _limits
-		}, { oil: { firstYear: settings.year.end, lastYear: 0 }, gas: { firstYear: settings.year.end, lastYear: 0 } } )
+		}, reduced )
 
 		// Check if no data
-		if( newLimits.oil.firstYear === settings.year.end ) newLimits.oil.firstYear = 0
-		if( newLimits.gas.firstYear === settings.year.end ) newLimits.gas.firstYear = 0
+		settings.supportedFuels.forEach( fuel => {
+			if( newLimits[ fuel ].firstYear === settings.year.end ) newLimits[ fuel ].firstYear = 0
+		} )
 
 		set_limits( l => ( { ...l, production: newLimits } ) )
 		DEBUG && console.log( 'useEffect Production', { newLimits } )
-	}, [ production, productionSourceId ] )
+	}, [ production?.length, productionSourceId ] )
 
 	useEffect( () => {
 		DEBUG && console.log( 'useEffect projection', { projection, limits } )
 		if( !projection?.length > 0 ) return
 
 		let newLimits
+		const reduced = {}
+		settings.supportedFuels.forEach( fuel => reduced[ fuel ] = { firstYear: settings.year.end, lastYear: 0 } )
 
 		if( projectionSourceId === settings.stableProductionSourceId ) {
-			newLimits = {
-				oil: { firstYear: new Date().getFullYear() - 1, lastYear: settings.year.end },
-				gas: { firstYear: new Date().getFullYear() - 1, lastYear: settings.year.end }
-			}
+			newLimits = {}
+			settings.supportedFuels.forEach( fuel => newLimits[ fuel ] = {
+				firstYear: new Date().getFullYear() - 1,
+				lastYear: settings.year.end
+			} )
 		} else {
 			newLimits = projection.reduce( ( _limits, datapoint ) => {
 				if( datapoint.sourceId !== projectionSourceId ) return _limits
@@ -147,15 +159,13 @@ function LoadCountryData( { projectionSources } ) {
 				l.firstYear = Math.min( l.firstYear, datapoint.year )
 				l.lastYear = Math.max( l.lastYear, datapoint.year )
 				return _limits
-			}, {
-				oil: { firstYear: settings.year.end, lastYear: 0 },
-				gas: { firstYear: settings.year.end, lastYear: 0 }
-			} )
+			}, reduced )
 		}
 
 		// Check if no data
-		if( newLimits.oil.firstYear === settings.year.end ) newLimits.oil.firstYear = 0
-		if( newLimits.gas.firstYear === settings.year.end ) newLimits.gas.firstYear = 0
+		settings.supportedFuels.forEach( fuel => {
+			if( newLimits[ fuel ].firstYear === settings.year.end ) newLimits[ fuel ].firstYear = 0
+		} )
 
 		set_limits( l => ( { ...l, projection: newLimits } ) )
 	}, [ projection, projectionSourceId ] )

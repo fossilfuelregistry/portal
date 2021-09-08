@@ -1,6 +1,10 @@
 import settings from "settings"
 
 export function addToTotal( total, datapoint ) {
+	if( !total ) {
+		console.trace()
+		throw new Error( 'Calculation problem, addToTotal( undefined, ... )' )
+	}
 	const scopes = Object.keys( datapoint )
 	if( !scopes?.length ) return
 	const ranges = Object.keys( datapoint[ scopes[ 0 ] ] )
@@ -25,6 +29,10 @@ function _sumOfFuelCO2( fuel, range ) {
 }
 
 export function sumOfCO2( datapoint, range ) {
+	if( !datapoint ) {
+		console.trace()
+		return
+	}
 	if( datapoint.scope1 || datapoint.scope3 )
 		return _sumOfFuelCO2( datapoint, range )
 

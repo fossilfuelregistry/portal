@@ -22,7 +22,6 @@ module.exports = withAntdLess( {
 		locales: [ 'en', 'fr', 'es' ],
 		defaultLocale: 'en'
 	},
-	experimental: { esmExternals: 'loose' },
 	async redirects() {
 		return [
 			{

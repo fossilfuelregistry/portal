@@ -4,6 +4,7 @@ import HelpModal from "../HelpModal"
 import { addToTotal, sumOfCO2 } from "./calculate"
 import { useSelector } from "react-redux"
 import SummaryRow from "./SummaryRow"
+import settings from "../../settings"
 
 const DEBUG = false
 
@@ -13,10 +14,8 @@ function InputSummary( { dataset = [] } ) {
 
 	if( !( dataset?.length > 0 ) ) return null
 
-	const totals = {
-		oil: { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] },
-		gas: { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] }
-	}
+	const totals = {}
+	settings.supportedFuels.forEach( fuel => totals[ fuel ] = { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] } )
 
 	const sourceData = dataset.filter( p => p.sourceId === parseInt( productionSourceId ) )
 	sourceData.forEach( datapoint => {

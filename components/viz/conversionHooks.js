@@ -156,7 +156,7 @@ export const useConversionHooks = () => {
 		}
 	}
 
-	const _co2Factors = ( unit, toUnit, fullFuelType ) => {
+	const _co2Factors = ( unit, toUnit, fullFuelType, log, volume ) => {
 		const graph = graphs[ fullFuelType ]
 		const conversion = conversions[ fullFuelType ]
 		if( !graph ) throw new Error( 'No conversion graph for ' + fullFuelType )
@@ -175,13 +175,13 @@ export const useConversionHooks = () => {
 				`Conversion data issue: From ${ from } to ${ to } for ${ fullFuelType } is ${ JSON.stringify( conv ) }` )
 			const { factor: stepFactor, low: stepLow, high: stepHigh } = conv
 
-			//const DEBUG = fullFuelType === 'coal'
-			DEBUG && console.log( from, to, stepFactor )
-
 			factor *= stepFactor
 			low *= stepLow ?? stepFactor
 			high *= stepHigh ?? stepFactor
 			pathAsString += to + ( conv.country ? '(' + conv.country + ')' : '' ) + ' > '
+
+			//const DEBUG = fullFuelType === 'coal'
+			if( DEBUG || log ) console.log( from, to, stepFactor, volume * factor, conv.country ? '(' + conv.country + ')' : '' )
 		}
 
 		DEBUG && console.log( fullFuelType + ' Path ', {
@@ -204,7 +204,7 @@ export const useConversionHooks = () => {
 		return { low, high, factor }
 	}
 
-	const co2FromVolume = ( { volume, unit, fossilFuelType, subtype, methaneM3Ton, sourceId } ) => {
+	const co2FromVolume = ( { volume, unit, fossilFuelType, subtype, methaneM3Ton, year }, log ) => {
 		if( graphs === undefined ) return { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] }
 
 		const fullFuelType = getFullFuelType( { fossilFuelType, subtype } )
@@ -219,7 +219,8 @@ export const useConversionHooks = () => {
 		const toScope1Unit = 'kgco2e' + settings.fuelTypeSeparator + gwp
 
 		try {
-			scope1 = _co2Factors( unit, toScope1Unit, fullFuelType )
+			log && console.log( '--S1--' )
+			scope1 = _co2Factors( unit, toScope1Unit, fullFuelType, log, volume )
 		} catch( e ) {
 			DEBUG && console.log( `Scope 1 ${ toScope1Unit } Conversion Error:  ${ e.message }`, {
 				unit, toUnit: toScope1Unit,
@@ -229,15 +230,20 @@ export const useConversionHooks = () => {
 		}
 
 		try {
-			scope3 = _co2Factors( unit, 'kgco2e', fullFuelType )
+			log && console.log( '--S3--' )
+			scope3 = _co2Factors( unit, 'kgco2e', fullFuelType, log, volume )
 		} catch( e ) {
-			if( console.trace ) console.trace()
+			//if( console.trace ) console.trace()
 			console.log( 'Conversion to kgco2e Error: ' + e.message, { unit, fullFuelType, graph: graph.serialize() } )
 			throw new Error( "While looking for " + fullFuelType + ' ' + unit + " -> kgco2e conversion:\n" + e.message )
 		}
 
 		//const DEBUG = fossilFuelType === 'coal' //&& sourceId === 2
-		DEBUG && console.log( 'CO2 Factors: ', { scope1, scope3, methaneM3Ton } )
+		( DEBUG || log ) && console.log( 'CO2', fossilFuelType, volume.toFixed( 1 ), unit, {
+			scope1,
+			scope3,
+			methaneM3Ton
+		} )
 
 		let volume1 = volume
 		if( methaneM3Ton > 0 ) {
@@ -269,7 +275,10 @@ export const useConversionHooks = () => {
 			scope3: [ volume * scope3.low / 1e9, volume * scope3.factor / 1e9, volume * scope3.high / 1e9 ]
 		}
 
-		DEBUG && console.log( '.....co2', { result, volume1, unit } )
+		if( DEBUG || log ) {
+			console.log( '    ', result.scope1[ 1 ].toFixed( 3 ), '+', result.scope3[ 1 ].toFixed( 3 ), '=', ( result.scope3[ 1 ] + result.scope1[ 1 ] ).toFixed( 3 ) )
+			console.log( '' )
+		}
 		return result
 	}
 
@@ -292,10 +301,9 @@ export const useConversionHooks = () => {
 
 			const useGrades = getPreferredGrades( reserves, reservesSourceId )
 
-			const lastReserves = {
-				oil: { p: { year: 0, value: 0 }, c: { year: 0, value: 0 } },
-				gas: { p: { year: 0, value: 0 }, c: { year: 0, value: 0 } }
-			}
+			const lastReserves = {}
+			settings.supportedFuels.forEach( fuel => lastReserves[ fuel ] = { p: { year: 0, value: 0 }, c: { year: 0, value: 0 } } )
+
 			for( let i = reserves.length - 1; i >= 0; i-- ) { // Scan in reverse to find latest.
 				const r = reserves[ i ]
 				if( r.sourceId !== reservesSourceId ) continue
