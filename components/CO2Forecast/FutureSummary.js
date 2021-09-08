@@ -37,21 +37,29 @@ function FutureSummary( { dataset, limits, projectionSources } ) {
 	year.first = Math.max( new Date().getFullYear(), year.first )
 	const years = 1 + year.last - year.first
 
-	const sources = ( projectionSources ?? [] ).filter( s => s.sourceId !== settings.stableProductionSourceId ).map( source => {
-		const sourceTotal = {
-			oil: { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] },
-			gas: { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] }
-		}
+	const distinctSourceIds = {}
+	const sources = ( projectionSources ?? [] )
+		.filter( s => {
+			if( s.sourceId === settings.stableProductionSourceId ) return false
+			if( distinctSourceIds[ s.sourceId ] ) return false
+			distinctSourceIds[ s.sourceId ] = true
+			return true
+		} )
+		.map( source => {
+			const sourceTotal = {
+				oil: { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] },
+				gas: { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] }
+			}
 
-		dataset
-			.filter( d => d.sourceId === source.sourceId )
-			.forEach( d => {
-				if( d.year < year.first ) return
-				addToTotal( sourceTotal[ d.fossilFuelType ], d.co2 )
-			} )
+			dataset
+				.filter( d => d.sourceId === source.sourceId )
+				.forEach( d => {
+					if( d.year < year.first ) return
+					addToTotal( sourceTotal[ d.fossilFuelType ], d.co2 )
+				} )
 
-		return { ...source, total: sourceTotal }
-	} )
+			return { ...source, total: sourceTotal }
+		} )
 
 	DEBUG && console.log( { years, year, stable, dataset, sources } )
 

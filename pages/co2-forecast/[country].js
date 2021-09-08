@@ -24,6 +24,7 @@ import LargestProjects from "components/CO2Forecast/LargestProjects"
 import Sources from "components/CO2Forecast/Sources"
 import DenseProject from "components/CO2Forecast/DenseProject"
 import Footer from "components/Footer"
+import ProjectSelector from "../../components/navigation/ProjectSelector"
 
 const DEBUG = false
 
@@ -85,8 +86,15 @@ export default function CO2ForecastPage() {
 			.filter( s => s.dataType === 'PRODUCTION' )
 			.sort( ( a, b ) => Math.sign( ( b.quality ?? 0 ) - ( a.quality ?? 0 ) ) )
 
+		const distinctSourceIds = {} // On source can appear several times if it has different quality for different data points.
 		projectionSources = ( _countrySources?.getCountrySources?.nodes ?? [] )
-			.filter( s => s.dataType === 'PROJECTION' )
+			.filter( s => {
+				if( !( s.dataType === 'PROJECTION' ) ) return false
+				if( distinctSourceIds[ s.sourceId ] !== undefined ) return false
+				distinctSourceIds[ s.sourceId ] = Math.max( s.quality, distinctSourceIds[ s.sourceId ] )
+				return true
+			} )
+			.map( s => ( { ...s, quality: distinctSourceIds[ s.sourceId ] } ) ) // Use max value found
 			.sort( ( a, b ) => Math.sign( ( b.quality ?? 0 ) - ( a.quality ?? 0 ) ) )
 
 		reservesSources = ( _countrySources?.getCountrySources?.nodes ?? [] )
@@ -110,7 +118,6 @@ export default function CO2ForecastPage() {
 		const asyncEffect = async() => {
 			const ct = await getCountryCurrentCO2( country )
 			set_countryCurrentProduction( ct )
-			console.log( { ct } )
 		}
 		asyncEffect()
 	}, [ country, gwp ] )
@@ -140,6 +147,10 @@ export default function CO2ForecastPage() {
 					<h2>Country emissions history and forcast</h2>
 					<p>Intro text about country / project levels, ranges etc goes here...</p>
 					<p>First select a country!</p>
+					<ProjectSelector
+						iso3166={ country }
+						iso31662={ region ?? '' }
+					/>
 				</div>
 			)
 			break
