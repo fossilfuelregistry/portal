@@ -78,6 +78,9 @@ export default function CountryProductionPieChart( { project, currentProduction,
 	const projectRadius = 83 * Math.sqrt( ratio )
 
 	DEBUG && console.log( 'ratio', { ratio, production, currentProduction } )
+	let digits = 0
+	if( ratio < 0.1 ) digits = 1
+	if( ratio < 0.01 ) digits = 2
 
 	return (
 		<div className="co2-card">
@@ -118,7 +121,7 @@ export default function CountryProductionPieChart( { project, currentProduction,
 						<div style={ { height: 200 } }>
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 10 100 100" height="100%" width="100%">
 								<circle
-									fill={ colors[ production.fuels[ 0 ] ]?.scope3 } className="cls-1" cx="50"
+									fill={ colors.oil.scope3 } className="cls-1" cx="50"
 									cy="50" r={ projectRadius }
 								/>
 								<text
@@ -129,7 +132,7 @@ export default function CountryProductionPieChart( { project, currentProduction,
 									fontWeight={ 'bold' }
 									textAnchor="middle"
 								>
-									<tspan x={ 50 }>{ ( ratio * 100 ).toFixed( 2 ) }%</tspan>
+									<tspan x={ 50 }>{ ( ratio * 100 ).toFixed( digits ) }%</tspan>
 									<tspan x={ 50 } dy={ 16 }>{ project.projectIdentifier }</tspan>
 								</text>
 							</svg>

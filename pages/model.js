@@ -15,8 +15,7 @@ import { prepareProductionDataset } from "../components/CO2Forecast/calculate"
 import { useRouter } from "next/router"
 import { VariableSizeList } from "react-window"
 
-const sources = [ 1, 2, 3
-]
+const sources = [ 1, 2, 3 ]
 
 function Wrapper( {
 	// Are there more items to load?
