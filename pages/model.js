@@ -61,7 +61,7 @@ function Wrapper( {
 			const tableData = []
 
 			country.production.forEach( ( p, i ) => {
-				p.co2 = co2FromVolume( p ) //, country.iso3166 === 'co' )
+				p.co2 = co2FromVolume( p, country.iso3166 === 'dk' )
 				p.country = country.iso3166
 				p.label =
 					<span>{ allSources.find( s => s.sourceId === p.sourceId )?.name } { p.fossilFuelType } { p.subtype }</span>
@@ -77,7 +77,7 @@ function Wrapper( {
 					tableData.push( {
 						co2: totals,
 						id: 'T' + p.id,
-						label: 'Total',
+						label: <span>Total<br/><br/></span>,
 						className: 'total'
 					} )
 
@@ -136,6 +136,7 @@ function Wrapper( {
 
                       .total {
                         font-weight: bold;
+                        vertical-align: top;
                       }
 
                       tbody td {
@@ -169,7 +170,7 @@ function Wrapper( {
 						ref={ ref }
 						height={ 800 }
 						width={ 800 }
-						itemSize={ index => 80 + ( items[ index ]?.production?.length ?? 0 ) * 25 }
+						itemSize={ index => 80 + ( items[ index ]?.production?.length ?? 0 ) * 30 }
 					>
 						{ Item }
 					</VariableSizeList>
@@ -218,6 +219,10 @@ export default function Model() {
 							variables: { iso3166: country.iso3166, iso31662: '' }
 						} )
 						country.production = prepareProductionDataset( ( q.data?.countryDataPoints?.nodes ?? [] ).filter( p => p.year === parseInt( router.query.year ) ?? 2019 ) )
+						if( country.iso3166 === 'dk' ) console.log( {
+							prepared: country.production,
+							raw: q.data?.countryDataPoints?.nodes?.filter( p => p.year === parseInt( router.query.year ) ?? 2019 )
+						} )
 						country.isItemLoaded = true
 					}
 				} }

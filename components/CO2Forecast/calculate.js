@@ -161,10 +161,13 @@ export function prepareProductionDataset( dataset ) {
 
 	// Now squash multiple year entries into one.
 	const singlePointPerYear = []
-	let aggregatePoint = { ...onlySupportedFuelPoints[ 0 ] }
+	let aggregatePoint
 
 	onlySupportedFuelPoints.forEach( datapoint => {
-
+		if( !aggregatePoint ) {
+			aggregatePoint = { ...datapoint }
+			return
+		}
 		if( aggregatePoint.year !== datapoint.year
 			|| aggregatePoint.fossilFuelType !== datapoint.fossilFuelType
 			|| aggregatePoint.sourceId !== datapoint.sourceId ) {
@@ -186,6 +189,7 @@ export function prepareProductionDataset( dataset ) {
 	singlePointPerYear.push( aggregatePoint )
 
 	singlePointPerYear.forEach( datapoint => {
+		if( !datapoint ) return
 		delete datapoint.__typename
 	} )
 

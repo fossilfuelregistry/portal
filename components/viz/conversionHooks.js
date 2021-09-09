@@ -232,6 +232,7 @@ export const useConversionHooks = () => {
 		let scope1 = {}, scope3
 		const toScope1Unit = 'kgco2e' + settings.fuelTypeSeparator + gwp
 
+		log && console.log( '-----', country, fossilFuelType, volume, unit )
 		try {
 			log && console.log( '--S1--' )
 			scope1 = _co2Factors( gc, unit, toScope1Unit, fullFuelType, log, volume )
