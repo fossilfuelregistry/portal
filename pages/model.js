@@ -5,15 +5,15 @@ import { useApolloClient, useQuery } from "@apollo/client"
 import { GQL_productionCountries } from "queries/general"
 import GraphQLStatus from "components/GraphQLStatus"
 import InfiniteLoader from 'react-window-infinite-loader'
-import { FixedSizeList } from 'react-window'
 import Loading from "components/Loading"
 import { GQL_countryProduction } from "../queries/country"
 import { useConversionHooks } from "../components/viz/conversionHooks"
 import CarbonIntensitySelector from "components/viz/IntensitySelector"
-import { Col, Input, Row } from "antd"
+import { Col, Row } from "antd"
 import { useSelector } from "react-redux"
 import { prepareProductionDataset } from "../components/CO2Forecast/calculate"
 import { useRouter } from "next/router"
+import { VariableSizeList } from "react-window"
 
 const sources = [ 1, 2, 3
 ]
@@ -163,16 +163,16 @@ function Wrapper( {
 				threshold={ 2 }
 			>
 				{ ( { onItemsRendered, ref } ) => (
-					<FixedSizeList
+					<VariableSizeList
 						itemCount={ itemCount }
 						onItemsRendered={ onItemsRendered }
 						ref={ ref }
 						height={ 800 }
 						width={ 800 }
-						itemSize={ 240 }
+						itemSize={ index => 80 + ( items[ index ]?.production?.length ?? 0 ) * 25 }
 					>
 						{ Item }
-					</FixedSizeList>
+					</VariableSizeList>
 				) }
 			</InfiniteLoader>
 		</div>
