@@ -44,6 +44,13 @@ export const useConversionHooks = () => {
 	// Build unit graphs for all fuels.
 	useEffect( () => {
 		if( !( conversionConstants?.length > 0 ) ) return
+		const ccGraphs = countryConversionGraphs()
+		set_graphs( ccGraphs.graphs )
+		set_conversions( ccGraphs.conversions )
+
+	}, [ conversionConstants?.length, country ] )
+
+	const countryConversionGraphs = countryOverride => {
 		let _graphs = {}, _conversions = {}, fuels = [ ...settings.supportedFuels ]
 
 		conversionConstants.forEach( c => {
@@ -61,11 +68,12 @@ export const useConversionHooks = () => {
 			_conversions[ fuelType ] = {}
 
 			// Build list of constants where we have a country specific override.
-			const countrySpecificConstants = conversionConstants.filter( c => c.country === country )
+			const currentCountry = ( countryOverride ?? country )
+			const countrySpecificConstants = conversionConstants.filter( c => c.country === currentCountry )
 
 			const thisFuelConversions = conversionConstants
 				.filter( c => {
-					if( c.country === country ) return true
+					if( c.country === currentCountry ) return true
 					if( c.country ) return false // Not current country then!
 					// When constant.country is nullish we need to see if there is a country override.
 					// In that case skip it.
@@ -91,7 +99,6 @@ export const useConversionHooks = () => {
 			Object.keys( allUnits ).forEach( u => _graphs[ fuelType ].addNode( u ) )
 
 			DEBUG && console.log( { fuelType, allUnits, thisFuelConversions } )
-
 			thisFuelConversions.forEach( conv => {
 				_graphs[ fuelType ].addEdge( conv.fromUnit, _toUnit( conv ) )
 				_conversions[ fuelType ][ conv.fromUnit + '>' + _toUnit( conv ) ] = {
@@ -105,9 +112,9 @@ export const useConversionHooks = () => {
 		} )
 
 		DEBUG && console.log( { l: conversionConstants?.length, _graphs, _conversions, _fuels: fuels } )
-		set_graphs( _graphs )
-		set_conversions( _conversions )
-	}, [ conversionConstants?.length, country ] )
+
+		return { graphs: _graphs, conversions: _conversions }
+	}
 
 	const conversionPathLoggerReset = () => lastConversionPath = {}
 
@@ -156,7 +163,7 @@ export const useConversionHooks = () => {
 		}
 	}
 
-	const _co2Factors = ( unit, toUnit, fullFuelType, log, volume ) => {
+	const _co2Factors = ( { graphs, conversions }, unit, toUnit, fullFuelType, log, volume ) => {
 		const graph = graphs[ fullFuelType ]
 		const conversion = conversions[ fullFuelType ]
 		if( !graph ) throw new Error( 'No conversion graph for ' + fullFuelType )
@@ -204,11 +211,18 @@ export const useConversionHooks = () => {
 		return { low, high, factor }
 	}
 
-	const co2FromVolume = ( { volume, unit, fossilFuelType, subtype, methaneM3Ton }, log ) => {
-		if( graphs === undefined ) return { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] }
+	const co2FromVolume = ( { volume, unit, fossilFuelType, subtype, methaneM3Ton, country }, log ) => {
+		let gc = { graphs, conversions }
+		if( country ) {
+			// We want to override graphs to this country instead of the Redux state country
+			gc = countryConversionGraphs( country )
+			//console.log( 'Country Override:', country, volume, unit, fossilFuelType, gc )
+		}
+
+		if( gc.graphs === undefined ) return { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] }
 
 		const fullFuelType = getFullFuelType( { fossilFuelType, subtype } )
-		const graph = graphs[ fullFuelType ]
+		const graph = gc.graphs[ fullFuelType ]
 		if( !graph ) {
 			console.log( 'No unit conversion graph for ' + fullFuelType )
 			console.log( graphs )
@@ -220,7 +234,7 @@ export const useConversionHooks = () => {
 
 		try {
 			log && console.log( '--S1--' )
-			scope1 = _co2Factors( unit, toScope1Unit, fullFuelType, log, volume )
+			scope1 = _co2Factors( gc, unit, toScope1Unit, fullFuelType, log, volume )
 		} catch( e ) {
 			DEBUG && console.log( `Scope 1 ${ toScope1Unit } Conversion Error:  ${ e.message }`, {
 				unit, toUnit: toScope1Unit,
@@ -231,7 +245,7 @@ export const useConversionHooks = () => {
 
 		try {
 			log && console.log( '--S3--' )
-			scope3 = _co2Factors( unit, 'kgco2e', fullFuelType, log, volume )
+			scope3 = _co2Factors( gc, unit, 'kgco2e', fullFuelType, log, volume )
 		} catch( e ) {
 			//if( console.trace ) console.trace()
 			console.log( 'Conversion to kgco2e Error: ' + e.message, { unit, fullFuelType, graph: graph.serialize() } )
@@ -257,7 +271,7 @@ export const useConversionHooks = () => {
 			}, 'e3ton|sparse-scope1' )
 			volume1 = e3tonMethane * 1000000
 			const toUnit = 'kgco2e' + settings.fuelTypeSeparator + gwp
-			scope1 = _co2Factors( 'ch4kg', toUnit, 'coal' )
+			scope1 = _co2Factors( gc, 'ch4kg', toUnit, 'coal' )
 			DEBUG && console.log( 'Project Specific Scope1:', {
 				scope1,
 				volume,
@@ -302,7 +316,10 @@ export const useConversionHooks = () => {
 			const useGrades = getPreferredGrades( reserves, reservesSourceId )
 
 			const lastReserves = {}
-			settings.supportedFuels.forEach( fuel => lastReserves[ fuel ] = { p: { year: 0, value: 0 }, c: { year: 0, value: 0 } } )
+			settings.supportedFuels.forEach( fuel => lastReserves[ fuel ] = {
+				p: { year: 0, value: 0 },
+				c: { year: 0, value: 0 }
+			} )
 
 			for( let i = reserves.length - 1; i >= 0; i-- ) { // Scan in reverse to find latest.
 				const r = reserves[ i ]

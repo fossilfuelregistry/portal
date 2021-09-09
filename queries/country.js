@@ -10,10 +10,10 @@ query countrySource( $iso3166: String = "", $iso31662: String = "") {
 export const GQL_countryProduction = gql`
 query production( $iso3166: String! $iso31662: String! ) {
   countryDataPoints(
-  	orderBy: [YEAR_ASC,FOSSIL_FUEL_TYPE_ASC,SOURCE_ID_ASC]
+  	orderBy: [YEAR_ASC,SOURCE_ID_ASC,FOSSIL_FUEL_TYPE_ASC]
     condition: { iso3166: $iso3166 iso31662: $iso31662 dataType: PRODUCTION }
   ) {
-    nodes { fossilFuelType volume year unit subtype sourceId quality }
+    nodes { id fossilFuelType volume year unit subtype sourceId quality }
   }
 }`
 

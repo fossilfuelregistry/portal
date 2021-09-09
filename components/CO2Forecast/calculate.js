@@ -154,3 +154,40 @@ export function getFullFuelType( datapoint ) {
 	//console.log( 'fullFuelType', fullFuelType )
 	return fullFuelType
 }
+
+export function prepareProductionDataset( dataset, co2FromVolume ) {
+
+	const onlySupportedFuelPoints = dataset.filter( datapoint => settings.supportedFuels.includes( datapoint.fossilFuelType ) )
+
+	// Now squash multiple year entries into one.
+	const singlePointPerYear = []
+	let aggregatePoint = { ...onlySupportedFuelPoints[ 0 ] }
+
+	onlySupportedFuelPoints.forEach( datapoint => {
+
+		if( aggregatePoint.year !== datapoint.year
+			|| aggregatePoint.fossilFuelType !== datapoint.fossilFuelType
+			|| aggregatePoint.sourceId !== datapoint.sourceId ) {
+			singlePointPerYear.push( aggregatePoint )
+			aggregatePoint = { ...datapoint }
+			return
+		}
+
+		if( aggregatePoint.unit !== datapoint.unit ) {
+			console.log( { aggregatePoint, datapoint } )
+			throw new Error( 'Multiple data points for same fuel / source / year cannot have different units.' )
+		}
+
+		//console.log( 'Aggregating', { aggregatePoint, datapoint } )
+		aggregatePoint.subtype = null
+		aggregatePoint.volume += datapoint.volume
+	} )
+
+	singlePointPerYear.push( aggregatePoint )
+
+	singlePointPerYear.forEach( datapoint => {
+		delete datapoint.__typename
+	} )
+
+	return singlePointPerYear
+}

@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux"
 import ForecastView from "./ForecastView"
 import { useConversionHooks } from "../viz/conversionHooks"
 import settings from "settings"
+import { prepareProductionDataset } from "./calculate"
 
 const DEBUG = false
 
@@ -29,47 +30,7 @@ function LoadCountryData( { projectionSources } ) {
 		if( !( dataset?.length > 0 ) ) return []
 
 		try {
-			const onlySupportedFuelPoints = dataset.filter( datapoint => settings.supportedFuels.includes( datapoint.fossilFuelType ) )
-
-			// Now squash multiple year entries into one.
-			const singlePointPerYear = []
-			let aggregatePoint = { ...onlySupportedFuelPoints[ 0 ] }
-
-			onlySupportedFuelPoints.forEach( datapoint => {
-
-				if( aggregatePoint.year !== datapoint.year
-					|| aggregatePoint.fossilFuelType !== datapoint.fossilFuelType
-					|| aggregatePoint.sourceId !== datapoint.sourceId ) {
-					singlePointPerYear.push( aggregatePoint )
-					aggregatePoint = { ...datapoint }
-					return
-				}
-
-				if( aggregatePoint.unit !== datapoint.unit ) {
-					console.log( { aggregatePoint, datapoint } )
-					throw new Error( 'Multiple data points for same fuel / source / year cannot have different units.' )
-				}
-
-				//console.log( 'Aggregating', { aggregatePoint, datapoint } )
-				aggregatePoint.subtype = null
-				aggregatePoint.volume += datapoint.volume
-			} )
-
-			singlePointPerYear.push( aggregatePoint )
-
-			singlePointPerYear.forEach( datapoint => {
-				let log = false
-				if( datapoint.year === 2019 && datapoint.sourceId === productionSourceId && !datapoint.grade ) {
-					log = true
-				}
-				delete datapoint.id
-				delete datapoint.__typename
-
-				datapoint.co2 = co2FromVolume( datapoint, log )
-			} )
-
-			return singlePointPerYear
-
+			return prepareProductionDataset( dataset ).map( p => p.co2 = co2FromVolume( p ) )
 		} catch( e ) {
 			notification.error( { message: 'Application error', description: e.message, duration: 20 } )
 			return dataset

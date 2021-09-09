@@ -38,6 +38,8 @@
     "react-share": "^4.4.0",
     "react-singleton-hook": "^3.2.1",
     "react-spring": "^9.2.4",
+    "react-window": "^1.8.6",
+    "react-window-infinite-loader": "^1.0.7",
     "redux-devtools-extension": "^2.13.9",
     "vis-network": "^9.1.0"
   },
