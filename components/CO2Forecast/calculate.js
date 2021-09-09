@@ -155,7 +155,7 @@ export function getFullFuelType( datapoint ) {
 	return fullFuelType
 }
 
-export function prepareProductionDataset( dataset, co2FromVolume ) {
+export function prepareProductionDataset( dataset ) {
 
 	const onlySupportedFuelPoints = dataset.filter( datapoint => settings.supportedFuels.includes( datapoint.fossilFuelType ) )
 

@@ -30,7 +30,7 @@ function LoadCountryData( { projectionSources } ) {
 		if( !( dataset?.length > 0 ) ) return []
 
 		try {
-			return prepareProductionDataset( dataset ).map( p => p.co2 = co2FromVolume( p ) )
+			return prepareProductionDataset( dataset ).map( p => ( { ...p, co2: co2FromVolume( p ) } ) )
 		} catch( e ) {
 			notification.error( { message: 'Application error', description: e.message, duration: 20 } )
 			return dataset
@@ -107,7 +107,7 @@ function LoadCountryData( { projectionSources } ) {
 
 	useEffect( () => {
 		if( !( production?.length > 0 ) ) return
-		console.log( 'useEffect Production', production?.length, limits )
+
 		const reduced = {}
 		settings.supportedFuels.forEach( fuel => reduced[ fuel ] = { firstYear: settings.year.end, lastYear: 0 } )
 
@@ -118,6 +118,8 @@ function LoadCountryData( { projectionSources } ) {
 			l.lastYear = Math.max( l.lastYear, datapoint.year )
 			return _limits
 		}, reduced )
+
+		console.log( 'useEffect Production', production?.length, { production, limits, newLimits } )
 
 		// Check if no data
 		settings.supportedFuels.forEach( fuel => {
@@ -216,8 +218,10 @@ function LoadCountryData( { projectionSources } ) {
 		return <GraphQLStatus loading={ loadingReserves } error={ errorLoadingReserves }/>
 
 	// Don't try to render a chart until all data looks good
-	if( ( !limits.production?.oil?.lastYear && !limits.production?.gas?.lastYear ) || !production?.length > 0 )
+	if( ( !limits.production?.oil?.lastYear && !limits.production?.gas?.lastYear ) || !production?.length > 0 ) {
+		console.log( 'What to do?', { limits, production } )
 		return <Alert message={ getText( 'make_selections' ) } type="info" showIcon/>
+	}
 
 	return (
 		<ForecastView
