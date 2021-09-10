@@ -6,10 +6,13 @@ import { curveLinear } from '@visx/curve'
 import { scaleLinear } from '@visx/scale'
 import { withTooltip } from '@visx/tooltip'
 import { max } from 'd3-array'
+import { Button } from 'antd'
+import { DownloadOutlined } from '@ant-design/icons'
 import { withParentSize } from "@visx/responsive"
 import useText from "lib/useText"
 import { combineOilAndGas, sumOfCO2 } from "../CO2Forecast/calculate"
 import { useSelector } from "react-redux"
+import { saveSvgAsPng } from 'save-svg-as-png'
 import settings from 'settings'
 
 const DEBUG = false
@@ -83,7 +86,16 @@ function CO2ForecastGraphBase( {
 
 	return (
 		<div className="graph" style={ { height: height, minHeight: 400 } }>
-			<svg width={ '100%' } height={ height }>
+			<Button
+				style={ { position: "absolute", top: 20, right: '50%' } }
+				shape="circle"
+				onClick={ () => {
+					saveSvgAsPng( document.getElementById( "CO2Forecast" ), "CO2Forecast.png" );
+				} }
+			>
+				<DownloadOutlined/>
+			</Button>
+			<svg width={ '100%' } height={ height } id="CO2Forecast">
 				<Group left={ margin.left } top={ 0 }>
 					<AxisBottom
 						top={ height - 30 }

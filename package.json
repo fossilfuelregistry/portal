@@ -41,6 +41,7 @@
     "react-window": "^1.8.6",
     "react-window-infinite-loader": "^1.0.7",
     "redux-devtools-extension": "^2.13.9",
+    "save-svg-as-png": "^1.4.17",
     "vis-network": "^9.1.0"
   },
   "license": "MIT",

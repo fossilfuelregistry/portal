@@ -166,6 +166,13 @@ const PieChartInternal = ( { parentWidth, parentHeight, data, header, topNote, n
 					{ tooltipData.quantity?.toFixed( 1 ) } ({ tooltipData.year })
 				</Tooltip>
 			) }
+
+			<style jsx>{ `
+              :global(.visx-glyph) {
+                pointer-events: none;
+              }
+			` }
+			</style>
 		</>
 	)
 }
