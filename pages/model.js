@@ -115,13 +115,13 @@ function Wrapper( {
 							</tr>
 							<tr>
 								<td style={ { textAlign: 'left' } }>Source</td>
-								<td>Low</td>
+								<td className="scope">Low</td>
 								<td>Mid</td>
 								<td>High</td>
-								<td>Low</td>
+								<td className="scope">Low</td>
 								<td>Mid</td>
 								<td>High</td>
-								<td>Low</td>
+								<td className="scope">Low</td>
 								<td>Mid</td>
 								<td>High</td>
 							</tr>
@@ -148,11 +148,15 @@ function Wrapper( {
 					<style jsx>{ `
                       td {
                         font-size: 10px;
-                        padding: 0 12px;
+                        padding: 0  0 0 12px;
+                      }
+
+                      .scope {
+                        padding-left: 50px;
                       }
 
                       .total {
-                      border-top: 1px solid #cccccc;
+                        border-top: 1px solid #cccccc;
                         font-weight: bold;
                         vertical-align: top;
                       }
