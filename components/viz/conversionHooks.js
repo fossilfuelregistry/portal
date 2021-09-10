@@ -7,7 +7,7 @@ import { GQL_countryCurrentProduction } from "queries/country"
 import { notification } from "antd"
 import settings from "../../settings"
 import { useRouter } from "next/router"
-import useText from "../../lib/useText"
+import useText from "lib/useText"
 
 const DEBUG = false
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import TopNavigation from "components/navigation/TopNavigation"
 import Footer from "components/Footer"
 import { useApolloClient, useQuery } from "@apollo/client"
@@ -43,6 +43,13 @@ function Wrapper( {
 	// Every row is loaded except for our loading indicator row.
 	const isItemLoaded = index => items[ index ]?.isItemLoaded
 
+	const [ itemSizes, set_itemSizes ] = useState( 0 )
+	const listRef = useRef()
+
+	useEffect( () => {
+		listRef.current?.resetAfterIndex( 0 )
+	}, [ itemSizes ] )
+
 	// Render an item or a loading indicator.
 	const Item = ( { index, style } ) => {
 		const { co2FromVolume } = useConversionHooks()
@@ -85,8 +92,19 @@ function Wrapper( {
 			} )
 
 			content = (
-				<div>
-					<div>{ country.en } (<b>{ country.iso3166 }</b>)</div>
+				<div
+					style={ { paddingBottom: 20 } }
+					ref={ el => {
+						if( !el ) return
+						if( items[ index ].divHeight === el.getBoundingClientRect().height ) return
+
+						items[ index ].divHeight = el.getBoundingClientRect().height
+						set_itemSizes( itemSizes + 1 )  // Trigger parent rerender
+					} }
+				>
+					<div>
+						{ country.en } (<b>{ country.iso3166 }</b>)
+					</div>
 					<table>
 						<thead>
 							<tr>
@@ -134,6 +152,7 @@ function Wrapper( {
                       }
 
                       .total {
+                      border-top: 1px solid #cccccc;
                         font-weight: bold;
                         vertical-align: top;
                       }
@@ -145,6 +164,8 @@ function Wrapper( {
                       thead td {
                         text-align: right;
                         font-weight: bold;
+                        color: #999999;
+                        background-color: #f2f2f2;
                       }
 					` }
 					</style>
@@ -166,10 +187,13 @@ function Wrapper( {
 					<VariableSizeList
 						itemCount={ itemCount }
 						onItemsRendered={ onItemsRendered }
-						ref={ ref }
+						ref={ e => {
+							ref( e )
+							listRef.current = e
+						} }
 						height={ 800 }
 						width={ 800 }
-						itemSize={ index => 80 + ( items[ index ]?.production?.length ?? 0 ) * 30 }
+						itemSize={ index => items[ index ].divHeight }
 					>
 						{ Item }
 					</VariableSizeList>
@@ -190,7 +214,11 @@ export default function Model() {
 	useEffect( () => {
 		if( !( countriesData?.getProducingIso3166?.nodes?.length > 0 ) ) return
 		if( countries?.length === countriesData?.getProducingIso3166?.nodes?.length ) return
-		set_countries( countriesData.getProducingIso3166.nodes.map( c => ( { ...c, isItemLoaded: false } ) ) )
+		set_countries( countriesData.getProducingIso3166.nodes.map( c => ( {
+			...c,
+			isItemLoaded: false,
+			divHeight: 200
+		} ) ) )
 	}, [ countriesData?.getProducingIso3166?.nodes?.length ] )
 
 	if( loadingCountries || errorLoadingCountries )
