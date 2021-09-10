@@ -109,9 +109,9 @@ function Wrapper( {
 						<thead>
 							<tr>
 								<td/>
-								<td colSpan={ 3 } style={ { textAlign: 'center' } }>Scope 1</td>
-								<td colSpan={ 3 } style={ { textAlign: 'center' } }>Scope 3</td>
-								<td colSpan={ 3 } style={ { textAlign: 'center' } }>Sum</td>
+								<td className="scope" colSpan={ 3 } style={ { textAlign: 'center' } }>Scope 1</td>
+								<td className="scope" colSpan={ 3 } style={ { textAlign: 'center' } }>Scope 3</td>
+								<td className="scope" colSpan={ 3 } style={ { textAlign: 'center' } }>Sum</td>
 							</tr>
 							<tr>
 								<td style={ { textAlign: 'left' } }>Source</td>
