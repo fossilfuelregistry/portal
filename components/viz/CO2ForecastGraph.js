@@ -86,15 +86,16 @@ function CO2ForecastGraphBase( {
 
 	return (
 		<div className="graph" style={ { height: height, minHeight: 400 } }>
-			<Button
-				style={ { position: "absolute", top: 20, right: '50%' } }
-				shape="circle"
-				onClick={ () => {
+			<a
+				style={ { position: "absolute", top: 8, right: 16, zIndex: 1001 } }
+				onClick={ e => {
+					e.stopPropagation()
 					saveSvgAsPng( document.getElementById( "CO2Forecast" ), "CO2Forecast.png" );
 				} }
 			>
 				<DownloadOutlined/>
-			</Button>
+			</a>
+
 			<svg width={ '100%' } height={ height } id="CO2Forecast">
 				<Group left={ margin.left } top={ 0 }>
 					<AxisBottom
@@ -282,8 +283,8 @@ function CO2ForecastGraphBase( {
               .legend {
                 position: absolute;
                 font-size: 14px;
-                top: 20px;
-                right: 50px;
+                top: 0px;
+                right: 0px;
                 border: 1px solid #dddddd;
                 border-radius: 8px;
                 padding: 8px 12px 12px;

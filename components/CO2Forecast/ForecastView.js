@@ -30,13 +30,15 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 		<>
 			<Row gutter={ [ 32, 32 ] }>
 				<Col xs={ 24 } xl={ 24 } xxl={ 16 }>
-					<CO2ForecastGraph
-						production={ production }
-						projection={ projection }
-						reserves={ reserves }
-						projectedProduction={ projectedProduction }
-						limits={ limits }
-					/>
+					<div className="big-graph-wrap">
+						<CO2ForecastGraph
+							production={ production }
+							projection={ projection }
+							reserves={ reserves }
+							projectedProduction={ projectedProduction }
+							limits={ limits }
+						/>
+					</div>
 				</Col>
 
 				<Col xs={ 24 } xl={ 24 } xxl={ 8 }>
@@ -126,6 +128,13 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
                 background-color: #eeeeee;
                 padding: 16px;
                 border-radius: 8px;
+              }
+
+              .big-graph-wrap {
+                background-color: #f7f7f7;
+                padding: 12px;
+                border-radius: 8px;
+                height: 100%;
               }
 
               .tldr {
