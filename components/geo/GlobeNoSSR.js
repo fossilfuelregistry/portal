@@ -70,7 +70,7 @@ export default function GlobeNoSSR( { year, dataKeyName = 'production', onGlobeR
 	return (
 		<Globe
 			width={ window.innerWidth - 40 }
-			height={ window.innerWidth - 40 }
+			height={ Math.min( window.innerWidth - 40, window.innerHeight - 100 ) }
 			backgroundColor="#ffffff"
 			globeImageUrl="//unpkg.com/three-globe/example/img/earth-day.jpg"
 			onGlobeReady={ onGlobeReady }
