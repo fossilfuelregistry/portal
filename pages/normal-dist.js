@@ -3,9 +3,12 @@ import TopNavigation from "components/navigation/TopNavigation"
 import Footer from "components/Footer"
 import gaussian from 'gaussian'
 import { solve } from 'solv.js'
-import palette from 'google-palette'
+import getConfig from "next/config"
+//import palette from 'google-palette'
+import Color from 'color'
 
-const DEBUG = true
+const DEBUG = false
+const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
 // Function to calculate percentile value from variance
 function percentile( variance, p, mean ) {
@@ -32,8 +35,18 @@ function PercentileBar( { low, mid, high, scale, height, x, y, width } ) {
 			percentilePoints.push( highDistribution.ppf( percent / 100 ) )
 	}
 
-	const tolSeq = palette( 'tol-sq', 11 )
-	const tileColors = [ ...tolSeq, ...tolSeq.reverse() ].map( c => '#' + c )
+	//const tolSeq = palette( 'cb-BrBG', 11 )
+	//const tolSeq = palette( 'tol-sq', 11 )
+	// const tolSeq = [ '#0A99FF', '#008FF5', '#0083E0', '#0077CC', '#006BB8', '#005FA3', '#005694', '#00477A', '#003C66', '#003052', '#00243D' ]
+
+	let colSeq = []
+	const primary = theme[ '@primary-color' ]
+	for( let c = 0; c <= 10; c++ ) {
+		colSeq.push( Color( primary ).darken( 0.4 ).desaturate( c / 30 ).lighten( c/3.5 ).hex() )
+	}
+	const colSeqRev = [ ...colSeq ].reverse()
+	const tileColors = [ ...colSeqRev, ...colSeq ]//.map( c => '#' + c )
+	DEBUG && console.log( tileColors )
 	const scaleY = v => height * ( 1 - v / scale )
 
 	const textX = x + width + 2
@@ -50,7 +63,7 @@ function PercentileBar( { low, mid, high, scale, height, x, y, width } ) {
 			{ percentilePoints.map( ( v, i ) => {
 				const y = scaleY( percentilePoints[ i ] )
 				const pHeight = ( i === 0 ? height - y : scaleY( percentilePoints[ i - 1 ] ) - y )
-				console.log( { i, v, y, height, c: tileColors[ i ] } )
+				DEBUG && console.log( { i, v, y, height, c: tileColors[ i ] } )
 				return (
 					<rect
 						key={ v }
@@ -61,15 +74,16 @@ function PercentileBar( { low, mid, high, scale, height, x, y, width } ) {
 						fill={ tileColors[ i + 2 ] }
 					/> )
 			} ) }
-			<text x={ textX } y={ textHighY } fontSize="11" fontWeight="bold" textAnchor="left">
+			<text className="numeric" x={ textX } y={ textHighY } fontSize="11" fontWeight="bold" textAnchor="left">
 				<tspan dy={ 5 }>{ high }</tspan>
 			</text>
 			<text
+				className="numeric"
 				x={ textX } y={ textMidY } fontSize="14" fontWeight="bold" textAnchor="left"
 			>
 				<tspan dy={ 7 }>{ mid }</tspan>
 			</text>
-			<text x={ textX } y={ textLowY } fontSize="11" fontWeight="bold" textAnchor="left">
+			<text className="numeric" x={ textX } y={ textLowY } fontSize="11" fontWeight="bold" textAnchor="left">
 				<tspan dy={ 5 }>{ low }</tspan>
 			</text>
 		</g> )

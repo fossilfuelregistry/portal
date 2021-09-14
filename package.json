@@ -15,6 +15,7 @@
     "babel-plugin-import": "^1.7.0",
     "babel-plugin-inline-react-svg": "^2.0.1",
     "clone": "^2.1.2",
+    "color": "^4.0.1",
     "dayjs": "^1.10.6",
     "gaussian": "^1.2.0",
     "google-palette": "^1.1.0",
