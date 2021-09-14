@@ -40,9 +40,9 @@ function PercentileBar( { low, mid, high, scale, height, x, y, width } ) {
 	// const tolSeq = [ '#0A99FF', '#008FF5', '#0083E0', '#0077CC', '#006BB8', '#005FA3', '#005694', '#00477A', '#003C66', '#003052', '#00243D' ]
 
 	let colSeq = []
-	const primary = theme[ '@primary-color' ]
+	const primary = '#4c0403' // theme[ '@primary-color' ]
 	for( let c = 0; c <= 10; c++ ) {
-		colSeq.push( Color( primary ).darken( 0.4 ).desaturate( c / 30 ).lighten( c/3.5 ).hex() )
+		colSeq.push( Color( primary ).darken( 0.2 ).desaturate( c / 30 ).lighten( c/1.4 ).hex() )
 	}
 	const colSeqRev = [ ...colSeq ].reverse()
 	const tileColors = [ ...colSeqRev, ...colSeq ]//.map( c => '#' + c )
