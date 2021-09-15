@@ -16,6 +16,7 @@ import HelpModal from "../HelpModal"
 import LeafletNoSSR from "../geo/LeafletNoSSR"
 import Sources from "./Sources"
 import getConfig from "next/config"
+import MapLibre from "../geo/MapLibre"
 
 const DEBUG = false
 
@@ -138,7 +139,7 @@ function SparseProject( { borders, countryCurrentProduction } ) {
 					</Col>
 
 					<Col xs={ 24 } xl={ 12 }>
-						<LeafletNoSSR
+						<MapLibre
 							className="country-geo"
 							outlineGeometry={ borders }
 							projects={ [ theProject ] }
