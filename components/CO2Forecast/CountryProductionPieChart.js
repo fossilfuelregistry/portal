@@ -31,7 +31,9 @@ export default function CountryProductionPieChart( { project, currentProduction,
 	useEffect( () => {
 		if( !( currentProduction?.[ 0 ]?.totalCO2 > 0 ) ) return
 
-		const mySources = currentProduction.map( s => allSources.find( as => as.sourceId === s.sourceId ) )
+		const mySources = currentProduction
+			.filter( s => s.sourceId !== 3 ) // Hard filter to remove OPEC due to having no coal.
+			.map( s => allSources.find( as => as.sourceId === s.sourceId ) )
 		set_sources( mySources )
 
 		let currentSourceId = sourceId
