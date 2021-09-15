@@ -145,6 +145,16 @@ export default function LargestProjects( { onPositions, onGeoClick } ) {
                 display: inline-block;
               }
 
+              .co2-card {
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+              }
+              
+              .co2-card .box {
+              	flex: 1 1 auto;
+              }
+
               .co2-card :global(.ant-switch-inner svg path) {
                 fill: #ffffff;
               }

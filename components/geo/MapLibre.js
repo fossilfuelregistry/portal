@@ -85,7 +85,10 @@ export default function MapLibre( {
 			zoom: 8
 		} )
 		console.log( "NEW MAP", map.current )
-		map.current.on( 'load', () => set_loaded( 2 ) )
+		map.current.on( 'load', () => {
+			map.current.resize();
+			set_loaded( 2 )
+		} )
 	}, [ loaded, domRef.current ] )
 
 	useEffect( () => {

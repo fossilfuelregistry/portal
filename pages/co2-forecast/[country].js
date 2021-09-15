@@ -16,7 +16,6 @@ import { getProducingCountries } from "lib/getStaticProps"
 import { getPreferredReserveGrade } from "components/CO2Forecast/calculate"
 import { useRouter } from "next/router"
 import SparseProject from "components/CO2Forecast/SparseProject"
-import LeafletNoSSR from "components/geo/LeafletNoSSR"
 import { GQL_countryBorder, GQL_countrySources } from "queries/country"
 import CountryProductionPieChart from "components/CO2Forecast/CountryProductionPieChart"
 import { useConversionHooks } from "components/viz/conversionHooks"
@@ -346,14 +345,17 @@ export default function CO2ForecastPage() {
                   }
 
                   .page :global(.geo-wrap) {
-                    margin-top: 24px;
-                    position: relative;
+                    height: 100%;
+                    min-height: 350px;
+                    padding-top: 24px;
                   }
 
                   .page :global(.country-geo) {
+                    height: 100%;
                     width: 100%;
-                    height: 400px;
+                    position: relative;
                   }
+
 				` }
 				</style>
 
