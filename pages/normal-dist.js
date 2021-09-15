@@ -74,7 +74,7 @@ function PercentileBar( { low, mid, high, scale, height, x, y, width } ) {
 						fill={ tileColors[ i + 2 ] }
 					/> )
 			} ) }
-			<text className="numeric" x={ textX } y={ textHighY } fontSize="11" fontWeight="bold" textAnchor="left">
+			<text className="numeric" x={ textX } y={ textHighY } fontSize="11" fontWeight="bold" textAnchor="left" fill="#aaaaaa">
 				<tspan dy={ 5 }>{ high }</tspan>
 			</text>
 			<text
@@ -83,7 +83,7 @@ function PercentileBar( { low, mid, high, scale, height, x, y, width } ) {
 			>
 				<tspan dy={ 7 }>{ mid }</tspan>
 			</text>
-			<text className="numeric" x={ textX } y={ textLowY } fontSize="11" fontWeight="bold" textAnchor="left">
+			<text className="numeric" x={ textX } y={ textLowY } fontSize="11" fontWeight="bold" textAnchor="left" fill="#aaaaaa">
 				<tspan dy={ 5 }>{ low }</tspan>
 			</text>
 		</g> )
