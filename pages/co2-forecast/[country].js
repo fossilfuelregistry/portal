@@ -24,7 +24,8 @@ import LargestProjects from "components/CO2Forecast/LargestProjects"
 import Sources from "components/CO2Forecast/Sources"
 import DenseProject from "components/CO2Forecast/DenseProject"
 import Footer from "components/Footer"
-import ProjectSelector from "../../components/navigation/ProjectSelector"
+import ProjectSelector from "components/navigation/ProjectSelector"
+import MapLibre from "../../components/geo/MapLibre"
 
 const DEBUG = false
 
@@ -168,7 +169,7 @@ export default function CO2ForecastPage() {
 
 						<Col xs={ 24 } lg={ 12 } xxl={ 8 }>
 							<div className="geo-wrap">
-								<LeafletNoSSR
+								<MapLibre
 									className="country-geo"
 									outlineGeometry={ borders }
 									highlightedProjects={ highlightedProjects }

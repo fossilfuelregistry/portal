@@ -11,6 +11,7 @@ import LeafletNoSSR from "../geo/LeafletNoSSR"
 import Sources from "./Sources"
 import LoadProjectData from "./LoadProjectData"
 import getConfig from "next/config"
+import MapLibre from "../geo/MapLibre"
 
 const DEBUG = false
 
@@ -75,7 +76,7 @@ function DenseProject( { countryCurrentProduction, borders, productionSources, p
 
 					<Col xs={ 24 } xxl={ 12 }>
 						<div className="geo-wrap">
-							<LeafletNoSSR
+							<MapLibre
 								className="country-geo"
 								outlineGeometry={ borders }
 								projects={ [ theProject ] }
