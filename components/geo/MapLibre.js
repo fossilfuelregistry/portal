@@ -58,7 +58,7 @@ export default function MapLibre( {
 		return {
 			type: 'FeatureCollection',
 			features: geo
-				.filter( p => p?.type !== 'Point' )
+				.filter( p => !!p?.type && p.type !== 'Point' )
 				.map( p => ( { type: 'Feature', geometry: p } ) )
 		}
 	}, [ projects ] )
@@ -81,12 +81,10 @@ export default function MapLibre( {
 		map.current = new window.maplibregl.Map( {
 			container: domRef.current,
 			style: `https://tiles.fossilfuelregistry.org/styles/basic-preview/style.json`,
-			center: [ 18.184216, 59.316269 ],
-			zoom: 8
 		} )
 		console.log( "NEW MAP", map.current )
 		map.current.on( 'load', () => {
-			map.current.resize();
+			map.current.resize()
 			set_loaded( 2 )
 		} )
 	}, [ loaded, domRef.current ] )
@@ -97,8 +95,11 @@ export default function MapLibre( {
 		console.log( 'MapLibre add border', { loaded, outlineGeometry, bounds } )
 		try {
 			if( map.current.getSource( 'borders' ) ) {
-				map.current.removeLayer( 'borders' )
-				map.current.removeSource( 'borders' )
+				try {
+					map.current.removeLayer( 'borders' )
+					map.current.removeSource( 'borders' )
+				} catch( e ) {
+				}
 			}
 
 			map.current.addSource( 'borders', {
@@ -114,8 +115,9 @@ export default function MapLibre( {
 				source: 'borders',
 				layout: {},
 				paint: {
-					'line-color': '#1172BA70',
-					'line-width': 1
+					'line-color': '#1172BA',
+					'line-opacity': 0.5,
+					'line-width': 3
 				}
 			} )
 			console.log( 'fitBounds', bounds )

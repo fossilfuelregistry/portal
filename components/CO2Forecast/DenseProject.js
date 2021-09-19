@@ -7,7 +7,6 @@ import { GQL_project } from "queries/country"
 import GraphQLStatus from "../GraphQLStatus"
 import { useConversionHooks } from "components/viz/conversionHooks"
 import CountryProductionPieChart from "./CountryProductionPieChart"
-import LeafletNoSSR from "../geo/LeafletNoSSR"
 import Sources from "./Sources"
 import LoadProjectData from "./LoadProjectData"
 import getConfig from "next/config"
@@ -57,7 +56,12 @@ function DenseProject( { countryCurrentProduction, borders, productionSources, p
 			<>
 				<Button
 					block
-					style={ { marginTop: 34, marginBottom: 16, borderColor: theme[ '@primary-color' ], color: theme[ '@primary-color' ] } }
+					style={ {
+						marginTop: 34,
+						marginBottom: 16,
+						borderColor: theme[ '@primary-color' ],
+						color: theme[ '@primary-color' ]
+					} }
 					onClick={ goToCountryOverview }
 				>
 					{ getText( 'back_to_country_overview' ) }
@@ -74,6 +78,7 @@ function DenseProject( { countryCurrentProduction, borders, productionSources, p
 						/>
 					</Col>
 
+					{ ( theProject.geom || theProject.geoPosition ) &&
 					<Col xs={ 24 } xxl={ 12 }>
 						<div className="geo-wrap">
 							<MapLibre
@@ -83,7 +88,7 @@ function DenseProject( { countryCurrentProduction, borders, productionSources, p
 								fitToProjects={ true }
 							/>
 						</div>
-					</Col>
+					</Col> }
 				</Row>
 
 				<Divider style={ { marginTop: 48 } }><h4>{ getText( 'co2_forecast' ) }</h4></Divider>

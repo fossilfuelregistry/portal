@@ -13,7 +13,6 @@ import { ExportOutlined } from "@ant-design/icons"
 import BarStackChart from "components/viz/BarStackChart"
 import CountryProductionPieChart from "./CountryProductionPieChart"
 import HelpModal from "../HelpModal"
-import LeafletNoSSR from "../geo/LeafletNoSSR"
 import Sources from "./Sources"
 import getConfig from "next/config"
 import MapLibre from "../geo/MapLibre"
@@ -138,13 +137,14 @@ function SparseProject( { borders, countryCurrentProduction } ) {
 						/>
 					</Col>
 
+					{ ( theProject.geom || theProject.geoPosition ) &&
 					<Col xs={ 24 } xl={ 12 }>
 						<MapLibre
 							className="country-geo"
 							outlineGeometry={ borders }
 							projects={ [ theProject ] }
 						/>
-					</Col>
+					</Col> }
 
 					<Col xs={ 24 } xl={ 12 }>
 						<div className="co2-card">
