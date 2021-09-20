@@ -3,7 +3,7 @@ import bbox from '@turf/bbox'
 import Loading from "../Loading"
 import getConfig from "next/config"
 
-const DEBUG = true
+const DEBUG = false
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
@@ -75,14 +75,14 @@ export default function MapLibre( {
 	}, [] )
 
 	useEffect( () => {
-		console.log( 'MapLibre useEffect Create map', loaded, window.maplibregl, domRef.current, map.current )
+		DEBUG && console.log( 'MapLibre useEffect Create map', loaded, window.maplibregl, domRef.current, map.current )
 		if( !window.maplibregl || !domRef.current || map.current ) return
-		console.log( "CREATE MAP" )
+		DEBUG && console.log( "CREATE MAP" )
 		map.current = new window.maplibregl.Map( {
 			container: domRef.current,
 			style: `https://tiles.fossilfuelregistry.org/styles/basic-preview/style.json`,
 		} )
-		console.log( "NEW MAP", map.current )
+		DEBUG && console.log( "NEW MAP", map.current )
 		map.current.on( 'load', () => {
 			map.current.resize()
 			set_loaded( 2 )
@@ -92,7 +92,7 @@ export default function MapLibre( {
 	useEffect( () => {
 		if( loaded < 2 || !outlineGeometry ) return
 		const bounds = bbox( outlineGeometry )
-		console.log( 'MapLibre add border', { loaded, outlineGeometry, bounds } )
+		DEBUG && console.log( 'MapLibre add border', { loaded, outlineGeometry, bounds } )
 		try {
 			if( map.current.getSource( 'borders' ) ) {
 				try {
@@ -120,7 +120,7 @@ export default function MapLibre( {
 					'line-width': 3
 				}
 			} )
-			console.log( 'fitBounds', bounds )
+			DEBUG && console.log( 'fitBounds', bounds )
 			map.current.fitBounds( bounds )
 			set_loaded( 3 )
 		} catch( e ) {
@@ -171,7 +171,7 @@ export default function MapLibre( {
 
 	useEffect( () => {
 		if( loaded !== 3 || !projects ) return
-		console.log( 'MapLibre add projects', { loaded, projects } )
+		DEBUG && console.log( 'MapLibre add projects', { loaded, projects } )
 
 		try {
 			DEBUG && console.log( 'add projects', features, markers )

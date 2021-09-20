@@ -219,7 +219,7 @@ function LoadCountryData( { projectionSources } ) {
 
 	// Don't try to render a chart until all data looks good
 	if( ( !limits.production?.oil?.lastYear && !limits.production?.gas?.lastYear ) || !production?.length > 0 ) {
-		console.log( 'What to do?', { limits, production } )
+		DEBUG && console.log( 'What to do?', { limits, production } )
 		return <Alert message={ getText( 'make_selections' ) } type="info" showIcon/>
 	}
 

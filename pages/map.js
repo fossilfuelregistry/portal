@@ -42,7 +42,7 @@ export default function MapPage() {
 	useEffect( () => {
 		console.log( loaded, window.maplibregl, domRef.current )
 		if( !window.maplibregl || !domRef.current || map.current ) return
-		console.log( "CREATE MAP" )
+		DEBUG && console.log( "CREATE MAP" )
 		map.current = new window.maplibregl.Map( {
 			container: domRef.current,
 			style: `https://tiles.fossilfuelregistry.org/styles/basic-preview/style.json`,

@@ -1,14 +1,13 @@
 import React from "react"
 import useText from "lib/useText"
 import { useSelector } from "react-redux"
-import HelpModal from "../HelpModal"
-import SummaryRow from "./SummaryRow"
 import { addToTotal } from "./calculate"
 import settings from "../../settings"
+import ScopeBars from "../viz/ScopeBars"
 
 const DEBUG = false
 
-function YearSummary( { dataset = [] } ) {
+export default function YearSummary( { dataset = [] } ) {
 	const { getText } = useText()
 	const productionSourceId = useSelector( redux => redux.productionSourceId )
 
@@ -29,51 +28,40 @@ function YearSummary( { dataset = [] } ) {
 	if( lastYearProd[ 'gas' ]?.year && ( lastYearProd[ 'oil' ]?.year !== lastYearProd[ 'gas' ]?.year ) ) // Different last year?
 		year = `(${ lastYearProd[ 'oil' ]?.year } / ${ lastYearProd[ 'gas' ]?.year })`
 
+	console.log( { totals } )
+
 	return (
 		<div className="table-wrap">
-			<table>
-				<thead>
-					<tr>
-						<th colSpan={ 4 }>
-							{ getText( 'this_year' ) } { year } { getText( 'megaton' ) } CO²e
-							<HelpModal title="ranges" content="explanation_ranges"/>
-						</th>
-					</tr>
-				</thead>
-				<tbody>
-					<SummaryRow totals={ totals } total={ getText( 'total' ) }/>
-				</tbody>
-			</table>
+			<div className="top">
+				{ getText( 'this_year' ) } { year } { getText( 'megaton' ) } CO²e
+			</div>
+
+			<div style={ { flexGrow: 1, minHeight: 400 } }>
+				<ScopeBars totals={ totals }/>
+			</div>
 
 			<style jsx>{ `
               .table-wrap {
                 border: 1px solid #dddddd;
                 border-radius: 8px;
-                margin-bottom: 16px;
+                position: relative;
+                display: flex;
+                flex-direction: column;
+                height: 100%;
               }
 
-              table tr:first-child th:first-child {
-                border-top-left-radius: 8px;
+              .table-wrap :global(svg) {
+                display: block;
               }
 
-              table tr:first-child th:last-child {
-                border-top-right-radius: 8px;
-              }
-
-              table {
+              .top {
                 width: 100%;
-              }
-
-              th {
                 background-color: #eeeeee;
-              }
-
-              th, td {
                 padding: 3px 12px;
+                font-weight: bold;
+                text-align: center;
               }
 			` }
 			</style>
 		</div> )
 }
-
-export default YearSummary
