@@ -6,7 +6,7 @@ import getConfig from "next/config"
 import { Alert } from "antd"
 //import palette from 'google-palette'
 
-const DEBUG = false
+const DEBUG = true
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
@@ -16,8 +16,15 @@ function percentile( variance, p, mean ) {
 	return d.ppf( p )
 }
 
+function toCustomPrecision( x ) {
+	if( x < 1000 ) return x.toPrecision( 3 )
+	if( x < 10000 ) return ( x / 10 ).toFixed() + '0'
+	if( x < 100000 ) return ( x / 100 ).toFixed() + '00'
+	if( x < 1000000 ) return ( x / 1000 ).toFixed() + ' 000'
+}
+
 export default function PercentileBar( { low, mid, high, scale, height, x, y, width, color } ) {
-	console.log( 'PercentileBar', { low, mid, high, scale, height, x, y, width } )
+	DEBUG && console.log( 'PercentileBar', { low, mid, high, scale, height, x, y, width } )
 
 	try {
 		// Find variance of two asymmetric distributions from known low/mid and mid/high points
@@ -76,25 +83,25 @@ export default function PercentileBar( { low, mid, high, scale, height, x, y, wi
 				} ) }
 				<text
 					className="numeric" x={ textX } y={ textHighY } fontSize="14" fontWeight="bold" textAnchor="left"
-					  fill="#aaaaaa"
+					fill="#aaaaaa"
 				>
-					<tspan dy={ 5 }>{ high.toPrecision( 3 ) }</tspan>
+					<tspan dy={ 5 }>{ toCustomPrecision( high ) }</tspan>
 				</text>
 				<text
 					className="numeric"
 					x={ textX } y={ textMidY } fontSize="18" fontWeight="bold" textAnchor="left"
 				>
-					<tspan dy={ 7 }>{ mid.toPrecision( 3 ) }</tspan>
+					<tspan dy={ 7 }>{ toCustomPrecision( mid ) }</tspan>
 				</text>
 				<text
 					className="numeric" x={ textX } y={ textLowY } fontSize="14" fontWeight="bold" textAnchor="left"
-					  fill="#aaaaaa"
+					fill="#aaaaaa"
 				>
-					<tspan dy={ 5 }>{ low.toPrecision( 3 ) }</tspan>
+					<tspan dy={ 5 }>{ toCustomPrecision( low ) }</tspan>
 				</text>
 			</g> )
-	}
-	catch( e ) {
-		return <Alert type="error" showIcon={ true } message="PercentileBar calulations failed" description={e.message} />
+	} catch( e ) {
+		console.log( e )
+		return <text>PercentileBar calculations failed: { e.message }</text>
 	}
 }

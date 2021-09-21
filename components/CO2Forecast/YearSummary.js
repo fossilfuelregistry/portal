@@ -28,7 +28,7 @@ export default function YearSummary( { dataset = [] } ) {
 	if( lastYearProd[ 'gas' ]?.year && ( lastYearProd[ 'oil' ]?.year !== lastYearProd[ 'gas' ]?.year ) ) // Different last year?
 		year = `(${ lastYearProd[ 'oil' ]?.year } / ${ lastYearProd[ 'gas' ]?.year })`
 
-	console.log( { totals } )
+	DEBUG && console.log( { totals } )
 
 	return (
 		<div className="table-wrap">

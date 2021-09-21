@@ -138,6 +138,7 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
                 padding: 12px;
                 border-radius: 8px;
                 height: 100%;
+                max-height: 60vh;
               }
 
               .tldr {

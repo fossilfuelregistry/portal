@@ -85,7 +85,7 @@ function CO2ForecastGraphBase( {
 	if( !( maxCO2 > 0 ) ) return null // JSON.stringify( maxCO2 )
 
 	return (
-		<div className="graph" style={ { height: height, minHeight: 400 } }>
+		<div className="graph" style={ { height: height, minHeight: 400, maxHeight: 700 } }>
 			<a
 				style={ { position: "absolute", top: 8, right: 16, zIndex: 1001 } }
 				onClick={ e => {

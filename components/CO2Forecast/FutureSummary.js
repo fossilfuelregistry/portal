@@ -4,6 +4,7 @@ import { useSelector } from "react-redux"
 import { useConversionHooks } from "../viz/conversionHooks"
 import { addToTotal, sumOfCO2 } from "./calculate"
 import settings from "settings"
+import SourceBars from "../viz/SourceBars"
 
 const DEBUG = false
 
@@ -63,74 +64,43 @@ function FutureSummary( { dataset, limits, projectionSources } ) {
 
 	DEBUG && console.log( { years, year, stable, dataset, sources } )
 
-	const _ = v => Math.round( v )
-
 	return (
 		<div className="table-wrap">
-			<table>
-				<thead>
-					<tr>
-						<th colSpan={ 4 }>{ getText( 'future_emissions' ) } { getText( 'megaton' ) } CO²e</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr className="subheader">
-						<td align="right"/>
-						<td align="right">{ getText( 'low' ) }</td>
-						<td align="right">{ getText( 'mid' ) }</td>
-						<td align="right">{ getText( 'high' ) }</td>
-					</tr>
 
-					{ sources.map( source => (
-						<tr key={ source.sourceId }>
-							<td>{ source.name?.startsWith( 'name_' ) ? getText( source.name ) : source.name }</td>
-							<td align="right">{ _( sumOfCO2( source.total, 0 ) ) }</td>
-							<td align="right">{ _( sumOfCO2( source.total, 1 ) ) }</td>
-							<td align="right">{ _( sumOfCO2( source.total, 2 ) ) }</td>
-						</tr>
-					) ) }
+			<div className="top">
+				{ getText( 'future_emissions' ) } { getText( 'megaton' ) } CO²e
+			</div>
 
-					<tr>
-						<td>{ getText( 'stable' ) }</td>
-						<td align="right">{ _( years * sumOfCO2( stable, 0 ) ) }</td>
-						<td align="right">{ _( years * sumOfCO2( stable, 1 ) ) }</td>
-						<td align="right">{ _( years * sumOfCO2( stable, 2 ) ) }</td>
-					</tr>
-				</tbody>
-			</table>
+			<div style={ { flexGrow: 1, minHeight: 400 } }>
+				<SourceBars
+					sources={ [ ...sources, {
+						sourceId: 100,
+						name: 'name_projection_stable',
+						total: [ 0, 1, 2 ].map( r => years * sumOfCO2( stable, r ) )
+					} ] }
+				/>
+			</div>
 
 			<style jsx>{ `
               .table-wrap {
                 border: 1px solid #dddddd;
                 border-radius: 8px;
+                position: relative;
+                display: flex;
+                flex-direction: column;
+                height: 100%;
               }
 
-              table tr:first-child th:first-child {
-                border-top-left-radius: 8px;
+              .table-wrap :global(svg) {
+                display: block;
               }
 
-              table tr:first-child th:last-child {
-                border-top-right-radius: 8px;
-              }
-
-              table {
+              .top {
                 width: 100%;
-              }
-
-              th {
                 background-color: #eeeeee;
-              }
-
-              th, td {
                 padding: 3px 12px;
-              }
-
-              .subheader td {
-                background-color: #eeeeee;
-              }
-
-              .total td {
-                font-weight: 700;
+                font-weight: bold;
+                text-align: center;
               }
 			` }
 			</style>
