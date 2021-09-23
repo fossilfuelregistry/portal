@@ -29,14 +29,14 @@ function SparseProject( { borders, countryCurrentProduction } ) {
 	const project = useSelector( redux => redux.project )
 	const [ localeDescription, set_localeDescription ] = useState()
 
-	DEBUG && console.log( 'SparseProject', { country, project } )
+	DEBUG && console.info( 'SparseProject', { country, project } )
 
 	const { data, loading, error } = useQuery( GQL_project, {
 		variables: { id: project?.id },
 		skip: !( project?.id > 0 )
 	} )
 
-	DEBUG && console.log( 'SparseProject', { country, project, loading, error, data } )
+	DEBUG && console.info( 'SparseProject', { country, project, loading, error, data } )
 
 	const theProject = data?.project ?? {}
 
@@ -54,7 +54,7 @@ function SparseProject( { borders, countryCurrentProduction } ) {
 	const co2 = useMemo( () => {
 		if( !theProject?.id ) return {}
 		const co2 = projectCO2( theProject )
-		DEBUG && console.log( 'SparseProject projectCO2', { theProject, co2 } )
+		DEBUG && console.info( 'SparseProject projectCO2', { theProject, co2 } )
 		return co2
 	}, [ theProject?.id ] )
 
@@ -82,7 +82,7 @@ function SparseProject( { borders, countryCurrentProduction } ) {
 				const resp = await api.json()
 				set_localeDescription( resp?.data?.translations?.[ 0 ]?.translatedText )
 			} catch( e ) {
-				console.log( e )
+				console.info( e )
 				notification.error( {
 					message: "Failed to translate description",
 					description: e.message
@@ -103,7 +103,7 @@ function SparseProject( { borders, countryCurrentProduction } ) {
 		_addElements( allFuelsCO2.scope1, co2[ fuel ].scope1 )
 		_addElements( allFuelsCO2.scope3, co2[ fuel ].scope3 )
 	} )
-	DEBUG && console.log( 'SparseProject', co2, allFuelsCO2 )
+	DEBUG && console.info( 'SparseProject', co2, allFuelsCO2 )
 
 	try {
 		return (
@@ -225,7 +225,7 @@ function SparseProject( { borders, countryCurrentProduction } ) {
 				</style>
 			</> )
 	} catch( e ) {
-		console.log( e )
+		console.info( e )
 		return <Alert message={ e.message } type="error" showIcon/>
 	}
 }

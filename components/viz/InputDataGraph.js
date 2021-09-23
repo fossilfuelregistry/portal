@@ -122,7 +122,7 @@ function InputDataGraphBase( {
 
 			<Row gutter={20}>
 				{sources.map( ( s, i ) => {
-					//console.log( 'INPUT', comment, fuel, s )
+					//console.info( 'INPUT', comment, fuel, s )
 					const name = allSources.find( src => src.sourceId === s )?.[ 'name' ]
 					if( !name?.length ) return null
 					return (

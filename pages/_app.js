@@ -22,11 +22,11 @@ function GFFR( { Component, pageProps } ) {
 
 	useEffect( () => {
 		const handleRouteChange = url => {
-			//console.log( '*** routeChangeComplete ***', url )
+			//console.info( '*** routeChangeComplete ***', url )
 			trackView( url )
 		}
 		const checkProject = url => {
-			//console.log( '*** routeChangeStart ***', url, router.query )
+			//console.info( '*** routeChangeStart ***', url, router.query )
 		}
 		//router.events.on( 'routeChangeStart', checkProject )
 		router.events.on( 'routeChangeComplete', handleRouteChange )
@@ -48,7 +48,7 @@ function GFFR( { Component, pageProps } ) {
 			.then( ipLocation => {
 				dispatch( { type: 'IPLOCATION', payload: { lat: ipLocation.lat, lng: ipLocation.lon } } )
 			} )
-			.catch( e => console.log( e.message ) )
+			.catch( e => console.info( e.message ) )
 	}, [] )
 
 	return (

@@ -8,7 +8,7 @@ const DEBUG = false
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
 const loadScript = ( scriptId, srcUrl, callback ) => {
-	DEBUG && console.log( 'Maplibre::loadScript', { scriptId, srcUrl, callback } )
+	DEBUG && console.info( 'Maplibre::loadScript', { scriptId, srcUrl, callback } )
 	const existingScript = document.getElementById( scriptId )
 	if( !existingScript ) {
 		const script = document.createElement( 'script' )
@@ -25,7 +25,7 @@ const loadScript = ( scriptId, srcUrl, callback ) => {
 
 		script.onload = arg => {
 			if( callback ) {
-				DEBUG && console.log( '<<< loaded', scriptId )
+				DEBUG && console.info( '<<< loaded', scriptId )
 				callback()
 			}
 		}
@@ -49,7 +49,7 @@ export default function MapLibre( {
 	const highlightGroup = useRef()
 	const [ loaded, set_loaded ] = useState( 0 )
 
-	DEBUG && console.log( { center, onMove, onMap, className } )
+	DEBUG && console.info( { center, onMove, onMap, className } )
 
 	const features = useMemo( () => {
 		const geo = projects
@@ -75,14 +75,14 @@ export default function MapLibre( {
 	}, [] )
 
 	useEffect( () => {
-		DEBUG && console.log( 'MapLibre useEffect Create map', loaded, window.maplibregl, domRef.current, map.current )
+		DEBUG && console.info( 'MapLibre useEffect Create map', loaded, window.maplibregl, domRef.current, map.current )
 		if( !window.maplibregl || !domRef.current || map.current ) return
-		DEBUG && console.log( "CREATE MAP" )
+		DEBUG && console.info( "CREATE MAP" )
 		map.current = new window.maplibregl.Map( {
 			container: domRef.current,
 			style: `https://tiles.fossilfuelregistry.org/styles/basic-preview/style.json`,
 		} )
-		DEBUG && console.log( "NEW MAP", map.current )
+		DEBUG && console.info( "NEW MAP", map.current )
 		map.current.on( 'load', () => {
 			map.current.resize()
 			set_loaded( 2 )
@@ -92,7 +92,7 @@ export default function MapLibre( {
 	useEffect( () => {
 		if( loaded < 2 || !outlineGeometry ) return
 		const bounds = bbox( outlineGeometry )
-		DEBUG && console.log( 'MapLibre add border', { loaded, outlineGeometry, bounds } )
+		DEBUG && console.info( 'MapLibre add border', { loaded, outlineGeometry, bounds } )
 		try {
 			if( map.current.getSource( 'borders' ) ) {
 				try {
@@ -120,12 +120,12 @@ export default function MapLibre( {
 					'line-width': 3
 				}
 			} )
-			DEBUG && console.log( 'fitBounds', bounds )
+			DEBUG && console.info( 'fitBounds', bounds )
 			map.current.fitBounds( bounds )
 			set_loaded( 3 )
 		} catch( e ) {
-			console.log( e )
-			console.log( { outlineGeometry } )
+			console.info( e )
+			console.info( { outlineGeometry } )
 		}
 	}, [ domRef.current, loaded, outlineGeometry ] )
 
@@ -141,7 +141,7 @@ export default function MapLibre( {
 
 			if( highlightedProjects[ 0 ].geojson.type === 'Point' ) {
 				map.current.fitBounds( [ highlightedProjects[ 0 ].geojson.coordinates, highlightedProjects[ 0 ].geojson.coordinates ], { maxZoom: 11 } )
-				//console.log( window.L.GeoJSON.coordsToLatLng( highlightedProjects[ 0 ].geojson.coordinates ) )
+				//console.info( window.L.GeoJSON.coordsToLatLng( highlightedProjects[ 0 ].geojson.coordinates ) )
 			} else {
 				map.current.addSource( 'highlight', {
 					type: "geojson",
@@ -164,17 +164,17 @@ export default function MapLibre( {
 				map.current.fitBounds( pBounds, { maxZoom: 7 } )
 			}
 		} catch( e ) {
-			console.log( e )
-			console.log( { highlightedProjects } )
+			console.info( e )
+			console.info( { highlightedProjects } )
 		}
 	}, [ domRef.current, loaded, highlightedProjects ] )
 
 	useEffect( () => {
 		if( loaded !== 3 || !projects ) return
-		DEBUG && console.log( 'MapLibre add projects', { loaded, projects } )
+		DEBUG && console.info( 'MapLibre add projects', { loaded, projects } )
 
 		try {
-			DEBUG && console.log( 'add projects', features, markers )
+			DEBUG && console.info( 'add projects', features, markers )
 
 			if( map.current.getSource( 'projects' ) ) {
 				map.current.removeLayer( 'projects' )
@@ -211,8 +211,8 @@ export default function MapLibre( {
 				map.current.fitBounds( bounds, { maxZoom: 7 } )
 			}
 		} catch( e ) {
-			console.log( e )
-			console.log( { projects } )
+			console.info( e )
+			console.info( { projects } )
 		}
 	}, [ domRef.current, loaded, projects, projectMarkers ] )
 

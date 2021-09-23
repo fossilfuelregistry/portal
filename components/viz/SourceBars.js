@@ -22,7 +22,7 @@ function SourceBarsBase( { sources = [], parentWidth, parentHeight } ) {
 			} )
 	} )
 
-	DEBUG && console.log( { sources, maxTotal, parentHeight } )
+	DEBUG && console.info( { sources, maxTotal, parentHeight } )
 	const primary = theme[ '@primary-color' ]
 	const textY = parentHeight - 8
 
@@ -32,7 +32,7 @@ function SourceBarsBase( { sources = [], parentWidth, parentHeight } ) {
 			viewBox={ "-10 -10 400 " + ( ( parentHeight ?? 400 ) + 20 ).toFixed() }
 		>
 			{ sources.map( ( s, i ) => {
-				DEBUG && console.log( 'Source', s.name, s.range )
+				DEBUG && console.info( 'Source', s.name, s.range )
 				return (
 					<g key={ s.sourceId }>
 						<PercentileBar

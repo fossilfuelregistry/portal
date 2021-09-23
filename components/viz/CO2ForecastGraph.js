@@ -64,7 +64,7 @@ function CO2ForecastGraphBase( {
 			gas_c: d.gas?.continProd ?? 0
 		} ) )
 
-	DEBUG && console.log( { production, productionData, projProdData, projectionSourceId, projectedProduction } )
+	DEBUG && console.info( { production, productionData, projProdData, projectionSourceId, projectedProduction } )
 	// scale
 	const yearScale = scaleLinear( {
 		range: [ 0, parentWidth - margin.left ],
@@ -73,7 +73,7 @@ function CO2ForecastGraphBase( {
 
 	const maxCO2 = useMemo( () => {
 		let maxValue = max( productionData, d => ( d.oil ?? 0 ) + ( d.gas ?? 0 ) )
-		DEBUG && console.log( { maxValue } )
+		DEBUG && console.info( { maxValue } )
 		return maxValue
 	}, [ productionData ] )
 

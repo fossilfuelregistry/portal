@@ -93,7 +93,7 @@ const PieChartInternal = ( { parentWidth, parentHeight, data, header, topNote, n
 												hideTooltip()
 											} }
 											onMouseEnter={ () => {
-												//console.log( { tooltipTop, tooltipLeft, centroidX, centroidY } )
+												//console.info( { tooltipTop, tooltipLeft, centroidX, centroidY } )
 												showTooltip( {
 													tooltipLeft: labelPosX + parentWidth / 2,
 													tooltipTop: labelPosY - parentHeight / 2,

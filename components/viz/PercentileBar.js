@@ -3,15 +3,15 @@ import gaussian from "gaussian"
 import Color from "color"
 import React from "react"
 import getConfig from "next/config"
-import { Alert } from "antd"
 //import palette from 'google-palette'
 
-const DEBUG = true
+const DEBUG = false
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
 // Function to calculate percentile value from variance
 function percentile( variance, p, mean ) {
+	if( !( variance > 0 ) ) return 0
 	const d = gaussian( mean, variance ** 2 )
 	return d.ppf( p )
 }
@@ -24,12 +24,18 @@ function toCustomPrecision( x ) {
 }
 
 export default function PercentileBar( { low, mid, high, scale, height, x, y, width, color } ) {
-	DEBUG && console.log( 'PercentileBar', { low, mid, high, scale, height, x, y, width } )
+	DEBUG && console.info( 'PercentileBar', { low, mid, high, scale, height, x, y, width } )
 
+	if( mid === 0 ) {
+		console.info( 'PercentileBar NO DATA', { low, mid, high, scale, height, x, y, width } )
+		return "?"
+	}
+
+	let lowVariance, highVariance
 	try {
 		// Find variance of two asymmetric distributions from known low/mid and mid/high points
-		const lowVariance = solve( v => percentile( v, 0.05, mid ), low, ( mid - low ) / 2, 0.05, 100 )
-		const highVariance = solve( v => percentile( v, 0.95, mid ), high, ( high - mid ) / 2, 0.05, 100 )
+		lowVariance = solve( v => percentile( v, 0.05, mid ), low, ( mid - low ) / 2, 0.05, 100 )
+		highVariance = solve( v => percentile( v, 0.95, mid ), high, ( high - mid ) / 2, 0.05, 100 )
 
 		const lowDistribution = gaussian( mid, lowVariance ** 2 )
 		const highDistribution = gaussian( mid, highVariance ** 2 )
@@ -53,7 +59,7 @@ export default function PercentileBar( { low, mid, high, scale, height, x, y, wi
 		}
 		const colSeqRev = [ ...colSeq ].reverse()
 		const tileColors = [ ...colSeqRev, ...colSeq ]//.map( c => '#' + c )
-		DEBUG && console.log( tileColors )
+		DEBUG && console.info( tileColors )
 		const scaleY = v => height * ( 1 - v / scale )
 
 		const textX = x + width + 2
@@ -70,7 +76,7 @@ export default function PercentileBar( { low, mid, high, scale, height, x, y, wi
 				{ percentilePoints.map( ( v, i ) => {
 					const y = scaleY( percentilePoints[ i ] )
 					const pHeight = ( i === 0 ? height - y : scaleY( percentilePoints[ i - 1 ] ) - y )
-					DEBUG && console.log( { i, v, y, height, c: tileColors[ i ] } )
+					DEBUG && console.info( { i, v, y, height, c: tileColors[ i ] } )
 					return (
 						<rect
 							key={ v }
@@ -101,7 +107,8 @@ export default function PercentileBar( { low, mid, high, scale, height, x, y, wi
 				</text>
 			</g> )
 	} catch( e ) {
-		console.log( e )
+		console.info( { lowVariance, highVariance, low, mid, high } )
+		console.info( e )
 		return <text>PercentileBar calculations failed: { e.message }</text>
 	}
 }

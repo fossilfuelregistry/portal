@@ -7,13 +7,13 @@ import Footer from "components/Footer"
 const DEBUG = true
 
 const loadScript = ( scriptId, srcUrl, callback ) => {
-	DEBUG && console.log( 'Maplibre::loadScript', { scriptId, srcUrl, callback } )
+	DEBUG && console.info( 'Maplibre::loadScript', { scriptId, srcUrl, callback } )
 	const existingScript = document.getElementById( 'scriptId' )
 	if( !existingScript ) {
 		const script = document.createElement( 'script' )
 		script.src = srcUrl
 		script.id = scriptId
-		DEBUG && console.log( '...', scriptId )
+		DEBUG && console.info( '...', scriptId )
 		document.body.appendChild( script )
 
 		const cssLink = document.createElement( 'link' )
@@ -22,7 +22,7 @@ const loadScript = ( scriptId, srcUrl, callback ) => {
 
 		script.onload = arg => {
 			if( callback ) {
-				DEBUG && console.log( '<<< loaded', scriptId )
+				DEBUG && console.info( '<<< loaded', scriptId )
 				callback()
 			}
 		}
@@ -40,20 +40,20 @@ export default function MapPage() {
 	}, [] )
 
 	useEffect( () => {
-		console.log( loaded, window.maplibregl, domRef.current )
+		console.info( loaded, window.maplibregl, domRef.current )
 		if( !window.maplibregl || !domRef.current || map.current ) return
-		DEBUG && console.log( "CREATE MAP" )
+		DEBUG && console.info( "CREATE MAP" )
 		map.current = new window.maplibregl.Map( {
 			container: domRef.current,
 			style: `https://tiles.fossilfuelregistry.org/styles/basic-preview/style.json`,
 			center: [ 18.184216, 59.316269 ],
 			zoom: 8
 		} )
-		console.log( "NEW MAP", map.current )
+		console.info( "NEW MAP", map.current )
 	}, [ loaded, domRef.current ] )
 
 	if( typeof window === 'undefined' || !window.maplibregl ) return "Not loaded."
-	console.log( 'RENDER', window.maplibregl )
+	console.info( 'RENDER', window.maplibregl )
 	return (
 		<div className="page">
 			<TopNavigation/>

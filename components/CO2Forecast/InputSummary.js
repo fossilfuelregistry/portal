@@ -22,7 +22,7 @@ function InputSummary( { dataset = [] } ) {
 		addToTotal( totals[ datapoint.fossilFuelType ], datapoint.co2 )
 	} )
 
-	DEBUG && console.log( 'InputSummary', { dataset, productionSourceId, sourceData } )
+	DEBUG && console.info( 'InputSummary', { dataset, productionSourceId, sourceData } )
 
 	const _ = v => Math.round( v )
 

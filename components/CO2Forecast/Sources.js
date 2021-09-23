@@ -23,7 +23,7 @@ export default function Sources( { production, reserves, projection } ) {
 						<Button
 							size="small"
 							onClick={ () => {
-								console.log( 'CLICK', { s, modal } )
+								console.info( 'CLICK', { s, modal } )
 								modal.info( {
 									title: (
 										<span>
@@ -68,7 +68,7 @@ export default function Sources( { production, reserves, projection } ) {
 		} )
 
 	const _reserves = reserves?.map( r => allSources.find( s => s.sourceId === r.sourceId ) )
-	DEBUG && console.log( { production, reserves: _reserves, projection } )
+	DEBUG && console.info( { production, reserves: _reserves, projection } )
 
 	return (
 		<div className="co2-card">

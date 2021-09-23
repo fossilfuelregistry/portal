@@ -73,7 +73,7 @@ export default function LargestProjects( { onPositions, onGeoClick } ) {
 					<table style={ { margin: '0 auto' } }>
 						<tbody>
 							{ largest.map( p => {
-								//console.log( { p: p.productionCo2E, countryTotalCO2 } )
+								//console.info( { p: p.productionCo2E, countryTotalCO2 } )
 								return (
 									<tr key={ p.id }>
 

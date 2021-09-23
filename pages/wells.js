@@ -40,7 +40,7 @@ export default function Wells() {
 	[ ipLocation?.lat, ipLocation?.lng ] )
 
 	const handleOnMove = useCallback( ( center, _bounds ) => {
-		console.log( _bounds )
+		console.info( _bounds )
 		set_bounds( _bounds )
 		set_center( { lat: center.lat, lng: center.lng } )
 	}, [ set_center ] )
@@ -80,7 +80,7 @@ export default function Wells() {
 		} )
 
 		if( lastWell.x ) mergedWells.push( lastWell )
-		DEBUG && console.log( 'Wells', mergedWells.length )
+		DEBUG && console.info( 'Wells', mergedWells.length )
 
 		if( mergedWells.length > 20 )
 			heatmap.current = window.L.heatLayer(
@@ -95,7 +95,7 @@ export default function Wells() {
 			).addTo( map )
 
 		// window.L.marker( [ well.position.y, well.position.x ] ).addTo( map )
-		// console.log( markers.current )
+		// console.info( markers.current )
 		// const group = window.L.featureGroup( markers.current ).addTo( map )
 	}
 

@@ -14,7 +14,7 @@ function ScopeBarsBase( { totals = [], parentWidth, parentHeight } ) {
 	const total = [ 0, 1, 2 ].map( i => sumOfCO2( totals, i ) )
 	const maxTotal = total.reduce( ( t, i ) => Math.max( t, i ), 0 )
 
-	DEBUG && console.log( { total, totals, maxTotal, parentHeight } )
+	DEBUG && console.info( { total, totals, maxTotal, parentHeight } )
 	const primary = theme[ '@primary-color' ]
 	const textY = parentHeight - 8
 

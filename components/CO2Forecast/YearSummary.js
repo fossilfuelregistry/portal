@@ -22,13 +22,13 @@ export default function YearSummary( { dataset = [] } ) {
 
 	settings.supportedFuels.forEach( fuel => addToTotal( totals, lastYearProd[ fuel ]?.co2 ?? 0 ) )
 
-	DEBUG && console.log( { lastYearProd, productionSourceId, dataset } )
+	DEBUG && console.info( { lastYearProd, productionSourceId, dataset } )
 
 	let year = `(${ lastYearProd[ 'oil' ]?.year })`
 	if( lastYearProd[ 'gas' ]?.year && ( lastYearProd[ 'oil' ]?.year !== lastYearProd[ 'gas' ]?.year ) ) // Different last year?
 		year = `(${ lastYearProd[ 'oil' ]?.year } / ${ lastYearProd[ 'gas' ]?.year })`
 
-	DEBUG && console.log( { totals } )
+	DEBUG && console.info( { totals } )
 
 	return (
 		<div className="table-wrap">

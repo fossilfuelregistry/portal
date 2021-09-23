@@ -17,7 +17,7 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 	const country = useSelector( redux => redux.country )
 	const projectGeo = useSelector( redux => redux.projectGeo )
 
-	DEBUG && console.log( 'ForecastView', {
+	DEBUG && console.info( 'ForecastView', {
 		production,
 		projection,
 		reserves,

@@ -23,21 +23,21 @@ function DenseProject( { countryCurrentProduction, borders, productionSources, p
 	const { projectCO2, goToCountryOverview } = useConversionHooks()
 	const productionSourceId = useSelector( redux => redux.productionSourceId )
 
-	DEBUG && console.log( 'DenseProject', { country, project, countryCurrentProduction } )
+	DEBUG && console.info( 'DenseProject', { country, project, countryCurrentProduction } )
 
 	const { data, loading, error } = useQuery( GQL_project, {
 		variables: { id: project?.id },
 		skip: !( project?.id > 0 )
 	} )
 
-	DEBUG && console.log( 'DenseProject', { country, project, loading, error, data } )
+	DEBUG && console.info( 'DenseProject', { country, project, loading, error, data } )
 
 	const theProject = data?.project ?? {}
 
 	const production = useMemo( () => {
 		if( !theProject?.id ) return {}
 		const co2 = projectCO2( theProject )
-		DEBUG && console.log( 'DenseProject projectCO2', { theProject, co2 } )
+		DEBUG && console.info( 'DenseProject projectCO2', { theProject, co2 } )
 		return co2
 	}, [ theProject?.id ] )
 
@@ -106,7 +106,7 @@ function DenseProject( { countryCurrentProduction, borders, productionSources, p
 				</style>
 			</> )
 	} catch( e ) {
-		console.log( e )
+		console.info( e )
 		return <Alert message={ e.message } type="error" showIcon/>
 	}
 }

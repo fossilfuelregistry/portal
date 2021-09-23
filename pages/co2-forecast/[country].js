@@ -32,7 +32,7 @@ const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
 export default function CO2ForecastPage() {
 	const { getText } = useText()
-	const { getCountryCurrentCO2, pageQuery } = useConversionHooks()
+	const { getCountryCurrentCO2, pageQuery, sourceNameFromId } = useConversionHooks()
 	const country = useSelector( redux => redux.country )
 	const countryName = useSelector( redux => redux.countryName )
 	const region = useSelector( redux => redux.region )
@@ -67,7 +67,7 @@ export default function CO2ForecastPage() {
 
 	let productionSources, projectionSources, reservesSources
 
-	DEBUG && console.log( 'COUNTRY', { project, nextQuery: router.query, myQuery: query } )
+	DEBUG && console.info( 'COUNTRY', { project, nextQuery: router.query, myQuery: query } )
 
 	if( project?.id > 0 ) {
 		productionSources = ( _projectSources?.getProjectSources?.nodes ?? [] )
@@ -80,7 +80,7 @@ export default function CO2ForecastPage() {
 				...s,
 				namePretty: `${ getPreferredReserveGrade( s.grades ) } ${ s.year }`
 			} ) )
-		DEBUG && console.log( { _projectSources, productionSources, projectionSources, reservesSources } )
+		DEBUG && console.info( { _projectSources, productionSources, projectionSources, reservesSources } )
 	} else {
 		productionSources = ( _countrySources?.getCountrySources?.nodes ?? [] )
 			.filter( s => s.dataType === 'PRODUCTION' )
@@ -104,7 +104,7 @@ export default function CO2ForecastPage() {
 				namePretty: `${ getPreferredReserveGrade( s.grades ) } ${ s.year }`
 			} ) )
 			.sort( ( a, b ) => Math.sign( ( b.quality ?? 0 ) - ( a.quality ?? 0 ) ) )
-		DEBUG && console.log( {
+		DEBUG && console.info( {
 			productionSources,
 			projectionSources,
 			reservesSources
@@ -125,7 +125,7 @@ export default function CO2ForecastPage() {
 	useEffect( () => {
 		const qCountry = router.query?.country
 		if( qCountry === null || qCountry === '-' || qCountry === 'null' ) return
-		DEBUG && console.log( 'useEffect PRELOAD country', { country, qCountry } )
+		DEBUG && console.info( 'useEffect PRELOAD country', { country, qCountry } )
 		if( qCountry !== country ) dispatch( { type: 'COUNTRY', payload: qCountry } )
 	}, [ router.query?.country ] )
 
@@ -137,7 +137,10 @@ export default function CO2ForecastPage() {
 	if( proj?.length > 0 && project?.projectType === 'SPARSE' )
 		templateId = 'sparse-project'
 
-	DEBUG && console.log( 'Template select:', { templateId, project, productionSourceId } )
+	DEBUG && console.info( 'Template select:', { templateId, project, productionSourceId } )
+
+	const reservesSourceId = parseInt( router.query.reservesSourceId ?? '0' )
+	const projectionSourceId = parseInt( router.query.projectionSourceId ?? '0' )
 
 	switch( templateId ) {
 
@@ -181,13 +184,27 @@ export default function CO2ForecastPage() {
 							<LargestProjects
 								onGeoClick={ geo => {
 									set_highlightedProjects( [ geo ] )
-									console.log( geo )
+									console.info( geo )
 								} }
 							/>
 						</Col>
 					</Row>
 
-					<Divider style={ { marginTop: 48 } }><h4>{ getText( 'co2_forecast' ) }</h4></Divider>
+					<Divider style={ { marginTop: 48, marginBottom: 0 } }><h4>{ getText( 'co2_forecast' ) }</h4></Divider>
+
+					<div className="settings-summary" style={{ textAlign: 'center', marginBottom: 24 }}>
+						<b>{ countryName }</b> -
+						{ ' ' + getText( 'production' ) }: <b>{ sourceNameFromId( productionSourceId ) }</b>
+
+						{ reservesSourceId &&
+						<span>{ ' - ' + getText( 'reserves' ) }: <b>{ sourceNameFromId( reservesSourceId ) }</b></span>
+						}
+
+						{ projectionSourceId &&
+						<span>{ ' - ' + getText( 'projection' ) }: <b>{ sourceNameFromId( projectionSourceId ) }</b></span>
+						}
+
+					</div>
 
 					{ productionSourceId > 0 && <LoadCountryData projectionSources={ projectionSources }/> }
 

@@ -250,7 +250,7 @@ export default function Model() {
 							variables: { iso3166: country.iso3166, iso31662: '' }
 						} )
 						country.production = prepareProductionDataset( ( q.data?.countryDataPoints?.nodes ?? [] ).filter( p => p.year === parseInt( router.query.year ) ?? 2019 ) )
-						if( country.iso3166 === 'dk' ) console.log( {
+						if( country.iso3166 === 'dk' ) console.info( {
 							prepared: country.production,
 							raw: q.data?.countryDataPoints?.nodes?.filter( p => p.year === parseInt( router.query.year ) ?? 2019 )
 						} )

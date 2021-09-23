@@ -46,10 +46,10 @@ function LoadCountryData( { projectionSources } ) {
 		skip: !productionSourceId
 	} )
 
-	DEBUG && console.log( 'LoadCountryData', { productionData } )
+	DEBUG && console.info( 'LoadCountryData', { productionData } )
 
 	const production = useMemo( () => {
-		DEBUG && console.log( '_co2( productionData )', productionData?.countryDataPoints?.nodes )
+		DEBUG && console.info( '_co2( productionData )', productionData?.countryDataPoints?.nodes )
 		return _co2( productionData?.countryDataPoints?.nodes )
 	}, [ productionData?.countryDataPoints?.nodes, productionData?.countryDataPoints?.nodes?.length, productionSourceId, gwp ] )
 
@@ -73,7 +73,7 @@ function LoadCountryData( { projectionSources } ) {
 					stableProj.push( { ...stableProduction.oil, year, sourceId: settings.stableProductionSourceId } )
 					stableProj.push( { ...stableProduction.gas, year, sourceId: settings.stableProductionSourceId } )
 				}
-				DEBUG && console.log( { stableProj } )
+				DEBUG && console.info( { stableProj } )
 				return stableProj
 			} else
 				return _co2( projectionData?.countryDataPoints?.nodes )
@@ -119,7 +119,7 @@ function LoadCountryData( { projectionSources } ) {
 			return _limits
 		}, reduced )
 
-		console.log( 'useEffect Production', production?.length, { production, limits, newLimits } )
+		console.info( 'useEffect Production', production?.length, { production, limits, newLimits } )
 
 		// Check if no data
 		settings.supportedFuels.forEach( fuel => {
@@ -127,11 +127,11 @@ function LoadCountryData( { projectionSources } ) {
 		} )
 
 		set_limits( l => ( { ...l, production: newLimits } ) )
-		DEBUG && console.log( 'useEffect Production', { newLimits } )
+		DEBUG && console.info( 'useEffect Production', { newLimits } )
 	}, [ production?.length, productionSourceId ] )
 
 	useEffect( () => {
-		DEBUG && console.log( 'useEffect projection', { projection, limits } )
+		DEBUG && console.info( 'useEffect projection', { projection, limits } )
 		if( !projection?.length > 0 ) return
 
 		let newLimits
@@ -163,7 +163,7 @@ function LoadCountryData( { projectionSources } ) {
 	}, [ projection, projectionSourceId ] )
 
 	useEffect( () => {
-		DEBUG && console.log( 'useEffect reserves', { limits, reserves } )
+		DEBUG && console.info( 'useEffect reserves', { limits, reserves } )
 		if( !( reserves?.length > 0 ) ) return
 		const newLimits = reserves.reduce( ( _limits, datapoint ) => {
 			_limits.firstYear = ( _limits.firstYear === undefined || datapoint.year < _limits.firstYear ) ? datapoint.year : _limits.firstYear
@@ -174,12 +174,12 @@ function LoadCountryData( { projectionSources } ) {
 		set_limits( l => ( { ...l, reserves: newLimits } ) )
 	}, [ reserves ] )
 
-	DEBUG && console.log( { limits, production, projection, reserves } )
+	DEBUG && console.info( { limits, production, projection, reserves } )
 
 	// Figure out available grades when reserves loaded.
 
 	useEffect( () => {
-		DEBUG && console.log( 'useEffect Reserve Grades', { reserves, reservesSourceId } )
+		DEBUG && console.info( 'useEffect Reserve Grades', { reserves, reservesSourceId } )
 		if( !( reserves?.length > 0 ) ) return
 		const _grades = reserves
 			.filter( r => r.sourceId === reservesSourceId )
@@ -187,7 +187,7 @@ function LoadCountryData( { projectionSources } ) {
 				g[ r.grade ] = false
 				return g
 			}, {} )
-		//console.log( _grades )
+		//console.info( _grades )
 		set_grades( _grades )
 	}, [ reserves?.length, reservesSourceId ] )
 
@@ -197,7 +197,7 @@ function LoadCountryData( { projectionSources } ) {
 		if( !productionSourceId ) return []
 		if( !projectionSourceId ) return []
 		if( !reservesSourceId ) return []
-		DEBUG && console.log( 'useMemo projectedProduction', { projection, reserves } )
+		DEBUG && console.info( 'useMemo projectedProduction', { projection, reserves } )
 		try {
 			return reservesProduction( projection, reserves, projectionSourceId, reservesSourceId, limits, grades )
 		} catch( e ) {
@@ -219,7 +219,7 @@ function LoadCountryData( { projectionSources } ) {
 
 	// Don't try to render a chart until all data looks good
 	if( ( !limits.production?.oil?.lastYear && !limits.production?.gas?.lastYear ) || !production?.length > 0 ) {
-		DEBUG && console.log( 'What to do?', { limits, production } )
+		DEBUG && console.info( 'What to do?', { limits, production } )
 		return <Alert message={ getText( 'make_selections' ) } type="info" showIcon/>
 	}
 

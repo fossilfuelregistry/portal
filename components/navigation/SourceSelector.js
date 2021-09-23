@@ -22,13 +22,13 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 	const query = router.query
 
 	if( DEBUG )
-		console.log( { stateKey, sources: sources.length, stateValue, selectedSourceOption, query, router } )
+		console.info( { stateKey, sources: sources.length, stateValue, selectedSourceOption, query, router } )
 
 	useEffect( () => { // If we have only a single option, preselect it.
 		if( !( sources?.length === 1 ) ) return
-		DEBUG && console.log( 'SourceSelector useEffect single', stateKey )
+		DEBUG && console.info( 'SourceSelector useEffect single', stateKey )
 		const id = sources?.[ 0 ]?.sourceId
-		DEBUG && console.log( stateKey, '>>>>>>>>>> Single source:', sources )
+		DEBUG && console.info( stateKey, '>>>>>>>>>> Single source:', sources )
 		set_selectedSourceOption( id?.toString() )
 		co2PageUpdateQuery( store, router, stateKey, id )
 		dispatch( { type: stateKey.toUpperCase(), payload: parseInt( id ) } )
@@ -36,15 +36,15 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 	}, [ sources?.length === 1 ] )
 
 	useEffect( () => { // Clear selection if selected value is no longer available.
-		DEBUG && console.log( stateKey, { stateValue, loading, selectedSourceOption, sources } )
+		DEBUG && console.info( stateKey, { stateValue, loading, selectedSourceOption, sources } )
 
 		if( loading ) return
-		DEBUG && console.log( 'SourceSelector useEffect', stateKey )
+		DEBUG && console.info( 'SourceSelector useEffect', stateKey )
 
 		// All sources gone?
 		if( sources?.length === 0 && !loading ) {
 			if( !firstInitialize.current ) {
-				DEBUG && console.log( stateKey, '>>>>>>>>>> Sources empty' )
+				DEBUG && console.info( stateKey, '>>>>>>>>>> Sources empty' )
 				set_selectedSourceOption( undefined )
 				co2PageUpdateQuery( store, router, stateKey, undefined )
 				dispatch( { type: stateKey.toUpperCase(), payload: null } )
@@ -60,10 +60,10 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 			let newSource
 			if( sources.length > 0 ) {
 				newSource = sources[ 0 ]
-				DEBUG && console.log( stateKey, '>>>>>>>>>> PREeset', newSource )
+				DEBUG && console.info( stateKey, '>>>>>>>>>> PREeset', newSource )
 			} else {
 				newSource = undefined
-				DEBUG && console.log( stateKey, '>>>>>>>>>> Reset' )
+				DEBUG && console.info( stateKey, '>>>>>>>>>> Reset' )
 			}
 			const newId = newSource?.sourceId?.toString()
 			set_selectedSourceOption( newId )

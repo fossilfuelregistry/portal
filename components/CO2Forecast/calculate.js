@@ -22,7 +22,7 @@ function _sumOfFuelCO2( fuel, range ) {
 	try {
 		return fuel.scope1?.[ range ] + fuel.scope3?.[ range ]
 	} catch( e ) {
-		console.log( fuel )
+		console.info( fuel )
 		console.trace()
 		throw new Error( e.message + '\nCannot calculate CO2 of ' + JSON.stringify( fuel ) )
 	}
@@ -123,7 +123,7 @@ export async function co2PageUpdateQuery( store, router, parameter, value ) {
 	else if( state.project?.projectIdentifier )
 		query.set( 'project', state.project?.projectIdentifier )
 
-	DEBUG && console.log( 'URL', parameter, '->', { value, router, query, state } )
+	DEBUG && console.info( 'URL', parameter, '->', { value, router, query, state } )
 
 	if( value !== undefined )
 		query.set( parameter, value )
@@ -140,9 +140,9 @@ export async function co2PageUpdateQuery( store, router, parameter, value ) {
 	let url = ''
 	if( router.locale !== router.defaultLocale ) url += '/' + router.locale
 	url += router.pathname.replace( /\[country\]/, state.country ) + '?' + query.toString()
-	DEBUG && console.log( 'URL <<<', router.asPath )
+	DEBUG && console.info( 'URL <<<', router.asPath )
 	if( url === router.asPath ) return
-	DEBUG && console.log( 'URL >>>', url )
+	DEBUG && console.info( 'URL >>>', url )
 
 	await router.replace( url, null, { shallow: true } )
 }
@@ -151,7 +151,7 @@ export function getFullFuelType( datapoint ) {
 	let fullFuelType = datapoint.fossilFuelType
 	if( datapoint.fossilFuelType?.length > 0 )
 		fullFuelType = datapoint.fossilFuelType + ( datapoint.subtype?.length > 0 ? settings.fuelTypeSeparator + datapoint.subtype : '' )
-	//console.log( 'fullFuelType', fullFuelType )
+	//console.info( 'fullFuelType', fullFuelType )
 	return fullFuelType
 }
 
@@ -177,11 +177,11 @@ export function prepareProductionDataset( dataset ) {
 		}
 
 		if( aggregatePoint.unit !== datapoint.unit ) {
-			console.log( { aggregatePoint, datapoint } )
+			console.info( { aggregatePoint, datapoint } )
 			throw new Error( 'Multiple data points for same fuel / source / year cannot have different units.' )
 		}
 
-		//console.log( 'Aggregating', { aggregatePoint, datapoint } )
+		//console.info( 'Aggregating', { aggregatePoint, datapoint } )
 		aggregatePoint.subtype = null
 		aggregatePoint.volume += datapoint.volume
 	} )

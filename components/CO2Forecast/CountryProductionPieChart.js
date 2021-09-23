@@ -28,6 +28,7 @@ export default function CountryProductionPieChart( { project, currentProduction,
 	const total = useSelector( redux => redux.countryTotalCO2 )
 	const allSources = useSelector( redux => redux.allSources )
 
+	DEBUG && console.info( 'CountryProductionPieChart', { project, currentProduction, production } )
 	useEffect( () => {
 		if( !( currentProduction?.[ 0 ]?.totalCO2 > 0 ) ) return
 
@@ -48,7 +49,7 @@ export default function CountryProductionPieChart( { project, currentProduction,
 		dispatch( { type: 'COUNTRYTOTALCO2', payload: _total } )
 
 		const slices = currentEmissions?.production?.flatMap( p => {
-			DEBUG && console.log( 'CountryProductionPieChart', p )
+			DEBUG && console.info( 'CountryProd Pie', p )
 			const q1 = p.co2?.scope1?.[ 1 ] ?? 0
 			const q3 = p.co2?.scope3?.[ 1 ] ?? 0
 			return [ {
@@ -69,7 +70,7 @@ export default function CountryProductionPieChart( { project, currentProduction,
 				fillColor: colors[ p.fossilFuelType ].scope1
 			} ]
 		} )
-		DEBUG && console.log( { emissions: currentProduction, slices } )
+		DEBUG && console.info( { emissions: currentProduction, slices } )
 		set_pieChartData( slices )
 	}, [ currentProduction, sourceId, gwp ] )
 
@@ -79,7 +80,7 @@ export default function CountryProductionPieChart( { project, currentProduction,
 	const ratio = ( production?.totalCO2 ?? 0 ) / ( countryEmission ?? 1 )
 	const projectRadius = 83 * Math.sqrt( ratio )
 
-	DEBUG && console.log( 'ratio', { ratio, production, currentProduction } )
+	DEBUG && console.info( 'ratio', { ratio, production, currentProduction } )
 	let digits = 0
 	if( ratio < 0.1 ) digits = 1
 	if( ratio < 0.01 ) digits = 2

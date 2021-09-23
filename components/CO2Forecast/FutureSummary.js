@@ -18,7 +18,7 @@ function FutureSummary( { dataset, limits, projectionSources } ) {
 	if( !( dataset?.length > 0 ) ) return null
 	if( !stableProduction.oil || !stableProduction.gas ) return null
 
-	DEBUG && console.log( { projectionSourceId, allSources, limits, stableProduction } )
+	DEBUG && console.info( { projectionSourceId, allSources, limits, stableProduction } )
 
 	const stable = {
 		oil: co2FromVolume( stableProduction.oil ),
@@ -62,7 +62,7 @@ function FutureSummary( { dataset, limits, projectionSources } ) {
 			return { ...source, total: sourceTotal }
 		} )
 
-	DEBUG && console.log( { years, year, stable, dataset, sources } )
+	DEBUG && console.info( { years, year, stable, dataset, sources } )
 
 	return (
 		<div className="table-wrap">

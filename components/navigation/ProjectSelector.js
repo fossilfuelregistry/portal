@@ -22,10 +22,10 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 
 	const query = router.query
 
-	DEBUG && console.log( 'ProjectSelector', { query, iso3166, iso31662 } )
+	DEBUG && console.info( 'ProjectSelector', { query, iso3166, iso31662 } )
 
 	useEffect( () => {
-		DEBUG && console.log( 'ProjectSelector useEffect 1', { project } )
+		DEBUG && console.info( 'ProjectSelector useEffect 1', { project } )
 		if( !project || project === 'loading' )
 			set_selectedProjectOption( undefined )
 		else
@@ -40,7 +40,7 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 
 	useEffect( () => {
 		if( loading || error || !projData?.getProjects?.nodes?.length ) return
-		DEBUG && console.log( 'ProjectSelector useEffect 2', { project, query } )
+		DEBUG && console.info( 'ProjectSelector useEffect 2', { project, query } )
 
 		// Remove non-current entries and get one entry per project..
 		const projs = new Map()
@@ -63,13 +63,13 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 				dispatch( { type: 'PROJECT', payload: undefined } )
 			}
 		}
-		DEBUG && console.log( 'ProjectSelector', { projs, gql: projData?.getProjects?.nodes } )
+		DEBUG && console.info( 'ProjectSelector', { projs, gql: projData?.getProjects?.nodes } )
 
 		set_projects( Array.from( projs.values() ) )
 
 	}, [ projData?.getProjects?.nodes?.length, query.project ] )
 
-	DEBUG && console.log( 'ProjectSelector', {
+	DEBUG && console.info( 'ProjectSelector', {
 		projData: projData?.getProjects?.nodes?.length,
 		loading,
 		error,
@@ -93,7 +93,7 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 						set_selectedProjectOption( p )
 						const proj = projects.find( pr => pr.projectIdentifier === p )
 						dispatch( { type: 'PROJECT', payload: proj } )
-						console.log( { p, proj, projects } )
+						console.info( { p, proj, projects } )
 
 						if( proj?.projectId?.length > 0 ) {
 							const q = await apolloClient.query( {

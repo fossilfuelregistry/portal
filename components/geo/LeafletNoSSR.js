@@ -18,11 +18,11 @@ export default function LeafletNoSSR( { wells, className, outlineGeometry, proje
 	useEffect( () => {
 		if( !ipLocation ) return
 		set_center( ipLocation )
-		DEBUG && console.log( { ipLocation } )
+		DEBUG && console.info( { ipLocation } )
 	}, [ ipLocation?.lat, ipLocation?.lng ] )
 
 	const handleOnMove = useCallback( ( center, _bounds ) => {
-		DEBUG && console.log( { _bounds } )
+		DEBUG && console.info( { _bounds } )
 		set_bounds( _bounds )
 		set_center( { lat: center.lat, lng: center.lng } )
 	}, [ set_center ] )
@@ -50,7 +50,7 @@ export default function LeafletNoSSR( { wells, className, outlineGeometry, proje
 		} )
 
 		if( lastWell.x ) mergedWells.push( lastWell )
-		DEBUG && console.log( 'Wells', mergedWells.length )
+		DEBUG && console.info( 'Wells', mergedWells.length )
 
 		if( mergedWells.length > 20 )
 			heatmap.current = window.L.heatLayer(
@@ -65,11 +65,11 @@ export default function LeafletNoSSR( { wells, className, outlineGeometry, proje
 			).addTo( map )
 
 		// window.L.marker( [ well.position.y, well.position.x ] ).addTo( map )
-		// console.log( markers.current )
+		// console.info( markers.current )
 		// const group = window.L.featureGroup( markers.current ).addTo( map )
 	}
 
-	DEBUG && console.log( { map, wells, center } )
+	DEBUG && console.info( { map, wells, center } )
 
 	if( !center?.lat ) return null
 

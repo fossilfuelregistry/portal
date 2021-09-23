@@ -51,7 +51,7 @@ function LoadProjectData() {
 	} )
 
 	const production = useMemo( () => {
-		DEBUG && console.log( '_co2( productionData )', productionData?.projectDataPoints?.nodes )
+		DEBUG && console.info( '_co2( productionData )', productionData?.projectDataPoints?.nodes )
 		return _co2( productionData?.projectDataPoints?.nodes )
 	}, [ productionData?.projectDataPoints?.nodes, productionData?.projectDataPoints?.nodes?.length, productionSourceId, gwp ] )
 
@@ -64,7 +64,7 @@ function LoadProjectData() {
 		skip: !project?.id
 	} )
 
-	DEBUG && console.log( 'LoadProjectData', { productionData, production } )
+	DEBUG && console.info( 'LoadProjectData', { productionData, production } )
 
 	const projection = useMemo( () => {
 		try {
@@ -77,7 +77,7 @@ function LoadProjectData() {
 					stableProj.push( { ...stableProduction.oil, year, sourceId: settings.stableProductionSourceId } )
 					stableProj.push( { ...stableProduction.gas, year, sourceId: settings.stableProductionSourceId } )
 				}
-				DEBUG && console.log( { stableProj } )
+				DEBUG && console.info( { stableProj } )
 				return stableProj
 			} else
 				return _co2( projectionData?.projectDataPoints?.nodes )
@@ -110,7 +110,7 @@ function LoadProjectData() {
 	// Figure out available years when data loaded.
 
 	useEffect( () => {
-		DEBUG && console.log( 'useEffect Production', production?.length, limits )
+		DEBUG && console.info( 'useEffect Production', production?.length, limits )
 		if( !production?.length > 0 ) return
 		const newLimits = production.reduce( ( _limits, datapoint ) => {
 			if( datapoint.sourceId !== productionSourceId ) return _limits
@@ -125,11 +125,11 @@ function LoadProjectData() {
 		if( newLimits.gas.firstYear === settings.year.end ) newLimits.gas.firstYear = 0
 
 		set_limits( l => ( { ...l, production: newLimits } ) )
-		DEBUG && console.log( 'useEffect Production', { newLimits } )
+		DEBUG && console.info( 'useEffect Production', { newLimits } )
 	}, [ production, productionSourceId ] )
 
 	useEffect( () => {
-		DEBUG && console.log( 'useEffect projection', { projection, limits } )
+		DEBUG && console.info( 'useEffect projection', { projection, limits } )
 		if( !projection?.length > 0 ) return
 
 		let newLimits
@@ -160,7 +160,7 @@ function LoadProjectData() {
 	}, [ projection, projectionSourceId ] )
 
 	useEffect( () => {
-		DEBUG && console.log( 'useEffect reserves', { limits, reserves } )
+		DEBUG && console.info( 'useEffect reserves', { limits, reserves } )
 		if( !( reserves?.length > 0 ) ) return
 		const newLimits = reserves.reduce( ( _limits, datapoint ) => {
 			_limits.firstYear = ( _limits.firstYear === undefined || datapoint.year < _limits.firstYear ) ? datapoint.year : _limits.firstYear
@@ -171,12 +171,12 @@ function LoadProjectData() {
 		set_limits( l => ( { ...l, reserves: newLimits } ) )
 	}, [ reserves ] )
 
-	DEBUG && console.log( { limits, project, production, projection, reserves } )
+	DEBUG && console.info( { limits, project, production, projection, reserves } )
 
 	// Figure out available grades when reserves loaded.
 
 	useEffect( () => {
-		DEBUG && console.log( 'useEffect Reserve Grades', { reserves, reservesSourceId } )
+		DEBUG && console.info( 'useEffect Reserve Grades', { reserves, reservesSourceId } )
 		if( !( reserves?.length > 0 ) ) return
 		const _grades = reserves
 			.filter( r => r.sourceId === reservesSourceId )
@@ -184,7 +184,7 @@ function LoadProjectData() {
 				g[ r.grade ] = false
 				return g
 			}, {} )
-		//console.log( _grades )
+		//console.info( _grades )
 		set_grades( _grades )
 	}, [ reserves?.length, reservesSourceId ] )
 
@@ -194,7 +194,7 @@ function LoadProjectData() {
 		if( !productionSourceId ) return []
 		if( !projectionSourceId ) return []
 		if( !reservesSourceId ) return []
-		DEBUG && console.log( 'useMemo projectedProduction', { projection, reserves } )
+		DEBUG && console.info( 'useMemo projectedProduction', { projection, reserves } )
 		try {
 			return reservesProduction( projection, reserves, projectionSourceId, reservesSourceId, limits, grades )
 		} catch( e ) {

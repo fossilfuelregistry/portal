@@ -5,12 +5,12 @@ export function makeEstimate( scope, estimate ) {
 }
 
 export function getFuelScopeCO2( datapoint, estimate ) {
-	//console.log( { datapoint: JSON.stringify( datapoint ), estimate, e: makeEstimate( datapoint, estimate ) } )
+	//console.info( { datapoint: JSON.stringify( datapoint ), estimate, e: makeEstimate( datapoint, estimate ) } )
 	return makeEstimate( datapoint, estimate )
 }
 
 export function getFuelCO2( datapoint, estimate ) {
-	//console.log( { datapoint } )
+	//console.info( { datapoint } )
 	if( !datapoint ) return 0
 	return getFuelScopeCO2( datapoint.scope1, estimate ) + getFuelScopeCO2( datapoint.scope3, estimate )
 }

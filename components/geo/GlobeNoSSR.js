@@ -17,7 +17,7 @@ export default function GlobeNoSSR( { year, dataKeyName = 'production', onGlobeR
 				if( !f.ok ) throw new Error( 'Status ' + f.status + ' ' + f.statusText )
 				const data = await f.json()
 				set_countries( data )
-				//console.log( data.find( d => d.isoA2 === 'GB' ) )
+				//console.info( data.find( d => d.isoA2 === 'GB' ) )
 			} catch( e ) {
 				notification.error( {
 					message: "Failed to fetch global dataset.",

@@ -26,7 +26,7 @@ export default function CountrySelector() {
 		= useQuery( GQL_productionCountries )
 
 	const countries = useMemo( () => {
-		DEBUG && console.log( 'CountrySelector useMemo', {
+		DEBUG && console.info( 'CountrySelector useMemo', {
 			language: router.locale,
 			countries: countriesData?.getProducingIso3166?.nodes
 		} )
@@ -36,12 +36,12 @@ export default function CountrySelector() {
 			.sort( ( a, b ) => a.name.localeCompare( b.name ) )
 	}, [ countriesData?.getProducingIso3166?.nodes?.length, router.locale ] )
 
-	DEBUG && console.log( '\n\n', countries.length, countriesData?.getProducingIso3166?.nodes?.length )
+	DEBUG && console.info( '\n\n', countries.length, countriesData?.getProducingIso3166?.nodes?.length )
 
 	useEffect( () => { // Preload based on URL value which is initialized in Redux state
 		if( !countries.length ) return
 		if( !country || country === '-' || country === 'null' ) return
-		DEBUG && console.log( 'CountrySelector useEffect COUNTRYNAME', country, router.query?.country )
+		DEBUG && console.info( 'CountrySelector useEffect COUNTRYNAME', country, router.query?.country )
 
 		if( !selectedCountryOption || selectedCountryOption.value !== country ) {
 			const name = countries.find( c => c.iso3166?.toLowerCase() === country.toLowerCase() )?.[ 'name' ]
@@ -54,7 +54,7 @@ export default function CountrySelector() {
 	}, [ countries?.length ] )
 
 	useEffect( () => { // Look for regions in the country
-		DEBUG && console.log( 'CountrySelector useEffect REGION', router.query?.country )
+		DEBUG && console.info( 'CountrySelector useEffect REGION', router.query?.country )
 		const _regions = ( countriesData?.getProducingIso3166?.nodes ?? [] )
 			.filter( r => r.iso3166 === country && !!r.iso31662 )
 			.map( r => ( { ...r, name: r[ router.locale ] ?? r.en } ) )
@@ -62,7 +62,7 @@ export default function CountrySelector() {
 		if( _regions.length === 0 ) set_selectedRegionOption( undefined )
 	}, [ country ] )
 
-	DEBUG && console.log( 'CountrySelector', { countries, regions, selectedCountryOption } )
+	DEBUG && console.info( 'CountrySelector', { countries, regions, selectedCountryOption } )
 
 	if( loadingCountries || errorLoadingCountries )
 		return <GraphQLStatus loading={ loadingCountries } error={ errorLoadingCountries }/>

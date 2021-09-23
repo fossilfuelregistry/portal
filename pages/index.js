@@ -53,12 +53,12 @@ export default function Home() {
 			data.production = country.countryProductionsByIso3166?.nodes?.filter( p => p.sourceId === sourceId ) ?? {}
 			data.reserves = country.countryReservesByIso3166?.nodes?.filter( p => p.sourceId === reservesId ) ?? {}
 
-			console.log( { sources, reserves, country, sourceId, reservesId, data } )
+			console.info( { sources, reserves, country, sourceId, reservesId, data } )
 
 			if( data.production.length > 0 ) {
 				const lastProd = findLastProductionYear( data.production, sourceId )
 				const lastRes = findLastReservesYear( data.reserves )
-				console.log( { lastProd, lastRes } )
+				console.info( { lastProd, lastRes } )
 				if( lastProd.yearData[ 0 ] ) {
 					data.countryProd = getFuelCO2( co2FromVolume( lastProd.yearData[ 0 ] ), 2 )
 						+ getFuelCO2( co2FromVolume( lastProd.yearData[ 1 ] ), 2 )
@@ -68,7 +68,7 @@ export default function Home() {
 							+ getFuelCO2( co2FromVolume( lastRes.yearData[ 1 ] ), 2 )
 					}
 
-					DEBUG && console.log( data )
+					DEBUG && console.info( data )
 					set_modalData( data )
 				}
 			}

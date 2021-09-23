@@ -7,17 +7,17 @@ const DEBUG = false
 const projectBorderStyle = { "color": "#2b8d6e", "weight": 3, "opacity": 0.65 }
 
 const loadScript = ( scriptId, srcUrl, callback ) => {
-	DEBUG && console.log( 'Leaflet::loadScript', { scriptId, srcUrl, callback } )
+	DEBUG && console.info( 'Leaflet::loadScript', { scriptId, srcUrl, callback } )
 	const existingScript = document.getElementById( 'scriptId' )
 	if( !existingScript ) {
 		const script = document.createElement( 'script' )
 		script.src = srcUrl
 		script.id = scriptId
-		DEBUG && console.log( '...', scriptId )
+		DEBUG && console.info( '...', scriptId )
 		document.body.appendChild( script )
 		script.onload = () => {
 			if( callback ) {
-				DEBUG && console.log( '<<<', scriptId )
+				DEBUG && console.info( '<<<', scriptId )
 				callback()
 			}
 		}
@@ -43,14 +43,14 @@ export default function Leaflet( {
 	const highlightGroup = useRef()
 	const [ loaded, set_loaded ] = useState( 0 )
 
-	DEBUG && console.log( { center, onMove, onMap, className } )
+	DEBUG && console.info( { center, onMove, onMap, className } )
 
 	useEffect( () => {
 		loadScript( 'leaflet-script', 'https://unpkg.com/leaflet/dist/leaflet.js', () => set_loaded( l => l + 1 ) )
 	}, [] )
 
 	useEffect( () => {
-		DEBUG && console.log( { loaded } )
+		DEBUG && console.info( { loaded } )
 		switch( loaded ) {
 			case 1:
 				loadScript( 'leaflet-providers', '/js/leaflet-providers.js', () => set_loaded( l => l + 1 ) )
@@ -69,7 +69,7 @@ export default function Leaflet( {
 				).addTo( mapRef.current )
 
 				mapRef.current.on( 'moveend', event => {
-					DEBUG && console.log( { event, center: mapRef.current.getCenter() } )
+					DEBUG && console.info( { event, center: mapRef.current.getCenter() } )
 					onMove?.( mapRef.current.getCenter(), mapRef.current.getBounds() )
 				} )
 
@@ -101,14 +101,14 @@ export default function Leaflet( {
 			outlineLayer.current = window.L.GeoJSON.geometryToLayer( outlineGeometry )
 			outlineLayer.current.addTo( mapRef.current )
 			const bounds = outlineLayer.current.getBounds()
-			DEBUG && console.log( 'FIT!', outlineGeometry, bounds.isValid() )
-			DEBUG && console.log( JSON.stringify( bounds ) )
-			DEBUG && console.log( bounds )
+			DEBUG && console.info( 'FIT!', outlineGeometry, bounds.isValid() )
+			DEBUG && console.info( JSON.stringify( bounds ) )
+			DEBUG && console.info( bounds )
 			mapRef.current.fitBounds( bounds, { maxZoom: 6 } )
-			DEBUG && console.log( 'FITTED' )
+			DEBUG && console.info( 'FITTED' )
 		} catch( e ) {
-			console.log( e )
-			console.log( { outlineGeometry } )
+			console.info( e )
+			console.info( { outlineGeometry } )
 		}
 	}, [ domRef.current, loaded, outlineGeometry ] )
 
@@ -121,18 +121,18 @@ export default function Leaflet( {
 			if( highlightedProjects[ 0 ].geojson.type === 'Point' ) {
 				mapRef.current.setView( window.L.GeoJSON.coordsToLatLng( highlightedProjects[ 0 ].geojson.coordinates ) )
 				mapRef.current.setZoom( 11 )
-				//console.log( window.L.GeoJSON.coordsToLatLng( highlightedProjects[ 0 ].geojson.coordinates ) )
+				//console.info( window.L.GeoJSON.coordsToLatLng( highlightedProjects[ 0 ].geojson.coordinates ) )
 			} else {
 				const highlight = window.L.GeoJSON.geometryToLayer( highlightedProjects[ 0 ].geojson )
 				highlightGroup.current.addLayer( highlight )
 				const bounds = highlight.getBounds()
 
-				console.log( 'HIGHLIGHT', { highlightGroup, highlightedProjects, bounds } )
+				console.info( 'HIGHLIGHT', { highlightGroup, highlightedProjects, bounds } )
 				mapRef.current.fitBounds( bounds, { maxZoom: 7 } )
 			}
 		} catch( e ) {
-			console.log( e )
-			console.log( { highlightedProjects } )
+			console.info( e )
+			console.info( { highlightedProjects } )
 		}
 	}, [ domRef.current, loaded, highlightedProjects ] )
 
@@ -153,8 +153,8 @@ export default function Leaflet( {
 				mapRef.current.fitBounds( bounds, { maxZoom: 6 } )
 			}
 		} catch( e ) {
-			console.log( e )
-			console.log( { projects } )
+			console.info( e )
+			console.info( { projects } )
 		}
 	}, [ domRef.current, loaded, projects ] )
 
