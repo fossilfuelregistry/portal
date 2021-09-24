@@ -29,7 +29,7 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 	return (
 		<>
 			<Row gutter={ [ 32, 32 ] }>
-				<Col xs={ 24 } xl={ 24 } xxl={ 16 }>
+				<Col xs={ 24 } xl={ 24 } xxl={ 24 }>
 					<div className="big-graph-wrap">
 						<CO2ForecastGraph
 							production={ production }
@@ -41,17 +41,17 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 					</div>
 				</Col>
 
-				<Col xs={ 24 } xl={ 24 } xxl={ 8 }>
+				<Col xs={ 24 } xl={ 24 } xxl={ 24 }>
 					<Row gutter={ [ 32, 32 ] }>
-						<Col xs={ 24 } xl={ 12 } xxl={ 24 }>
+						<Col xs={ 24 } xl={ 8 } xxl={ 8 }>
 							<YearSummary dataset={ production } limits={ limits }/>
 						</Col>
 
-						<Col xs={ 24 } xl={ 12 } xxl={ 24 }>
+						<Col xs={ 24 } xl={ 8 } xxl={ 8 }>
 							<InputSummary dataset={ production }/>
 						</Col>
 
-						<Col xs={ 24 } xl={ 12 } xxl={ 24 }>
+						<Col xs={ 24 } xl={ 8 } xxl={ 8 }>
 							<FutureSummary
 								dataset={ projection }
 								limits={ limits }

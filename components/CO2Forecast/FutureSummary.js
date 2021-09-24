@@ -68,7 +68,8 @@ function FutureSummary( { dataset, limits, projectionSources } ) {
 		<div className="table-wrap">
 
 			<div className="top">
-				{ getText( 'future_emissions' ) } { getText( 'megaton' ) } CO²e
+				{ getText( 'future_emissions' ) }<br/>
+				{ getText( 'megaton' ) } CO²e
 			</div>
 
 			<div style={ { flexGrow: 1, minHeight: 400 } }>
@@ -101,6 +102,10 @@ function FutureSummary( { dataset, limits, projectionSources } ) {
                 padding: 3px 12px;
                 font-weight: bold;
                 text-align: center;
+              }
+
+              .table-wrap :global(svg) {
+                margin: 0 auto;
               }
 			` }
 			</style>

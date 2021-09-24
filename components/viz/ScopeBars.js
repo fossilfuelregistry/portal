@@ -8,6 +8,7 @@ import useText from "lib/useText"
 const DEBUG = false
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
+const colWidth = 130
 
 function ScopeBarsBase( { totals = [], parentWidth, parentHeight } ) {
 	const { getText } = useText()
@@ -17,11 +18,12 @@ function ScopeBarsBase( { totals = [], parentWidth, parentHeight } ) {
 	DEBUG && console.info( { total, totals, maxTotal, parentHeight } )
 	const primary = theme[ '@primary-color' ]
 	const textY = parentHeight - 8
+	const width = Math.min( parentWidth, colWidth * 3 )
 
 	return (
 		<svg
-			width={ parentWidth } height={ parentHeight }
-			viewBox={ "-10 -10 400 " + ( ( parentHeight ?? 400 ) + 20 ).toFixed() }
+			width={ width } height={ parentHeight }
+			viewBox={ "-10 -10 " + width + ' ' + ( ( parentHeight ?? 400 ) + 30 ).toFixed() }
 		>
 			<PercentileBar
 				high={ totals.scope1[ 2 ] }
@@ -46,7 +48,7 @@ function ScopeBarsBase( { totals = [], parentWidth, parentHeight } ) {
 				height={ parentHeight ?? 400 }
 				scale={ maxTotal }
 				color={ "#1b8d98" }
-				x={ 130 }
+				x={ colWidth }
 				y={ 0 }
 				width={ 80 }
 			/>
@@ -62,7 +64,7 @@ function ScopeBarsBase( { totals = [], parentWidth, parentHeight } ) {
 				height={ parentHeight ?? 400 }
 				scale={ maxTotal }
 				color={ primary }
-				x={ 260 }
+				x={ 2 * colWidth }
 				y={ 0 }
 				width={ 80 }
 			/>

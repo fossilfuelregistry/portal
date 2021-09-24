@@ -9,7 +9,7 @@ const DEBUG = true
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
-function SourceBarsBase( { sources = [], parentWidth, parentHeight } ) {
+function SourceBarsBase( { sources = [], parentHeight } ) {
 	const { getText } = useText()
 
 	let maxTotal = 0
@@ -25,11 +25,12 @@ function SourceBarsBase( { sources = [], parentWidth, parentHeight } ) {
 	DEBUG && console.info( { sources, maxTotal, parentHeight } )
 	const primary = theme[ '@primary-color' ]
 	const textY = parentHeight - 8
+	const width = 130 * sources.length
 
 	return (
 		<svg
-			width={ parentWidth } height={ parentHeight }
-			viewBox={ "-10 -10 400 " + ( ( parentHeight ?? 400 ) + 20 ).toFixed() }
+			width={ width } height={ parentHeight }
+			viewBox={ "-10 -10 " + width + ' ' + ( ( parentHeight ?? 400 ) + 20 ).toFixed() }
 		>
 			{ sources.map( ( s, i ) => {
 				DEBUG && console.info( 'Source', s.name, s.range )

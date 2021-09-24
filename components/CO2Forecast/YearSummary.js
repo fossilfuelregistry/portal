@@ -52,6 +52,7 @@ export default function YearSummary( { dataset = [] } ) {
 
               .table-wrap :global(svg) {
                 display: block;
+                margin: 0 auto;
               }
 
               .top {

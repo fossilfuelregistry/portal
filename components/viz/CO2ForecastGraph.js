@@ -6,7 +6,6 @@ import { curveLinear } from '@visx/curve'
 import { scaleLinear } from '@visx/scale'
 import { withTooltip } from '@visx/tooltip'
 import { max } from 'd3-array'
-import { Button } from 'antd'
 import { DownloadOutlined } from '@ant-design/icons'
 import { withParentSize } from "@visx/responsive"
 import useText from "lib/useText"
@@ -14,8 +13,11 @@ import { combineOilAndGas, sumOfCO2 } from "../CO2Forecast/calculate"
 import { useSelector } from "react-redux"
 import { saveSvgAsPng } from 'save-svg-as-png'
 import settings from 'settings'
+import getConfig from "next/config"
 
 const DEBUG = false
+
+const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
 const colors = {
 	oil: { past: '#008080', reserves: '#70a494', contingent: '#b4c8a8' },
@@ -85,12 +87,12 @@ function CO2ForecastGraphBase( {
 	if( !( maxCO2 > 0 ) ) return null // JSON.stringify( maxCO2 )
 
 	return (
-		<div className="graph" style={ { height: height, minHeight: 400, maxHeight: 700 } }>
+		<div className="graph" style={ { height: height } }>
 			<a
 				style={ { position: "absolute", top: 8, right: 16, zIndex: 1001 } }
 				onClick={ e => {
 					e.stopPropagation()
-					saveSvgAsPng( document.getElementById( "CO2Forecast" ), "CO2Forecast.png" );
+					saveSvgAsPng( document.getElementById( "CO2Forecast" ), "CO2Forecast.png" )
 				} }
 			>
 				<DownloadOutlined/>
@@ -278,6 +280,15 @@ function CO2ForecastGraphBase( {
 
               .graph {
                 position: relative;
+                min-height: 500px;
+                max-height: 700px;
+              }
+
+              @media (max-width: ${ theme[ '@screen-sm' ] }) {
+                .graph {
+                  min-height: 350px;
+                  max-height: 500px;
+                }
               }
 
               .legend {

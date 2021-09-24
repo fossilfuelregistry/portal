@@ -10,7 +10,11 @@ export default function FuelIcon( { fuel, height, width, padding } ) {
 		oil: <IconOil/>,
 	}
 
-	const icon = React.cloneElement( icons[ fuel ], { height, width: width ?? height } )
+	let icon
+	if( !Object.keys( icons ).includes( fuel ) )
+		icon = ''
+	else
+		icon = React.cloneElement( icons[ fuel ], { height, width: width ?? height } )
 
 	if( padding > 0 )
 		return <div style={ { padding } }>{ icon }</div>
