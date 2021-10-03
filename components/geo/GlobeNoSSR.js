@@ -2,10 +2,12 @@ import Globe from "react-globe.gl"
 import Spinner from "./Spinner"
 import { useCallback, useEffect, useState } from "react"
 import { notification } from "antd"
+import { useRouter } from "next/router"
 
 export default function GlobeNoSSR( { year, dataKeyName = 'production', onGlobeReady, onCountryClick } ) {
 	const [ countries, set_countries ] = useState()
 	const [ polygons, set_polygons ] = useState( [] )
+	const router = useRouter()
 
 	useEffect( () => {
 		const asyncEffect = async() => {
@@ -51,6 +53,7 @@ export default function GlobeNoSSR( { year, dataKeyName = 'production', onGlobeR
 			onPolygonClick={ onCountryClick }
 			polygonsData={ polygons }
 			polygonAltitude={ getAltitude }
+			polygonLabel={ country => country[ router.locale ] }
 			polygonCapColor={ () => 'rgba(20, 0, 0, 0.5)' }
 			polygonSideColor={ () => 'rgba(0, 0, 0, 0.08)' }
 			polygonsTransitionDuration={ 3000 }
