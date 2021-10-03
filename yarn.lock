@@ -3118,6 +3118,11 @@ get-orientation@1.1.2:
   dependencies:
     stream-parser "^0.3.1"
 
+get-own-enumerable-property-symbols@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/get-own-enumerable-property-symbols/-/get-own-enumerable-property-symbols-3.0.2.tgz#b5fde77f22cbe35f390b4e089922c50bce6ef664"
+  integrity sha512-I0UBV/XOz1XkIJHEUDMZAbzCThU/H8DxmSfmdGcKPnVhu2VfFqr34jr9777IyaTYvxjedWhqVIilEDsCdP5G6g==
+
 get-stream@^6.0.1:
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/get-stream/-/get-stream-6.0.1.tgz#a262d8eef67aced57c2852ad6167526a43cbf7b7"
@@ -3560,6 +3565,11 @@ is-number@^7.0.0:
   resolved "https://registry.yarnpkg.com/is-number/-/is-number-7.0.0.tgz#7535345b896734d5f80c4d06c50955527a14f12b"
   integrity sha512-41Cifkg6e8TylSpdtTpeLVMqvSBEVzTttHvERD741+pnZ8ANv0004MRL43QKPDlK9cGvNp6NZWZUBlbGXYxxng==
 
+is-obj@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/is-obj/-/is-obj-3.0.0.tgz#b0889f1f9f8cb87e87df53a8d1230a2250f8b9be"
+  integrity sha512-IlsXEHOjtKhpN8r/tRFj2nDyTmHvcfNeu/nrRIcXE17ROeatXchkojffa1SpdqW4cr/Fj6QkEf/Gn4zf6KKvEQ==
+
 is-plain-obj@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/is-plain-obj/-/is-plain-obj-4.0.0.tgz#06c0999fd7574edf5a906ba5644ad0feb3a84d22"
@@ -3588,6 +3598,11 @@ is-regex@^1.1.4:
   dependencies:
     call-bind "^1.0.2"
     has-tostringtag "^1.0.0"
+
+is-regexp@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/is-regexp/-/is-regexp-3.0.0.tgz#6f92c66ecd4206a9e41fbabbd63a8e05ba76fd0c"
+  integrity sha512-qbTM1elwEGoOK1GK2NngtLxRohdSgJME5vjQQaOoSWkzIHJVCxT+t+BO1/a7EhJixZOUUMda7Uj5gxjbJJhieA==
 
 is-string@^1.0.5:
   version "1.0.5"
@@ -6026,6 +6041,15 @@ string_decoder@~1.1.1:
   integrity sha512-n/ShnvDi6FHbbVfviro+WojiFzv+s8MPMHBczVePfUpDJLwoLT0ht1l4YwBCbi8pJAveEEdnkHyPyTP/mzRfwg==
   dependencies:
     safe-buffer "~5.1.0"
+
+stringify-object@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/stringify-object/-/stringify-object-4.0.0.tgz#57a379dacb5355ab3dbe93693ce974f1234f7c88"
+  integrity sha512-MkMnWfxpZgZdd4z+EM7zmpPQZ6tCyC/vx+D1Mz6xbLHpzQwjHjSQCv7LEjDMArrnKCeMWn9KKeDEoifF2B6oaQ==
+  dependencies:
+    get-own-enumerable-property-symbols "^3.0.2"
+    is-obj "^3.0.0"
+    is-regexp "^3.0.0"
 
 strip-ansi@6.0.0, strip-ansi@^6.0.0:
   version "6.0.0"

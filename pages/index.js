@@ -1,18 +1,13 @@
 import TopNavigation from "components/navigation/TopNavigation"
-import getConfig from 'next/config'
 import dynamic from "next/dynamic"
-import { Alert, Button, Col, Modal, Radio, Row, Slider } from "antd"
-import React, { useCallback, useEffect, useState } from "react"
+import { Button, Modal } from "antd"
+import React, { useState } from "react"
 import { useRouter } from "next/router"
 import useText from "lib/useText"
 import { NextSeo } from "next-seo"
-import { findLastProductionYear, findLastReservesYear, getFuelCO2 } from "components/viz/util"
-import { useConversionHooks } from "components/viz/conversionHooks"
 import Footer from "components/Footer"
 
 const DEBUG = false
-
-const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
 const GlobeNoSSR = dynamic( () => import( "components/geo/GlobeNoSSR" ),
 	{ ssr: false } )
@@ -20,60 +15,7 @@ const GlobeNoSSR = dynamic( () => import( "components/geo/GlobeNoSSR" ),
 export default function Home() {
 	const router = useRouter()
 	const { getText } = useText()
-	const [ year, set_year ] = useState( 2019 )
 	const [ country, set_country ] = useState( undefined )
-	const [ modalData, set_modalData ] = useState( undefined )
-	const [ tooltipVisible, set_tooltipVisible ] = useState( false )
-	const [ dataKeyName, set_dataKeyName ] = useState( 'production' )
-	const { co2FromVolume } = useConversionHooks()
-
-	const handleChangeKeyName = useCallback( event => {
-		set_dataKeyName( event.target.value )
-	}, [] )
-
-	useEffect( () => {
-		if( country ) {
-			const data = {}
-			const sources = country.countryProductionsByIso3166?.nodes?.reduce( ( s, d ) => {
-				s[ d.sourceId ] = true
-				return s
-			}, {} )
-			const reserves = country.countryReservesByIso3166?.nodes?.reduce( ( s, d ) => {
-				s[ d.sourceId ] = true
-				return s
-			}, {} )
-			let sourceId = 2, reservesId = 2 // EIA
-			if( !sources[ sourceId ] ) sourceId = 1
-			if( !sources[ sourceId ] ) sourceId = 3
-			if( !sources[ sourceId ] ) return
-
-			if( !reserves[ reservesId ] ) reservesId = 1
-			if( !reserves[ reservesId ] ) reservesId = 3
-
-			data.production = country.countryProductionsByIso3166?.nodes?.filter( p => p.sourceId === sourceId ) ?? {}
-			data.reserves = country.countryReservesByIso3166?.nodes?.filter( p => p.sourceId === reservesId ) ?? {}
-
-			console.info( { sources, reserves, country, sourceId, reservesId, data } )
-
-			if( data.production.length > 0 ) {
-				const lastProd = findLastProductionYear( data.production, sourceId )
-				const lastRes = findLastReservesYear( data.reserves )
-				console.info( { lastProd, lastRes } )
-				if( lastProd.yearData[ 0 ] ) {
-					data.countryProd = getFuelCO2( co2FromVolume( lastProd.yearData[ 0 ] ), 2 )
-						+ getFuelCO2( co2FromVolume( lastProd.yearData[ 1 ] ), 2 )
-
-					if( lastRes.yearData[ 0 ] ) {
-						data.countryRes = getFuelCO2( co2FromVolume( lastRes.yearData[ 0 ] ), 2 )
-							+ getFuelCO2( co2FromVolume( lastRes.yearData[ 1 ] ), 2 )
-					}
-
-					DEBUG && console.info( data )
-					set_modalData( data )
-				}
-			}
-		}
-	}, [ country ] )
 
 	return (
 		<div className="page">
@@ -100,41 +42,9 @@ export default function Home() {
 			<TopNavigation/>
 
 			<div className="aspect-order">
-				<div className="content-block globe-controls aspect-controlled">
-					<Row gutter={ [ 4, 12 ] }>
-						<Col xs={ 24 } md={ 16 }>
-							<Slider
-								trackStyle={ { height: '12px' } }
-								railStyle={ { height: '12px' } }
-								handleStyle={ { height: '22px', width: '22px' } }
-								tooltipVisible={ tooltipVisible }
-								min={ 1970 }
-								max={ 2021 }
-								onChange={ set_year }
-								value={ year }
-							/>
-						</Col>
-						<Col xs={ 24 } md={ 8 } style={ { textAlign: 'center' } }>
-							<Radio.Group
-								options={ [
-									{ label: 'PRODUCTION', value: 'production' },
-									{ label: 'RESERVES', value: 'reserves' },
-								] }
-								onChange={ handleChangeKeyName }
-								value={ dataKeyName }
-								optionType="button"
-								buttonStyle="solid"
-							/>
-						</Col>
-					</Row>
-				</div>
-
 				<div className="content-block">
 					<GlobeNoSSR
-						onGlobeReady={ () => set_tooltipVisible( true ) }
 						onCountryClick={ set_country }
-						year={ year }
-						dataKeyName={ dataKeyName }
 					/>
 				</div>
 			</div>
@@ -143,43 +53,39 @@ export default function Home() {
 
 			{ !!country &&
 			<Modal
-				visible={ country?.name?.length > 0 }
+				visible={ country?.iso3166?.length > 0 }
 				onCancel={ () => set_country( undefined ) }
 				footer={ null }
 			>
-				<h1>{ country?.name }</h1>
+				<h1>{ country?.[ router.locale ] }</h1>
 
-				{ modalData?.countryProd > 0 &&
 				<table>
 					<tbody>
-						<tr>
-							<td>{ getText( 'population' ) } &nbsp;</td>
-							<td align="right">{ Math.round( country.popEst / 1000000 ) }</td>
-							<td>M</td>
+						<tr style={{ height: '50px', verticalAlign: 'bottom' }}>
+							<td colSpan={ 3 }>{ country.y } { getText( 'production' ) }</td>
 						</tr>
-						<tr>
-							<td>{ getText( 'production' ) } { year }&nbsp;&nbsp;</td>
-							<td align="right">{ modalData.countryProd?.toFixed( 1 ) }</td>
-							<td>M Tons CO²</td>
-						</tr>
-						{ modalData.countryRes &&
-						<tr>
-							<td>{ getText( 'reserves' ) } { year }&nbsp;&nbsp;</td>
-							<td align="right">{ modalData.countryRes?.toFixed( 1 ) }</td>
-							<td>M Tons CO²</td>
-						</tr> }
-					</tbody>
-				</table> }
 
-				{ !modalData &&
-				<Alert type="warning" showIcon message="EIA Production unavailable"/> }
+						{ country.p.map( p => (
+							<tr key={ p.f }>
+								<td>{ getText( p.f ) }</td>
+								<td align="right">{ p.v?.toFixed( 1 ) }</td>
+								<td>&nbsp;&nbsp;{ p.u }</td>
+							</tr> ) ) }
+
+						<tr style={{ height: '50px', verticalAlign: 'bottom' }}>
+							<td>{ getText( 'emissions' ) }</td>
+							<td align="right">{ country.t?.toFixed( 1 ) }</td>
+							<td>&nbsp;&nbsp;M Tons CO²</td>
+						</tr>
+					</tbody>
+				</table>
 
 				<Button
 					type="primary"
 					block style={ { marginTop: 24 } }
 					onClick={ () => {
 						set_country( undefined )
-						router.push( 'co2-forecast/' + country.isoA2?.toLowerCase() )
+						router.push( 'co2-forecast/' + country.iso3166?.toLowerCase() )
 					} }
 				>
 					{ getText( 'goto_co2_forecast' ) }
