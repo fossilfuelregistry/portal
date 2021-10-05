@@ -11,6 +11,7 @@ import CountrySelector from "../components/navigation/CountrySelector"
 import ProjectSelector from "../components/navigation/ProjectSelector"
 import { useSelector } from "react-redux"
 import Calculator from "../components/CO2Forecast/Calculator"
+import InfoBox from "../components/InfoBox"
 
 const DEBUG = false
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
@@ -50,7 +51,7 @@ export default function Home() {
 
 			<div className="page-padding">
 
-				<Row>
+				<Row gutter={ 12 }>
 					<Col xs={ 24 } lg={ 8 }>
 						<Row>
 							<Col xs={ 24 }>
@@ -88,9 +89,21 @@ export default function Home() {
 					</Col>
 
 					<Col xs={ 24 } lg={ 16 }>
-						<GlobeNoSSR
-							onCountryClick={ set_globeCountry }
-						/>
+						<div className="globe-col-wrap">
+							<div className="globe-wrap">
+								<GlobeNoSSR
+									onCountryClick={ set_globeCountry }
+								/>
+							</div>
+							<Row gutter={ 12 }>
+								<Col xs={ 24 } lg={ 12 }>
+									<InfoBox header={ 'About' } content={ 'Hello...' }/>
+								</Col>
+								<Col xs={ 24 } lg={ 12 }>
+									<InfoBox header={ 'Methodology' } content={ 'Hello...' }/>
+								</Col>
+							</Row>
+						</div>
 					</Col>
 				</Row>
 			</div>
@@ -163,6 +176,17 @@ export default function Home() {
                 border-radius: ${ theme[ '@border-radius-base' ] };
                 padding: 10px;
                 margin-bottom: 12px;
+              }
+
+              .globe-col-wrap {
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+              }
+
+              .globe-wrap {
+                flex: 1 1 auto;
+                background-color: #65b7d6;
               }
 
               .vspace > :global(div) {
