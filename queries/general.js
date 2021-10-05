@@ -17,11 +17,6 @@ query producingCountries {
     nodes { iso3166 iso31662 fr es en sv } }
 }`
 
-export const GQL_fossilFuelTypes = gql`
-query fossilFuelTypes {
-	fossilFuelTypes { nodes }
-}`
-
 export const GQL_projectSources = gql`
 query projectSources( $id:Int! ) {
   getProjectSources(forId: $id) {

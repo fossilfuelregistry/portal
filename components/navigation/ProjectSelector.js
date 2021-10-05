@@ -39,7 +39,7 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 	} )
 
 	useEffect( () => {
-		if( loading || error || !projData?.getProjects?.nodes?.length ) return
+		if( loading || error || !( projData?.getProjects?.nodes instanceof Array ) ) return
 		DEBUG && console.info( 'ProjectSelector useEffect 2', { project, query } )
 
 		// Remove non-current entries and get one entry per project..
@@ -82,7 +82,7 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 	return (
 		<>
 			{ projects?.length > 0 &&
-			<div style={ { marginTop: 12 } }>
+			<div>
 				<Select
 					showSearch
 					style={ { minWidth: 120, width: '100%' } }

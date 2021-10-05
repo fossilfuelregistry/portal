@@ -1,13 +1,19 @@
 import TopNavigation from "components/navigation/TopNavigation"
 import dynamic from "next/dynamic"
-import { Button, Modal } from "antd"
+import { Button, Col, Modal, Row } from "antd"
 import React, { useState } from "react"
 import { useRouter } from "next/router"
 import useText from "lib/useText"
 import { NextSeo } from "next-seo"
 import Footer from "components/Footer"
+import getConfig from "next/config"
+import CountrySelector from "../components/navigation/CountrySelector"
+import ProjectSelector from "../components/navigation/ProjectSelector"
+import { useSelector } from "react-redux"
+import Calculator from "../components/CO2Forecast/Calculator"
 
 const DEBUG = false
+const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
 const GlobeNoSSR = dynamic( () => import( "components/geo/GlobeNoSSR" ),
 	{ ssr: false } )
@@ -15,7 +21,8 @@ const GlobeNoSSR = dynamic( () => import( "components/geo/GlobeNoSSR" ),
 export default function Home() {
 	const router = useRouter()
 	const { getText } = useText()
-	const [ country, set_country ] = useState( undefined )
+	const country = useSelector( redux => redux.country )
+	const [ globeCountry, set_globeCountry ] = useState( undefined )
 
 	return (
 		<div className="page">
@@ -41,40 +48,79 @@ export default function Home() {
 
 			<TopNavigation/>
 
-			<div className="aspect-order">
-				<div className="content-block">
-					<GlobeNoSSR
-						onCountryClick={ set_country }
-					/>
-				</div>
+			<div className="page-padding">
+
+				<Row>
+					<Col xs={ 24 } lg={ 8 }>
+						<Row>
+							<Col xs={ 24 }>
+								<div className="front-card">
+									<div className="header">{ getText( 'quick-search' ) }</div>
+									<div className="box vspace">
+										<CountrySelector/>
+										<ProjectSelector
+											iso3166={ country }
+											iso31662={ '' }
+										/>
+										<Button type="primary" block>
+											{ getText( 'co2_forecast' ) }
+										</Button>
+									</div>
+								</div>
+							</Col>
+							<Col xs={ 24 }>
+								<div className="front-card">
+									<div className="header">{ getText( 'co2e-calculator' ) }</div>
+									<div className="box">
+										<Calculator/>
+									</div>
+								</div>
+							</Col>
+							<Col xs={ 24 }>
+								<div className="front-card">
+									<div className="header">{ getText( 'global-results' ) }</div>
+									<div className="box">
+										GRAPHS
+									</div>
+								</div>
+							</Col>
+						</Row>
+					</Col>
+
+					<Col xs={ 24 } lg={ 16 }>
+						<GlobeNoSSR
+							onCountryClick={ set_globeCountry }
+						/>
+					</Col>
+				</Row>
 			</div>
 
 			<Footer/>
 
-			{ !!country &&
+			{ !!globeCountry &&
 			<Modal
-				visible={ country?.iso3166?.length > 0 }
-				onCancel={ () => set_country( undefined ) }
+				visible={ globeCountry?.iso3166?.length > 0 }
+				onCancel={ () => set_globeCountry( undefined ) }
 				footer={ null }
 			>
-				<h1>{ country?.[ router.locale ] }</h1>
+				<h1>{ globeCountry?.[ router.locale ] }</h1>
 
 				<table>
 					<tbody>
-						<tr style={{ height: '50px', verticalAlign: 'bottom' }}>
-							<td colSpan={ 3 }>{ country.y } { getText( 'production' ) }</td>
+						<tr style={ { height: '50px', verticalAlign: 'bottom' } }>
+							<td colSpan={ 3 }>{ globeCountry.y } { getText( 'production' ) }</td>
 						</tr>
 
-						{ country.p.map( p => (
+						{ globeCountry.p.map( p => (
 							<tr key={ p.f }>
 								<td>{ getText( p.f ) }</td>
 								<td align="right">{ p.v?.toFixed( 1 ) }</td>
 								<td>&nbsp;&nbsp;{ p.u }</td>
 							</tr> ) ) }
 
-						<tr style={{ height: '50px', verticalAlign: 'bottom' }}>
+						<tr style={ { height: '50px', verticalAlign: 'bottom' } }>
 							<td>{ getText( 'emissions' ) }</td>
-							<td align="right">{ country.t?.toFixed( 1 ) }</td>
+							<td align="right">{ globeCountry.t?.toFixed( 1 ) }</td>
 							<td>&nbsp;&nbsp;M Tons CO²</td>
 						</tr>
 					</tbody>
@@ -84,8 +130,8 @@ export default function Home() {
 					type="primary"
 					block style={ { marginTop: 24 } }
 					onClick={ () => {
-						set_country( undefined )
-						router.push( 'co2-forecast/' + country.iso3166?.toLowerCase() )
+						set_globeCountry( undefined )
+						router.push( 'co2-forecast/' + globeCountry.iso3166?.toLowerCase() )
 					} }
 				>
 					{ getText( 'goto_co2_forecast' ) }
@@ -105,6 +151,23 @@ export default function Home() {
                 }
               }
 
+              .front-card .header {
+                font-size: 16px;
+                font-weight: bold;
+                color: dimgrey;
+              }
+
+              .front-card .box {
+                min-height: 220px;
+                border: 1px solid ${ theme[ '@border-color-base' ] };
+                border-radius: ${ theme[ '@border-radius-base' ] };
+                padding: 10px;
+                margin-bottom: 12px;
+              }
+
+              .vspace > :global(div) {
+                margin-bottom: 12px;
+              }
 			` }
 			</style>
 
@@ -113,3 +176,7 @@ export default function Home() {
 }
 
 export { getStaticProps } from 'lib/getStaticProps'
+
+// 						<GlobeNoSSR
+// 							onCountryClick={ set_globeCountry }
+// 						/>

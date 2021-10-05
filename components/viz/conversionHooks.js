@@ -9,7 +9,7 @@ import settings from "../../settings"
 import { useRouter } from "next/router"
 import useText from "lib/useText"
 
-const DEBUG = false
+const DEBUG = true
 
 let lastConversionPath = []
 let lastConversionLoggedTimer
@@ -232,7 +232,7 @@ export const useConversionHooks = () => {
 		if( country ) {
 			// We want to override graphs to this country instead of the Redux state country
 			gc = countryConversionGraphs( country )
-			//console.info( 'Country Override:', country, volume, unit, fossilFuelType, gc )
+			DEBUG && console.info( 'Country Override:', country, volume, unit, fossilFuelType, gc )
 		}
 
 		if( gc.graphs === undefined ) {
