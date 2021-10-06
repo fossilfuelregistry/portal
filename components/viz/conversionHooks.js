@@ -9,7 +9,7 @@ import settings from "../../settings"
 import { useRouter } from "next/router"
 import useText from "lib/useText"
 
-const DEBUG = true
+const DEBUG = false
 
 let lastConversionPath = []
 let lastConversionLoggedTimer

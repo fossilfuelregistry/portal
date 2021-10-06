@@ -5,6 +5,7 @@ export function addToTotal( total, datapoint ) {
 		console.trace()
 		throw new Error( 'Calculation problem, addToTotal( undefined, ... )' )
 	}
+	if( !datapoint ) return
 	const scopes = Object.keys( datapoint )
 	if( !scopes?.length ) return
 	const ranges = Object.keys( datapoint[ scopes[ 0 ] ] )

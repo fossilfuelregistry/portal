@@ -1,17 +1,17 @@
 import TopNavigation from "components/navigation/TopNavigation"
 import dynamic from "next/dynamic"
-import { Button, Col, Modal, Row } from "antd"
+import { Button, Col, Modal, notification, Row } from "antd"
 import React, { useState } from "react"
 import { useRouter } from "next/router"
 import useText from "lib/useText"
 import { NextSeo } from "next-seo"
 import Footer from "components/Footer"
 import getConfig from "next/config"
-import CountrySelector from "../components/navigation/CountrySelector"
-import ProjectSelector from "../components/navigation/ProjectSelector"
-import { useSelector } from "react-redux"
-import Calculator from "../components/CO2Forecast/Calculator"
-import InfoBox from "../components/InfoBox"
+import ProjectSelector from "components/navigation/ProjectSelector"
+import { useDispatch, useSelector } from "react-redux"
+import Calculator from "components/CO2Forecast/Calculator"
+import InfoBox from "components/InfoBox"
+import CountrySelectorStandalone from "../components/navigation/CountrySelectorStandalone"
 
 const DEBUG = false
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
@@ -21,9 +21,12 @@ const GlobeNoSSR = dynamic( () => import( "components/geo/GlobeNoSSR" ),
 
 export default function Home() {
 	const router = useRouter()
+	const dispatch = useDispatch()
 	const { getText } = useText()
 	const country = useSelector( redux => redux.country )
+	const projectIdentifier = useSelector( redux => redux.projectIdentifier )
 	const [ globeCountry, set_globeCountry ] = useState( undefined )
+	const [ searchCountry, set_searchCountry ] = useState( undefined )
 
 	return (
 		<div className="page">
@@ -58,12 +61,23 @@ export default function Home() {
 								<div className="front-card">
 									<div className="header">{ getText( 'quick-search' ) }</div>
 									<div className="box vspace">
-										<CountrySelector/>
+										<CountrySelectorStandalone
+											onChange={ c => set_searchCountry( c?.value ) }
+											placeholder={ getText( 'origin_country' ) + '...' }
+										/>
 										<ProjectSelector
-											iso3166={ country }
+											iso3166={ searchCountry }
 											iso31662={ '' }
 										/>
-										<Button type="primary" block>
+										<Button
+											type="primary" block
+											disabled={ !searchCountry }
+											onClick={ () => {
+												let url = '/co2-forecast/' + searchCountry
+												if( projectIdentifier ) url += '?project=' + encodeURIComponent( projectIdentifier )
+												router.push( url )
+											} }
+										>
 											{ getText( 'co2_forecast' ) }
 										</Button>
 									</div>
@@ -144,6 +158,7 @@ export default function Home() {
 					block style={ { marginTop: 24 } }
 					onClick={ () => {
 						set_globeCountry( undefined )
+						dispatch( { type: 'COUNTRY', payload: globeCountry.iso3166 } )
 						router.push( 'co2-forecast/' + globeCountry.iso3166?.toLowerCase() )
 					} }
 				>
@@ -186,7 +201,7 @@ export default function Home() {
 
               .globe-wrap {
                 flex: 1 1 auto;
-                background-color: #65b7d6;
+                min-height: 330px;
               }
 
               .vspace > :global(div) {
@@ -200,7 +215,3 @@ export default function Home() {
 }
 
 export { getStaticProps } from 'lib/getStaticProps'
-
-// 						<GlobeNoSSR
-// 							onCountryClick={ set_globeCountry }
-// 						/>

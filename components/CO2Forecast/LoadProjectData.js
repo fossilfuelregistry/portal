@@ -36,7 +36,7 @@ function LoadProjectData() {
 					return _d
 				} )
 		} catch( e ) {
-			notification.error( { message: 'Application error', description: e.message } )
+			notification.error( { message: 'LoadProjectData error', description: e.message } )
 			return dataset
 		}
 	}

@@ -104,7 +104,7 @@ function CO2ForecastGraphBase( {
 						top={ height - 30 }
 						scale={ yearScale }
 						numTicks={ parentWidth > 520 ? 8 : 4 }
-						tickFormat={ x => `${ x.toFixed( 0 ) }` }
+						tickFormat={ x => `${ x?.toFixed( 0 ) }` }
 						tickLabelProps={ ( label, pos, ticks ) => {
 							let dx = 0
 							if( pos === 0 ) dx = 15
@@ -182,7 +182,7 @@ function CO2ForecastGraphBase( {
 					<AxisRight
 						scale={ productionScale }
 						numTicks={ parentWidth > 520 ? 8 : 4 }
-						tickFormat={ x => x.toFixed( 0 ).toString() }
+						tickFormat={ x => x?.toFixed( 0 ).toString() }
 						tickLabelProps={ ( label, pos ) => {
 							return {
 								dx: '0.25em',

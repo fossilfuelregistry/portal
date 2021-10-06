@@ -32,7 +32,7 @@ function LoadCountryData( { projectionSources } ) {
 		try {
 			return prepareProductionDataset( dataset ).map( p => ( { ...p, co2: co2FromVolume( p ) } ) )
 		} catch( e ) {
-			notification.error( { message: 'Application error', description: e.message, duration: 20 } )
+			notification.error( { message: 'LoadCountryData  error', description: e.message, duration: 20 } )
 			return dataset
 		}
 	}
