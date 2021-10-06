@@ -201,7 +201,13 @@ export default function Home() {
 
               .globe-wrap {
                 flex: 1 1 auto;
+                min-height: 450px;
+              }
+
+              @media (max-width: ${ theme[ '@screen-sm' ] }) {
+                .globe-wrap {
                 min-height: 330px;
+                }
               }
 
               .vspace > :global(div) {
