@@ -1,6 +1,6 @@
 import TopNavigation from "components/navigation/TopNavigation"
 import dynamic from "next/dynamic"
-import { Button, Col, Modal, notification, Row } from "antd"
+import { Button, Col, Modal, Row } from "antd"
 import React, { useState } from "react"
 import { useRouter } from "next/router"
 import useText from "lib/useText"
@@ -23,7 +23,6 @@ export default function Home() {
 	const router = useRouter()
 	const dispatch = useDispatch()
 	const { getText } = useText()
-	const country = useSelector( redux => redux.country )
 	const projectIdentifier = useSelector( redux => redux.projectIdentifier )
 	const [ globeCountry, set_globeCountry ] = useState( undefined )
 	const [ searchCountry, set_searchCountry ] = useState( undefined )
@@ -106,7 +105,10 @@ export default function Home() {
 						<div className="globe-col-wrap">
 							<div className="globe-wrap">
 								<GlobeNoSSR
-									onCountryClick={ set_globeCountry }
+									onCountryClick={ c => {
+										set_globeCountry( c )
+										console.info( 'onPolygonClick', c )
+									} }
 								/>
 							</div>
 							<Row gutter={ 12 }>
@@ -206,7 +208,7 @@ export default function Home() {
 
               @media (max-width: ${ theme[ '@screen-sm' ] }) {
                 .globe-wrap {
-                min-height: 330px;
+                  min-height: 330px;
                 }
               }
 
