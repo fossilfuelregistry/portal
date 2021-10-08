@@ -107,7 +107,6 @@ export default function Home() {
 								<GlobeNoSSR
 									onCountryClick={ c => {
 										set_globeCountry( c )
-										console.info( 'onPolygonClick', c )
 									} }
 								/>
 							</div>
@@ -126,7 +125,6 @@ export default function Home() {
 
 			<Footer/>
 
-			{ !!globeCountry &&
 			<Modal
 				visible={ globeCountry?.iso3166?.length > 0 }
 				onCancel={ () => set_globeCountry( undefined ) }
@@ -134,6 +132,7 @@ export default function Home() {
 			>
 				<h1>{ globeCountry?.[ router.locale ] }</h1>
 
+				{ !!globeCountry &&
 				<table>
 					<tbody>
 						<tr style={ { height: '50px', verticalAlign: 'bottom' } }>
@@ -153,7 +152,7 @@ export default function Home() {
 							<td>&nbsp;&nbsp;M Tons CO²</td>
 						</tr>
 					</tbody>
-				</table>
+				</table> }
 
 				<Button
 					type="primary"
@@ -167,7 +166,7 @@ export default function Home() {
 					{ getText( 'goto_co2_forecast' ) }
 				</Button>
 
-			</Modal> }
+			</Modal>
 
 			<style jsx>{ `
               .aspect-order {
