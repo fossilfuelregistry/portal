@@ -23,9 +23,11 @@ export default function Home() {
 	const router = useRouter()
 	const dispatch = useDispatch()
 	const { getText } = useText()
-	const projectIdentifier = useSelector( redux => redux.projectIdentifier )
+	const project = useSelector( redux => redux.project )
 	const [ globeCountry, set_globeCountry ] = useState( undefined )
 	const [ searchCountry, set_searchCountry ] = useState( undefined )
+
+	const projectIdentifier = project?.projectIdentifier
 
 	return (
 		<div className="page">
