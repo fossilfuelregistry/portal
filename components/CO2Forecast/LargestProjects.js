@@ -7,7 +7,7 @@ import { useRouter } from "next/router"
 import { AreaChartOutlined, DotChartOutlined, EnvironmentOutlined } from "@ant-design/icons"
 import ProjectSelector from "components/navigation/ProjectSelector"
 import settings from "../../settings"
-import { Col, Divider, Row, Switch } from "antd"
+import { Checkbox, Col, Divider, Row } from "antd"
 import FuelIcon from "components/navigation/FuelIcon"
 import { GQL_projects } from "../../queries/general"
 
@@ -60,18 +60,22 @@ export default function LargestProjects( { onPositions, onGeoClick } ) {
 				className="box"
 				style={ { display: 'flex', flexDirection: 'column', justifyContent: 'space-between' } }
 			>
-				<div>
+				<div className="switches">
 					<Row justify="center" gutter={ 16 }>
 						{ settings.supportedFuels.map( fuel =>
 							<Col key={ fuel }>
-								<Switch
-									checkedChildren={ <FuelIcon fuel={ fuel } height={ 22 } padding={ 3 }/> }
-									unCheckedChildren={ <FuelIcon fuel={ fuel } height={ 22 } padding={ 3 }/> }
+								<Checkbox
 									checked={ filters[ fuel ] !== false }
-									onChange={ checked => {
-										set_filters( { ...filters, [ fuel ]: checked } )
+									onChange={ e => {
+										console.log( e )
+										set_filters( { ...filters, [ fuel ]: e.target.checked } )
 									} }
-								/>
+								>
+									<div style={ { display: 'inline-flex', opacity: ( filters[ fuel ] !== false ) ? 1 : 0.4 } }>
+										<FuelIcon fuel={ fuel } height={ 22 }/>
+										<div style={ { paddingLeft: 4 } }>{ getText( fuel ) }</div>
+									</div>
+								</Checkbox>
 							</Col>
 						) }
 					</Row>
@@ -163,6 +167,10 @@ export default function LargestProjects( { onPositions, onGeoClick } ) {
 
               .co2-card :global(.ant-switch-inner svg path) {
                 fill: #ffffff;
+              }
+
+              .switches :global(label) {
+                align-items: flex-start;
               }
 			` }
 			</style>
