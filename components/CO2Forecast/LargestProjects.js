@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from "react"
 import useText from "lib/useText"
 import { useQuery } from "@apollo/client"
 import Link from 'next/link'
-import { GQL_largestProjects } from "queries/country"
 import { useDispatch, useSelector } from "react-redux"
 import { useRouter } from "next/router"
 import { AreaChartOutlined, DotChartOutlined, EnvironmentOutlined } from "@ant-design/icons"
@@ -10,6 +9,9 @@ import ProjectSelector from "components/navigation/ProjectSelector"
 import settings from "../../settings"
 import { Col, Divider, Row, Switch } from "antd"
 import FuelIcon from "components/navigation/FuelIcon"
+import { GQL_projects } from "../../queries/general"
+
+const DEBUG = true
 
 export default function LargestProjects( { onPositions, onGeoClick } ) {
 	const { getText } = useText()
@@ -20,14 +22,18 @@ export default function LargestProjects( { onPositions, onGeoClick } ) {
 	const countryTotalCO2 = useSelector( redux => redux.countryTotalCO2 )
 	const [ filters, set_filters ] = useState( { oil: true, gas: true, coal: true } )
 
-	const { data, loading, error } = useQuery( GQL_largestProjects, {
-		variables: { iso3166: country },
+	const { data, loading, error } = useQuery( GQL_projects, {
+		variables: { iso3166_: country, iso31662_: region ?? '' },
 		skip: !country
 	} )
 
 	const projects = useMemo( () => {
-		return ( data?.projects?.nodes ?? [] ).filter( p => p.productionCo2E > 0 )
-	}, [ data?.projects?.nodes ] )
+		const projs = ( data?.getProjects?.nodes ?? [] )
+			.filter( p => p.co2 > 0 )
+			.sort( ( a, b ) => Math.sign( b.co2 - a.co2 ) )
+		DEBUG && console.info( projs[ 0 ] )
+		return projs
+	}, [ data?.getProjects?.nodes?.length ] )
 
 	useEffect( () => {
 		if( !( projects?.length > 0 ) ) return
@@ -40,7 +46,7 @@ export default function LargestProjects( { onPositions, onGeoClick } ) {
 	const largest = projects
 		.filter( p => {
 			let show = false
-			p.fuels.forEach( f => {
+			p.fuels?.forEach( f => {
 				if( filters[ f ] ) show = true
 			} )
 			return show
@@ -116,7 +122,7 @@ export default function LargestProjects( { onPositions, onGeoClick } ) {
 										</td>
 
 										<td align="right">
-											{ ( p.productionCo2E / ( countryTotalCO2 * 1e7 ) ).toFixed( 0 ) }<small>%</small>
+											{ ( p.co2 / ( countryTotalCO2 * 1e7 ) ).toFixed( 0 ) }<small>%</small>
 										</td>
 
 										<td style={ { paddingLeft: 12 } }>
@@ -150,9 +156,9 @@ export default function LargestProjects( { onPositions, onGeoClick } ) {
                 display: flex;
                 flex-direction: column;
               }
-              
+
               .co2-card .box {
-              	flex: 1 1 auto;
+                flex: 1 1 auto;
               }
 
               .co2-card :global(.ant-switch-inner svg path) {

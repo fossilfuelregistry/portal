@@ -27,7 +27,7 @@ query projectSources( $id:Int! ) {
 export const GQL_projects = gql`
 query projects($iso3166_: String!, $iso31662_: String = "") {
   getProjects(iso3166_: $iso3166_, iso31662_: $iso31662_) { 
-  	nodes { id projectIdentifier firstYear lastYear co2 projectType } }
+  	nodes { id projectIdentifier firstYear lastYear co2 fuels projectType } }
 }`
 
 export const GQL_sources = gql`
