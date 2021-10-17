@@ -5,7 +5,7 @@ import getConfig from "next/config"
 import useText from "lib/useText"
 import { sumOfCO2 } from "../CO2Forecast/calculate"
 
-const DEBUG = true
+const DEBUG = false
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 

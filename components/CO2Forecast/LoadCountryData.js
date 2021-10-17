@@ -74,7 +74,7 @@ function LoadCountryData( { projectionSources } ) {
 					stableProj.push( { ...stableProduction.gas, year, sourceId: settings.stableProductionSourceId } )
 				}
 				DEBUG && console.info( { stableProj } )
-				return stableProj
+				return stableProj.concat( _co2( projectionData?.countryDataPoints?.nodes ) )
 			} else
 				return _co2( projectionData?.countryDataPoints?.nodes )
 		} catch( e ) {

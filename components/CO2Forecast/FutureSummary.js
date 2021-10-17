@@ -51,7 +51,7 @@ function FutureSummary( { dataset, limits, projectionSources } ) {
 				oil: { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] },
 				gas: { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] }
 			}
-
+			DEBUG && console.info( 'Source data', source.sourceId, dataset )
 			dataset
 				.filter( d => d.sourceId === source.sourceId )
 				.forEach( d => {
