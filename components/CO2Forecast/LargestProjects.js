@@ -11,7 +11,7 @@ import { Checkbox, Col, Divider, Row } from "antd"
 import FuelIcon from "components/navigation/FuelIcon"
 import { GQL_projects } from "../../queries/general"
 
-const DEBUG = true
+const DEBUG = false
 
 export default function LargestProjects( { onPositions, onGeoClick } ) {
 	const { getText } = useText()

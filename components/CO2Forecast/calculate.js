@@ -80,6 +80,12 @@ export function getPreferredGrades( reserves, reservesSourceId ) {
 			cGrade = Math.max( cGrade, settings.gradesPreferenceOrder.indexOf( r.grade?.[ 0 ] ) )
 		}
 	} )
+	console.log( {
+		pGrade,
+		cGrade,
+		reservesSourceId,
+		reserves: reserves.filter( r => r.sourceId === reservesSourceId )
+	} )
 	if( pGrade < 0 ) pGrade = '--'
 	else pGrade = settings.gradesPreferenceOrder[ pGrade ] + 'p'
 	if( cGrade < 0 ) cGrade = '--'
@@ -170,6 +176,7 @@ export function prepareProductionDataset( dataset ) {
 			return
 		}
 		if( aggregatePoint.year !== datapoint.year
+			|| aggregatePoint.grade?.length > 0 // Do not aggregate reserves.
 			|| aggregatePoint.fossilFuelType !== datapoint.fossilFuelType
 			|| aggregatePoint.sourceId !== datapoint.sourceId ) {
 			singlePointPerYear.push( aggregatePoint )

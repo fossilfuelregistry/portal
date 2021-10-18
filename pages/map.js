@@ -4,7 +4,7 @@ import Footer from "components/Footer"
 //import { Map } from 'maplibre-gl'
 //import dynamic from 'next/dynamic'
 
-const DEBUG = true
+const DEBUG = false
 
 const loadScript = ( scriptId, srcUrl, callback ) => {
 	DEBUG && console.info( 'Maplibre::loadScript', { scriptId, srcUrl, callback } )

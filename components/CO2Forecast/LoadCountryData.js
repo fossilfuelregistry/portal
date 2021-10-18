@@ -119,7 +119,7 @@ function LoadCountryData( { projectionSources } ) {
 			return _limits
 		}, reduced )
 
-		console.info( 'useEffect Production', production?.length, { production, limits, newLimits } )
+		DEBUG && console.info( 'useEffect Production', production?.length, { production, limits, newLimits } )
 
 		// Check if no data
 		settings.supportedFuels.forEach( fuel => {

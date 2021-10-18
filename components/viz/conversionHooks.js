@@ -5,6 +5,7 @@ import { co2PageUpdateQuery, getFullFuelType, getPreferredGrades, sumOfCO2 } fro
 import { useApolloClient } from "@apollo/client"
 import { GQL_countryCurrentProduction } from "queries/country"
 import { notification } from "antd"
+import _trottle from 'lodash/throttle'
 import settings from "../../settings"
 import { useRouter } from "next/router"
 import useText from "lib/useText"
@@ -46,16 +47,26 @@ export const useConversionHooks = () => {
 
 	// Build unit graphs for all fuels.
 	useEffect( () => {
+		DEBUG && console.info( 'useEffect build conversion graphs', { conversionConstants, country, _country, graphs } )
 		if( !( conversionConstants?.length > 0 ) ) return
 		const ccGraphs = countryConversionGraphs()
 		if( country === _country && _length === conversionConstants?.length && graphs ) return
 
-		DEBUG && console.info( { ccGraphs, country, l: conversionConstants?.length, graphs, conversions, _length, _country } )
+		DEBUG && console.info( {
+			ccGraphs,
+			country,
+			l: conversionConstants?.length,
+			graphs,
+			conversions,
+			_length,
+			_country
+		} )
 
 		graphs = ccGraphs.graphs
 		conversions = ccGraphs.conversions
 		_country = country
 		_length = conversionConstants?.length
+		DEBUG && console.info( 'useEffect graphs:', { graphs, conversions } )
 
 	}, [ conversionConstants?.length, country, graphs === undefined ] )
 
@@ -227,6 +238,16 @@ export const useConversionHooks = () => {
 		return { low, high, factor }
 	}
 
+	// Avoid overloading browser with notifications when there is an error.
+	const _throttled_notification = _trottle( ( volume, unit, fossilFuelType, subtype, methaneM3Ton, country ) => {
+		notification.warning( {
+			message: 'CO2 Calc, no unit graph available',
+			description: JSON.stringify( { volume, unit, fossilFuelType, subtype, methaneM3Ton, country } )
+		} )
+		console.info( 'CO2 Calc, no unit graph available' )
+		console.info( { graphs, conversions, volume, unit, fossilFuelType, subtype, methaneM3Ton, country } )
+	}, 2000, { 'trailing': false } )
+
 	const co2FromVolume = ( { volume, unit, fossilFuelType, subtype, methaneM3Ton, country }, log ) => {
 		let gc = { graphs, conversions }
 		if( country ) {
@@ -236,12 +257,7 @@ export const useConversionHooks = () => {
 		}
 
 		if( gc.graphs === undefined ) {
-			notification.warning( {
-				message: 'CO2 Calc, no unit graph available',
-				description: JSON.stringify( { volume, unit, fossilFuelType, subtype, methaneM3Ton, country } )
-			} )
-			console.info( 'CO2 Calc, no unit graph available' )
-			console.info( { graphs, conversions, volume, unit, fossilFuelType, subtype, methaneM3Ton, country } )
+			_throttled_notification( volume, unit, fossilFuelType, subtype, methaneM3Ton, country )
 			return { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] }
 		}
 
@@ -323,6 +339,7 @@ export const useConversionHooks = () => {
 
 	const reservesProduction =
 		( projection, reserves, projectionSourceId, reservesSourceId, limits, grades ) => {
+			//const DEBUG = true
 			DEBUG && console.info( 'reservesProduction', {
 				projection,
 				reserves,
@@ -352,6 +369,7 @@ export const useConversionHooks = () => {
 				if( r.grade !== useGrades.pGrade && r.grade !== useGrades.cGrade ) continue
 				const grade = r.grade[ 1 ] // Disregard first character.
 				if( r.year < lastReserves[ r.fossilFuelType ][ grade ].year ) continue
+				DEBUG && console.info( 'reservesProduction', { reserve: r } )
 				lastReserves[ r.fossilFuelType ][ grade ].year = r.year
 				lastReserves[ r.fossilFuelType ][ grade ].value = sumOfCO2( co2FromVolume( r ), 1 )
 			}
@@ -360,7 +378,14 @@ export const useConversionHooks = () => {
 			// Fill out gap between production and projection (if any)
 			const gapStart = Math.min( limits.production.oil.lastYear, limits.production.gas.lastYear )
 			const gapEnd = Math.max( limits.projection.oil.firstYear, limits.projection.gas.firstYear, gapStart )
-			DEBUG && console.info( { reservesSourceId, useGrades, lastReserves, limits, gapStart, gapEnd } )
+			DEBUG && console.info( 'reservesProduction', {
+				reservesSourceId,
+				useGrades,
+				lastReserves,
+				limits,
+				gapStart,
+				gapEnd
+			} )
 
 			if( gapStart > 0 ) {
 				for( let y = gapStart; y < gapEnd; y++ ) {

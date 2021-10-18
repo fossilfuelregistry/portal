@@ -5,7 +5,7 @@ import settings from "../settings"
 import { ExportOutlined } from "@ant-design/icons"
 import getConfig from "next/config"
 
-const DEBUG = true
+const DEBUG = false
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
