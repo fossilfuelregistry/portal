@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react"
 import TopNavigation from "components/navigation/TopNavigation"
 import getConfig from 'next/config'
 import CountrySelector from "components/navigation/CountrySelector"
-import { Alert, Col, Divider, Row } from "antd"
+import { Affix, Alert, Col, Divider, Row } from "antd"
 import useText from "lib/useText"
 import { NextSeo } from "next-seo"
 import { useDispatch, useSelector } from "react-redux"
@@ -190,9 +190,10 @@ export default function CO2ForecastPage() {
 						</Col>
 					</Row>
 
-					<Divider style={ { marginTop: 48, marginBottom: 0 } }><h4>{ getText( 'co2_forecast' ) }</h4></Divider>
+					<Divider style={ { marginTop: 48, marginBottom: 0 } }><h4>{ getText( 'co2_forecast' ) }</h4>
+					</Divider>
 
-					<div className="settings-summary" style={{ textAlign: 'center', marginBottom: 24 }}>
+					<div className="settings-summary" style={ { textAlign: 'center', marginBottom: 24 } }>
 						<b>{ countryName }</b> -
 						{ ' ' + getText( 'production' ) }: <b>{ sourceNameFromId( productionSourceId ) }</b>
 
@@ -241,7 +242,7 @@ export default function CO2ForecastPage() {
 		default:
 			template = <Alert showIcon type="warning" message={ 'No template for ' + templateId }/>
 	}
-	//debugger
+
 	return (
 		<>
 			<NextSeo
@@ -267,62 +268,63 @@ export default function CO2ForecastPage() {
 				<TopNavigation share={ true }/>
 
 				<div className="co2">
-
 					<Row gutter={ [ 12, 12 ] } style={ { marginBottom: 26 } }>
 
-						<Col xs={ 24 } lg={ 6 }>
-							<h4>{ getText( 'country' ) }</h4>
-							<CountrySelector/>
+						<Col xs={ 12 } lg={ 6 }>
+							<Affix offsetTop={ 12 }>
+								<div style={{ backgroundColor: '#ffffff', index: 10 }}>
+									<h4>{ getText( 'country' ) }</h4>
+									<CountrySelector/>
 
-							<h4 className="selector">
-								{ getText( 'carbon_intensity' ) }
-								<HelpModal title="carbon_intensity" content="explanation_methanefactor"/>
-							</h4>
-							<CarbonIntensitySelector/>
+									<h4 className="selector">
+										{ getText( 'carbon_intensity' ) }
+										<HelpModal title="carbon_intensity" content="explanation_methanefactor"/>
+									</h4>
+									<CarbonIntensitySelector/>
 
-							{ project?.type !== 'SPARSE' &&
-							<>
-								<h4 className="selector">
-									{ getText( 'data_source' ) }
-									<HelpModal title="data_source" content="explanation_countryhistoric"/>
-								</h4>
-								<SourceSelector
-									sources={ productionSources }
-									loading={ loading }
-									stateKey="productionSourceId"
-									placeholder={ getText( 'data_source' ) }
-								/>
-							</>
-							}
+									{ project?.type !== 'SPARSE' &&
+									<>
+										<h4 className="selector">
+											{ getText( 'data_source' ) }
+											<HelpModal title="data_source" content="explanation_countryhistoric"/>
+										</h4>
+										<SourceSelector
+											sources={ productionSources }
+											loading={ loading }
+											stateKey="productionSourceId"
+											placeholder={ getText( 'data_source' ) }
+										/>
+									</>
+									}
 
-							{ !!productionSourceId && project?.type !== 'SPARSE' &&
-							<>
-								<h4 className="selector">{ getText( 'reserves' ) }</h4>
-								<SourceSelector
-									sources={ reservesSources }
-									loading={ loading }
-									stateKey="reservesSourceId"
-									placeholder={ getText( 'reserves' ) }
-								/>
+									{ !!productionSourceId && project?.type !== 'SPARSE' &&
+									<>
+										<h4 className="selector">{ getText( 'reserves' ) }</h4>
+										<SourceSelector
+											sources={ reservesSources }
+											loading={ loading }
+											stateKey="reservesSourceId"
+											placeholder={ getText( 'reserves' ) }
+										/>
 
-								<h4 className="selector">
-									{ getText( 'projection' ) }
-								</h4>
-								<SourceSelector
-									sources={ projectionSources }
-									loading={ loading }
-									stateKey="projectionSourceId"
-									placeholder={ getText( 'projection' ) }
-								/>
-							</> }
-
+										<h4 className="selector">
+											{ getText( 'projection' ) }
+										</h4>
+										<SourceSelector
+											sources={ projectionSources }
+											loading={ loading }
+											stateKey="projectionSourceId"
+											placeholder={ getText( 'projection' ) }
+										/>
+									</> }
+								</div>
+							</Affix>
 						</Col>
 
 						<Col xs={ 24 } lg={ 18 }>
 							{ template }
 						</Col>
 					</Row>
-
 				</div>
 
 				<Footer/>
