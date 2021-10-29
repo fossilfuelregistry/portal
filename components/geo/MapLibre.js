@@ -53,7 +53,7 @@ export default function MapLibre( {
 
 	const features = useMemo( () => {
 		const geo = projects
-			.map( p => p.geom?.geojson ?? p.geoPosition?.geojson )
+			.map( p => p?.geom?.geojson ?? p?.geoPosition?.geojson )
 
 		return {
 			type: 'FeatureCollection',
@@ -64,7 +64,7 @@ export default function MapLibre( {
 	}, [ projects ] )
 
 	const projectMarkers = useMemo( () => {
-		const geo = ( projects ?? [] ).map( p => p.geom?.geojson ?? p.geoPosition?.geojson )
+		const geo = ( projects ?? [] ).map( p => p?.geom?.geojson ?? p?.geoPosition?.geojson )
 		return geo
 			.filter( p => p?.type === 'Point' )
 			.map( p => p.coordinates )
