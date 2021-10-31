@@ -43,15 +43,15 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 
 				<Col xs={ 24 } xl={ 24 } xxl={ 24 }>
 					<Row gutter={ [ 32, 32 ] }>
-						<Col xs={ 24 } xl={ 8 } xxl={ 8 }>
+						<Col xs={ 24 } xl={ 12 } xxl={ 8 }>
 							<YearSummary dataset={ production } limits={ limits }/>
 						</Col>
 
-						<Col xs={ 24 } xl={ 8 } xxl={ 8 }>
+						<Col xs={ 24 } xl={ 12 } xxl={ 8 }>
 							<InputSummary dataset={ production }/>
 						</Col>
 
-						<Col xs={ 24 } xl={ 8 } xxl={ 8 }>
+						<Col xs={ 24 } xl={ 12 } xxl={ 8 }>
 							<FutureSummary
 								dataset={ projection }
 								limits={ limits }
