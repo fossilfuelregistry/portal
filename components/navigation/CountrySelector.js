@@ -9,12 +9,13 @@ import useText from "lib/useText"
 import useTracker from "lib/useTracker"
 import { co2PageUpdateQuery } from "../CO2Forecast/calculate"
 
-const DEBUG = false
+const DEBUG = true
 
 export default function CountrySelector() {
 	const router = useRouter()
 	const store = useStore()
 	const country = useSelector( redux => redux.country )
+	const countryName = useSelector( redux => redux.countryName )
 	const [ selectedCountryOption, set_selectedCountryOption ] = useState()
 	const [ selectedRegionOption, set_selectedRegionOption ] = useState()
 	const [ regions, set_regions ] = useState()
@@ -25,18 +26,24 @@ export default function CountrySelector() {
 	const { data: countriesData, loading: loadingCountries, error: errorLoadingCountries }
 		= useQuery( GQL_productionCountries )
 
+	DEBUG && console.info( '------CountrySelector------' )
+
 	const countries = useMemo( () => {
 		DEBUG && console.info( 'CountrySelector useMemo', {
 			language: router.locale,
 			countries: countriesData?.getProducingIso3166?.nodes
 		} )
-		return ( countriesData?.getProducingIso3166?.nodes ?? [] )
+		const cs = ( countriesData?.getProducingIso3166?.nodes ?? [] )
 			.map( c => ( { ...c, name: c[ router.locale ] ?? c.en } ) )
 			.filter( c => c.name !== null && c.iso31662 === '' ) // Exclude regions
 			.sort( ( a, b ) => a.name.localeCompare( b.name ) )
+
+		DEBUG && console.info( 'CountrySelector Initialize', cs )
+		return cs
+
 	}, [ countriesData?.getProducingIso3166?.nodes?.length, router.locale ] )
 
-	DEBUG && console.info( '\n\n', countries.length, countriesData?.getProducingIso3166?.nodes?.length )
+	DEBUG && console.info( '\n', countries.length, countriesData?.getProducingIso3166?.nodes?.length )
 
 	useEffect( () => { // Preload based on URL value which is initialized in Redux state
 		if( !countries.length ) return
@@ -53,7 +60,16 @@ export default function CountrySelector() {
 		}
 	}, [ countries?.length ] )
 
-	useEffect( () => { // Look for regions in the country
+	useEffect( () => {
+		if( !country ) return
+
+		if( countries.length > 0 && !( countryName?.length > 0 ) ) {
+			const currentCountry = countries.find( c => c.iso3166 = country )
+			DEBUG && console.info( 'CountrySelector reInitialize', country, currentCountry, countries )
+			dispatch( { type: 'COUNTRYNAME', payload: currentCountry?.name } )
+		}
+
+		// Look for regions in the country
 		DEBUG && console.info( 'CountrySelector useEffect REGION', router.query?.country )
 		const _regions = ( countriesData?.getProducingIso3166?.nodes ?? [] )
 			.filter( r => r.iso3166 === country && !!r.iso31662 )

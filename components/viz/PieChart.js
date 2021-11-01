@@ -73,6 +73,8 @@ const PieChartInternal = ( { parentWidth, parentHeight, data, header, topNote, n
 						innerRadius={ 0.6 * radius }
 						cornerRadius={ 3 }
 						padAngle={ 0.005 }
+						pieSort={ null }
+						pieSortValues={ null }
 					>
 						{ ( pie ) => {
 							return pie.arcs.map( ( arc ) => {
