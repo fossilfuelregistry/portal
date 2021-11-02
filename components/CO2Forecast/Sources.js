@@ -15,10 +15,10 @@ export default function Sources( { production, reserves, projection } ) {
 	const [ modal, contextHolder ] = Modal.useModal()
 
 	const _renderSourceList =
-		sources => sources.map( s => {
+		sources => sources.map( ( s, i ) => {
 			if( !s?.sourceId ) return null
 			return (
-				<React.Fragment key={ s.sourceId }>
+				<React.Fragment key={ s.sourceId + '-' + i }>
 					<span>
 						<Button
 							size="small"
@@ -36,7 +36,8 @@ export default function Sources( { production, reserves, projection } ) {
 										<>
 											<div
 												style={ { marginBottom: 8 } }
-											>{ s.description?.startsWith( 'explanation_' ) ? <ReactMarkdown>{ getText( s.description ) }</ReactMarkdown> : s.description }
+											>{ s.description?.startsWith( 'explanation_' ) ?
+													<ReactMarkdown>{ getText( s.description ) }</ReactMarkdown> : s.description }
 											</div>
 
 											{ s.documentUrl &&
@@ -76,7 +77,7 @@ export default function Sources( { production, reserves, projection } ) {
 			<div className="box" style={ { minHeight: 'unset' } }>
 				{ contextHolder }
 
-				{ production?.length > 0&&
+				{ production?.length > 0 &&
 				<div>
 					<b>{ getText( 'production' ) }: </b>
 					{ _renderSourceList( production ) }

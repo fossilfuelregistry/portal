@@ -9,7 +9,7 @@ import useText from "lib/useText"
 import useTracker from "lib/useTracker"
 import { co2PageUpdateQuery } from "../CO2Forecast/calculate"
 
-const DEBUG = true
+const DEBUG = false
 
 export default function CountrySelector() {
 	const router = useRouter()

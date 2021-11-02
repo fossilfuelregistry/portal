@@ -1,5 +1,7 @@
 import settings from "settings"
 
+const DEBUG = false
+
 export function addToTotal( total, datapoint ) {
 	if( !total ) {
 		console.trace()
@@ -80,7 +82,7 @@ export function getPreferredGrades( reserves, reservesSourceId ) {
 			cGrade = Math.max( cGrade, settings.gradesPreferenceOrder.indexOf( r.grade?.[ 0 ] ) )
 		}
 	} )
-	console.log( {
+	DEBUG && console.log( {
 		pGrade,
 		cGrade,
 		reservesSourceId,
