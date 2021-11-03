@@ -1,4 +1,4 @@
-import React, { useMemo } from "react"
+import React, { useCallback, useMemo } from "react"
 import { Group } from '@visx/group'
 import { AreaStack, LinePath } from '@visx/shape'
 import { AxisBottom, AxisRight } from '@visx/axis'
@@ -11,9 +11,12 @@ import { withParentSize } from "@visx/responsive"
 import useText from "lib/useText"
 import { combineOilAndGas, sumOfCO2 } from "../CO2Forecast/calculate"
 import { useSelector } from "react-redux"
-import { saveSvgAsPng } from 'save-svg-as-png'
+import FileSaver from 'file-saver'
+import { toCsv } from "react-csv-downloader"
 import settings from 'settings'
 import getConfig from "next/config"
+import { Button, Dropdown, Menu } from "antd"
+import { saveSvgAsPng } from "save-svg-as-png"
 
 const DEBUG = false
 
@@ -30,6 +33,7 @@ function CO2ForecastGraphBase( {
 	production, projection, projectedProduction, parentWidth, parentHeight
 } ) {
 	const { getText } = useText()
+	const country = useSelector( redux => redux.country )
 	const projectionSourceId = useSelector( redux => redux.projectionSourceId )
 	const productionSourceId = useSelector( redux => redux.productionSourceId )
 
@@ -87,19 +91,72 @@ function CO2ForecastGraphBase( {
 		domain: [ 0, maxCO2 ],
 	} )
 
+	const handleMenuClick = useCallback( async e => {
+
+		const _csv = async() => {
+			const columns = [
+				{ id: 'year', displayName: 'year', },
+				{ id: 'oil', displayName: 'oil emissions', },
+				{ id: 'gas', displayName: 'gas emissions', },
+				{ id: 'co2', displayName: 'projected emissions', },
+				{ id: 'oil_p', displayName: 'projected oil emissions', },
+				{ id: 'oil_c', displayName: 'projected contingent oil emissions', },
+				{ id: 'gas_p', displayName: 'projected gas emissions', },
+				{ id: 'gas_c', displayName: 'projected contingent gas emissions', },
+			]
+			const datas = productionData
+			projectionData.forEach( d => {
+				const y = datas.find( dp => dp.year === d.year )
+				if( y )
+					y.co2 = d.co2
+				else
+					datas.push( d )
+			} )
+			projProdData.forEach( d => {
+				const y = datas.find( dp => dp.year === d.year )
+				if( y ) {
+					y.oil_p = d.oil_p
+					y.oil_c = d.oil_c
+					y.gas_p = d.gas_p
+					y.gas_c = d.gas_c
+				}
+				else
+					datas.push( d )
+			} )
+			const csv = await toCsv( {
+				datas, columns
+			} )
+			const blob = new Blob( [ csv ], { type: 'text/csv;charset=utf-8' } )
+			FileSaver.saveAs( blob, 'fossilfuelregistry_' + country + '_data.csv' )
+		}
+
+		switch( e.key ) {
+			case 'png':
+				saveSvgAsPng( document.getElementById( "CO2Forecast" ), "CO2Forecast.png" )
+				break
+			case 'csv':
+				await _csv()
+				break
+			default:
+		}
+	}, [] )
+
 	if( !( maxCO2 > 0 ) ) return null // JSON.stringify( maxCO2 )
+
+	const menu = (
+		<Menu onClick={ handleMenuClick }>
+			<Menu.Item key="png">PNG Image</Menu.Item>
+			<Menu.Item key="csv">CSV Data</Menu.Item>
+		</Menu>
+	)
 
 	return (
 		<div className="graph" style={ { height: height } }>
-			<a
-				style={ { position: "absolute", top: 8, right: 16, zIndex: 1001 } }
-				onClick={ e => {
-					e.stopPropagation()
-					saveSvgAsPng( document.getElementById( "CO2Forecast" ), "CO2Forecast.png" )
-				} }
-			>
-				<DownloadOutlined/>
-			</a>
+			<div className="chart-menu" style={ { position: "absolute", top: 8, right: 16, zIndex: 1001 } }>
+				<Dropdown onClick={ handleMenuClick } overlay={ menu }>
+					<Button type="primary" shape="circle" icon={ <DownloadOutlined/> }/>
+				</Dropdown>
+			</div>
 
 			<svg width={ '100%' } height={ height } id="CO2Forecast">
 				<Group left={ margin.left } top={ 0 }>
