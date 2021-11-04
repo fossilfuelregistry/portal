@@ -2,14 +2,34 @@ import React from "react"
 import useText from "lib/useText"
 import { useSelector } from "react-redux"
 import { useConversionHooks } from "../viz/conversionHooks"
-import { addToTotal, sumOfCO2 } from "./calculate"
+import { addToTotal } from "./calculate"
 import settings from "settings"
 import SourceBars from "../viz/SourceBars"
+import { Col, Row } from "antd"
+import CsvDownloader from "react-csv-downloader"
+import { DownloadOutlined } from "@ant-design/icons"
 
 const DEBUG = false
 
+const _csvFormatter = s => {
+	if( !s?.total?.oil?.scope1 ) {
+		return []
+	}
+	return [ 'oil', 'gas' ].map( fuel => ( {
+		scenario: s.name,
+		fuel,
+		scope1_low: s.total[ fuel ].scope1[ 0 ],
+		scope1_mid: s.total[ fuel ].scope1[ 1 ],
+		scope1_high: s.total[ fuel ].scope1[ 2 ],
+		scope3_low: s.total[ fuel ].scope3[ 0 ],
+		scope3_mid: s.total[ fuel ].scope3[ 1 ],
+		scope3_high: s.total[ fuel ].scope3[ 2 ]
+	} ) )
+}
+
 function FutureSummary( { dataset, limits, projectionSources } ) {
 	const { getText } = useText()
+	const country = useSelector( redux => redux.country )
 	const { co2FromVolume } = useConversionHooks()
 	const stableProduction = useSelector( redux => redux.stableProduction )
 	const allSources = useSelector( redux => redux.allSources )
@@ -62,23 +82,47 @@ function FutureSummary( { dataset, limits, projectionSources } ) {
 			return { ...source, total: sourceTotal }
 		} )
 
-	DEBUG && console.info( { years, year, stable, dataset, sources } )
+	const stableSource = {
+		name: 'name_projection_stable',
+		sourceId: 100,
+		total: {
+			oil: { scope1: stable.oil.scope1.map( e => years * e ), scope3: stable.oil.scope3.map( e => years * e ) },
+			gas: { scope1: stable.gas.scope1.map( e => years * e ), scope3: stable.gas.scope3.map( e => years * e ) }
+		}
+	}
+
+	const csvData = [ ..._csvFormatter( stableSource ) ]
+
+	sources.forEach( s => {
+		const srcCsv = _csvFormatter( s )
+		srcCsv.forEach( row => csvData.push( row ) )
+	} )
+
+	DEBUG && console.info( { years, year, stable, stableSource, csvData, dataset, sources } )
 
 	return (
 		<div className="table-wrap">
 
 			<div className="top">
-				{ getText( 'future_emissions' ) }<br/>
-				{ getText( 'megaton' ) } CO²e
+				<Row gutter={ 12 } style={ { display: 'inline-flex' } }>
+					<Col>
+						{ getText( 'future_emissions' ) }<br/>
+						{ getText( 'megaton' ) } CO²e
+					</Col>
+					<Col>
+						<CsvDownloader
+							datas={ csvData }
+							filename={ country + '_emissions_forecast.csv' }
+						>
+							<DownloadOutlined/>
+						</CsvDownloader>
+					</Col>
+				</Row>
 			</div>
 
 			<div style={ { flexGrow: 1, minHeight: 400 } }>
 				<SourceBars
-					sources={ [ ...sources, {
-						sourceId: 100,
-						name: 'name_projection_stable',
-						total: [ 0, 1, 2 ].map( r => years * sumOfCO2( stable, r ) )
-					} ] }
+					sources={ [ ...sources, stableSource ] }
 				/>
 			</div>
 

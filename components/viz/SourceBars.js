@@ -16,7 +16,7 @@ function SourceBarsBase( { sources = [], parentHeight } ) {
 	sources.forEach( s => {
 		s.range = [ 0, 1, 2 ]
 			.map( i => {
-				const volume = s.sourceId === 100 ? s.total[ i ] : sumOfCO2( s.total, i )
+				const volume = sumOfCO2( s.total, i )
 				maxTotal = Math.max( maxTotal, volume )
 				return volume
 			} )
