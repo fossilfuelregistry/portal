@@ -8,7 +8,7 @@ import { DownloadOutlined } from "@ant-design/icons"
 import CsvDownloader from "react-csv-downloader"
 import { Col, Row } from "antd"
 
-const DEBUG = true
+const DEBUG = false
 
 export default function YearSummary( { dataset = [] } ) {
 	const { getText } = useText()
@@ -36,9 +36,9 @@ export default function YearSummary( { dataset = [] } ) {
 		scope1_low: totals.scope1[ 0 ],
 		scope1_mid: totals.scope1[ 1 ],
 		scope1_high: totals.scope1[ 2 ],
-		scope2_low: totals.scope3[ 0 ],
-		scope2_mid: totals.scope3[ 1 ],
-		scope2_high: totals.scope3[ 2 ]
+		scope3_low: totals.scope3[ 0 ],
+		scope3_mid: totals.scope3[ 1 ],
+		scope3_high: totals.scope3[ 2 ]
 	} ]
 
 	DEBUG && console.info( { totals, csvData } )

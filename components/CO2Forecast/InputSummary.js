@@ -5,12 +5,15 @@ import { addToTotal, sumOfCO2 } from "./calculate"
 import { useSelector } from "react-redux"
 import SummaryRow from "./SummaryRow"
 import settings from "../../settings"
-import Download from "./Download"
+import CsvDownloader from "react-csv-downloader"
+import { Col, Row } from "antd"
+import { DownloadOutlined } from "@ant-design/icons"
 
 const DEBUG = false
 
 function InputSummary( { dataset = [] } ) {
 	const { getText } = useText()
+	const country = useSelector( redux => redux.country )
 	const productionSourceId = useSelector( redux => redux.productionSourceId )
 
 	if( !( dataset?.length > 0 ) ) return null
@@ -23,7 +26,27 @@ function InputSummary( { dataset = [] } ) {
 		addToTotal( totals[ datapoint.fossilFuelType ], datapoint.co2 )
 	} )
 
-	DEBUG && console.info( 'InputSummary', { dataset, productionSourceId, sourceData } )
+	const csvData = [
+		{
+			fuel: 'oil',
+			scope1_low: totals.oil.scope1[ 0 ],
+			scope1_mid: totals.oil.scope1[ 1 ],
+			scope1_high: totals.oil.scope1[ 2 ],
+			scope3_low: totals.oil.scope3[ 0 ],
+			scope3_mid: totals.oil.scope3[ 1 ],
+			scope3_high: totals.oil.scope3[ 2 ]
+		},
+		{
+			fuel: 'gas',
+			scope1_low: totals.gas.scope1[ 0 ],
+			scope1_mid: totals.gas.scope1[ 1 ],
+			scope1_high: totals.gas.scope1[ 2 ],
+			scope3_low: totals.gas.scope3[ 0 ],
+			scope3_mid: totals.gas.scope3[ 1 ],
+			scope3_high: totals.gas.scope3[ 2 ]
+		} ]
+
+	DEBUG && console.info( 'InputSummary', { totals, csvData, dataset, productionSourceId, sourceData } )
 
 	const _ = v => Math.round( v )
 
@@ -33,8 +56,22 @@ function InputSummary( { dataset = [] } ) {
 				<thead>
 					<tr>
 						<th colSpan={ 4 }>
-							{ getText( 'past_emissions' ) } { getText( 'megaton' ) } CO²e
-							<HelpModal title="ranges" content="explanation_ranges"/>
+							<Row gutter={ 12 } style={ { display: 'inline-flex' } }>
+								<Col>
+									{ getText( 'past_emissions' ) } { getText( 'megaton' ) } CO²e
+								</Col>
+								<Col>
+									<CsvDownloader
+										datas={ csvData }
+										filename={ country + '_historic_emissions.csv' }
+									>
+										<DownloadOutlined/>
+									</CsvDownloader>
+								</Col>
+								<Col>
+									<HelpModal title="ranges" content="explanation_ranges"/>
+								</Col>
+							</Row>
 						</th>
 					</tr>
 				</thead>
