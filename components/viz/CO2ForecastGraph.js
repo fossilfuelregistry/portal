@@ -80,9 +80,7 @@ function CO2ForecastGraphBase( {
 
 	const maxCO2 = useMemo( () => {
 		let maxValue = max( productionData, d => ( d.oil ?? 0 ) + ( d.gas ?? 0 ) )
-		console.log( 'max prod', maxValue )
 		maxValue = Math.max( maxValue, max( projectionData, d => d.co2 ) )
-		console.info( { maxValue, projectionData } )
 		return maxValue * 1.05
 	}, [ productionData, projectionData ] )
 

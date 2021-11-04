@@ -4,11 +4,15 @@ import { useSelector } from "react-redux"
 import { addToTotal } from "./calculate"
 import settings from "../../settings"
 import ScopeBars from "../viz/ScopeBars"
+import { DownloadOutlined } from "@ant-design/icons"
+import CsvDownloader from "react-csv-downloader"
+import { Col, Row } from "antd"
 
-const DEBUG = false
+const DEBUG = true
 
 export default function YearSummary( { dataset = [] } ) {
 	const { getText } = useText()
+	const country = useSelector( redux => redux.country )
 	const productionSourceId = useSelector( redux => redux.productionSourceId )
 
 	if( !( dataset?.length > 0 ) ) return null
@@ -28,12 +32,33 @@ export default function YearSummary( { dataset = [] } ) {
 	if( lastYearProd[ 'gas' ]?.year && ( lastYearProd[ 'oil' ]?.year !== lastYearProd[ 'gas' ]?.year ) ) // Different last year?
 		year = `(${ lastYearProd[ 'oil' ]?.year } / ${ lastYearProd[ 'gas' ]?.year })`
 
-	DEBUG && console.info( { totals } )
+	const csvData = [ {
+		scope1_low: totals.scope1[ 0 ],
+		scope1_mid: totals.scope1[ 1 ],
+		scope1_high: totals.scope1[ 2 ],
+		scope2_low: totals.scope3[ 0 ],
+		scope2_mid: totals.scope3[ 1 ],
+		scope2_high: totals.scope3[ 2 ]
+	} ]
+
+	DEBUG && console.info( { totals, csvData } )
 
 	return (
 		<div className="table-wrap">
 			<div className="top">
-				{ getText( 'this_year' ) } { year } { getText( 'megaton' ) } CO²e
+				<Row gutter={ 12 } style={ { display: 'inline-flex' } }>
+					<Col>
+						{ getText( 'this_year' ) } { year } { getText( 'megaton' ) } CO²e
+					</Col>
+					<Col>
+						<CsvDownloader
+							datas={ csvData }
+							filename={ country + '_year_emissions.csv' }
+						>
+							<DownloadOutlined/>
+						</CsvDownloader>
+					</Col>
+				</Row>
 			</div>
 
 			<div style={ { flexGrow: 1, minHeight: 400 } }>
@@ -64,5 +89,6 @@ export default function YearSummary( { dataset = [] } ) {
               }
 			` }
 			</style>
-		</div> )
+		</div>
+	)
 }

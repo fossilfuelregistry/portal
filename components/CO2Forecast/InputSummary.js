@@ -5,6 +5,7 @@ import { addToTotal, sumOfCO2 } from "./calculate"
 import { useSelector } from "react-redux"
 import SummaryRow from "./SummaryRow"
 import settings from "../../settings"
+import Download from "./Download"
 
 const DEBUG = false
 
