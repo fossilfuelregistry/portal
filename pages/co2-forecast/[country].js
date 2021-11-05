@@ -129,258 +129,275 @@ export default function CO2ForecastPage() {
 		if( qCountry !== country ) dispatch( { type: 'COUNTRY', payload: qCountry } )
 	}, [ router.query?.country ] )
 
-	let templateId = 'intro', template, proj = router.query.project
-	if( country && ( !project || !( proj?.length > 0 ) ) )
-		templateId = 'dense-country'
-	if( proj?.length > 0 && project?.projectType === 'DENSE' )
-		templateId = "dense-project"
-	if( proj?.length > 0 && project?.projectType === 'SPARSE' )
-		templateId = 'sparse-project'
+	try {
 
-	DEBUG && console.info( 'Template select:', { templateId, project, productionSourceId } )
+		let templateId = 'intro', template, proj = router.query.project
+		if( country && ( !project || !( proj?.length > 0 ) ) )
+			templateId = 'dense-country'
+		if( proj?.length > 0 && project?.projectType === 'DENSE' )
+			templateId = "dense-project"
+		if( proj?.length > 0 && project?.projectType === 'SPARSE' )
+			templateId = 'sparse-project'
 
-	const reservesSourceId = parseInt( router.query.reservesSourceId ?? '0' )
-	const projectionSourceId = parseInt( router.query.projectionSourceId ?? '0' )
+		DEBUG && console.info( 'Template select:', { country, templateId, project, productionSourceId } )
 
-	switch( templateId ) {
+		const reservesSourceId = parseInt( router.query.reservesSourceId ?? '0' )
+		const projectionSourceId = parseInt( router.query.projectionSourceId ?? '0' )
 
-		case 'intro':
-			template = (
-				<div className="text-page">
-					<h2>Country emissions history and forcast</h2>
-					<p>Intro text about country / project levels, ranges etc goes here...</p>
-					<p>First select a country!</p>
-					<ProjectSelector
-						iso3166={ country }
-						iso31662={ region ?? '' }
-					/>
-				</div>
-			)
-			break
-		case "dense-country":
-			template = (
-				<>
-					<Divider><h4>{ getText( 'country_overview' ) }</h4></Divider>
+		switch( templateId ) {
 
-					<Row gutter={ [ 32, 32 ] } style={ { marginBottom: 26 } }>
-						<Col xs={ 24 } lg={ 12 } xxl={ 8 }>
-							<CountryProductionPieChart
-								currentProduction={ countryCurrentProduction }
-							/>
-						</Col>
+			case 'intro':
+				template = (
+					<div className="text-page">
+						<h2>Country emissions history and forcast</h2>
+						<p>Intro text about country / project levels, ranges etc goes here...</p>
+						<p>First select a country!</p>
+						<ProjectSelector
+							iso3166={ country }
+							iso31662={ region ?? '' }
+						/>
+					</div>
+				)
+				break
+			case "dense-country":
+				template = (
+					<>
+						<Divider><h4>{ getText( 'country_overview' ) }</h4></Divider>
 
-						<Col xs={ 24 } lg={ 12 } xxl={ 8 }>
-							<div className="geo-wrap">
-								<MapLibre
-									className="country-geo"
-									outlineGeometry={ borders }
-									highlightedProjects={ highlightedProjects }
-									projects={ projectBorders }
+						<Row gutter={ [ 32, 32 ] } style={ { marginBottom: 26 } }>
+							<Col xs={ 24 } lg={ 12 } xxl={ 8 }>
+								<CountryProductionPieChart
+									currentProduction={ countryCurrentProduction }
 								/>
-							</div>
-						</Col>
+							</Col>
 
-						<Col xs={ 24 } lg={ 12 } xxl={ 8 }>
-							<LargestProjects
-								onGeoClick={ geo => {
-									set_highlightedProjects( [ geo ] )
-									console.info( geo )
-								} }
-							/>
-						</Col>
-					</Row>
+							<Col xs={ 24 } lg={ 12 } xxl={ 8 }>
+								<div className="geo-wrap">
+									<MapLibre
+										className="country-geo"
+										outlineGeometry={ borders }
+										highlightedProjects={ highlightedProjects }
+										projects={ projectBorders }
+									/>
+								</div>
+							</Col>
 
-					<Divider style={ { marginTop: 48, marginBottom: 0 } }><h4>{ getText( 'co2_forecast' ) }</h4>
-					</Divider>
+							<Col xs={ 24 } lg={ 12 } xxl={ 8 }>
+								<LargestProjects
+									onGeoClick={ geo => {
+										set_highlightedProjects( [ geo ] )
+										console.info( geo )
+									} }
+								/>
+							</Col>
+						</Row>
 
-					<div className="settings-summary" style={ { textAlign: 'center', marginBottom: 24 } }>
-						<b>{ countryName }</b> -
-						{ ' ' + getText( 'production' ) }: <b>{ sourceNameFromId( productionSourceId ) }</b>
+						<Divider style={ { marginTop: 48, marginBottom: 0 } }><h4>{ getText( 'co2_forecast' ) }</h4>
+						</Divider>
 
-						{ reservesSourceId &&
-						<span>{ ' - ' + getText( 'reserves' ) }: <b>{ sourceNameFromId( reservesSourceId ) }</b></span>
-						}
+						<div className="settings-summary" style={ { textAlign: 'center', marginBottom: 24 } }>
+							<b>{ countryName }</b> -
+							{ ' ' + getText( 'production' ) }: <b>{ sourceNameFromId( productionSourceId ) }</b>
 
-						{ projectionSourceId &&
-						<span>{ ' - ' + getText( 'projection' ) }: <b>{ sourceNameFromId( projectionSourceId ) }</b></span>
-						}
+							{ reservesSourceId &&
+							<span>{ ' - ' + getText( 'reserves' ) }: <b>{ sourceNameFromId( reservesSourceId ) }</b></span>
+							}
 
+							{ projectionSourceId &&
+							<span>{ ' - ' + getText( 'projection' ) }: <b>{ sourceNameFromId( projectionSourceId ) }</b></span>
+							}
+
+						</div>
+
+						{ productionSourceId > 0 && <LoadCountryData projectionSources={ projectionSources }/> }
+
+						<div/>
+						<Divider style={ { marginTop: 48 } }/>
+
+						<Sources
+							production={ productionSources }
+							reserves={ reservesSources }
+							projection={ projectionSources }
+						/>
+					</> )
+				break
+
+			case "dense-project":
+				template =
+					<DenseProject
+						countryCurrentProduction={ countryCurrentProduction }
+						borders={ borders }
+						productionSources={ productionSources }
+						projectionSources={ projectionSources }
+						reservesSources={ reservesSources }
+					/>
+				break
+
+			case "sparse-project":
+				template =
+					<SparseProject
+						countryCurrentProduction={ countryCurrentProduction }
+						borders={ borders }
+					/>
+				break
+
+			default:
+				template = <Alert showIcon type="warning" message={ 'No template for ' + templateId }/>
+		}
+
+		return (
+			<>
+				<NextSeo
+					title={ title }
+					description={ getText( 'a_service_from_gffr' ) }
+					openGraph={ {
+						url: 'https://fossilfuelregistry.org',
+						title: getText( 'grff' ),
+						description: title,
+						images: [
+							{
+								url: 'https://fossilfuelregistry.org/og1.jpg',
+								width: 1200,
+								height: 671,
+								alt: getText( 'grff' ),
+							}
+						],
+						site_name: getText( 'grff' ),
+					} }
+				/>
+
+				<div className="page">
+					<TopNavigation share={ true }/>
+
+					<div className="co2">
+						<Row gutter={ [ 12, 12 ] } style={ { marginBottom: 26 } }>
+
+							<Col xs={ 12 } lg={ 6 }>
+								<Affix offsetTop={ 12 }>
+									<div style={ { backgroundColor: '#ffffff', index: 10 } }>
+										<h4>{ getText( 'country' ) }</h4>
+										<CountrySelector/>
+
+										<h4 className="selector">
+											{ getText( 'carbon_intensity' ) }
+											<HelpModal title="carbon_intensity" content="explanation_methanefactor"/>
+										</h4>
+										<CarbonIntensitySelector/>
+
+										{ project?.type !== 'SPARSE' &&
+										<>
+											<h4 className="selector">
+												{ getText( 'data_source' ) }
+												<HelpModal title="data_source" content="explanation_countryhistoric"/>
+											</h4>
+											<SourceSelector
+												sources={ productionSources }
+												loading={ loading }
+												stateKey="productionSourceId"
+												placeholder={ getText( 'data_source' ) }
+											/>
+										</>
+										}
+
+										{ !!productionSourceId && project?.type !== 'SPARSE' &&
+										<>
+											<h4 className="selector">{ getText( 'reserves' ) }</h4>
+											<SourceSelector
+												sources={ reservesSources }
+												loading={ loading }
+												stateKey="reservesSourceId"
+												placeholder={ getText( 'reserves' ) }
+											/>
+
+											<h4 className="selector">
+												{ getText( 'projection' ) }
+											</h4>
+											<SourceSelector
+												sources={ projectionSources }
+												loading={ loading }
+												stateKey="projectionSourceId"
+												placeholder={ getText( 'projection' ) }
+											/>
+										</> }
+									</div>
+								</Affix>
+							</Col>
+
+							<Col xs={ 24 } lg={ 18 }>
+								{ template }
+							</Col>
+						</Row>
 					</div>
 
-					{ productionSourceId > 0 && <LoadCountryData projectionSources={ projectionSources }/> }
+					<Footer/>
 
-					<div/>
-					<Divider style={ { marginTop: 48 } }/>
+					<style jsx>{ `
+                      .page {
+                        padding-bottom: 20px;
+                      }
 
-					<Sources
-						production={ productionSources }
-						reserves={ reservesSources }
-						projection={ projectionSources }
-					/>
-				</> )
-			break
+                      .co2 {
+                        padding: 0 40px;
+                      }
 
-		case "dense-project":
-			template =
-				<DenseProject
-					countryCurrentProduction={ countryCurrentProduction }
-					borders={ borders }
-					productionSources={ productionSources }
-					projectionSources={ projectionSources }
-					reservesSources={ reservesSources }
-				/>
-			break
+                      @media (max-width: ${ theme[ '@screen-sm' ] }) {
+                        .co2 {
+                          padding: 0 18px;
+                        }
+                      }
 
-		case "sparse-project":
-			template =
-				<SparseProject
-					countryCurrentProduction={ countryCurrentProduction }
-					borders={ borders }
-				/>
-			break
+                      h4 {
+                        margin-bottom: 6px !important;
+                      }
 
-		default:
-			template = <Alert showIcon type="warning" message={ 'No template for ' + templateId }/>
-	}
+                      .selector {
+                        margin-top: 12px !important;
+                      }
 
-	return (
-		<>
-			<NextSeo
-				title={ title }
-				description={ getText( 'a_service_from_gffr' ) }
-				openGraph={ {
-					url: 'https://fossilfuelregistry.org',
-					title: getText( 'grff' ),
-					description: title,
-					images: [
-						{
-							url: 'https://fossilfuelregistry.org/og1.jpg',
-							width: 1200,
-							height: 671,
-							alt: getText( 'grff' ),
-						}
-					],
-					site_name: getText( 'grff' ),
-				} }
-			/>
+                      .co2 :global(.ant-slider-mark) {
+                        top: 25px;
+                      }
 
+                      .co2 :global(.ant-slider-dot) {
+                        height: 20px;
+                        width: 20px;
+                        top: -4px;
+                        transform: translateX(-6.5px);
+                      }
+
+                      .page :global(.geo-wrap) {
+                        height: 100%;
+                        min-height: 350px;
+                        padding-top: 24px;
+                      }
+
+                      .page :global(.country-geo) {
+                        height: 100%;
+                        width: 100%;
+                        position: relative;
+                      }
+
+					` }
+					</style>
+
+				</div>
+			</>
+		)
+	} catch( e ) {
+		return (
 			<div className="page">
 				<TopNavigation share={ true }/>
-
-				<div className="co2">
-					<Row gutter={ [ 12, 12 ] } style={ { marginBottom: 26 } }>
-
-						<Col xs={ 12 } lg={ 6 }>
-							<Affix offsetTop={ 12 }>
-								<div style={{ backgroundColor: '#ffffff', index: 10 }}>
-									<h4>{ getText( 'country' ) }</h4>
-									<CountrySelector/>
-
-									<h4 className="selector">
-										{ getText( 'carbon_intensity' ) }
-										<HelpModal title="carbon_intensity" content="explanation_methanefactor"/>
-									</h4>
-									<CarbonIntensitySelector/>
-
-									{ project?.type !== 'SPARSE' &&
-									<>
-										<h4 className="selector">
-											{ getText( 'data_source' ) }
-											<HelpModal title="data_source" content="explanation_countryhistoric"/>
-										</h4>
-										<SourceSelector
-											sources={ productionSources }
-											loading={ loading }
-											stateKey="productionSourceId"
-											placeholder={ getText( 'data_source' ) }
-										/>
-									</>
-									}
-
-									{ !!productionSourceId && project?.type !== 'SPARSE' &&
-									<>
-										<h4 className="selector">{ getText( 'reserves' ) }</h4>
-										<SourceSelector
-											sources={ reservesSources }
-											loading={ loading }
-											stateKey="reservesSourceId"
-											placeholder={ getText( 'reserves' ) }
-										/>
-
-										<h4 className="selector">
-											{ getText( 'projection' ) }
-										</h4>
-										<SourceSelector
-											sources={ projectionSources }
-											loading={ loading }
-											stateKey="projectionSourceId"
-											placeholder={ getText( 'projection' ) }
-										/>
-									</> }
-								</div>
-							</Affix>
-						</Col>
-
-						<Col xs={ 24 } lg={ 18 }>
-							{ template }
-						</Col>
-					</Row>
+				<div className="page-padding">
+					<Alert
+						showIcon
+						type="error"
+						message="Oops! Something went wrong for this page."
+						description={ <pre>{ e.stack }</pre> }
+					/>
 				</div>
-
-				<Footer/>
-
-				<style jsx>{ `
-                  .page {
-                    padding-bottom: 20px;
-                  }
-
-                  .co2 {
-                    padding: 0 40px;
-                  }
-
-                  @media (max-width: ${ theme[ '@screen-sm' ] }) {
-                    .co2 {
-                      padding: 0 18px;
-                    }
-                  }
-
-                  h4 {
-                    margin-bottom: 6px !important;
-                  }
-
-                  .selector {
-                    margin-top: 12px !important;
-                  }
-
-                  .co2 :global(.ant-slider-mark) {
-                    top: 25px;
-                  }
-
-                  .co2 :global(.ant-slider-dot) {
-                    height: 20px;
-                    width: 20px;
-                    top: -4px;
-                    transform: translateX(-6.5px);
-                  }
-
-                  .page :global(.geo-wrap) {
-                    height: 100%;
-                    min-height: 350px;
-                    padding-top: 24px;
-                  }
-
-                  .page :global(.country-geo) {
-                    height: 100%;
-                    width: 100%;
-                    position: relative;
-                  }
-
-				` }
-				</style>
-
 			</div>
-		</>
-	)
+		)
+	}
 }
 
 export { getStaticProps } from 'lib/getStaticProps'

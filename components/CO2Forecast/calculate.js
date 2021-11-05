@@ -5,7 +5,9 @@ const DEBUG = false
 export function addToTotal( total, datapoint ) {
 	if( !total ) {
 		console.trace()
-		throw new Error( 'Calculation problem, addToTotal( undefined, ... )' )
+		console.log( { datapoint } )
+		return
+		//throw new Error( 'Calculation problem, addToTotal( undefined, ... )' )
 	}
 	if( !datapoint ) return
 	const scopes = Object.keys( datapoint )

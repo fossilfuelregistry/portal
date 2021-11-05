@@ -1,6 +1,6 @@
 import { useApolloClient, useQuery } from "@apollo/client"
 import GraphQLStatus from "../GraphQLStatus"
-import { Select } from "antd"
+import { Alert, Select } from "antd"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
@@ -16,6 +16,7 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 	const apolloClient = useApolloClient()
 	const [ selectedProjectOption, set_selectedProjectOption ] = useState()
 	const [ projects, set_projects ] = useState( [] )
+	const [ message, set_message ] = useState()
 	const dispatch = useDispatch()
 	const project = useSelector( redux => redux.project )
 	const { getText } = useText()
@@ -47,7 +48,7 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 		projData?.getProjects?.nodes?.forEach( p => {
 			const prev = projs.get( p.projectIdentifier )
 			if( prev?.lastYear > p.lastYear ) return
-			if( p.projectIdentifier?.length > 0 && p.lastYear >= 2015 ) projs.set( p.projectIdentifier, p )
+			if( p.projectIdentifier?.length > 0 && ( p.lastYear ?? p.dataYear ) >= 2015 ) projs.set( p.projectIdentifier, p )
 		} )
 
 		// Now that we have data, also see if we should set state from URL
@@ -57,6 +58,8 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 				dispatch( { type: 'PROJECT', payload: p } )
 				set_selectedProjectOption( p.projectIdentifier )
 				window.projectInitialized = true
+			} else {
+				set_message( getText( 'request_to_load_non_existing_project' ) + ' ' + query.project )
 			}
 		} else {
 			if( project ) {
@@ -83,6 +86,7 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 		<>
 			{ projects?.length > 0 &&
 			<div>
+				{ message && <><Alert showIcon type="warning" message={ message }/><br/></> }
 				<Select
 					showSearch
 					style={ { minWidth: 120, width: '100%' } }
