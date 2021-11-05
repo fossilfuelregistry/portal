@@ -13,7 +13,7 @@ export default function About() {
 
 			<div className="page-padding">
 				<h2>{ getText( 'about_header' ) }</h2>
-				<ReactMarkdown>{ getText( 'about_grff' ) }</ReactMarkdown>
+				<ReactMarkdown>{ getText( 'page_about' ) }</ReactMarkdown>
 			</div>
 
 			<Footer/>
