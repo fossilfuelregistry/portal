@@ -26,6 +26,9 @@ const NavigDrawer = ( { visible, onClose } ) => {
 			>
 				<h4 className="item"><Link href="/co2-forecast">{ getText( 'co2_forecast' ) }</Link></h4>
 				<h4 className="item"><Link href="/wells">{ getText( 'wells' ) }</Link></h4>
+				<h4 className="item"><Link href="/data">{ getText( 'data_menu_item' ) }</Link></h4>
+				<h4 className="item"><Link href="/methodology">{ getText( 'methodology_menu_item' ) }</Link></h4>
+				<h4 className="item"><Link href="/analysis">{ getText( 'analysis_menu_item' ) }</Link></h4>
 				<h4 className="item"><Link href="/api-intro">API</Link></h4>
 				<h4 className="item"><Link href="/about">{ getText( 'about' ) }</Link></h4>
 				<h4>
