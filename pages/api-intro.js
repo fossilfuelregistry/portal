@@ -1,19 +1,19 @@
 import React from "react"
 import TopNavigation from "components/navigation/TopNavigation"
 import useText from "lib/useText"
-import ReactMarkdown from "react-markdown"
+import Markdown from "components/MarkdownCustomized"
 import Footer from "components/Footer"
 
 export default function ApiIntro() {
 	const { getText } = useText()
 
 	return (
-		<div className="page">
+		<div className="static-page">
 			<TopNavigation/>
 
 			<div className="page-padding">
 				<h2>{ getText( 'API_header' ) }</h2>
-				<ReactMarkdown>{ getText( 'API_intro' ) }</ReactMarkdown>
+				<Markdown>{ getText( 'API_intro' ) }</Markdown>
 			</div>
 
 			<Footer/>

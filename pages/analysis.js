@@ -1,18 +1,18 @@
 import React from "react"
 import TopNavigation from "components/navigation/TopNavigation"
 import useText from "lib/useText"
-import ReactMarkdown from "react-markdown"
+import Markdown from "components/MarkdownCustomized"
 import Footer from "components/Footer"
 
 export default function Analysis() {
 	const { getText } = useText()
 
 	return (
-		<div className="page">
+		<div className="static-page">
 			<TopNavigation/>
 
 			<div className="page-padding">
-				<ReactMarkdown>{ getText( 'page_analysis' ) }</ReactMarkdown>
+				<Markdown>{ getText( 'page_analysis' ) }</Markdown>
 			</div>
 
 			<Footer/>
