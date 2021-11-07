@@ -97,7 +97,7 @@ export default function ProjectSelector( { iso3166, iso31662 } ) {
 						set_selectedProjectOption( p )
 						const proj = projects.find( pr => pr.projectIdentifier === p )
 						dispatch( { type: 'PROJECT', payload: proj } )
-						console.info( { p, proj, projects } )
+						DEBUG && console.info( { p, proj, projects } )
 
 						if( proj?.projectId?.length > 0 ) {
 							const q = await apolloClient.query( {

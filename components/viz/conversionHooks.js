@@ -528,10 +528,14 @@ export const useConversionHooks = () => {
 	}
 
 	const projectCO2 = ( project ) => {
+		const DEBUG = false
 		const points = project?.projectDataPoints?.nodes ?? []
 		const productionPerFuel = { totalCO2: 0, fuels: [] }
 
-		if( !points.length ) return productionPerFuel
+		if( !points.length ) {
+			console.info( 'Warning no data point!', project )
+			return productionPerFuel
+		}
 
 		settings.supportedFuels.forEach( fuel => {
 			const fuelData = points.filter( p => p.fossilFuelType === fuel && p.dataType === 'PRODUCTION' )
@@ -541,7 +545,7 @@ export const useConversionHooks = () => {
 				else
 					return last
 			}, { year: 0 } )
-
+			DEBUG && console.log( { points, fuel, fuelData, lastYearProd } )
 			if( lastYearProd.year === 0 ) return
 			const co2 = co2FromVolume( { ...lastYearProd, methaneM3Ton: project.methaneM3Ton } )
 			let targetUnit

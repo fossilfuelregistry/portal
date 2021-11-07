@@ -60,7 +60,7 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 			let newSource
 			if( sources.length > 0 ) {
 				newSource = sources[ 0 ]
-				DEBUG && console.info( stateKey, '>>>>>>>>>> PREeset', newSource )
+				DEBUG && console.info( stateKey, '>>>>>>>>>> Reset', newSource )
 			} else {
 				newSource = undefined
 				DEBUG && console.info( stateKey, '>>>>>>>>>> Reset' )
@@ -75,6 +75,8 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 			return
 		}
 	}, [ sources, sources?.length, loading, stateValue, project ] )
+
+	const uniqSource = {}
 
 	return (
 		<div>
@@ -94,7 +96,10 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 				{ sources
 					.filter( s => {
 						// Do not show stable for sparse projects
-						return !( s.sourceId === settings?.stableProductionSourceId && project?.dataType === 'sparse' )
+						if( s.sourceId === settings?.stableProductionSourceId && project?.dataType === 'sparse' ) return false
+						if( uniqSource[ s.sourceId ] ) return false
+						uniqSource[ s.sourceId ] = true
+						return true
 					} )
 					.map( s => {
 						let name = s.name + ' (' + s.namePretty + ')'
