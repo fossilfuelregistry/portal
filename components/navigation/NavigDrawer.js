@@ -25,7 +25,6 @@ const NavigDrawer = ( { visible, onClose } ) => {
 				visible={ visible }
 			>
 				<h4 className="item"><Link href="/co2-forecast">{ getText( 'co2_forecast' ) }</Link></h4>
-				<h4 className="item"><Link href="/wells">{ getText( 'menu_item_wells' ) }</Link></h4>
 				<h4 className="item"><Link href="/data">{ getText( 'menu_item_data' ) }</Link></h4>
 				<h4 className="item"><Link href="/methodology">{ getText( 'menu_item_methodology' ) }</Link></h4>
 				<h4 className="item"><Link href="/analysis">{ getText( 'menu_item_analysis' ) }</Link></h4>
@@ -61,3 +60,5 @@ const NavigDrawer = ( { visible, onClose } ) => {
 }
 
 export default NavigDrawer
+
+// 				<h4 className="item"><Link href="/wells">{ getText( 'menu_item_wells' ) }</Link></h4>
