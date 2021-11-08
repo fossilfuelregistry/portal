@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux"
 import Calculator from "components/CO2Forecast/Calculator"
 import InfoBox from "components/InfoBox"
 import CountrySelectorStandalone from "../components/navigation/CountrySelectorStandalone"
+import Markdown from "components/MarkdownCustomized"
 
 const DEBUG = false
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
@@ -96,7 +97,7 @@ export default function Home() {
 								<div className="front-card">
 									<div className="header">{ getText( 'front_analysis_title' ) }</div>
 									<div className="box">
-										{ getText( 'front_analysis' ) }
+										<Markdown>{ getText( 'front_analysis' ) }</Markdown>
 									</div>
 								</div>
 							</Col>
@@ -116,13 +117,13 @@ export default function Home() {
 								<Col xs={ 24 } lg={ 12 }>
 									<InfoBox
 										header={ getText( 'front_about_title' ) }
-										content={ getText( 'front_about' ) }
+										content={ <Markdown>{ getText( 'front_about' ) }</Markdown> }
 									/>
 								</Col>
 								<Col xs={ 24 } lg={ 12 }>
 									<InfoBox
 										header={ getText( 'front_methodology_title' ) }
-										content={ getText( 'front_methodology' ) }
+										content={ <Markdown>{ getText( 'front_methodology' ) }</Markdown> }
 									/>
 								</Col>
 							</Row>
