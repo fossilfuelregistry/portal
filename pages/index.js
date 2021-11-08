@@ -94,9 +94,9 @@ export default function Home() {
 							</Col>
 							<Col xs={ 24 }>
 								<div className="front-card">
-									<div className="header">{ getText( 'global-results' ) }</div>
+									<div className="header">{ getText( 'front_analysis_title' ) }</div>
 									<div className="box">
-										GRAPHS
+										{ getText( 'front_analysis' ) }
 									</div>
 								</div>
 							</Col>
@@ -114,10 +114,16 @@ export default function Home() {
 							</div>
 							<Row gutter={ 12 }>
 								<Col xs={ 24 } lg={ 12 }>
-									<InfoBox header={ 'About' } content={ 'Hello...' }/>
+									<InfoBox
+										header={ getText( 'front_about_title' ) }
+										content={ getText( 'front_about' ) }
+									/>
 								</Col>
 								<Col xs={ 24 } lg={ 12 }>
-									<InfoBox header={ 'Methodology' } content={ 'Hello...' }/>
+									<InfoBox
+										header={ getText( 'front_methodology_title' ) }
+										content={ getText( 'front_methodology' ) }
+									/>
 								</Col>
 							</Row>
 						</div>
