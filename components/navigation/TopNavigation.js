@@ -3,12 +3,13 @@ import { Col, Row } from 'antd'
 import NavigDrawer from "components/navigation/NavigDrawer"
 import { CgMenu } from 'react-icons/cg'
 import getConfig from 'next/config'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import useText from "lib/useText"
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
-export default function TopNavigation( props ) {
+export default function TopNavigation() {
 	const router = useRouter()
 	const { getText } = useText()
 	const [ visible, set_visible ] = useState( false )
@@ -41,7 +42,7 @@ export default function TopNavigation( props ) {
 					<CgMenu onClick={ showDrawer }/>
 				</Col>
 				<Col>
-					<img src="/SVG/gffr-logo.svg" alt="GFFR Logo" height={ 40 }/>
+					<Link href="/"><img src="/SVG/gffr-logo.svg" alt="GFFR Logo" height={ 40 }/></Link>
 				</Col>
 				<Col>
 					<h4>{ getText( 'grff' ) }</h4>

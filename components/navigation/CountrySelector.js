@@ -56,18 +56,19 @@ export default function CountrySelector() {
 
 			set_selectedCountryOption( newselectedCountryOption )
 			dispatch( { type: 'COUNTRYNAME', payload: name } )
-			trackEvent( 'country', { iso3166: newselectedCountryOption.value, country: name } )
 		}
 	}, [ countries?.length ] )
 
 	useEffect( () => {
-		if( !country ) return
+		if( !( countries.length > 0 ) ) return
 
-		if( countries.length > 0 && !( countryName?.length > 0 ) ) {
-			const currentCountry = countries.find( c => c.iso3166 = country )
-			DEBUG && console.info( 'CountrySelector reInitialize', country, currentCountry, countries )
-			dispatch( { type: 'COUNTRYNAME', payload: currentCountry?.name } )
-		}
+		const currentCountry = countries.find( c => c.iso3166 === country )
+		DEBUG && console.info( 'CountrySelector reInitialize', country, currentCountry, countries )
+
+		dispatch( { type: 'COUNTRYNAME', payload: currentCountry?.name } )
+
+		if( !selectedCountryOption || selectedCountryOption.value !== country )
+			set_selectedCountryOption( { value: country, label: currentCountry?.name } )
 
 		// Look for regions in the country
 		DEBUG && console.info( 'CountrySelector useEffect REGION', router.query?.country )
@@ -75,10 +76,13 @@ export default function CountrySelector() {
 			.filter( r => r.iso3166 === country && !!r.iso31662 )
 			.map( r => ( { ...r, name: r[ router.locale ] ?? r.en } ) )
 		set_regions( _regions )
+
 		if( _regions.length === 0 ) set_selectedRegionOption( undefined )
+
+		trackEvent( 'country', { iso3166: country, country: currentCountry?.name } )
 	}, [ country ] )
 
-	DEBUG && console.info( 'CountrySelector', { countries, regions, selectedCountryOption } )
+	DEBUG && console.info( 'CountrySelector', { country, countries, regions, selectedCountryOption } )
 
 	if( loadingCountries || errorLoadingCountries )
 		return <GraphQLStatus loading={ loadingCountries } error={ errorLoadingCountries }/>
