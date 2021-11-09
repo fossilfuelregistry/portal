@@ -543,7 +543,7 @@ export const useConversionHooks = () => {
 				if( point.year > last.year )
 					return point
 				else
-					return last
+					return ( last.year === 0 ? point : last ) // for projects with year: null data.
 			}, { year: 0 } )
 			DEBUG && console.log( { points, fuel, fuelData, lastYearProd } )
 			if( lastYearProd.year === 0 ) return

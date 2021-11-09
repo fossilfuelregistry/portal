@@ -10,7 +10,6 @@ import OpenCorporateCard from "../OpenCorporateCard"
 
 import { useRouter } from "next/router"
 import { ExportOutlined } from "@ant-design/icons"
-import BarStackChart from "components/viz/BarStackChart"
 import CountryProductionPieChart from "./CountryProductionPieChart"
 import HelpModal from "../HelpModal"
 import Sources from "./Sources"
