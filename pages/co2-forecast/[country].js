@@ -245,6 +245,10 @@ export default function CO2ForecastPage() {
 				template = <Alert showIcon type="warning" message={ 'No template for ' + templateId }/>
 		}
 
+		let mobile = true
+		if( typeof window !== 'undefined' )
+			mobile = window.matchMedia( `(max-width: ${ theme[ '@screen-xs' ] })` ).matches
+
 		return (
 			<>
 				<NextSeo
@@ -273,7 +277,7 @@ export default function CO2ForecastPage() {
 						<Row gutter={ [ 12, 12 ] } style={ { marginBottom: 26 } }>
 
 							<Col xs={ 12 } lg={ 6 }>
-								<Affix offsetTop={ 12 }>
+								<Affix offsetTop={ 12 } target={ mobile ? null : undefined /* poor mans disable */  }>
 									<div style={ { backgroundColor: '#ffffff', index: 10 } }>
 										<h4>{ getText( 'country' ) }</h4>
 										<CountrySelector/>
