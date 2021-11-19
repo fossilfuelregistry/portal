@@ -4,11 +4,20 @@ import { withParentSize } from "@visx/responsive"
 import { sumOfCO2 } from "../CO2Forecast/calculate"
 import getConfig from "next/config"
 import useText from "lib/useText"
+import { Modal } from "antd"
+import ReactMarkdown from "react-markdown"
 
 const DEBUG = false
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 const colWidth = 130
+
+function helpModal( title, content ) {
+	return Modal.info( {
+		title,
+		content: ( <ReactMarkdown>{ content }</ReactMarkdown> )
+	} )
+}
 
 function ScopeBarsBase( { totals = [], parentWidth, parentHeight } ) {
 	const { getText } = useText()
@@ -38,7 +47,9 @@ function ScopeBarsBase( { totals = [], parentWidth, parentHeight } ) {
 			/>
 
 			<text x={ 40 } y={ textY } fontSize="14" fontWeight="bold" textAnchor="middle" fill="#000000">
-				<tspan>{ getText( 'scope1' ).toUpperCase() }</tspan>
+				<tspan onClick={ () => helpModal( getText( 'scopes' ), getText( 'scope_1' ) ) }>
+					{ getText( 'scope1' ).toUpperCase() }
+				</tspan>
 			</text>
 
 			<PercentileBar
@@ -54,7 +65,9 @@ function ScopeBarsBase( { totals = [], parentWidth, parentHeight } ) {
 			/>
 
 			<text x={ 170 } y={ textY } fontSize="14" fontWeight="bold" textAnchor="middle" fill="#000000">
-				<tspan>{ getText( 'scope3' ).toUpperCase() }</tspan>
+				<tspan onClick={ () => helpModal( getText( 'scopes' ), getText( 'scope_3' ) ) }>
+					{ getText( 'scope3' ).toUpperCase() }
+				</tspan>
 			</text>
 
 			<PercentileBar

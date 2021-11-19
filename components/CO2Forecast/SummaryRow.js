@@ -27,7 +27,7 @@ export default function SummaryRow( { label, totals, total } ) {
 			<tr>
 				<td>
 					{ getText( 'scope' ) } 3
-					<HelpModal title="scopes" content="scope_2"/>
+					<HelpModal title="scopes" content="scope_3"/>
 				</td>
 				<td align="right">{ _( totals.scope3[ 0 ] ) }</td>
 				<td align="right">{ _( totals.scope3[ 1 ] ) }</td>

@@ -8,6 +8,7 @@ import SourceBars from "../viz/SourceBars"
 import { Col, Row } from "antd"
 import CsvDownloader from "react-csv-downloader"
 import { DownloadOutlined } from "@ant-design/icons"
+import HelpModal from "../HelpModal"
 
 const DEBUG = false
 
@@ -107,16 +108,18 @@ function FutureSummary( { dataset, limits, projectionSources } ) {
 			<div className="top">
 				<Row gutter={ 12 } style={ { display: 'inline-flex' } }>
 					<Col>
-						{ getText( 'future_emissions' ) }<br/>
+						{ getText( 'future_emissions' ) }{ ' ' }
 						{ getText( 'megaton' ) } CO²e
-					</Col>
-					<Col>
-						<CsvDownloader
-							datas={ csvData }
-							filename={ country + '_emissions_forecast.csv' }
-						>
-							<DownloadOutlined/>
-						</CsvDownloader>
+						{ ' ' }
+						<div style={ { display: 'inline-block' } }>
+							<CsvDownloader
+								datas={ csvData }
+								filename={ country + '_emissions_forecast.csv' }
+							>
+								<DownloadOutlined/>
+							</CsvDownloader>
+						</div>
+						<HelpModal title="ranges" content="explanation_ranges"/>
 					</Col>
 				</Row>
 			</div>

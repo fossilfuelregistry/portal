@@ -7,6 +7,7 @@ import ScopeBars from "../viz/ScopeBars"
 import { DownloadOutlined } from "@ant-design/icons"
 import CsvDownloader from "react-csv-downloader"
 import { Col, Row } from "antd"
+import HelpModal from "../HelpModal"
 
 const DEBUG = false
 
@@ -57,6 +58,9 @@ export default function YearSummary( { dataset = [] } ) {
 						>
 							<DownloadOutlined/>
 						</CsvDownloader>
+					</Col>
+					<Col>
+						<HelpModal title="ranges" content="explanation_ranges"/>
 					</Col>
 				</Row>
 			</div>
