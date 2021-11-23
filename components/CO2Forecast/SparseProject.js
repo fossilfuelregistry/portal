@@ -190,6 +190,19 @@ function SparseProject( { borders, countryCurrentProduction } ) {
 						</div>
 					</Col> }
 
+					{ !!theProject.linkUrl &&
+					<Col xs={ 24 } xl={ 12 }>
+						<div className="co2-card">
+							<div className="header">Extended information from GEM</div>
+							<div className="box">
+								<div>
+									<b>{ theProject.projectIdentifier } </b>
+									<a href={ theProject.linkUrl }><ExportOutlined/></a>
+								</div>
+							</div>
+						</div>
+					</Col> }
+
 					<Col xs={ 24 } xl={ 12 }>
 						<Sources
 							production={ co2.sources }
