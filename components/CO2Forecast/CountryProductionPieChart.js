@@ -78,7 +78,7 @@ export default function CountryProductionPieChart( { project, currentProduction,
 
 	const countryEmission = currentProduction?.find( p => p.sourceId === sourceId )?.totalCO2
 	const ratio = ( production?.totalCO2 ?? 0 ) / ( countryEmission ?? 1 )
-	const projectRadius = 83 * Math.sqrt( ratio )
+	//const projectRadius = 83 * Math.sqrt( ratio )
 
 	DEBUG && console.info( 'ratio', { ratio, production, currentProduction } )
 	let digits = 0
@@ -121,31 +121,18 @@ export default function CountryProductionPieChart( { project, currentProduction,
 
 					{ !!project && !!production?.totalCO2 &&
 					<Col xs={ 10 } style={ { textAlign: 'center' } }>
-						<div style={ { height: 200 } }>
-							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 10 100 100" height="100%" width="100%">
-								<circle
-									fill={ colors.oil.scope3 } className="cls-1" cx="50"
-									cy="50" r={ projectRadius }
-								/>
-								<text
-									y={ 80 }
-									fill="#000000d9"
-									fontSize={ 14 }
-									fontFamily={ 'sommet-rounded' }
-									fontWeight={ 'bold' }
-									textAnchor="middle"
-								>
-									<tspan x={ 50 }>{ ( ratio * 100 ).toFixed( digits ) }%</tspan>
-									<tspan x={ 50 } dy={ 16 }>{ project.projectIdentifier }</tspan>
-								</text>
-							</svg>
-						</div>
-						{ getText( 'production' ) } { production[ production.fuels[ 0 ] ].lastYear }:
+						<h2>{ project.projectIdentifier }</h2>
+						{ getText( 'production' ) } { production[ production.fuels[ 0 ] ].lastYear ?? production[ production.fuels[ 0 ] ].dataYear }:
 						<br/>
-						{ production.fuels.map( f => <div key={ f }>{ production[ f ]?.productionString }</div> ) }
+						<h3>
+							{ production.fuels.map( f => <div key={ f }>{ production[ f ]?.productionString }</div> ) }
+						</h3>
+						({ ( ratio * 100 ).toFixed( digits ) }% { getText( 'of_country_total' ) })
+						<br/>
 						{ getText( 'emissions' ) }:
-						<br/>
-						{ production.totalCO2?.toFixed( 2 ) } { getText( 'megaton' ) } CO²e
+						<h3>
+							{ production.totalCO2?.toFixed( 2 ) } { getText( 'megaton' ) } CO²e
+						</h3>
 					</Col>
 					}
 				</Row>
@@ -165,3 +152,23 @@ export default function CountryProductionPieChart( { project, currentProduction,
 		</div>
 	)
 }
+
+// <div style={ { height: 200 } }>
+// 	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 10 100 100" height="100%" width="100%">
+// 		<circle
+// 			fill={ colors.oil.scope3 } className="cls-1" cx="50"
+// 			cy="50" r={ projectRadius }
+// 		/>
+// 		<text
+// 			y={ 80 }
+// 			fill="#000000d9"
+// 			fontSize={ 14 }
+// 			fontFamily={ 'sommet-rounded' }
+// 			fontWeight={ 'bold' }
+// 			textAnchor="middle"
+// 		>
+// 			<tspan x={ 50 }>{ ( ratio * 100 ).toFixed( digits ) }%</tspan>
+// 			<tspan x={ 50 } dy={ 16 }>{ project.projectIdentifier }</tspan>
+// 		</text>
+// 	</svg>
+// </div>

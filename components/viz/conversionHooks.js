@@ -528,7 +528,7 @@ export const useConversionHooks = () => {
 	}
 
 	const projectCO2 = ( project ) => {
-		const DEBUG = false
+		const DEBUG = true
 		const points = project?.projectDataPoints?.nodes ?? []
 		const productionPerFuel = { totalCO2: 0, fuels: [] }
 
@@ -564,6 +564,7 @@ export const useConversionHooks = () => {
 			}
 
 			co2.lastYear = lastYearProd.year
+			co2.dataYear = lastYearProd.dataYear
 
 			co2.productionVolume = convertVolume( lastYearProd, targetUnit )
 
