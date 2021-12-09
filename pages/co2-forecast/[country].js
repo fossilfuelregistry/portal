@@ -172,6 +172,9 @@ export default function CO2ForecastPage() {
 							</Col>
 
 							<Col xs={ 24 } lg={ 12 } xxl={ 8 }>
+								<div className="co2-card" style={ { position: 'absolute' } }>
+									<div className="header">{ getText( 'country_map_projects' ) }</div>
+								</div>
 								<div className="geo-wrap">
 									<MapLibre
 										className="country-geo"
@@ -277,7 +280,7 @@ export default function CO2ForecastPage() {
 						<Row gutter={ [ 12, 12 ] } style={ { marginBottom: 26 } }>
 
 							<Col xs={ 12 } lg={ 6 }>
-								<Affix offsetTop={ 12 } target={ mobile ? null : undefined /* poor mans disable */  }>
+								<Affix offsetTop={ 12 } target={ mobile ? null : undefined /* poor mans disable */ }>
 									<div style={ { backgroundColor: '#ffffff', index: 10 } }>
 										<h4>{ getText( 'country' ) }</h4>
 										<CountrySelector/>
