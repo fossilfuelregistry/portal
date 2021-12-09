@@ -26,25 +26,17 @@ function InputSummary( { dataset = [] } ) {
 		addToTotal( totals[ datapoint.fossilFuelType ], datapoint.co2 )
 	} )
 
-	const csvData = [
+	const csvData = settings.supportedFuels.map( fuel => (
 		{
-			fuel: 'oil',
-			scope1_low: totals.oil.scope1[ 0 ],
-			scope1_mid: totals.oil.scope1[ 1 ],
-			scope1_high: totals.oil.scope1[ 2 ],
-			scope3_low: totals.oil.scope3[ 0 ],
-			scope3_mid: totals.oil.scope3[ 1 ],
-			scope3_high: totals.oil.scope3[ 2 ]
-		},
-		{
-			fuel: 'gas',
-			scope1_low: totals.gas.scope1[ 0 ],
-			scope1_mid: totals.gas.scope1[ 1 ],
-			scope1_high: totals.gas.scope1[ 2 ],
-			scope3_low: totals.gas.scope3[ 0 ],
-			scope3_mid: totals.gas.scope3[ 1 ],
-			scope3_high: totals.gas.scope3[ 2 ]
-		} ]
+			fuel,
+			scope1_low: totals[ fuel ]?.scope1[ 0 ],
+			scope1_mid: totals[ fuel ]?.scope1[ 1 ],
+			scope1_high: totals[ fuel ]?.scope1[ 2 ],
+			scope3_low: totals[ fuel ]?.scope3[ 0 ],
+			scope3_mid: totals[ fuel ]?.scope3[ 1 ],
+			scope3_high: totals[ fuel ]?.scope3[ 2 ]
+		} )
+	)
 
 	DEBUG && console.info( 'InputSummary', { totals, csvData, dataset, productionSourceId, sourceData } )
 
@@ -76,16 +68,14 @@ function InputSummary( { dataset = [] } ) {
 					</tr>
 				</thead>
 				<tbody>
-					<SummaryRow
-						label={ getText( 'oil' ) }
-						total={ getText( 'oil' ) + ' ' + getText( 'total' ) }
-						totals={ totals.oil }
-					/>
-					<SummaryRow
-						label={ getText( 'gas' ) }
-						total={ getText( 'gas' ) + ' ' + getText( 'total' ) }
-						totals={ totals.gas }
-					/>
+					{ settings.supportedFuels.map( fuel => (
+						<SummaryRow
+							key={ fuel }
+							label={ getText( fuel ) }
+							total={ getText( fuel ) + ' ' + getText( 'total' ) }
+							totals={ totals[ fuel ] }
+						/>
+					) ) }
 					<tr className="total subheader">
 						<td>{ getText( 'totals' ) }</td>
 						<td align="right">{ _( sumOfCO2( totals, 0 ) ) }</td>
