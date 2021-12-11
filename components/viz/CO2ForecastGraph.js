@@ -141,20 +141,22 @@ function CO2ForecastGraphBase( {
 
 	if( !( maxCO2 > 0 ) ) return null // JSON.stringify( maxCO2 )
 
-	const menu = (
-		<Menu onClick={ handleMenuClick }>
-			<Menu.Item key="png">PNG Image</Menu.Item>
-			<Menu.Item key="csv">CSV Data</Menu.Item>
-		</Menu>
-	)
+	// PNG DOWNLOAD BUTTON
+	// const menu = (
+	// 	<Menu onClick={ handleMenuClick }>
+	// 		<Menu.Item key="png">PNG Image</Menu.Item>
+	// 		<Menu.Item key="csv">CSV Data</Menu.Item>
+	// 	</Menu>
+	// )
+
+	// 			<div className="chart-menu" style={ { position: "absolute", top: 8, right: 16, zIndex: 1001 } }>
+	// 				<Dropdown onClick={ handleMenuClick } overlay={ menu }>
+	// 					<Button type="primary" shape="circle" icon={ <DownloadOutlined/> }/>
+	// 				</Dropdown>
+	// 			</div>
 
 	return (
 		<div className="graph" style={ { height: height } }>
-			<div className="chart-menu" style={ { position: "absolute", top: 8, right: 16, zIndex: 1001 } }>
-				<Dropdown onClick={ handleMenuClick } overlay={ menu }>
-					<Button type="primary" shape="circle" icon={ <DownloadOutlined/> }/>
-				</Dropdown>
-			</div>
 
 			<svg width={ '100%' } height={ height } id="CO2Forecast">
 				<Group left={ margin.left } top={ 0 }>

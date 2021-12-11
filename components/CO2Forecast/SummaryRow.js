@@ -43,6 +43,7 @@ export default function SummaryRow( { label, totals, total } ) {
 			<style jsx>{ `
               th, td {
                 padding: 3px 12px;
+                white-space: nowrap;
               }
 
               .subheader td {
