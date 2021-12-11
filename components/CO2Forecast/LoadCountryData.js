@@ -98,8 +98,8 @@ function LoadCountryData( { projectionSources } ) {
 	// Find stable production
 	useEffect( () => {
 		const reverse = [ ...production ].reverse()
-		const oil = reverse.find( d => d.fossilFuelType === 'oil' )
-		const gas = reverse.find( d => d.fossilFuelType === 'gas' )
+		const oil = reverse.find( d => d.fossilFuelType === 'oil' && d.sourceId === productionSourceId )
+		const gas = reverse.find( d => d.fossilFuelType === 'gas' && d.sourceId === productionSourceId )
 		dispatch( { type: 'STABLEPRODUCTION', payload: { oil, gas } } )
 	}, [ production, productionSourceId, gwp ] )
 

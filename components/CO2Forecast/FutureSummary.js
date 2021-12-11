@@ -10,7 +10,7 @@ import CsvDownloader from "react-csv-downloader"
 import { DownloadOutlined } from "@ant-design/icons"
 import HelpModal from "../HelpModal"
 
-const DEBUG = true
+const DEBUG = false
 
 const _csvFormatter = s => {
 	if( !s?.total?.oil?.scope1 ) {
