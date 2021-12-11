@@ -49,7 +49,7 @@ export default function YearSummary( { dataset = [] } ) {
 			<div className="top">
 				<Row gutter={ 12 } style={ { display: 'inline-flex' } }>
 					<Col>
-						{ getText( 'this_year' ) } { year } { getText( 'megaton' ) } CO²e
+						{ getText( 'now_heading' ) }
 					</Col>
 					<Col>
 						<CsvDownloader
@@ -60,7 +60,7 @@ export default function YearSummary( { dataset = [] } ) {
 						</CsvDownloader>
 					</Col>
 					<Col>
-						<HelpModal title="ranges" content="explanation_ranges"/>
+						<HelpModal title="now_heading" content="now_heading_explanation"/>
 					</Col>
 				</Row>
 			</div>

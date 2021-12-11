@@ -108,8 +108,7 @@ function FutureSummary( { dataset, limits, projectionSources } ) {
 			<div className="top">
 				<Row gutter={ 12 } style={ { display: 'inline-flex' } }>
 					<Col>
-						{ getText( 'future_emissions' ) }{ ' ' }
-						{ getText( 'megaton' ) } CO²e
+						{ getText( '2040_heading' ) }
 						{ ' ' }
 						<div style={ { display: 'inline-block' } }>
 							<CsvDownloader
@@ -119,7 +118,7 @@ function FutureSummary( { dataset, limits, projectionSources } ) {
 								<DownloadOutlined/>
 							</CsvDownloader>
 						</div>
-						<HelpModal title="ranges" content="explanation_ranges"/>
+						<HelpModal title="2040_heading" content="2040_heading_explanation"/>
 					</Col>
 				</Row>
 			</div>

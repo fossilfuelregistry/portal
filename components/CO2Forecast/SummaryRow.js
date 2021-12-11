@@ -11,9 +11,9 @@ export default function SummaryRow( { label, totals, total } ) {
 		<>
 			<tr className="subheader">
 				<td>{ label }</td>
-				<td align="right">{ getText( 'low' ) }</td>
-				<td align="right">{ getText( 'mid' ) }</td>
-				<td align="right">{ getText( 'high' ) }</td>
+				<td align="right">{ getText( 'low' ) } <HelpModal title="ranges" content="P5"/></td>
+				<td align="right">{ getText( 'mid' ) } <HelpModal title="historic_heading" content="WA"/></td>
+				<td align="right">{ getText( 'high' ) } <HelpModal title="historic_heading" content="P95"/></td>
 			</tr>
 			<tr>
 				<td>

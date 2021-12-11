@@ -50,7 +50,7 @@ function InputSummary( { dataset = [] } ) {
 						<th colSpan={ 4 }>
 							<Row gutter={ 12 } style={ { display: 'inline-flex' } }>
 								<Col>
-									{ getText( 'past_emissions' ) } { getText( 'megaton' ) } CO²e
+									{ getText( 'historic_heading' ) }
 								</Col>
 								<Col>
 									<CsvDownloader
@@ -61,7 +61,7 @@ function InputSummary( { dataset = [] } ) {
 									</CsvDownloader>
 								</Col>
 								<Col>
-									<HelpModal title="ranges" content="explanation_ranges"/>
+									<HelpModal title="historic_heading" content="historic_heading_explanation"/>
 								</Col>
 							</Row>
 						</th>
