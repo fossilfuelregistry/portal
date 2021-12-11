@@ -197,7 +197,7 @@ export default function CO2ForecastPage() {
 
 						<Divider style={ { marginTop: 48, marginBottom: 0 } }>
 							<h4>
-								{ getText( 'co2_forecast' ) }{' '}
+								{ getText( 'co2_forecast' ) }{ ' ' }
 								<HelpModal title="co2_forecast" content="country_snapshot_explanation"/>
 							</h4>
 						</Divider>

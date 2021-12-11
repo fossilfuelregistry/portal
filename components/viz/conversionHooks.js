@@ -528,7 +528,7 @@ export const useConversionHooks = () => {
 	}
 
 	const projectCO2 = ( project ) => {
-		const DEBUG = true
+		const DEBUG = false
 		const points = project?.projectDataPoints?.nodes ?? []
 		const productionPerFuel = { totalCO2: 0, fuels: [] }
 

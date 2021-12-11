@@ -10,7 +10,7 @@ import CsvDownloader from "react-csv-downloader"
 import { DownloadOutlined } from "@ant-design/icons"
 import HelpModal from "../HelpModal"
 
-const DEBUG = false
+const DEBUG = true
 
 const _csvFormatter = s => {
 	if( !s?.total?.oil?.scope1 ) {
@@ -39,7 +39,7 @@ function FutureSummary( { dataset, limits, projectionSources } ) {
 	if( !( dataset?.length > 0 ) ) return null
 	if( !stableProduction.oil || !stableProduction.gas ) return null
 
-	DEBUG && console.info( { projectionSourceId, allSources, limits, stableProduction } )
+	DEBUG && console.info( { projectionSourceId, allSources, limits, stableProduction, projectionSources } )
 
 	const stable = {
 		oil: co2FromVolume( stableProduction.oil ),

@@ -93,7 +93,7 @@ function DenseProject( { countryCurrentProduction, borders, productionSources, p
 
 				<Divider style={ { marginTop: 48 } }><h4>{ getText( 'co2_forecast' ) }</h4></Divider>
 
-				{ productionSourceId > 0 && <LoadProjectData/> }
+				{ productionSourceId > 0 && <LoadProjectData projectionSources={ projectionSources }/> }
 
 				<Sources
 					production={ productionSources }

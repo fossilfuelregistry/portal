@@ -23,7 +23,8 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 		reserves,
 		projectedProduction,
 		limits,
-		projectGeo
+		projectGeo,
+		projectionSources
 	} )
 
 	return (

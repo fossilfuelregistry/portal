@@ -11,7 +11,7 @@ import settings from "settings"
 
 const DEBUG = false
 
-function LoadProjectData() {
+function LoadProjectData( { projectionSources } ) {
 	const dispatch = useDispatch()
 	const { co2FromVolume, reservesProduction } = useConversionHooks()
 	const { getText } = useText()
@@ -224,6 +224,7 @@ function LoadProjectData() {
 			projection={ projection }
 			reserves={ reserves }
 			projectedProduction={ projectedProduction }
+			projectionSources={ projectionSources }
 		/>
 	)
 }
