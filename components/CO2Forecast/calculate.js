@@ -118,7 +118,7 @@ export function getPreferredReserveGrade( grades ) {
 }
 
 export async function co2PageUpdateQuery( store, router, parameter, value ) {
-	const params = [ 'region', 'productionSourceId', 'projectionSourceId', 'reservesSourceId' ]
+	const params = [ 'region', 'productionSourceId', 'projectionSourceId', 'reservesSourceId', 'gwp' ]
 	const DEBUG = false
 	const query = new URLSearchParams()
 	const state = store.getState()
