@@ -47,7 +47,8 @@ function ScopeBarsBase( { totals = [], parentWidth, parentHeight } ) {
 			/>
 
 			<text x={ 40 } y={ textY } fontSize="14" fontWeight="bold" textAnchor="middle" fill="#000000">
-				<tspan onClick={ () => helpModal( getText( 'scopes' ), getText( 'scope_1' ) ) }>
+				<tspan onClick={ () => helpModal( getText( 'scopes' ), getText( 'scope_1' ) ) }
+					   style={ { cursor: 'help' } }>
 					{ getText( 'scope1' ).toUpperCase() }
 				</tspan>
 			</text>
@@ -65,7 +66,8 @@ function ScopeBarsBase( { totals = [], parentWidth, parentHeight } ) {
 			/>
 
 			<text x={ 170 } y={ textY } fontSize="14" fontWeight="bold" textAnchor="middle" fill="#000000">
-				<tspan onClick={ () => helpModal( getText( 'scopes' ), getText( 'scope_3' ) ) }>
+				<tspan onClick={ () => helpModal( getText( 'scopes' ), getText( 'scope_3' ) ) }
+					   style={ { cursor: 'help' } }>
 					{ getText( 'scope3' ).toUpperCase() }
 				</tspan>
 			</text>

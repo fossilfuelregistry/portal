@@ -3,11 +3,21 @@ import gaussian from "gaussian"
 import Color from "color"
 import React from "react"
 import getConfig from "next/config"
+import { Modal } from "antd"
+import ReactMarkdown from "react-markdown"
+import useText from "../../lib/useText"
 //import palette from 'google-palette'
 
 const DEBUG = false
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
+
+function helpModal( title, content ) {
+	return Modal.info( {
+		title,
+		content: ( <ReactMarkdown>{ content }</ReactMarkdown> )
+	} )
+}
 
 // Function to calculate percentile value from variance
 function percentile( variance, p, mean ) {
@@ -24,6 +34,7 @@ function toCustomPrecision( x ) {
 }
 
 export default function PercentileBar( { low, mid, high, scale, height, x, y, width, color } ) {
+	const { getText } = useText()
 	DEBUG && console.info( 'PercentileBar', { low, mid, high, scale, height, x, y, width } )
 
 	if( mid === 0 ) {
@@ -91,15 +102,22 @@ export default function PercentileBar( { low, mid, high, scale, height, x, y, wi
 					className="numeric" x={ textX } y={ textHighY } fontSize="14" fontWeight="bold" textAnchor="left"
 					fill="#aaaaaa"
 				>
-					<tspan dy={ 5 }>{ toCustomPrecision( high ) }</tspan>
+					<tspan dy={ 5 } onClick={ () => helpModal( getText( 'ranges' ), getText( 'P95' ) ) }
+						   style={ { cursor: 'help' } }>
+						{ toCustomPrecision( high ) }
+					</tspan>
 				</text>
 				<text
 					className="numeric"
+					onClick={ () => helpModal( getText( 'ranges' ), getText( 'WA' ) ) }
+					style={ { cursor: 'help' } }
 					x={ textX } y={ textMidY } fontSize="18" fontWeight="bold" textAnchor="left"
 				>
 					<tspan dy={ 7 }>{ toCustomPrecision( mid ) }</tspan>
 				</text>
 				<text
+					onClick={ () => helpModal( getText( 'ranges' ), getText( 'P5' ) ) }
+					style={ { cursor: 'help' } }
 					className="numeric" x={ textX } y={ textLowY } fontSize="14" fontWeight="bold" textAnchor="left"
 					fill="#aaaaaa"
 				>
