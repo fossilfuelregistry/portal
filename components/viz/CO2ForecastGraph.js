@@ -307,6 +307,10 @@ function CO2ForecastGraphBase( {
 							</td>
 							<td>{ getText( 'oil' ) } : { getText( 'against_contingent' ) }</td>
 						</tr> }
+						{ ( !cReserves && !pReserves ) && <tr>
+							<td/>
+							<td style={ { maxWidth: 200 } }>{ getText( 'no_reserves' ) }</td>
+						</tr> }
 					</tbody>
 				</table>
 
