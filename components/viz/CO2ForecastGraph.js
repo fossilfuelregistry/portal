@@ -6,7 +6,6 @@ import { curveLinear } from '@visx/curve'
 import { scaleLinear } from '@visx/scale'
 import { withTooltip } from '@visx/tooltip'
 import { max } from 'd3-array'
-import { DownloadOutlined } from '@ant-design/icons'
 import { withParentSize } from "@visx/responsive"
 import useText from "lib/useText"
 import { combineOilAndGas, sumOfCO2 } from "../CO2Forecast/calculate"
@@ -15,7 +14,6 @@ import FileSaver from 'file-saver'
 import { toCsv } from "react-csv-downloader"
 import settings from 'settings'
 import getConfig from "next/config"
-import { Button, Dropdown, Menu } from "antd"
 import { saveSvgAsPng } from "save-svg-as-png"
 
 const DEBUG = false
@@ -45,6 +43,8 @@ function CO2ForecastGraphBase( {
 	const getY1 = d => d[ 1 ]
 	const getProjection = d => d.co2
 
+	let pReserves = false, cReserves = false
+
 	const productionData = combineOilAndGas( production.filter( d => d.sourceId === productionSourceId ) )
 		.filter( d => d.year >= settings.year.start )
 		.map( d => ( {
@@ -62,13 +62,19 @@ function CO2ForecastGraphBase( {
 
 	const projProdData = ( projectionSourceId ? combineOilAndGas( projectedProduction ) : [] )
 		.filter( d => d.year >= settings.year.start )
-		.map( d => ( {
-			year: d.year,
-			oil_p: d.oil?.plannedProd ?? 0,
-			oil_c: d.oil?.continProd ?? 0,
-			gas_p: d.gas?.plannedProd ?? 0,
-			gas_c: d.gas?.continProd ?? 0
-		} ) )
+		.map( d => {
+			if( d.oil?.plannedProd > 0 ) pReserves = true
+			if( d.gas?.plannedProd > 0 ) pReserves = true
+			if( d.oil?.continProd > 0 ) cReserves = true
+			if( d.gas?.continProd > 0 ) cReserves = true
+			return {
+				year: d.year,
+				oil_p: d.oil?.plannedProd ?? 0,
+				oil_c: d.oil?.continProd ?? 0,
+				gas_p: d.gas?.plannedProd ?? 0,
+				gas_c: d.gas?.continProd ?? 0
+			}
+		} )
 
 	DEBUG && console.info( { production, productionData, projProdData, projectionSourceId, projectedProduction } )
 
@@ -117,8 +123,7 @@ function CO2ForecastGraphBase( {
 					y.oil_c = d.oil_c
 					y.gas_p = d.gas_p
 					y.gas_c = d.gas_c
-				}
-				else
+				} else
 					datas.push( d )
 			} )
 			const csv = await toCsv( {
@@ -278,30 +283,30 @@ function CO2ForecastGraphBase( {
 							</td>
 							<td>{ getText( 'oil' ) } { getText( 'past_emissions' ) }</td>
 						</tr>
-						<tr>
+						{ pReserves && <tr>
 							<td>
 								<div className="blob gas p"/>
 							</td>
 							<td>{ getText( 'gas' ) }: { getText( 'against_reserves' ) }</td>
-						</tr>
-						<tr>
+						</tr> }
+						{ pReserves && <tr>
 							<td>
 								<div className="blob oil p"/>
 							</td>
 							<td>{ getText( 'oil' ) }: { getText( 'against_reserves' ) }</td>
-						</tr>
-						<tr>
+						</tr> }
+						{ cReserves && <tr>
 							<td>
 								<div className="blob gas c"/>
 							</td>
 							<td>{ getText( 'gas' ) }: { getText( 'against_contingent' ) }</td>
-						</tr>
-						<tr>
+						</tr> }
+						{ cReserves && <tr>
 							<td>
 								<div className="blob oil c"/>
 							</td>
 							<td>{ getText( 'oil' ) } : { getText( 'against_contingent' ) }</td>
-						</tr>
+						</tr> }
 					</tbody>
 				</table>
 
