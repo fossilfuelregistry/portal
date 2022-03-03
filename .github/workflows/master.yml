@@ -10,6 +10,7 @@ on:
       - Sprint5
       - Sprint6
       - Sprint7
+  workflow_dispatch:
 
 jobs:
   deploy-dev:
@@ -26,14 +27,19 @@ jobs:
 
       - name: Pull commits into running dev
         uses: appleboy/ssh-action@master
+        env:
+            GITHUB_BRANCH: ${{ github.ref }}
         with:
           host: dev.fossilfuelregistry.org
           username: grff
           key_path: ./id_rsa
+          envs: GIT_BRANCH
           script: |
             pwd
             id
             cd grff-portal
-            git pull
+            git checkout master
+            git fetch --all
+            git reset --hard origin/master
             yarn build
             pm2 restart 0
