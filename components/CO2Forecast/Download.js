@@ -2,12 +2,13 @@ import CsvDownloader from "react-csv-downloader";
 import React from "react";
 import { sumOfCO2 } from "./calculate";
 import { useSelector } from "react-redux";
-import useText from "../../lib/useText";
+import useCsvDataTranslator from "lib/useCsvDataTranslator"
+
 
 export default function Download({ data, filename, fuel, children }) {
 	const allSources = useSelector((redux) => redux.allSources);
 
-	const { getText } = useText();
+	const { generateCsvTranslation } = useCsvDataTranslator()
 
 	if (!data?.length > 0) return null;
 
@@ -27,15 +28,7 @@ export default function Download({ data, filename, fuel, children }) {
 			return _d;
 		});
 
-	const translatedData = datas.map((d) => {
-		const keys = Object.keys(d);
-		const prefix = "csv_key_";
-		const obj = {};
-
-		keys.forEach((key, i) => obj[getText(`${prefix}${key}`)] = d[key])
-
-		return obj;
-	});
+	const translatedData = datas.map(generateCsvTranslation);
 
 	return (
 		<div className="download">

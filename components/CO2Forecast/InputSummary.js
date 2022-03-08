@@ -8,11 +8,13 @@ import settings from "../../settings"
 import CsvDownloader from "react-csv-downloader"
 import { Col, Row } from "antd"
 import { DownloadOutlined } from "@ant-design/icons"
+import useCsvDataTranslator from "lib/useCsvDataTranslator"
 
 const DEBUG = false
 
 function InputSummary( { dataset = [] } ) {
 	const { getText } = useText()
+	const { generateCsvTranslation } = useCsvDataTranslator()
 	const country = useSelector( redux => redux.country )
 	const productionSourceId = useSelector( redux => redux.productionSourceId )
 
@@ -40,6 +42,8 @@ function InputSummary( { dataset = [] } ) {
 
 	DEBUG && console.info( 'InputSummary', { totals, csvData, dataset, productionSourceId, sourceData } )
 
+	const translatedCsvData = csvData.map(generateCsvTranslation)
+
 	const _ = v => Math.round( v )
 
 	return (
@@ -54,7 +58,7 @@ function InputSummary( { dataset = [] } ) {
 								</Col>
 								<Col>
 									<CsvDownloader
-										datas={ csvData }
+										datas={ translatedCsvData }
 										filename={ country + '_historic_emissions.csv' }
 									>
 										<DownloadOutlined/>

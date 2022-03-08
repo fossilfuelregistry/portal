@@ -1,5 +1,4 @@
 import React from "react"
-import useText from "lib/useText"
 import { useSelector } from "react-redux"
 import { useConversionHooks } from "../viz/conversionHooks"
 import { addToTotal } from "./calculate"
@@ -9,6 +8,8 @@ import { Col, Row } from "antd"
 import CsvDownloader from "react-csv-downloader"
 import { DownloadOutlined } from "@ant-design/icons"
 import HelpModal from "../HelpModal"
+import useText from "lib/useText"
+import useCsvDataTranslator from "lib/useCsvDataTranslator"
 
 const DEBUG = false
 
@@ -30,6 +31,7 @@ const _csvFormatter = s => {
 
 function FutureSummary( { dataset, limits, projectionSources } ) {
 	const { getText } = useText()
+	const { generateCsvTranslation } = useCsvDataTranslator()
 	const country = useSelector( redux => redux.country )
 	const { co2FromVolume } = useConversionHooks()
 	const stableProduction = useSelector( redux => redux.stableProduction )
@@ -100,6 +102,8 @@ function FutureSummary( { dataset, limits, projectionSources } ) {
 		srcCsv.forEach( row => csvData.push( row ) )
 	} )
 
+	const translatedCsvData = csvData.map(generateCsvTranslation)
+
 	DEBUG && console.info( { years, year, stable, stableSource, csvData, dataset, sources } )
 
 	return (
@@ -112,7 +116,7 @@ function FutureSummary( { dataset, limits, projectionSources } ) {
 						{ ' ' }
 						<div style={ { display: 'inline-block' } }>
 							<CsvDownloader
-								datas={ csvData }
+								datas={ translatedCsvData }
 								filename={ country + '_emissions_forecast.csv' }
 							>
 								<DownloadOutlined/>
