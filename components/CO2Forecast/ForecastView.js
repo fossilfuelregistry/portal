@@ -125,6 +125,28 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 					</div>
 				</Col> }
 
+				{ production?.length > 0 &&
+				<Col xs={ 24 } md={ 12 } xxl={ 12 }>
+					<div className="graph-wrap">
+						<h4>{ getText( 'coal' ) + ' ' + getText( 'production' ) } e6ton</h4>
+						<InputDataGraph data={ production } fuel="coal" comment="PROD"/>
+						<Download data={ production } filename={ 'coal_production_' + country } fuel="coal">
+							<Button className="download" block>{ getText( 'download' ) }</Button>
+						</Download>
+					</div>
+				</Col> }
+
+				{ reserves?.length > 0 &&
+				<Col xs={ 24 } md={ 12 } xxl={ 12 }>
+					<div className="graph-wrap">
+						<h4>{ getText( 'coal' ) + ' ' + getText( 'reserves' ) } e6ton</h4>
+						<InputDataGraph data={ reserves } fuel="coal" comment="RES"/>
+						<Download data={ reserves } filename={ 'coal_reserves_' + country } fuel="coal">
+							<Button className="download" block>{ getText( 'download' ) }</Button>
+						</Download>
+					</div>
+				</Col> }
+
 			</Row>
 
 			<style jsx>{ `

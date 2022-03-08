@@ -47,6 +47,7 @@ function InputDataGraphBase( {
 		let y
 		if( point.fossilFuelType === 'gas' ) y = convertVolume( point, 'e9m3' )
 		if( point.fossilFuelType === 'oil' ) y = convertVolume( point, 'e6bbl' )
+		if( point.fossilFuelType === 'coal' ) y = convertVolume( point, 'e6ton' )
 
 		currentYearSet[ point.sourceId ] = y
 
