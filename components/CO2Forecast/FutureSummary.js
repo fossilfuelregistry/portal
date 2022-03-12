@@ -17,7 +17,7 @@ const _csvFormatter = s => {
 	if( !s?.total?.oil?.scope1 ) {
 		return []
 	}
-	return [ 'oil', 'gas' ].map( fuel => ( {
+	return [ 'oil', 'gas', 'coal' ].map( fuel => ( {
 		scenario: s.name,
 		fuel,
 		scope1_low: s.total[ fuel ].scope1[ 0 ],
@@ -45,7 +45,8 @@ function FutureSummary( { dataset, limits, projectionSources } ) {
 
 	const stable = {
 		oil: co2FromVolume( stableProduction.oil ),
-		gas: co2FromVolume( stableProduction.gas )
+		gas: co2FromVolume( stableProduction.gas ),
+		coal: co2FromVolume( stableProduction.coal ),
 	}
 
 	const projectionSource = allSources.find( s => s.sourceId === projectionSourceId )
@@ -91,7 +92,8 @@ function FutureSummary( { dataset, limits, projectionSources } ) {
 		sourceId: 100,
 		total: {
 			oil: { scope1: stable.oil.scope1.map( e => years * e ), scope3: stable.oil.scope3.map( e => years * e ) },
-			gas: { scope1: stable.gas.scope1.map( e => years * e ), scope3: stable.gas.scope3.map( e => years * e ) }
+			gas: { scope1: stable.gas.scope1.map( e => years * e ), scope3: stable.gas.scope3.map( e => years * e ) },
+			coal: { scope1: stable.coal.scope1.map( e => years * e ), scope3: stable.coal.scope3.map( e => years * e ) },
 		}
 	}
 

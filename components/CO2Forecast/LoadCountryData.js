@@ -72,6 +72,7 @@ function LoadCountryData( { projectionSources } ) {
 				for( let year = 2020; year <= settings.year.end; year++ ) {
 					stableProj.push( { ...stableProduction.oil, year, sourceId: settings.stableProductionSourceId } )
 					stableProj.push( { ...stableProduction.gas, year, sourceId: settings.stableProductionSourceId } )
+					stableProj.push( { ...stableProduction.coal, year, sourceId: settings.stableProductionSourceId } )
 				}
 				DEBUG && console.info( { stableProj } )
 				return stableProj.concat( _co2( projectionData?.countryDataPoints?.nodes ) )
@@ -100,7 +101,8 @@ function LoadCountryData( { projectionSources } ) {
 		const reverse = [ ...production ].reverse()
 		const oil = reverse.find( d => d.fossilFuelType === 'oil' && d.sourceId === productionSourceId )
 		const gas = reverse.find( d => d.fossilFuelType === 'gas' && d.sourceId === productionSourceId )
-		dispatch( { type: 'STABLEPRODUCTION', payload: { oil, gas } } )
+		const coal = reverse.find( d => d.fossilFuelType === 'coal' && d.sourceId === productionSourceId )
+		dispatch( { type: 'STABLEPRODUCTION', payload: { oil, gas, coal } } )
 	}, [ production, productionSourceId, gwp ] )
 
 	// Figure out available years when data loaded.
@@ -218,7 +220,7 @@ function LoadCountryData( { projectionSources } ) {
 		return <GraphQLStatus loading={ loadingReserves } error={ errorLoadingReserves }/>
 
 	// Don't try to render a chart until all data looks good
-	if( ( !limits.production?.oil?.lastYear && !limits.production?.gas?.lastYear ) || !production?.length > 0 ) {
+	if( ( !limits.production?.oil?.lastYear && !limits.production?.gas?.lastYear && !limits.production?.coal?.lastYear ) || !production?.length > 0 ) {
 		DEBUG && console.info( 'What to do?', { limits, production } )
 		return <Alert message={ getText( 'make_selections' ) } type="info" showIcon/>
 	}

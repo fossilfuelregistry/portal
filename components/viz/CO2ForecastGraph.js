@@ -8,7 +8,7 @@ import { withTooltip } from '@visx/tooltip'
 import { max } from 'd3-array'
 import { withParentSize } from "@visx/responsive"
 import useText from "lib/useText"
-import { combineOilAndGas, sumOfCO2 } from "../CO2Forecast/calculate"
+import { combineOilAndGasAndCoal, sumOfCO2 } from "../CO2Forecast/calculate"
 import { useSelector } from "react-redux"
 import FileSaver from 'file-saver'
 import { toCsv } from "react-csv-downloader"
@@ -23,6 +23,7 @@ const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 const colors = {
 	oil: { past: '#008080', reserves: '#70a494', contingent: '#b4c8a8' },
 	gas: { past: '#de8a5a', reserves: '#edbb8a', contingent: '#f6edbd' },
+	coal: { past: '#00B6FF', reserves: '#008FE6', contingent: '#00B6FF' },
 }
 
 //#008080,#70a494,#b4c8a8,#f6edbd,#edbb8a,#de8a5a,#ca562c
@@ -45,34 +46,39 @@ function CO2ForecastGraphBase( {
 
 	let pReserves = false, cReserves = false
 
-	const productionData = combineOilAndGas( production.filter( d => d.sourceId === productionSourceId ) )
+	const productionData = combineOilAndGasAndCoal( production.filter( d => d.sourceId === productionSourceId ) )
 		.filter( d => d.year >= settings.year.start )
 		.map( d => ( {
 			year: d.year,
 			oil: d.oil ? sumOfCO2( d.oil.co2, 1 ) : 0,
-			gas: d.gas ? sumOfCO2( d.gas.co2, 1 ) : 0
+			gas: d.gas ? sumOfCO2( d.gas.co2, 1 ) : 0,
+			coal: d.coal ? sumOfCO2(d.coal.co2, 1) : 0,
 		} ) )
 
-	const projectionData = combineOilAndGas( projection.filter( d => d.sourceId === projectionSourceId ) )
+	const projectionData = combineOilAndGasAndCoal( projection.filter( d => d.sourceId === projectionSourceId ) )
 		.filter( d => d.year >= settings.year.start )
 		.map( d => ( {
 			year: d.year,
-			co2: ( d.oil ? sumOfCO2( d.oil.co2, 1 ) : 0 ) + ( d.gas ? sumOfCO2( d.gas.co2, 1 ) : 0 )
+			co2: ( d.oil ? sumOfCO2( d.oil.co2, 1 ) : 0 ) + ( d.gas ? sumOfCO2( d.gas.co2, 1 ) : 0 ) + ( d.coal ? sumOfCO2( d.coal.co2, 1 ) : 0 )
 		} ) )
 
-	const projProdData = ( projectionSourceId ? combineOilAndGas( projectedProduction ) : [] )
+	const projProdData = ( projectionSourceId ? combineOilAndGasAndCoal( projectedProduction ) : [] )
 		.filter( d => d.year >= settings.year.start )
 		.map( d => {
 			if( d.oil?.plannedProd > 0 ) pReserves = true
 			if( d.gas?.plannedProd > 0 ) pReserves = true
+			if( d.coal?.plannedProd > 0 ) pReserves = true
 			if( d.oil?.continProd > 0 ) cReserves = true
 			if( d.gas?.continProd > 0 ) cReserves = true
+			if( d.coal?.continProd > 0 ) cReserves = true
 			return {
 				year: d.year,
 				oil_p: d.oil?.plannedProd ?? 0,
 				oil_c: d.oil?.continProd ?? 0,
 				gas_p: d.gas?.plannedProd ?? 0,
-				gas_c: d.gas?.continProd ?? 0
+				gas_c: d.gas?.continProd ?? 0,
+				coal_p: d.coal?.plannedProd ?? 0,
+				coal_c: d.coal?.continProd ?? 0,
 			}
 		} )
 
@@ -85,7 +91,7 @@ function CO2ForecastGraphBase( {
 	} )
 
 	const maxCO2 = useMemo( () => {
-		let maxValue = max( productionData, d => ( d.oil ?? 0 ) + ( d.gas ?? 0 ) )
+		let maxValue = max( productionData, d => ( d.oil ?? 0 ) + ( d.gas ?? 0 ) + (d.coal ?? 0) )
 		maxValue = Math.max( maxValue, max( projectionData, d => d.co2 ) )
 		return maxValue * 1.05
 	}, [ productionData, projectionData ] )
@@ -102,11 +108,14 @@ function CO2ForecastGraphBase( {
 				{ id: 'year', displayName: 'year', },
 				{ id: 'oil', displayName: 'oil emissions', },
 				{ id: 'gas', displayName: 'gas emissions', },
+				{ id: 'coal', displayName: 'coal emissions', },
 				{ id: 'co2', displayName: 'projected emissions', },
 				{ id: 'oil_p', displayName: 'projected oil emissions', },
 				{ id: 'oil_c', displayName: 'projected contingent oil emissions', },
 				{ id: 'gas_p', displayName: 'projected gas emissions', },
 				{ id: 'gas_c', displayName: 'projected contingent gas emissions', },
+				{ id: 'coal_p', displayName: 'projected coal emissions', },
+				{ id: 'coal_c', displayName: 'projected contingent coal emissions', },
 			]
 			const datas = productionData
 			projectionData.forEach( d => {
@@ -123,6 +132,8 @@ function CO2ForecastGraphBase( {
 					y.oil_c = d.oil_c
 					y.gas_p = d.gas_p
 					y.gas_c = d.gas_c
+					y.coal_p = d.coal_p
+					y.coal_c = d.coal_c
 				} else
 					datas.push( d )
 			} )
@@ -186,7 +197,7 @@ function CO2ForecastGraphBase( {
 					/>
 
 					<AreaStack
-						keys={ [ 'oil_c', 'oil_p', 'gas_c', 'gas_p' ] }
+						keys={ [ 'oil_c', 'oil_p', 'gas_c', 'gas_p', 'coal_c', 'coal_p' ] }
 						data={ projProdData }
 						x={ d => yearScale( getYear( d.data ) ) }
 						y0={ d => productionScale( getY0( d ) ) }
@@ -201,9 +212,12 @@ function CO2ForecastGraphBase( {
 										stroke="transparent"
 										fill={ {
 											oil_p: colors.oil.reserves,
-											gas_c: colors.gas.contingent,
+											oil_c: colors.oil.contingent,
 											gas_p: colors.gas.reserves,
-											oil_c: colors.oil.contingent
+											gas_c: colors.gas.contingent,
+											coal_p: colors.coal.reserves,
+											coal_c: colors.coal.contingent,
+											
 										}[ stack.key ] }
 									/>
 								)
@@ -211,7 +225,7 @@ function CO2ForecastGraphBase( {
 					</AreaStack>
 
 					<AreaStack
-						keys={ [ 'oil', 'gas' ] }
+						keys={ [ 'oil', 'gas', 'coal' ] }
 						data={ productionData }
 						defined={ d => ( getY0( d ) > 0 || getY1( d ) > 0 ) }
 						x={ d => yearScale( getYear( d.data ) ) }
@@ -228,6 +242,7 @@ function CO2ForecastGraphBase( {
 										fill={ {
 											oil: colors.oil.past,
 											gas: colors.gas.past,
+											coal: colors.coal.past,
 										}[ stack.key ] }
 									/>
 								)
@@ -283,6 +298,12 @@ function CO2ForecastGraphBase( {
 							</td>
 							<td>{ getText( 'oil' ) } { getText( 'past_emissions' ) }</td>
 						</tr>
+						<tr>
+							<td>
+								<div className="blob coal past"/>
+							</td>
+							<td>{ getText( 'coal' ) } { getText( 'past_emissions' ) }</td>
+						</tr>
 						{ pReserves && <tr>
 							<td>
 								<div className="blob gas p"/>
@@ -295,6 +316,12 @@ function CO2ForecastGraphBase( {
 							</td>
 							<td>{ getText( 'oil' ) }: { getText( 'against_reserves' ) }</td>
 						</tr> }
+						{ pReserves && <tr>
+							<td>
+								<div className="blob coal p"/>
+							</td>
+							<td>{ getText( 'coal' ) }: { getText( 'against_reserves' ) }</td>
+						</tr> }
 						{ cReserves && <tr>
 							<td>
 								<div className="blob gas c"/>
@@ -306,6 +333,12 @@ function CO2ForecastGraphBase( {
 								<div className="blob oil c"/>
 							</td>
 							<td>{ getText( 'oil' ) } : { getText( 'against_contingent' ) }</td>
+						</tr> }
+						{ cReserves && <tr>
+							<td>
+								<div className="blob coal c"/>
+							</td>
+							<td>{ getText( 'coal' ) } : { getText( 'against_contingent' ) }</td>
 						</tr> }
 						{ ( !cReserves && !pReserves ) && <tr>
 							<td/>
@@ -345,6 +378,10 @@ function CO2ForecastGraphBase( {
 
               :global(path.reserves.gas) {
                 stroke: #4382b3;
+              }
+
+			  :global(path.reserves.gas) {
+                stroke: #433333;
               }
 
               .graph {
@@ -387,6 +424,10 @@ function CO2ForecastGraphBase( {
                 background-color: ${ colors.gas.past };
               }
 
+			  .coal.past {
+                background-color: ${ colors.coal.past };
+              }
+
               .oil.p {
                 background-color: ${ colors.oil.reserves };
               }
@@ -395,12 +436,20 @@ function CO2ForecastGraphBase( {
                 background-color: ${ colors.gas.reserves };
               }
 
+			  .coal.p {
+                background-color: ${ colors.coal.reserves };
+              }
+
               .oil.c {
                 background-color: ${ colors.oil.contingent };
               }
 
               .gas.c {
                 background-color: ${ colors.gas.contingent };
+              }
+
+			  .coal.c {
+                background-color: ${ colors.coal.contingent };
               }
 			` }
 			</style>

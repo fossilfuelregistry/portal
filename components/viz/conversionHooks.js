@@ -376,8 +376,8 @@ export const useConversionHooks = () => {
 
 			let prod = []
 			// Fill out gap between production and projection (if any)
-			const gapStart = Math.min( limits.production.oil.lastYear, limits.production.gas.lastYear )
-			const gapEnd = Math.max( limits.projection.oil.firstYear, limits.projection.gas.firstYear, gapStart )
+			const gapStart = Math.min( limits.production.oil.lastYear, limits.production.gas.lastYear, limits.production.coal.lastYear )
+			const gapEnd = Math.max( limits.projection.oil.firstYear, limits.projection.gas.firstYear, limits.projection.coal.firstYear , gapStart )
 			DEBUG && console.info( 'reservesProduction', {
 				reservesSourceId,
 				useGrades,
@@ -401,6 +401,13 @@ export const useConversionHooks = () => {
 							...stableProduction.gas,
 							year: y,
 							fossilFuelType: 'gas',
+							sourceId: projectionSourceId
+						} )
+					if( limits.production.coal.lastYear <= y )
+						prod.push( {
+							...stableProduction.coal,
+							year: y,
+							fossilFuelType: 'coal',
 							sourceId: projectionSourceId
 						} )
 				}

@@ -57,7 +57,7 @@ export function __sumOfCO2( datapoint, range ) {
 	}
 }
 
-export function combineOilAndGas( dataset ) {
+export function combineOilAndGasAndCoal( dataset ) {
 	let newDataset = []
 	let nextCombinedPoint = { year: 0 }
 
