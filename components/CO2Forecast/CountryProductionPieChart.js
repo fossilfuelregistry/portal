@@ -27,6 +27,8 @@ export default function CountryProductionPieChart( { project, currentProduction,
 	const gwp = useSelector( redux => redux.gwp )
 	const total = useSelector( redux => redux.countryTotalCO2 )
 	const allSources = useSelector( redux => redux.allSources )
+	const costPerTonCO2 = useSelector( redux => redux.co2CostPerTon )
+
 
 	DEBUG && console.info( 'CountryProductionPieChart', { project, currentProduction, production } )
 	useEffect( () => {
@@ -44,14 +46,16 @@ export default function CountryProductionPieChart( { project, currentProduction,
 			set_sourceId( currentSourceId )
 		}
 
+		const costMultiplier = (costPerTonCO2?.cost ?? 1)
+
 		const currentEmissions = currentProduction.find( e => e.sourceId === currentSourceId )
-		const _total = currentEmissions?.totalCO2
+		const _total = currentEmissions?.totalCO2 * costMultiplier
 		dispatch( { type: 'COUNTRYTOTALCO2', payload: _total } )
 
 		const slices = currentEmissions?.production?.flatMap( p => {
 			DEBUG && console.info( 'CountryProd Pie', p )
-			const q1 = p.co2?.scope1?.[ 1 ] ?? 0
-			const q3 = p.co2?.scope3?.[ 1 ] ?? 0
+			const q1 = p.co2?.scope1?.[ 1 ] * costMultiplier ?? 0
+			const q3 = p.co2?.scope3?.[ 1 ] * costMultiplier ?? 0
 			return [ {
 				label: p.fossilFuelType?.toUpperCase() + ' ' + getText( 'scope3' ),
 				quantity: q3,
@@ -72,7 +76,7 @@ export default function CountryProductionPieChart( { project, currentProduction,
 		} )
 		DEBUG && console.info( { emissions: currentProduction, slices } )
 		set_pieChartData( slices )
-	}, [ currentProduction, sourceId, gwp ] )
+	}, [ currentProduction, sourceId, gwp, costPerTonCO2 ] )
 
 	if( !currentProduction ) return null
 
@@ -84,6 +88,9 @@ export default function CountryProductionPieChart( { project, currentProduction,
 	let digits = 0
 	if( ratio < 0.1 ) digits = 1
 	if( ratio < 0.01 ) digits = 2
+
+
+	const unit = costPerTonCO2 ? ` ${costPerTonCO2.currency.toUpperCase()}` : ' CO²e'
 
 	return (
 		<div className="co2-card">
@@ -101,7 +108,7 @@ export default function CountryProductionPieChart( { project, currentProduction,
 								data={ pieChartData }
 								topNote={ countryName + ' ' + getText( 'total' ) }
 								header={ total?.toFixed( 0 ) }
-								note={ getText( 'megaton' ) + ' CO²e' }
+								note={ getText( 'megaton' ) + unit }
 							/>
 						</div>
 
