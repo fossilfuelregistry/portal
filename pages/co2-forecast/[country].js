@@ -25,6 +25,7 @@ import DenseProject from "components/CO2Forecast/DenseProject"
 import Footer from "components/Footer"
 import ProjectSelector from "components/navigation/ProjectSelector"
 import MapLibre from "../../components/geo/MapLibre"
+import CO2CostSelector from "../../components/navigation/CO2CostSelector"
 
 const DEBUG = false
 
@@ -330,6 +331,8 @@ export default function CO2ForecastPage() {
 												placeholder={ getText( 'projection' ) }
 											/>
 										</> }
+										<h4 className="selector">{getText('co2-cost')}</h4>
+										<CO2CostSelector />
 									</div>
 								</Affix>
 							</Col>

@@ -231,8 +231,10 @@ export const useConversionHooks = () => {
 
 		if( lastConversionLoggedTimer ) clearTimeout( lastConversionLoggedTimer )
 		lastConversionLoggedTimer = setTimeout( () => {
-			console.info( '----- Conversions logged -----' )
-			lastConversionPath.sort( ( a, b ) => a.localeCompare( b ) ).forEach( p => console.info( p ) )
+			if( DEBUG ) {
+				console.info( '----- Conversions logged -----' )
+				lastConversionPath.sort( ( a, b ) => a.localeCompare( b ) ).forEach( p => console.info( p ) )
+			}
 			lastConversionPath = []
 		}, 1000 )
 		return { low, high, factor }
