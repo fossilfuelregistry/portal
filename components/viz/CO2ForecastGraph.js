@@ -15,6 +15,9 @@ import { toCsv } from "react-csv-downloader"
 import settings from 'settings'
 import getConfig from "next/config"
 import { saveSvgAsPng } from "save-svg-as-png"
+import useCsvDataTranslator from "lib/useCsvDataTranslator"
+import CsvDownloader from "react-csv-downloader"
+import { DownloadOutlined } from "@ant-design/icons"
 
 const DEBUG = false
 
@@ -35,6 +38,7 @@ function CO2ForecastGraphBase( {
 	const country = useSelector( redux => redux.country )
 	const projectionSourceId = useSelector( redux => redux.projectionSourceId )
 	const productionSourceId = useSelector( redux => redux.productionSourceId )
+	const { generateCsvTranslation } = useCsvDataTranslator()
 
 	const height = parentHeight
 	const margin = { left: 0, top: 10 }
@@ -157,6 +161,30 @@ function CO2ForecastGraphBase( {
 
 	if( !( maxCO2 > 0 ) ) return null // JSON.stringify( maxCO2 )
 
+
+	const csvData = [...productionData]
+	projectionData.forEach( d => {
+		const y = csvData.find( dp => dp.year === d.year )
+		if( y )
+			y.co2 = d.co2
+		else
+		csvData.push( d )
+	} )
+	projProdData.forEach( d => {
+		const y = csvData.find( dp => dp.year === d.year )
+		if( y ) {
+			y.oil_p = d.oil_p
+			y.oil_c = d.oil_c
+			y.gas_p = d.gas_p
+			y.gas_c = d.gas_c
+			y.coal_p = d.coal_p
+			y.coal_c = d.coal_c
+		} else
+		csvData.push( d )
+	} )
+
+	const translatedCsvData = csvData.map(generateCsvTranslation)
+
 	// PNG DOWNLOAD BUTTON
 	// const menu = (
 	// 	<Menu onClick={ handleMenuClick }>
@@ -173,6 +201,14 @@ function CO2ForecastGraphBase( {
 
 	return (
 		<div className="graph" style={ { height: height } }>
+			<div style={ { display: 'inline-block', paddingBottom:"5px" } }>
+				<CsvDownloader
+					datas={ translatedCsvData }
+					filename={ country + '_emissions_forecast.csv' }
+				>
+					<DownloadOutlined/>
+				</CsvDownloader>
+			</div>
 
 			<svg width={ '100%' } height={ height } id="CO2Forecast">
 				<Group left={ margin.left } top={ 0 }>
