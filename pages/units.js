@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react"
+import React, { useEffect, useRef } from "react"
 import { DataSet, Network } from 'vis-network/standalone/umd/vis-network.min'
 import TopNavigation from "components/navigation/TopNavigation"
 import { GQL_conversions } from "../queries/general"

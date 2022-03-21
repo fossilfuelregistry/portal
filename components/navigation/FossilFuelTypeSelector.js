@@ -1,3 +1,4 @@
+import React from "react"
 import { Select } from "antd"
 import useText from "lib/useText"
 import settings from "../../settings"

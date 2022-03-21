@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 import bbox from '@turf/bbox'
 import Loading from "../Loading"
 import getConfig from "next/config"

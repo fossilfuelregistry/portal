@@ -9,6 +9,8 @@ import CsvDownloader from "react-csv-downloader"
 import { Col, Row } from "antd"
 import HelpModal from "../HelpModal"
 import useCsvDataTranslator from "lib/useCsvDataTranslator"
+import useCO2CostConverter from "lib/useCO2CostConverter"
+
 
 const DEBUG = true
 
@@ -17,7 +19,7 @@ export default function YearSummary( { dataset = [] } ) {
 	const { generateCsvTranslation } = useCsvDataTranslator()
 	const country = useSelector( redux => redux.country )
 	const productionSourceId = useSelector( redux => redux.productionSourceId )
-	const costPerTonCO2 = useSelector( redux => redux.co2CostPerTon )
+	const { currentUnit, costMultiplier } = useCO2CostConverter()
 
 	if( !( dataset?.length > 0 ) ) return null
 
@@ -39,37 +41,32 @@ export default function YearSummary( { dataset = [] } ) {
 
 	DEBUG && console.info( { totals, csvData } )
 
-	let totalsInCO2OrCurrency = JSON.parse(JSON.stringify(totals))
+	let totalsInCO2OrCurrency = JSON.parse( JSON.stringify( totals ) )
 	let csvData = []
-	let unit = ' (MT CO2E)'
-
 	
-	useEffect(() => {
-		const multiplier = costPerTonCO2?.cost ?? 1
-		Object.entries(totals).forEach(entry => totalsInCO2OrCurrency[entry[0]] = entry[1].map(v => v * multiplier))
+	Object.entries( totals ).forEach( entry => totalsInCO2OrCurrency[ entry[ 0 ] ] = entry[ 1 ].map( v => v * costMultiplier ) )
 
-		unit = costPerTonCO2 ? ` (${costPerTonCO2?.currency})` : ' (MT CO2E)'
-		console.info(totalsInCO2OrCurrency)
-		console.info(totals)
 
-		csvData = [ {
-			scope1_low: totalsInCO2OrCurrency.scope1[ 0 ],
-			scope1_mid: totalsInCO2OrCurrency.scope1[ 1 ],
-			scope1_high: totalsInCO2OrCurrency.scope1[ 2 ],
-			scope3_low: totalsInCO2OrCurrency.scope3[ 0 ],
-			scope3_mid: totalsInCO2OrCurrency.scope3[ 1 ],
-			scope3_high: totalsInCO2OrCurrency.scope3[ 2 ]
-		} ]
-	}, [costPerTonCO2, totals]);
+	csvData = [ {
+		scope1_low: totalsInCO2OrCurrency.scope1[ 0 ],
+		scope1_mid: totalsInCO2OrCurrency.scope1[ 1 ],
+		scope1_high: totalsInCO2OrCurrency.scope1[ 2 ],
+		scope3_low: totalsInCO2OrCurrency.scope3[ 0 ],
+		scope3_mid: totalsInCO2OrCurrency.scope3[ 1 ],
+		scope3_high: totalsInCO2OrCurrency.scope3[ 2 ]
+	} ]
+	DEBUG && console.info( { csvData } )
 
-	const translatedCsvData = csvData.map(generateCsvTranslation)
+
+	const translatedCsvData = csvData.map( generateCsvTranslation )
+
 
 	return (
 		<div className="table-wrap">
 			<div className="top">
 				<Row gutter={ 12 } style={ { display: 'inline-flex' } }>
 					<Col>
-						{ getText( 'now_heading' ) + unit }
+						{ `${getText( 'now_heading' )} (${getText( 'megaton' )} ${currentUnit })`}
 					</Col>
 					<Col>
 						<CsvDownloader

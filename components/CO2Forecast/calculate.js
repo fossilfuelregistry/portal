@@ -2,7 +2,7 @@ import settings from "settings"
 
 const DEBUG = false
 
-export function addToTotal( total, datapoint ) {
+export function addToTotal( total, datapoint, optionalMultiplicationFactor = 1 ) {
 	if( !total ) {
 		console.trace()
 		console.log( { datapoint } )
@@ -18,7 +18,7 @@ export function addToTotal( total, datapoint ) {
 		ranges?.forEach( range => {
 			if( !total[ scope ] ) total[ scope ] = []
 			if( !total[ scope ][ range ] ) total[ scope ] [ range ] = 0
-			total[ scope ][ range ] += datapoint[ scope ][ range ]
+			total[ scope ][ range ] += datapoint[ scope ][ range ] * optionalMultiplicationFactor
 		} )
 	} )
 }

@@ -1,6 +1,6 @@
 import Globe from "react-globe.gl"
 import Spinner from "./Spinner"
-import { useCallback, useEffect, useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import { notification } from "antd"
 import { useRouter } from "next/router"
 import { withParentSize } from '@visx/responsive'

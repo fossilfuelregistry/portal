@@ -2,7 +2,8 @@ const { extendDefaultPlugins } = require( 'svgo' )
 
 module.exports = {
 	"presets": [
-		"next/babel"
+		"next/babel",
+		"@babel/preset-react"
 	],
 	"plugins": [
 		[

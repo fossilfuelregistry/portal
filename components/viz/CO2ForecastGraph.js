@@ -11,12 +11,11 @@ import useText from "lib/useText"
 import { combineOilAndGasAndCoal, sumOfCO2 } from "../CO2Forecast/calculate"
 import { useSelector } from "react-redux"
 import FileSaver from 'file-saver'
-import { toCsv } from "react-csv-downloader"
+import CsvDownloader, { toCsv } from "react-csv-downloader"
 import settings from 'settings'
 import getConfig from "next/config"
 import { saveSvgAsPng } from "save-svg-as-png"
 import useCsvDataTranslator from "lib/useCsvDataTranslator"
-import CsvDownloader from "react-csv-downloader"
 import { DownloadOutlined } from "@ant-design/icons"
 
 const DEBUG = false
@@ -56,7 +55,7 @@ function CO2ForecastGraphBase( {
 			year: d.year,
 			oil: d.oil ? sumOfCO2( d.oil.co2, 1 ) : 0,
 			gas: d.gas ? sumOfCO2( d.gas.co2, 1 ) : 0,
-			coal: d.coal ? sumOfCO2(d.coal.co2, 1) : 0,
+			coal: d.coal ? sumOfCO2( d.coal.co2, 1 ) : 0,
 		} ) )
 
 	const projectionData = combineOilAndGasAndCoal( projection.filter( d => d.sourceId === projectionSourceId ) )
@@ -95,7 +94,7 @@ function CO2ForecastGraphBase( {
 	} )
 
 	const maxCO2 = useMemo( () => {
-		let maxValue = max( productionData, d => ( d.oil ?? 0 ) + ( d.gas ?? 0 ) + (d.coal ?? 0) )
+		let maxValue = max( productionData, d => ( d.oil ?? 0 ) + ( d.gas ?? 0 ) + ( d.coal ?? 0 ) )
 		maxValue = Math.max( maxValue, max( projectionData, d => d.co2 ) )
 		return maxValue * 1.05
 	}, [ productionData, projectionData ] )
@@ -162,13 +161,13 @@ function CO2ForecastGraphBase( {
 	if( !( maxCO2 > 0 ) ) return null // JSON.stringify( maxCO2 )
 
 
-	const csvData = [...productionData]
+	const csvData = [ ...productionData ]
 	projectionData.forEach( d => {
 		const y = csvData.find( dp => dp.year === d.year )
 		if( y )
 			y.co2 = d.co2
 		else
-		csvData.push( d )
+			csvData.push( d )
 	} )
 	projProdData.forEach( d => {
 		const y = csvData.find( dp => dp.year === d.year )
@@ -180,10 +179,10 @@ function CO2ForecastGraphBase( {
 			y.coal_p = d.coal_p
 			y.coal_c = d.coal_c
 		} else
-		csvData.push( d )
+			csvData.push( d )
 	} )
 
-	const translatedCsvData = csvData.map(generateCsvTranslation)
+	const translatedCsvData = csvData.map( generateCsvTranslation )
 
 	// PNG DOWNLOAD BUTTON
 	// const menu = (
@@ -345,41 +344,41 @@ function CO2ForecastGraphBase( {
 								<div className="blob gas p"/>
 							</td>
 							<td>{ getText( 'gas' ) }: { getText( 'against_reserves' ) }</td>
-						</tr> }
+                     </tr> }
 						{ pReserves && <tr>
 							<td>
 								<div className="blob oil p"/>
 							</td>
 							<td>{ getText( 'oil' ) }: { getText( 'against_reserves' ) }</td>
-						</tr> }
+                     </tr> }
 						{ pReserves && <tr>
 							<td>
 								<div className="blob coal p"/>
 							</td>
 							<td>{ getText( 'coal' ) }: { getText( 'against_reserves' ) }</td>
-						</tr> }
+                     </tr> }
 						{ cReserves && <tr>
 							<td>
 								<div className="blob gas c"/>
 							</td>
 							<td>{ getText( 'gas' ) }: { getText( 'against_contingent' ) }</td>
-						</tr> }
+                     </tr> }
 						{ cReserves && <tr>
 							<td>
 								<div className="blob oil c"/>
 							</td>
 							<td>{ getText( 'oil' ) } : { getText( 'against_contingent' ) }</td>
-						</tr> }
+                     </tr> }
 						{ cReserves && <tr>
 							<td>
 								<div className="blob coal c"/>
 							</td>
 							<td>{ getText( 'coal' ) } : { getText( 'against_contingent' ) }</td>
-						</tr> }
+                     </tr> }
 						{ ( !cReserves && !pReserves ) && <tr>
 							<td/>
 							<td style={ { maxWidth: 200 } }>{ getText( 'no_reserves' ) }</td>
-						</tr> }
+                                        </tr> }
 					</tbody>
 				</table>
 

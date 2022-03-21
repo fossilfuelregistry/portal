@@ -331,7 +331,7 @@ export default function CO2ForecastPage() {
 												placeholder={ getText( 'projection' ) }
 											/>
 										</> }
-										<h4 className="selector">{getText('co2-cost')}</h4>
+										<h4 className="selector">{getText( 'co2_cost' )}</h4>
 										<CO2CostSelector />
 									</div>
 								</Affix>

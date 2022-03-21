@@ -11,7 +11,9 @@ import HelpModal from "../HelpModal"
 import useText from "lib/useText"
 import useCsvDataTranslator from "lib/useCsvDataTranslator"
 
-const DEBUG = false
+import useCO2CostConverter from "lib/useCO2CostConverter"
+
+const DEBUG = true
 
 const _csvFormatter = s => {
 	if( !s?.total?.oil?.scope1 ) {
@@ -29,6 +31,7 @@ const _csvFormatter = s => {
 	} ) )
 }
 
+
 function FutureSummary( { dataset, limits, projectionSources } ) {
 	const { getText } = useText()
 	const { generateCsvTranslation } = useCsvDataTranslator()
@@ -37,9 +40,12 @@ function FutureSummary( { dataset, limits, projectionSources } ) {
 	const stableProduction = useSelector( redux => redux.stableProduction )
 	const allSources = useSelector( redux => redux.allSources )
 	const projectionSourceId = useSelector( redux => redux.projectionSourceId )
+	const { currentUnit, costMultiplier } = useCO2CostConverter()
+
+
 
 	if( !( dataset?.length > 0 ) ) return null
-	if( !stableProduction.oil || !stableProduction.gas ) return null
+	if( !stableProduction.oil || !stableProduction.gas || !stableProduction.coal ) return null
 
 	DEBUG && console.info( { projectionSourceId, allSources, limits, stableProduction, projectionSources } )
 
@@ -81,7 +87,7 @@ function FutureSummary( { dataset, limits, projectionSources } ) {
 				.filter( d => d.sourceId === source.sourceId )
 				.forEach( d => {
 					if( d.year < year.first ) return
-					addToTotal( sourceTotal[ d.fossilFuelType ], d.co2 )
+					addToTotal( sourceTotal[ d.fossilFuelType ], d.co2, costMultiplier )
 				} )
 
 			return { ...source, total: sourceTotal }
@@ -91,20 +97,15 @@ function FutureSummary( { dataset, limits, projectionSources } ) {
 		name: 'name_projection_stable',
 		sourceId: 100,
 		total: {
-			oil: { scope1: stable.oil.scope1.map( e => years * e ), scope3: stable.oil.scope3.map( e => years * e ) },
-			gas: { scope1: stable.gas.scope1.map( e => years * e ), scope3: stable.gas.scope3.map( e => years * e ) },
-			coal: { scope1: stable.coal.scope1.map( e => years * e ), scope3: stable.coal.scope3.map( e => years * e ) },
+			oil: { scope1: stable.oil.scope1.map( e => years * e * costMultiplier ), scope3: stable.oil.scope3.map( e => years * e * costMultiplier ) },
+			gas: { scope1: stable.gas.scope1.map( e => years * e * costMultiplier ), scope3: stable.gas.scope3.map( e => years * e * costMultiplier ) },
+			coal: { scope1: stable.coal.scope1.map( e => years * e  * costMultiplier ), scope3: stable.coal.scope3.map( e => years * e * costMultiplier ) },
 		}
 	}
 
 	const csvData = [ ..._csvFormatter( stableSource ) ]
 
-	sources.forEach( s => {
-		const srcCsv = _csvFormatter( s )
-		srcCsv.forEach( row => csvData.push( row ) )
-	} )
-
-	const translatedCsvData = csvData.map(generateCsvTranslation)
+	const translatedCsvData = csvData.map( generateCsvTranslation )
 
 	DEBUG && console.info( { years, year, stable, stableSource, csvData, dataset, sources } )
 
