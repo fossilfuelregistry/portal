@@ -248,7 +248,9 @@ export const useConversionHooks = () => {
 		console.info( { graphs, conversions, volume, unit, fossilFuelType, subtype, methaneM3Ton, country } )
 	}, 2000, { 'trailing': false } )
 
-	const co2FromVolume = ( { volume, unit, fossilFuelType, subtype, methaneM3Ton, country }, log ) => {
+	const co2FromVolume = ( props, log ) => {
+		if( !props ) return { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] }
+
 		let gc = { graphs, conversions }
 		if( country ) {
 			// We want to override graphs to this country instead of the Redux state country
