@@ -46,7 +46,7 @@ export default function Units() {
 			nodes: nodes,
 			edges: edges,
 		}
-		const network = new Network( domRef.current, data, { physics: true } )
+		const network = new Network( domRef.current, data, { physics: false } )
 	}, [ domRef.current ] )
 
 	return (

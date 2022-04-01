@@ -248,7 +248,10 @@ export const useConversionHooks = () => {
 		console.info( { graphs, conversions, volume, unit, fossilFuelType, subtype, methaneM3Ton, country } )
 	}, 2000, { 'trailing': false } )
 
-	const co2FromVolume = ( { volume, unit, fossilFuelType, subtype, methaneM3Ton, country }, log ) => {
+	const co2FromVolume = ( props, log ) => {
+		if( !props ) return { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] }
+
+		const { volume, unit, fossilFuelType, subtype, methaneM3Ton, country } = props
 		let gc = { graphs, conversions }
 		if( country ) {
 			// We want to override graphs to this country instead of the Redux state country
@@ -377,7 +380,7 @@ export const useConversionHooks = () => {
 			let prod = []
 			// Fill out gap between production and projection (if any)
 			const gapStart = Math.min( limits.production.oil.lastYear, limits.production.gas.lastYear, limits.production.coal.lastYear )
-			const gapEnd = Math.max( limits.projection.oil.firstYear, limits.projection.gas.firstYear, limits.projection.coal.firstYear , gapStart )
+			const gapEnd = Math.max( limits.projection.oil.firstYear, limits.projection.gas.firstYear, limits.projection.coal.firstYear, gapStart )
 			DEBUG && console.info( 'reservesProduction', {
 				reservesSourceId,
 				useGrades,
