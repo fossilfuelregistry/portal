@@ -250,6 +250,7 @@ export const useConversionHooks = () => {
 
 	const co2FromVolume = ( props, log ) => {
 		if( !props ) return { scope1: [ 0, 0, 0 ], scope3: [ 0, 0, 0 ] }
+		const { volume, unit, fossilFuelType, subtype, methaneM3Ton, country } = props
 
 		let gc = { graphs, conversions }
 		if( country ) {
