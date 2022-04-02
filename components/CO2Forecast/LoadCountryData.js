@@ -10,7 +10,7 @@ import { useConversionHooks } from "../viz/conversionHooks"
 import settings from "settings"
 import { prepareProductionDataset } from "./calculate"
 
-const DEBUG = true
+const DEBUG = false
 
 function LoadCountryData( { projectionSources } ) {
 	const dispatch = useDispatch()

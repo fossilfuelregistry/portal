@@ -19,14 +19,14 @@ import useCsvDataTranslator from "lib/useCsvDataTranslator"
 import { DownloadOutlined } from "@ant-design/icons"
 import { formatCsvNumber } from "../../lib/numberFormatter"
 
-const DEBUG = true
+const DEBUG = false
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
 const colors = {
 	oil: { past: '#008080', reserves: '#70a494', contingent: '#b4c8a8' },
 	gas: { past: '#de8a5a', reserves: '#edbb8a', contingent: '#f6edbd' },
-	coal: { past: '#00B6FF', reserves: '#008FE6', contingent: '#00B6FF' },
+	coal: { past: '#6EABD9', reserves: '#90BCDE', contingent: '#B1CFE5' },
 }
 
 //#008080,#70a494,#b4c8a8,#f6edbd,#edbb8a,#de8a5a,#ca562c
@@ -165,8 +165,8 @@ function CO2ForecastGraphBase( {
 	const csvData = productionData.map(p=>({
 		year: p.year, 
 		oil: formatCsvNumber(p.oil),
-		coal: formatCsvNumber(p.coal),
 		gas: formatCsvNumber(p.gas),
+		coal: formatCsvNumber(p.coal),
 	}))
 
 	projectionData.forEach( d => {

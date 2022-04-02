@@ -13,7 +13,7 @@ import useCsvDataTranslator from "lib/useCsvDataTranslator"
 import useCO2CostConverter from "lib/useCO2CostConverter"
 import { formatCsvNumber } from "lib/numberFormatter"
 
-const DEBUG = true
+const DEBUG = false
 
 const _csvFormatter = s => {
 	if( !s?.total?.oil?.scope1 ) {
