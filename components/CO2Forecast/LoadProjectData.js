@@ -27,7 +27,7 @@ function LoadProjectData( { projectionSources } ) {
 	const _co2 = dataset => {
 		try {
 			return ( dataset ?? [] )
-				.filter( datapoint => datapoint.fossilFuelType === 'gas' || datapoint.fossilFuelType === 'oil' )
+				.filter( datapoint => datapoint.fossilFuelType === 'gas' || datapoint.fossilFuelType === 'oil' || datapoint.fossilFuelType === 'coal' )
 				.map( datapoint => {
 					let _d = { ...datapoint }
 					delete _d.id
@@ -76,6 +76,7 @@ function LoadProjectData( { projectionSources } ) {
 				for( let year = 2020; year <= settings.year.end; year++ ) {
 					stableProj.push( { ...stableProduction.oil, year, sourceId: settings.stableProductionSourceId } )
 					stableProj.push( { ...stableProduction.gas, year, sourceId: settings.stableProductionSourceId } )
+					stableProj.push( { ...stableProduction.coal, year, sourceId: settings.stableProductionSourceId } )
 				}
 				DEBUG && console.info( { stableProj } )
 				return stableProj
@@ -104,7 +105,8 @@ function LoadProjectData( { projectionSources } ) {
 		const reverse = [ ...production ].reverse()
 		const oil = reverse.find( d => d.fossilFuelType === 'oil' )
 		const gas = reverse.find( d => d.fossilFuelType === 'gas' )
-		dispatch( { type: 'STABLEPRODUCTION', payload: { oil, gas } } )
+		const coal = reverse.find( d => d.fossilFuelType === 'coal' )
+		dispatch( { type: 'STABLEPRODUCTION', payload: { oil, gas, coal } } )
 	}, [ production, productionSourceId, gwp ] )
 
 	// Figure out available years when data loaded.
@@ -118,11 +120,16 @@ function LoadProjectData( { projectionSources } ) {
 			l.firstYear = Math.min( l.firstYear, datapoint.year )
 			l.lastYear = Math.max( l.lastYear, datapoint.year )
 			return _limits
-		}, { oil: { firstYear: settings.year.end, lastYear: 0 }, gas: { firstYear: settings.year.end, lastYear: 0 } } )
+		}, { 
+			oil: { firstYear: settings.year.end, lastYear: 0 }, 
+			gas: { firstYear: settings.year.end, lastYear: 0 },
+			coal: { firstYear: settings.year.end, lastYear: 0 },
+		} )
 
 		// Check if no data
 		if( newLimits.oil.firstYear === settings.year.end ) newLimits.oil.firstYear = 0
 		if( newLimits.gas.firstYear === settings.year.end ) newLimits.gas.firstYear = 0
+		if( newLimits.coal.firstYear === settings.year.end ) newLimits.coal.firstYear = 0
 
 		set_limits( l => ( { ...l, production: newLimits } ) )
 		DEBUG && console.info( 'useEffect Production', { newLimits } )
@@ -137,7 +144,8 @@ function LoadProjectData( { projectionSources } ) {
 		if( projectionSourceId === settings.stableProductionSourceId ) {
 			newLimits = {
 				oil: { firstYear: new Date().getFullYear() - 1, lastYear: settings.year.end },
-				gas: { firstYear: new Date().getFullYear() - 1, lastYear: settings.year.end }
+				gas: { firstYear: new Date().getFullYear() - 1, lastYear: settings.year.end },
+				coal: { firstYear: new Date().getFullYear() - 1, lastYear: settings.year.end }
 			}
 		} else {
 			newLimits = projection.reduce( ( _limits, datapoint ) => {
@@ -148,13 +156,15 @@ function LoadProjectData( { projectionSources } ) {
 				return _limits
 			}, {
 				oil: { firstYear: settings.year.end, lastYear: 0 },
-				gas: { firstYear: settings.year.end, lastYear: 0 }
+				gas: { firstYear: settings.year.end, lastYear: 0 },
+				coal: { firstYear: settings.year.end, lastYear: 0 }
 			} )
 		}
 
 		// Check if no data
 		if( newLimits.oil.firstYear === settings.year.end ) newLimits.oil.firstYear = 0
 		if( newLimits.gas.firstYear === settings.year.end ) newLimits.gas.firstYear = 0
+		if( newLimits.coal.firstYear === settings.year.end ) newLimits.coal.firstYear = 0
 
 		set_limits( l => ( { ...l, projection: newLimits } ) )
 	}, [ projection, projectionSourceId ] )
@@ -215,7 +225,7 @@ function LoadProjectData( { projectionSources } ) {
 		return <GraphQLStatus loading={ loadingReserves } error={ errorLoadingReserves }/>
 
 	// Don't try to render a chart until all data looks good
-	if( ( !limits.production?.oil?.lastYear && !limits.production?.gas?.lastYear ) || !production?.length > 0 )
+	if( ( !limits.production?.oil?.lastYear && !limits.production?.gas?.lastYear && !limits.production?.coal?.lastYear ) || !production?.length > 0 )
 		return <Alert message={ getText( 'make_selections' ) } type="info" showIcon/>
 
 	return (

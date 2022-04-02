@@ -13,7 +13,7 @@ import useCO2CostConverter from "lib/useCO2CostConverter"
 import {formatCsvNumber} from "lib/numberFormatter"
 
 
-const DEBUG = true
+const DEBUG = false
 
 export default function YearSummary( { dataset = [] } ) {
 	const { getText } = useText()
