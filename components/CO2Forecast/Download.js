@@ -3,32 +3,39 @@ import React from "react";
 import { sumOfCO2 } from "./calculate";
 import { useSelector } from "react-redux";
 import useCsvDataTranslator from "lib/useCsvDataTranslator"
+import {formatCsvNumber} from "lib/numberFormatter"
 
 
-export default function Download({ data, filename, fuel, children }) {
-	const allSources = useSelector((redux) => redux.allSources);
+export default function Download( { data, filename, fuel, children } ) {
+	const allSources = useSelector( ( redux ) => redux.allSources );
 
 	const { generateCsvTranslation } = useCsvDataTranslator()
 
-	if (!data?.length > 0) return null;
+	if ( !data?.length > 0 ) return null;
 
 	// TODO only build data array when download clicked.
 
 	const datas = data
-		.filter((d) => d.fossilFuelType === fuel)
-		.map((d) => {
+		.filter( ( d ) => d.fossilFuelType === fuel )
+		.map( ( d ) => {
 			let _d = { ...d };
 			delete _d.id;
 			delete _d.__typename;
 			delete _d.sourceId;
-			_d.source = allSources.find((s) => s.sourceId === d.sourceId)?.name;
-			if (d.co2?.scope1 || d.co2?.scope3) {
-				_d.co2 = sumOfCO2(d.co2, 1);
+			_d.source = allSources.find( ( s ) => s.sourceId === d.sourceId )?.name;
+			if ( d.co2?.scope1 || d.co2?.scope3 ) {
+				_d.co2 = sumOfCO2( d.co2, 1 );
 			}
 			return _d;
-		});
+		} );
 
-	const translatedData = datas.map(generateCsvTranslation);
+	const translatedData = datas
+	.map(d => ({
+		...d,
+		co2: formatCsvNumber(d.co2),
+		volume: formatCsvNumber(d.volume),
+	}))
+	.map( generateCsvTranslation );
 
 	return (
 		<div className="download">

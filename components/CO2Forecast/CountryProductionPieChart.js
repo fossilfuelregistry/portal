@@ -1,10 +1,11 @@
 import useText from "lib/useText"
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import getConfig from "next/config"
 import PieChart from "components/viz/PieChart"
 import { useDispatch, useSelector } from "react-redux"
 import { Button, Col, Row } from "antd"
 import settings from "../../settings"
+import useCO2CostConverter from "lib/useCO2CostConverter"
 
 const DEBUG = false
 
@@ -27,6 +28,12 @@ export default function CountryProductionPieChart( { project, currentProduction,
 	const gwp = useSelector( redux => redux.gwp )
 	const total = useSelector( redux => redux.countryTotalCO2 )
 	const allSources = useSelector( redux => redux.allSources )
+	const costPerTonCO2 = useSelector( redux => redux.co2CostPerTon )
+
+	const { currentUnit, costMultiplier } = useCO2CostConverter()
+
+	const [ localTotal, setLocalTotal ] = useState( total ) 
+
 
 	DEBUG && console.info( 'CountryProductionPieChart', { project, currentProduction, production } )
 	useEffect( () => {
@@ -45,20 +52,20 @@ export default function CountryProductionPieChart( { project, currentProduction,
 		}
 
 		const currentEmissions = currentProduction.find( e => e.sourceId === currentSourceId )
-		const _total = currentEmissions?.totalCO2
+		const _total = currentEmissions?.totalCO2 
 		dispatch( { type: 'COUNTRYTOTALCO2', payload: _total } )
 
 		const slices = currentEmissions?.production?.flatMap( p => {
 			DEBUG && console.info( 'CountryProd Pie', p )
-			const q1 = p.co2?.scope1?.[ 1 ] ?? 0
-			const q3 = p.co2?.scope3?.[ 1 ] ?? 0
+			const q1 = p.co2?.scope1?.[ 1 ] * costMultiplier ?? 0
+			const q3 = p.co2?.scope3?.[ 1 ] * costMultiplier ?? 0
 			return [ {
 				label: p.fossilFuelType?.toUpperCase() + ' ' + getText( 'scope3' ),
 				quantity: q3,
 				fuel: p.fossilFuelType,
 				year: p.year,
 				subtype: p.subtype,
-				percentage: Math.round( ( q3 * 100 ) / _total ),
+				percentage: Math.round( ( q3 * 100 ) / ( _total * costMultiplier )  ),
 				fillColor: colors[ p.fossilFuelType ].scope3
 			}, {
 				label: p.fossilFuelType?.toUpperCase() + ' ' + getText( 'scope1' ),
@@ -66,13 +73,17 @@ export default function CountryProductionPieChart( { project, currentProduction,
 				fuel: p.fossilFuelType,
 				year: p.year,
 				subtype: p.subtype,
-				percentage: Math.round( ( q1 * 100 ) / _total ),
+				percentage: Math.round( ( q1 * 100 ) / ( _total * costMultiplier ) ),
 				fillColor: colors[ p.fossilFuelType ].scope1
 			} ]
 		} )
 		DEBUG && console.info( { emissions: currentProduction, slices } )
 		set_pieChartData( slices )
-	}, [ currentProduction, sourceId, gwp ] )
+	}, [ currentProduction, sourceId, gwp, costPerTonCO2, costMultiplier ] )
+
+	useEffect( ()=>{
+		setLocalTotal( costMultiplier * total )
+	},[ total, costMultiplier ] )
 
 	if( !currentProduction ) return null
 
@@ -84,6 +95,10 @@ export default function CountryProductionPieChart( { project, currentProduction,
 	let digits = 0
 	if( ratio < 0.1 ) digits = 1
 	if( ratio < 0.01 ) digits = 2
+
+	const displayGigaton = localTotal >= 1000 ?? false
+	const prefix = displayGigaton ?  getText( 'gigaton' ) : getText( 'megaton' )
+	const displayTotal = ( ( displayGigaton ? localTotal / 1000 : total ) ?? 0 ).toFixed( 0 )
 
 	return (
 		<div className="co2-card">
@@ -100,8 +115,8 @@ export default function CountryProductionPieChart( { project, currentProduction,
 							<PieChart
 								data={ pieChartData }
 								topNote={ countryName + ' ' + getText( 'total' ) }
-								header={ total?.toFixed( 0 ) }
-								note={ getText( 'megaton' ) + ' CO²e' }
+								header={ displayTotal }
+								note={ prefix + ' ' + currentUnit }
 							/>
 						</div>
 

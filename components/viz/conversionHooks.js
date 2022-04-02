@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from "react"
 import Graph from 'graph-data-structure'
 import { useDispatch, useSelector, useStore } from "react-redux"
 import { co2PageUpdateQuery, getFullFuelType, getPreferredGrades, sumOfCO2 } from "components/CO2Forecast/calculate"
@@ -231,8 +231,10 @@ export const useConversionHooks = () => {
 
 		if( lastConversionLoggedTimer ) clearTimeout( lastConversionLoggedTimer )
 		lastConversionLoggedTimer = setTimeout( () => {
-			console.info( '----- Conversions logged -----' )
-			lastConversionPath.sort( ( a, b ) => a.localeCompare( b ) ).forEach( p => console.info( p ) )
+			if( DEBUG ) {
+				console.info( '----- Conversions logged -----' )
+				lastConversionPath.sort( ( a, b ) => a.localeCompare( b ) ).forEach( p => console.info( p ) )
+			}
 			lastConversionPath = []
 		}, 1000 )
 		return { low, high, factor }

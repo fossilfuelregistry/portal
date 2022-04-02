@@ -6,6 +6,7 @@ import getConfig from "next/config"
 import { Modal } from "antd"
 import ReactMarkdown from "react-markdown"
 import useText from "../../lib/useText"
+import useNumberFormatter from "../../lib/useNumberFormatter"
 //import palette from 'google-palette'
 
 const DEBUG = false
@@ -26,15 +27,18 @@ function percentile( variance, p, mean ) {
 	return d.ppf( p )
 }
 
-function toCustomPrecision( x ) {
+/*function toCustomPrecision( x ) {
 	if( x < 1000 ) return x.toPrecision( 3 )
 	if( x < 10000 ) return ( x / 10 ).toFixed() + '0'
 	if( x < 100000 ) return ( x / 100 ).toFixed() + '00'
 	if( x < 1000000 ) return ( x / 1000 ).toFixed() + ' 000'
-}
+}*/
+
 
 export default function PercentileBar( { low, mid, high, scale, height, x, y, width, color } ) {
 	const { getText } = useText()
+	const toCustomPrecision =	useNumberFormatter()
+
 	DEBUG && console.info( 'PercentileBar', { low, mid, high, scale, height, x, y, width } )
 
 	if( mid === 0 ) {
@@ -73,6 +77,7 @@ export default function PercentileBar( { low, mid, high, scale, height, x, y, wi
 		DEBUG && console.info( tileColors )
 		const scaleY = v => height * ( 1 - v / scale )
 
+		
 		const textX = x + width + 2
 		let textHighY = scaleY( high )
 		let textMidY = scaleY( mid )

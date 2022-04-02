@@ -9,6 +9,10 @@ import CsvDownloader from "react-csv-downloader"
 import { Col, Row } from "antd"
 import { DownloadOutlined } from "@ant-design/icons"
 import useCsvDataTranslator from "lib/useCsvDataTranslator"
+import useCO2CostConverter from "lib/useCO2CostConverter"
+import {formatCsvNumber} from "lib/numberFormatter"
+
+import useNumberFormatter from "lib/useNumberFormatter"
 
 const DEBUG = false
 
@@ -17,6 +21,12 @@ function InputSummary( { dataset = [] } ) {
 	const { generateCsvTranslation } = useCsvDataTranslator()
 	const country = useSelector( redux => redux.country )
 	const productionSourceId = useSelector( redux => redux.productionSourceId )
+
+	const costPerTonCO2 = useSelector( redux => redux.co2CostPerTon )
+	const { currentUnit, costMultiplier } = useCO2CostConverter()
+	const numberFormatter = useNumberFormatter()
+
+
 
 	if( !( dataset?.length > 0 ) ) return null
 
@@ -28,21 +38,29 @@ function InputSummary( { dataset = [] } ) {
 		addToTotal( totals[ datapoint.fossilFuelType ], datapoint.co2 )
 	} )
 
+	const totalsInCO2OrCost = {}
+	 Object.entries( totals ).forEach( ( [ fuel, scopes ] ) => {
+		 totalsInCO2OrCost[ fuel ] = {}
+		Object.entries( scopes ).forEach( ( [ scope, value ] )=> {
+			totalsInCO2OrCost[ fuel ][ scope ] =  value.map( v=> v * costMultiplier )
+		} )
+	} )
+
 	const csvData = settings.supportedFuels.map( fuel => (
 		{
 			fuel,
-			scope1_low: totals[ fuel ]?.scope1[ 0 ],
-			scope1_mid: totals[ fuel ]?.scope1[ 1 ],
-			scope1_high: totals[ fuel ]?.scope1[ 2 ],
-			scope3_low: totals[ fuel ]?.scope3[ 0 ],
-			scope3_mid: totals[ fuel ]?.scope3[ 1 ],
-			scope3_high: totals[ fuel ]?.scope3[ 2 ]
+			scope1_low: formatCsvNumber(totalsInCO2OrCost[ fuel ]?.scope1[ 0 ]),
+			scope1_mid: formatCsvNumber(totalsInCO2OrCost[ fuel ]?.scope1[ 1 ]),
+			scope1_high: formatCsvNumber(totalsInCO2OrCost[ fuel ]?.scope1[ 2 ]),
+			scope3_low: formatCsvNumber(totalsInCO2OrCost[ fuel ]?.scope3[ 0 ]),
+			scope3_mid: formatCsvNumber(totalsInCO2OrCost[ fuel ]?.scope3[ 1 ]),
+			scope3_high: formatCsvNumber(totalsInCO2OrCost[ fuel ]?.scope3[ 2 ]),
 		} )
 	)
 
-	DEBUG && console.info( 'InputSummary', { totals, csvData, dataset, productionSourceId, sourceData } )
+	DEBUG && console.info( 'InputSummary', { totalsInCO2OrCost, csvData, dataset, productionSourceId, sourceData } )
 
-	const translatedCsvData = csvData.map(generateCsvTranslation)
+	const translatedCsvData = csvData.map( generateCsvTranslation )
 
 	const _ = v => Math.round( v )
 
@@ -77,14 +95,14 @@ function InputSummary( { dataset = [] } ) {
 							key={ fuel }
 							label={ getText( fuel ) }
 							total={ getText( fuel ) + ' ' + getText( 'total' ) }
-							totals={ totals[ fuel ] }
+							totals={ totalsInCO2OrCost[ fuel ] }
 						/>
 					) ) }
 					<tr className="total subheader">
 						<td>{ getText( 'totals' ) }</td>
-						<td align="right">{ _( sumOfCO2( totals, 0 ) ) }</td>
-						<td align="right">{ _( sumOfCO2( totals, 1 ) ) }</td>
-						<td align="right">{ _( sumOfCO2( totals, 2 ) ) }</td>
+						<td align="right">{ numberFormatter(_( sumOfCO2( totals, 0 ) ) * costMultiplier ) }</td>
+						<td align="right">{ numberFormatter(_( sumOfCO2( totals, 1 ) ) * costMultiplier ) }</td>
+						<td align="right">{ numberFormatter(_( sumOfCO2( totals, 2 ) ) * costMultiplier ) }</td>
 					</tr>
 				</tbody>
 			</table>

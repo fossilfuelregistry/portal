@@ -9,10 +9,12 @@
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
     "@apollo/client": "3.3",
+    "@babel/core": "^7.17.8",
+    "@babel/eslint-parser": "^7.17.0",
+    "@babel/preset-react": "^7.16.7",
     "@turf/bbox": "^6.5.0",
     "@visx/visx": "^2.5.0",
     "antd": "^4.17.3",
-    "babel-eslint": "^10.1.0",
     "babel-plugin-import": "^1.7.0",
     "babel-plugin-inline-react-svg": "^2.0.1",
     "clone": "^2.1.2",

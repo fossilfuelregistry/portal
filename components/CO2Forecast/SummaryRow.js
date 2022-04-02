@@ -3,8 +3,11 @@ import React from "react"
 import useText from "lib/useText"
 import { sumOfCO2 } from "./calculate"
 
+import useNumberFormatter from "lib/useNumberFormatter"
+
 export default function SummaryRow( { label, totals, total } ) {
 	const { getText } = useText()
+	const numberFormatter = useNumberFormatter()
 	const _ = v => Math.round( v )
 
 	return (
@@ -20,24 +23,24 @@ export default function SummaryRow( { label, totals, total } ) {
 					{ getText( 'scope' ) } 1
 					<HelpModal title="scopes" content="scope_1"/>
 				</td>
-				<td align="right">{ _( totals.scope1[ 0 ] ) }</td>
-				<td align="right">{ _( totals.scope1[ 1 ] ) }</td>
-				<td align="right">{ _( totals.scope1[ 2 ] ) }</td>
+				<td align="right">{ numberFormatter( _( totals.scope1[ 0 ] )) }</td>
+				<td align="right">{ numberFormatter( _( totals.scope1[ 1 ] )) }</td>
+				<td align="right">{ numberFormatter( _( totals.scope1[ 2 ] )) }</td>
 			</tr>
 			<tr>
 				<td>
 					{ getText( 'scope' ) } 3
 					<HelpModal title="scopes" content="scope_3"/>
 				</td>
-				<td align="right">{ _( totals.scope3[ 0 ] ) }</td>
-				<td align="right">{ _( totals.scope3[ 1 ] ) }</td>
-				<td align="right">{ _( totals.scope3[ 2 ] ) }</td>
+				<td align="right">{ numberFormatter( _( totals.scope3[ 0 ] ) ) }</td>
+				<td align="right">{ numberFormatter( _( totals.scope3[ 1 ] ) ) }</td>
+				<td align="right">{ numberFormatter( _( totals.scope3[ 2 ] ) ) }</td>
 			</tr>
 			<tr className="total">
 				<td>{ total }</td>
-				<td align="right">{ _( sumOfCO2( totals, 0 ) ) }</td>
-				<td align="right">{ _( sumOfCO2( totals, 1 ) ) }</td>
-				<td align="right">{ _( sumOfCO2( totals, 2 ) ) }</td>
+				<td align="right">{ numberFormatter( _( sumOfCO2( totals, 0 ) ) ) }</td>
+				<td align="right">{ numberFormatter( _( sumOfCO2( totals, 1 ) ) ) }</td>
+				<td align="right">{ numberFormatter( _( sumOfCO2( totals, 2 ) ) ) }</td>
 			</tr>
 
 			<style jsx>{ `

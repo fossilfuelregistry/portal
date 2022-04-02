@@ -1,6 +1,7 @@
 import { AxisLeft, AxisBottom } from '@visx/axis';
 import { GridRows } from '@visx/grid';
 import getConfig from "next/config";
+import React from "react"
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 

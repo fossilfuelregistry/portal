@@ -45,11 +45,11 @@ function SourceBarsBase( { sources = [], parentHeight } ) {
 							color={ primary }
 							x={ i * 130 }
 							y={ 0 }
-							width={ 80 }
+							width={ 60 }
 						/>
 
 						<text
-							x={ ( i * 130 ) + 40 } y={ textY }
+							x={ ( i * 130 ) + 30 } y={ textY }
 							fontSize="14" fontWeight="bold"
 							textAnchor="middle" fill="#000000"
 						>
