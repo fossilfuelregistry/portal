@@ -22,6 +22,8 @@ export default function CountryProductionPieChart( { project, currentProduction,
 	const { getText } = useText()
 	const [ sources, set_sources ] = useState( [] )
 	const [ sourceId, set_sourceId ] = useState()
+	const [ sourceName, setSourceName ] = useState( "" )
+	const [ productionYear, setProductionYear ] = useState( "" )
 	const [ pieChartData, set_pieChartData ] = useState( [] )
 	const dispatch = useDispatch()
 	const countryName = useSelector( redux => redux.countryName )
@@ -34,7 +36,6 @@ export default function CountryProductionPieChart( { project, currentProduction,
 
 	const [ localTotal, setLocalTotal ] = useState( total ) 
 
-
 	DEBUG && console.info( 'CountryProductionPieChart', { project, currentProduction, production } )
 	useEffect( () => {
 		if( !( currentProduction?.[ 0 ]?.totalCO2 > 0 ) ) return
@@ -44,7 +45,10 @@ export default function CountryProductionPieChart( { project, currentProduction,
 			.map( s => allSources.find( as => as.sourceId === s.sourceId ) )
 		set_sources( mySources )
 
+		console.info( "Sources", { mySources, sourceId } )
 		let currentSourceId = sourceId
+		setSourceName( mySources.find( s=>s.sourceId === sourceId )?.name ?? "" )
+		
 		if( !currentSourceId
 			|| mySources.find( s => s.sourceId === currentSourceId ) === undefined ) {
 			currentSourceId = mySources[ 0 ].sourceId
@@ -79,7 +83,18 @@ export default function CountryProductionPieChart( { project, currentProduction,
 		} )
 		DEBUG && console.info( { emissions: currentProduction, slices } )
 		set_pieChartData( slices )
-	}, [ currentProduction, sourceId, gwp, costPerTonCO2, costMultiplier ] )
+		setProductionYear( slices[ 0 ]?.year?.toString() ?? "" )
+	},
+	[ 
+		currentProduction, 
+		allSources, 
+		sourceId, 
+		gwp, 
+		costPerTonCO2, 
+		costMultiplier, 
+		dispatch, 
+		getText,
+	] )
 
 	useEffect( ()=>{
 		setLocalTotal( costMultiplier * total )
@@ -106,7 +121,7 @@ export default function CountryProductionPieChart( { project, currentProduction,
 				className="header"
 				title={ project?.id }
 			>
-				{ getText( 'emissions' ) } - { getText( 'current_annual_estimate' ) }
+				{`${ getText( 'emissions' ) } - ${ getText( 'current_annual_estimate' ) } (${ sourceName } ${ productionYear })`}
 			</div>
 			<div className="box">
 				<Row align={ 'middle' }>
