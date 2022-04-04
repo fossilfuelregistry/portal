@@ -340,19 +340,19 @@ function CO2ForecastGraphBase( {
 							<td>
 								<div className="blob gas past"/>
 							</td>
-							<td>{ getText( 'gas' ) } { getText( 'past_emissions' ) }</td>
+							<td>{ getText( 'gas' ) }: { getText( 'past_emissions' ) }</td>
 						</tr>
 						<tr>
 							<td>
 								<div className="blob oil past"/>
 							</td>
-							<td>{ getText( 'oil' ) } { getText( 'past_emissions' ) }</td>
+							<td>{ getText( 'oil' ) }: { getText( 'past_emissions' ) }</td>
 						</tr>
 						<tr>
 							<td>
 								<div className="blob coal past"/>
 							</td>
-							<td>{ getText( 'coal' ) } { getText( 'past_emissions' ) }</td>
+							<td>{ getText( 'coal' ) }: { getText( 'past_emissions' ) }</td>
 						</tr>
 						{ pReserves && <tr>
 							<td>
