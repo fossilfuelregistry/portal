@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux"
 import { Button, Col, Row } from "antd"
 import settings from "../../settings"
 import useCO2CostConverter from "lib/useCO2CostConverter"
+import HelpModal from "../HelpModal"
 
 const DEBUG = false
 
@@ -122,6 +123,7 @@ export default function CountryProductionPieChart( { project, currentProduction,
 				title={ project?.id }
 			>
 				{`${ getText( 'emissions' ) } - ${ getText( 'current_annual_estimate' ) } (${ sourceName } ${ productionYear })`}
+				<HelpModal title="current_annual_estimate" content="explanation_emissionsring"/>
 			</div>
 			<div className="box">
 				<Row align={ 'middle' }>
