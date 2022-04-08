@@ -40,7 +40,7 @@ query sources {
 
 export const SQL_co2costs = gql`
 query co2Costs {
-  co2Costs {
+  co2Costs(filter: {currency: {equalTo: "USD"}}) {
     nodes {
       costPerTon
       currency
