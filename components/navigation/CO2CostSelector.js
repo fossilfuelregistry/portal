@@ -1,83 +1,97 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Select, Switch } from "antd"
+import React, { useState, useEffect } from 'react';
+import { Select, Switch, Input } from "antd"
 import useText from "../../lib/useText"
-import { useRouter } from "next/router"
-import { useDispatch, useSelector, useStore } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 
 const DEBUG = false
-const NOT_SELECTED = 'NOT_SELECTED'
 
 const CO2cCstSelector = () => {
 
 	const { getText } = useText()
-	const store = useStore()
-	const router = useRouter()
-	const [ selectedSourceOption, set_selectedSourceOption ] = useState()
 	const dispatch = useDispatch()
-	const co2CostPerTon = useSelector( redux => redux.co2CostPerTon )
 	const showCostInGraphs = useSelector( redux => redux.showCostInGraphs )
 	const co2Costs = useSelector( redux => redux.co2Costs )
-	const project = useSelector( redux => redux.project )
-	const firstInitialize = useRef( true ) // Used to NOT clear settings before sources loaded.
+	const [ customValue, setCustomValue ] = useState ( "" )
+	const [ currentPreDefinedValue, setCurrentPreDefinedValue ] = useState ( )
+	const [ isUsingCustomValue, setIsUsingCustomValue ] = useState ( false )
 
-	const [ costs, setCosts ] = useState( [] )
+	const formatCustomValue = ( value ) => ( { cost: value, currency: "USD", source: "custom" } )
 	
-	useEffect( () => {
-		const _costs = co2Costs.map( ( { source, currency, costPerTon } )=>( {
-			source,
-			currency,
-			cost: costPerTon
-		} ) )
-
-		setCosts( _costs )
-	}, [ co2Costs ] );
-
-	const currentValue = co2CostPerTon ? JSON.stringify( co2CostPerTon ) : NOT_SELECTED
-    
-	const onTogglingCost = ( value ) => {
-		dispatch( {
-			type: 'SHOWCOSTINGRAPHS',
-			payload: value
-		} )
-	}
-
+	const dispatchCo2Cost = ( { source, currency, cost } ) => 
+		dispatch( { type: 'CO2COSTPERTON', payload: { source, currency, cost } } )
+	
+	const getCosts = () => co2Costs.map( ( { source, currency, costPerTon } ) =>
+		( { source, currency, cost: costPerTon } ) )
+	
+	const onTogglingCost = ( value ) => dispatch( { type: 'SHOWCOSTINGRAPHS', payload: value } )
+	
 	const onSelectCost = ( payload ) => {
-		if( payload === NOT_SELECTED ) onTogglingCost( false )
-
-		dispatch( {
-			type: 'CO2COSTPERTON',
-			payload: payload === NOT_SELECTED ? null : JSON.parse( payload )
-		} )
+		setCurrentPreDefinedValue( JSON.parse( payload ) )
+		dispatchCo2Cost( JSON.parse( payload ) )
 	}
+	
+	const onWriteCost = ( rawValue ) => {
+		const value = rawValue.replace( /,/,"." ).replace( / /, "" )
+		if( isNaN( Number( value ) ) ) return
+		setCustomValue( value )
+		dispatchCo2Cost( Number( value ) === 0  ? currentPreDefinedValue : formatCustomValue( value ) )
+	}
+
+	const onUsingCustomValue = () =>{
+		if( !isUsingCustomValue ){
+			const val = Number( customValue )
+			if( !isNaN( val ) && val > 0 )
+				dispatchCo2Cost( formatCustomValue( customValue ) )
+		}
+		else 
+			dispatchCo2Cost( currentPreDefinedValue )
+		setIsUsingCustomValue( !isUsingCustomValue )
+	}
+
+	useEffect( () => {
+		const costs = getCosts()
+		dispatchCo2Cost( costs?.[ 0 ] )
+		setCurrentPreDefinedValue( costs?.[ 0 ]  )
+	}, [ co2Costs ] );
 
 	return (
 		<>
 			<div>
-            
-				<Select 
-					style={ { minWidth: 120, width: '100%' } }
-					value={ currentValue } 
-					onChange={onSelectCost}
-				>
-					<Select.Option value={ NOT_SELECTED }>{ getText( 'select_co2_price' ) }</Select.Option>
-					{
-						costs.map( cost => (
-							<Select.Option value={JSON.stringify( cost )} key={JSON.stringify( cost )} >{`${ cost.cost.toFixed()} ${cost.currency} ${cost.source}`}</Select.Option>
-						)
-						)
-					}
-				</Select>
+				<Switch onChange={()=>onTogglingCost( !showCostInGraphs )} value={showCostInGraphs} /> <span>{getText( 'menu_co2_cost_switch_label' )}</span>
 			</div>
-
 			{
-				co2CostPerTon && (
-					<div>
-						<Switch onChange={()=>onTogglingCost( !showCostInGraphs )} /> <label>Display cost in graphs</label>
-					</div>
+				showCostInGraphs && (
+					<>
+						<div>
+            
+							<Select 
+								style={ { minWidth: 120, width: '100%' } }
+								value={ JSON.stringify(  currentPreDefinedValue ) } 
+								onChange={onSelectCost}
+								disabled={isUsingCustomValue}
+							>
+								{
+									getCosts().map( cost => (
+										<Select.Option value={JSON.stringify( cost )} key={JSON.stringify( cost )} >{`${ cost.cost.toFixed()} $us ${cost.source}`}</Select.Option>
+									)
+									)
+								}
+							</Select>
+						</div> 
+
+						<div>
+							<Switch onChange={ onUsingCustomValue } value={isUsingCustomValue} /> <span>{ getText( 'menu_co2_cost_custom_value_label' ) }</span>
+						</div>
+						{
+							isUsingCustomValue && (
+								<div>
+									<Input onChange={ e => onWriteCost( e.target.value )} value={customValue} placeholder="$us" />
+								</div>
+							)
+						}
+					</>
 				)
 			}
-
-
 			<style jsx>{ `
           div {
             margin-bottom: 6px !important;
