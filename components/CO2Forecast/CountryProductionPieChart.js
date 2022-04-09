@@ -7,6 +7,7 @@ import { Button, Col, Row } from "antd"
 import settings from "../../settings"
 import useCO2CostConverter from "lib/useCO2CostConverter"
 import HelpModal from "../HelpModal"
+import useNumberFormatter from "lib/useNumberFormatter"
 
 const DEBUG = false
 
@@ -32,6 +33,7 @@ export default function CountryProductionPieChart( { project, currentProduction,
 	const total = useSelector( redux => redux.countryTotalCO2 )
 	const allSources = useSelector( redux => redux.allSources )
 	const costPerTonCO2 = useSelector( redux => redux.co2CostPerTon )
+	const numberFormatter = useNumberFormatter()
 
 	const { currentUnit, costMultiplier } = useCO2CostConverter()
 
@@ -112,10 +114,6 @@ export default function CountryProductionPieChart( { project, currentProduction,
 	if( ratio < 0.1 ) digits = 1
 	if( ratio < 0.01 ) digits = 2
 
-	const displayGigaton = localTotal >= 1000 ?? false
-	const prefix = displayGigaton ?  getText( 'gigaton' ) : getText( 'megaton' )
-	const displayTotal = ( ( displayGigaton ? localTotal / 1000 : total ) ?? 0 ).toFixed( 0 )
-
 	return (
 		<div className="co2-card">
 			<div
@@ -132,8 +130,8 @@ export default function CountryProductionPieChart( { project, currentProduction,
 							<PieChart
 								data={ pieChartData }
 								topNote={ countryName + ' ' + getText( 'total' ) }
-								header={ displayTotal }
-								note={ prefix + ' ' + currentUnit }
+								header={ numberFormatter( localTotal ) }
+								note={ ' ' + currentUnit }
 							/>
 						</div>
 
