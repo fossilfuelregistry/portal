@@ -72,7 +72,7 @@ const CO2cCstSelector = () => {
 							>
 								{
 									getCosts().map( cost => (
-										<Select.Option value={JSON.stringify( cost )} key={JSON.stringify( cost )} >{`${ cost.cost.toFixed()} $us ${cost.source}`}</Select.Option>
+										<Select.Option value={JSON.stringify( cost )} key={JSON.stringify( cost )} >{`${ cost.cost.toFixed()} $US ${cost.source}`}</Select.Option>
 									)
 									)
 								}
@@ -85,7 +85,7 @@ const CO2cCstSelector = () => {
 						{
 							isUsingCustomValue && (
 								<div>
-									<Input onChange={ e => onWriteCost( e.target.value )} value={customValue} placeholder="$us" />
+									<Input onChange={ e => onWriteCost( e.target.value )} value={customValue} placeholder="$US" />
 								</div>
 							)
 						}
