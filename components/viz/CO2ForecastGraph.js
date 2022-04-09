@@ -16,6 +16,7 @@ import getConfig from "next/config"
 import useCsvDataTranslator from "lib/useCsvDataTranslator"
 import { DownloadOutlined } from "@ant-design/icons"
 import { formatCsvNumber } from "../../lib/numberFormatter"
+import useNumberFormatter from "lib/useNumberFormatter"
 import useCO2CostConverter from "lib/useCO2CostConverter"
 
 
@@ -40,9 +41,8 @@ function CO2ForecastGraphBase( {
 	const projectionSourceId = useSelector( redux => redux.projectionSourceId )
 	const productionSourceId = useSelector( redux => redux.productionSourceId )
 	const { generateCsvTranslation } = useCsvDataTranslator()
-
 	const { currentUnit, costMultiplier } = useCO2CostConverter()
-
+	const numberFormatter =  useNumberFormatter()
 
 	const height = parentHeight
 	const margin = { left: 0, top: 10 }
@@ -316,7 +316,7 @@ function CO2ForecastGraphBase( {
 					<AxisRight
 						scale={ productionScale }
 						numTicks={ parentWidth > 520 ? 8 : 4 }
-						tickFormat={ x => x?.toFixed( 0 ).toString() }
+						tickFormat={ x => numberFormatter( x ) }
 						tickLabelProps={ ( label, pos ) => {
 							return {
 								dx: '0.25em',
@@ -363,41 +363,41 @@ function CO2ForecastGraphBase( {
 								<div className="blob gas p"/>
 							</td>
 							<td>{ getText( 'gas' ) }: { getText( 'against_reserves' ) }</td>
-                     </tr> }
+						</tr> }
 						{ pReserves && <tr>
 							<td>
 								<div className="blob oil p"/>
 							</td>
 							<td>{ getText( 'oil' ) }: { getText( 'against_reserves' ) }</td>
-                     </tr> }
+						</tr> }
 						{ pReserves && <tr>
 							<td>
 								<div className="blob coal p"/>
 							</td>
 							<td>{ getText( 'coal' ) }: { getText( 'against_reserves' ) }</td>
-                     </tr> }
+						</tr> }
 						{ cReserves && <tr>
 							<td>
 								<div className="blob gas c"/>
 							</td>
 							<td>{ getText( 'gas' ) }: { getText( 'against_contingent' ) }</td>
-                     </tr> }
+						</tr> }
 						{ cReserves && <tr>
 							<td>
 								<div className="blob oil c"/>
 							</td>
 							<td>{ getText( 'oil' ) } : { getText( 'against_contingent' ) }</td>
-                     </tr> }
+						</tr> }
 						{ cReserves && <tr>
 							<td>
 								<div className="blob coal c"/>
 							</td>
 							<td>{ getText( 'coal' ) } : { getText( 'against_contingent' ) }</td>
-                     </tr> }
+						</tr> }
 						{ ( !cReserves && !pReserves ) && <tr>
 							<td/>
 							<td style={ { maxWidth: 200 } }>{ getText( 'no_reserves' ) }</td>
-                                        </tr> }
+						</tr> }
 					</tbody>
 				</table>
 

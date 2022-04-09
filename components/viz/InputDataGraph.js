@@ -9,6 +9,7 @@ import { max, min } from 'd3-array'
 import { useConversionHooks } from "./conversionHooks"
 import { Col, Row } from "antd"
 import { useSelector } from "react-redux"
+import useNumberFormatter from "lib/useNumberFormatter"
 
 const colors = [
 	'#008080', '#70a494', '#b4c8a8',
@@ -21,6 +22,7 @@ function InputDataGraphBase( {
 	const allSources = useSelector( redux => redux.allSources )
 	const margin = { left: 0, top: 10 }
 	const { convertVolume } = useConversionHooks( )
+	const numberFormatter = useNumberFormatter()
 
 	if( !( data?.length > 0 ) ) return null
 
@@ -90,7 +92,7 @@ function InputDataGraphBase( {
 					<AxisRight
 						scale={yScale}
 						numTicks={parentWidth > 520 ? 8 : 4}
-						tickFormat={x => x.toFixed( 0 ).toString()}
+						tickFormat={x => numberFormatter( x )}
 						tickLabelProps={() => ( {
 							dx: '0.25em',
 							dy: '0.25em',
