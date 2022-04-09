@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React from "react"
 import useText from "lib/useText"
 import { useSelector } from "react-redux"
 import { addToTotal } from "./calculate"
@@ -10,7 +10,7 @@ import { Col, Row } from "antd"
 import HelpModal from "../HelpModal"
 import useCsvDataTranslator from "lib/useCsvDataTranslator"
 import useCO2CostConverter from "lib/useCO2CostConverter"
-import {formatCsvNumber} from "lib/numberFormatter"
+import { formatCsvNumber } from "lib/numberFormatter"
 
 
 const DEBUG = false
@@ -20,7 +20,7 @@ export default function YearSummary( { dataset = [] } ) {
 	const { generateCsvTranslation } = useCsvDataTranslator()
 	const country = useSelector( redux => redux.country )
 	const productionSourceId = useSelector( redux => redux.productionSourceId )
-	const { currentUnit, costMultiplier } = useCO2CostConverter()
+	const { costMultiplier, currentUnit } = useCO2CostConverter()
 
 	if( !( dataset?.length > 0 ) ) return null
 
@@ -47,27 +47,24 @@ export default function YearSummary( { dataset = [] } ) {
 	
 	Object.entries( totals ).forEach( entry => totalsInCO2OrCurrency[ entry[ 0 ] ] = entry[ 1 ].map( v => v * costMultiplier ) )
 
-
 	csvData = [ {
-		scope1_low: formatCsvNumber(totalsInCO2OrCurrency.scope1[ 0 ]),
-		scope1_mid: formatCsvNumber(totalsInCO2OrCurrency.scope1[ 1 ]),
-		scope1_high: formatCsvNumber(totalsInCO2OrCurrency.scope1[ 2 ]),
-		scope3_low: formatCsvNumber(totalsInCO2OrCurrency.scope3[ 0 ]),
-		scope3_mid: formatCsvNumber(totalsInCO2OrCurrency.scope3[ 1 ]),
-		scope3_high: formatCsvNumber(totalsInCO2OrCurrency.scope3[ 2 ])
+		scope1_low: formatCsvNumber( totalsInCO2OrCurrency.scope1[ 0 ] ),
+		scope1_mid: formatCsvNumber( totalsInCO2OrCurrency.scope1[ 1 ] ),
+		scope1_high: formatCsvNumber( totalsInCO2OrCurrency.scope1[ 2 ] ),
+		scope3_low: formatCsvNumber( totalsInCO2OrCurrency.scope3[ 0 ] ),
+		scope3_mid: formatCsvNumber( totalsInCO2OrCurrency.scope3[ 1 ] ),
+		scope3_high: formatCsvNumber( totalsInCO2OrCurrency.scope3[ 2 ] )
 	} ]
 	DEBUG && console.info( { csvData } )
 
-
 	const translatedCsvData = csvData.map( generateCsvTranslation )
-
 
 	return (
 		<div className="table-wrap">
 			<div className="top">
 				<Row gutter={ 12 } style={ { display: 'inline-flex' } }>
 					<Col>
-						{ `${getText( 'now_heading' )} (${getText( 'megaton' )} ${currentUnit })`}
+						{ `${getText( 'now_heading' )} (${currentUnit})`}
 					</Col>
 					<Col>
 						<CsvDownloader
