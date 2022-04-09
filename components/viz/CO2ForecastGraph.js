@@ -10,16 +10,17 @@ import { withParentSize } from "@visx/responsive"
 import useText from "lib/useText"
 import { combineOilAndGasAndCoal, sumOfCO2 } from "../CO2Forecast/calculate"
 import { useSelector } from "react-redux"
-// import FileSaver from 'file-saver'
 import CsvDownloader /*, { toCsv } */ from "react-csv-downloader"
 import settings from 'settings'
 import getConfig from "next/config"
-// import { saveSvgAsPng } from "save-svg-as-png"
 import useCsvDataTranslator from "lib/useCsvDataTranslator"
 import { DownloadOutlined } from "@ant-design/icons"
 import { formatCsvNumber } from "../../lib/numberFormatter"
+import useCO2CostConverter from "lib/useCO2CostConverter"
 
-const DEBUG = false
+
+
+const DEBUG = true
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
@@ -40,6 +41,9 @@ function CO2ForecastGraphBase( {
 	const productionSourceId = useSelector( redux => redux.productionSourceId )
 	const { generateCsvTranslation } = useCsvDataTranslator()
 
+	const { currentUnit, costMultiplier } = useCO2CostConverter()
+
+
 	const height = parentHeight
 	const margin = { left: 0, top: 10 }
 
@@ -54,16 +58,16 @@ function CO2ForecastGraphBase( {
 		.filter( d => d.year >= settings.year.start )
 		.map( d => ( {
 			year: d.year,
-			oil: d.oil ? sumOfCO2( d.oil.co2, 1 ) : 0,
-			gas: d.gas ? sumOfCO2( d.gas.co2, 1 ) : 0,
-			coal: d.coal ? sumOfCO2( d.coal.co2, 1 ) : 0,
+			oil: d.oil ? sumOfCO2( d.oil.co2, 1 ) * costMultiplier : 0,
+			gas: d.gas ? sumOfCO2( d.gas.co2, 1 ) * costMultiplier  : 0,
+			coal: d.coal ? sumOfCO2( d.coal.co2, 1 ) * costMultiplier : 0,
 		} ) )
 
 	const projectionData = combineOilAndGasAndCoal( projection.filter( d => d.sourceId === projectionSourceId ) )
 		.filter( d => d.year >= settings.year.start )
 		.map( d => ( {
 			year: d.year,
-			co2: ( d.oil ? sumOfCO2( d.oil.co2, 1 ) : 0 ) + ( d.gas ? sumOfCO2( d.gas.co2, 1 ) : 0 ) + ( d.coal ? sumOfCO2( d.coal.co2, 1 ) : 0 )
+			co2: ( ( d.oil ? sumOfCO2( d.oil.co2, 1 )  : 0 ) + ( d.gas ? sumOfCO2( d.gas.co2, 1 ) : 0 ) + ( d.coal ? sumOfCO2( d.coal.co2, 1 ) : 0 ) ) * costMultiplier 
 		} ) )
 
 	const projProdData = ( projectionSourceId ? combineOilAndGasAndCoal( projectedProduction ) : [] )
@@ -77,12 +81,12 @@ function CO2ForecastGraphBase( {
 			if( d.coal?.continProd > 0 ) cReserves = true
 			return {
 				year: d.year,
-				oil_p: d.oil?.plannedProd ?? 0,
-				oil_c: d.oil?.continProd ?? 0,
-				gas_p: d.gas?.plannedProd ?? 0,
-				gas_c: d.gas?.continProd ?? 0,
-				coal_p: d.coal?.plannedProd ?? 0,
-				coal_c: d.coal?.continProd ?? 0,
+				oil_p: d.oil?.plannedProd * costMultiplier ?? 0,
+				oil_c: d.oil?.continProd * costMultiplier ?? 0,
+				gas_p: d.gas?.plannedProd * costMultiplier ?? 0,
+				gas_c: d.gas?.continProd * costMultiplier ?? 0,
+				coal_p: d.coal?.plannedProd * costMultiplier ?? 0,
+				coal_c: d.coal?.continProd * costMultiplier ?? 0,
 			}
 		} )
 
@@ -104,7 +108,7 @@ function CO2ForecastGraphBase( {
 		range: [ height - 30, 0 ],
 		domain: [ 0, maxCO2 ],
 	} )
-/*
+	/*
 	const handleMenuClick = useCallback( async e => {
 
 		const _csv = async() => {
@@ -162,19 +166,19 @@ function CO2ForecastGraphBase( {
 	if( !( maxCO2 > 0 ) ) return null // JSON.stringify( maxCO2 )
 
 
-	const csvData = productionData.map(p=>({
+	const csvData = productionData.map( p=>( {
 		year: p.year, 
-		oil: formatCsvNumber(p.oil),
-		gas: formatCsvNumber(p.gas),
-		coal: formatCsvNumber(p.coal),
-	}))
+		oil: formatCsvNumber( p.oil ),
+		gas: formatCsvNumber( p.gas ),
+		coal: formatCsvNumber( p.coal ),
+	} ) )
 
 	projectionData.forEach( d => {
 		const y = csvData.find( dp => dp.year === d.year )
 		if( y )
-			y.co2 = formatCsvNumber(d.co2)
+			y.co2 = formatCsvNumber( d.co2 )
 		else
-			csvData.push( { year: d.year, co2: formatCsvNumber(d.co2) } )
+			csvData.push( { year: d.year, co2: formatCsvNumber( d.co2 ) } )
 	} )
 	projProdData.forEach( d => {
 		const y = csvData.find( dp => dp.year === d.year )
@@ -326,7 +330,7 @@ function CO2ForecastGraphBase( {
 					/>
 
 					<text x="40" y="18" transform="rotate(0)" fontSize={ 13 }>
-						{ getText( 'megaton' ) } CO²e
+						{ currentUnit }
 					</text>
 
 				</Group>
