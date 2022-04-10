@@ -21,7 +21,7 @@ import useCO2CostConverter from "lib/useCO2CostConverter"
 
 
 
-const DEBUG = true
+const DEBUG = false
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
@@ -69,10 +69,12 @@ function CO2ForecastGraphBase( {
 			year: d.year,
 			co2: ( ( d.oil ? sumOfCO2( d.oil.co2, 1 )  : 0 ) + ( d.gas ? sumOfCO2( d.gas.co2, 1 ) : 0 ) + ( d.coal ? sumOfCO2( d.coal.co2, 1 ) : 0 ) ) * costMultiplier 
 		} ) )
-
+		
 	const projProdData = ( projectionSourceId ? combineOilAndGasAndCoal( projectedProduction ) : [] )
 		.filter( d => d.year >= settings.year.start )
 		.map( d => {
+			const multiplyOrZero = ( value ) => value ? value * costMultiplier : 0
+			
 			if( d.oil?.plannedProd > 0 ) pReserves = true
 			if( d.gas?.plannedProd > 0 ) pReserves = true
 			if( d.coal?.plannedProd > 0 ) pReserves = true
@@ -81,12 +83,12 @@ function CO2ForecastGraphBase( {
 			if( d.coal?.continProd > 0 ) cReserves = true
 			return {
 				year: d.year,
-				oil_p: d.oil?.plannedProd * costMultiplier ?? 0,
-				oil_c: d.oil?.continProd * costMultiplier ?? 0,
-				gas_p: d.gas?.plannedProd * costMultiplier ?? 0,
-				gas_c: d.gas?.continProd * costMultiplier ?? 0,
-				coal_p: d.coal?.plannedProd * costMultiplier ?? 0,
-				coal_c: d.coal?.continProd * costMultiplier ?? 0,
+				oil_p: multiplyOrZero( d.oil?.plannedProd ),
+				oil_c: multiplyOrZero( d.oil?.continProd ),
+				gas_p: multiplyOrZero( d.gas?.plannedProd ),
+				gas_c: multiplyOrZero( d.gas?.continProd ),
+				coal_p: multiplyOrZero( d.coal?.plannedProd ),
+				coal_c: multiplyOrZero( d.coal?.continProd ),
 			}
 		} )
 
