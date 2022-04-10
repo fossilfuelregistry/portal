@@ -22,12 +22,12 @@ const _csvFormatter = s => {
 	return [ 'oil', 'gas', 'coal' ].map( fuel => ( {
 		scenario: s.name,
 		fuel,
-		scope1_low: formatCsvNumber(s.total[ fuel ].scope1[ 0 ]),
-		scope1_mid: formatCsvNumber(s.total[ fuel ].scope1[ 1 ]),
-		scope1_high: formatCsvNumber(s.total[ fuel ].scope1[ 2 ]),
-		scope3_low: formatCsvNumber(s.total[ fuel ].scope3[ 0 ]),
-		scope3_mid: formatCsvNumber(s.total[ fuel ].scope3[ 1 ]),
-		scope3_high: formatCsvNumber(s.total[ fuel ].scope3[ 2 ]),
+		scope1_low: formatCsvNumber( s.total[ fuel ].scope1[ 0 ] ),
+		scope1_mid: formatCsvNumber( s.total[ fuel ].scope1[ 1 ] ),
+		scope1_high: formatCsvNumber( s.total[ fuel ].scope1[ 2 ] ),
+		scope3_low: formatCsvNumber( s.total[ fuel ].scope3[ 0 ] ),
+		scope3_mid: formatCsvNumber( s.total[ fuel ].scope3[ 1 ] ),
+		scope3_high: formatCsvNumber( s.total[ fuel ].scope3[ 2 ] ),
 	} ) )
 }
 
@@ -40,7 +40,7 @@ function FutureSummary( { dataset, limits, projectionSources } ) {
 	const stableProduction = useSelector( redux => redux.stableProduction )
 	const allSources = useSelector( redux => redux.allSources )
 	const projectionSourceId = useSelector( redux => redux.projectionSourceId )
-	const { currentUnit, costMultiplier } = useCO2CostConverter()
+	const { costMultiplier } = useCO2CostConverter()
 
 
 
@@ -54,6 +54,8 @@ function FutureSummary( { dataset, limits, projectionSources } ) {
 		gas: co2FromVolume( stableProduction.gas ),
 		coal: co2FromVolume( stableProduction.coal ),
 	}
+
+	let lastDataYear = dataset.map( ( { year } ) => year ).reduce( ( prev, cur ) => Math.min( prev, cur ) )
 
 	const projectionSource = allSources.find( s => s.sourceId === projectionSourceId )
 	if( !projectionSource ) return null
@@ -109,13 +111,15 @@ function FutureSummary( { dataset, limits, projectionSources } ) {
 
 	DEBUG && console.info( { years, year, stable, stableSource, csvData, dataset, sources } )
 
+	const replaceYear = ( text ) => text.replace( "%%START_YEAR%%", lastDataYear?.toString() ?? '', "g" ) 
+
 	return (
 		<div className="table-wrap">
 
 			<div className="top">
 				<Row gutter={ 12 } style={ { display: 'inline-flex' } }>
 					<Col>
-						{ getText( '2040_heading' ) }
+						{ replaceYear( getText( '2040_heading' ) ) }
 						{ ' ' }
 						<div style={ { display: 'inline-block' } }>
 							<CsvDownloader
