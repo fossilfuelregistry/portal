@@ -63,12 +63,20 @@ export default function MapLibre( {
 		}
 	}, [ projects ] )
 
-	const projectMarkers = useMemo( () => {
-		const geo = ( projects ?? [] ).map( p => p?.geom?.geojson ?? p?.geoPosition?.geojson )
-		return geo
-			.filter( p => p?.type === 'Point' )
-			.map( p => p.coordinates )
-	}, [ projects ] )
+	const projectsWithMarkers = useMemo( () =>  
+		( projects ?? [] )
+			.map( p => ( {
+				projectIdentifier: p.projectIdentifier, 
+				marker: p?.geom?.geojson ?? p?.geoPosition?.geojson 
+			} ) )
+			.filter( p => p?.marker?.type === 'Point' )
+			.map( p => ( {
+				projectIdentifier: p.projectIdentifier, 
+				coordinates: p.marker.coordinates,
+			} ) )
+	, [ projects ] )
+
+	DEBUG && console.info( { projectsWithMarkers } )
 
 	useEffect( () => {
 		loadScript( 'maplibre-script', 'https://unpkg.com/maplibre-gl@1.15.2/dist/maplibre-gl.js', () => set_loaded( l => l + 1 ) )
@@ -195,14 +203,30 @@ export default function MapLibre( {
 				}
 			} )
 
-			projectMarkers.forEach( m => {
+			projectsWithMarkers.forEach( m => {
+				const c = m.coordinates;
 				const marker = new window.maplibregl
 					.Marker( { scale: 0.7, color: theme[ '@primary-color' ] } )
-					.setLngLat( m )
+					.setLngLat( c )
 					.addTo( map.current )
 				markers.current.push( marker )
-				marker.getElement().addEventListener( 'click', () => {
-					window.location = 'https://maps.google.com/?t=k&q=' + m[ 1 ] + ',' + m[ 0 ]
+
+				const url = 'https://maps.google.com/?t=k&q=' + c[ 1 ] + ',' + c[ 0 ]
+				const popup = new window.maplibregl.Popup( {
+					closeButton: false,
+					closeOnClick: false
+				} )
+
+				marker.getElement().addEventListener( 'click', () => window.location = url )
+				marker.getElement().addEventListener( 'mouseover', ( ) => {
+					map.current.getCanvas().style.cursor = 'pointer'
+					popup
+						.setLngLat( c )
+						.setHTML( `<h3>${m.projectIdentifier}</h3>` )
+						.addTo( map.current );
+				} )
+				marker.getElement().addEventListener( 'mouseleave', ( ) => {
+					popup.remove()
 				} )
 			} )
 
@@ -214,7 +238,7 @@ export default function MapLibre( {
 			console.info( e )
 			console.info( { projects } )
 		}
-	}, [ domRef.current, loaded, projects, projectMarkers ] )
+	}, [ domRef.current, loaded, projects, projectsWithMarkers ] )
 
 	if( typeof window === 'undefined' || !window.maplibregl ) return <Loading/>
 
