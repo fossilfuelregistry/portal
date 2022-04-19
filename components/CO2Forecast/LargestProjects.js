@@ -10,6 +10,8 @@ import settings from "../../settings"
 import { Checkbox, Col, Divider, Row } from "antd"
 import FuelIcon from "components/navigation/FuelIcon"
 import { GQL_projects } from "../../queries/general"
+import HelpModal from "components/HelpModal"
+import useNumberFormatter from "../../lib/useNumberFormatter"
 
 const DEBUG = false
 
@@ -21,6 +23,7 @@ export default function LargestProjects( { onPositions, onGeoClick } ) {
 	const region = useSelector( redux => redux.region )
 	const countryTotalCO2 = useSelector( redux => redux.countryTotalCO2 )
 	const [ filters, set_filters ] = useState( { oil: true, gas: true, coal: true } )
+	const numberFormatter = useNumberFormatter()
 
 	const { data, loading, error } = useQuery( GQL_projects, {
 		variables: { iso3166_: country, iso31662_: region ?? '' },
@@ -55,7 +58,16 @@ export default function LargestProjects( { onPositions, onGeoClick } ) {
 
 	return (
 		<div className="co2-card">
-			<div className="header">{ getText( 'largest_projects' ) }</div>
+			<div className="header">
+				<Row>
+					<Col>
+						{ getText( 'largest_projects' ) }
+					</Col>
+					<Col>
+						<HelpModal title="largest_projects" content="largest_projects_explanation"/>
+					</Col>
+				</Row> 
+			</div>
 			<div
 				className="box"
 				style={ { display: 'flex', flexDirection: 'column', justifyContent: 'space-between' } }
@@ -126,7 +138,11 @@ export default function LargestProjects( { onPositions, onGeoClick } ) {
 										</td>
 
 										<td align="right">
-											{ ( p.co2 / ( countryTotalCO2 * 1e7 ) ).toFixed( 0 ) }<small>%</small>
+											{
+											/* ( p.co2 / ( countryTotalCO2 * 1e7 ) ).toFixed( 0 ) }<small>%</small>*/
+												numberFormatter( p.co2 / 1e7 ) 
+											}
+
 										</td>
 
 										<td style={ { paddingLeft: 12 } }>
@@ -149,6 +165,11 @@ export default function LargestProjects( { onPositions, onGeoClick } ) {
 						iso31662={ region ?? '' }
 					/>
 				</div>
+				<Row>
+					<Col style={{ paddingTop: 10, }}>
+						<Link href={`../projects/${country}`}>{getText( 'see_all_projects' )}</Link>
+					</Col>
+				</Row>
 			</div>
 			<style jsx>{ `
               .fuels {
