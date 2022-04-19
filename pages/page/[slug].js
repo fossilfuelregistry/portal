@@ -9,7 +9,7 @@ const headers = {
 export default function Page( { page } ) {
 
 	if( !page ) return null
-	console.log( page )
+
 	return (
 		<div className="cms-page">
 
