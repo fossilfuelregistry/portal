@@ -1,6 +1,6 @@
 import React from 'react'
 import { Head } from "next/head"
-import DynamicZone from "../../components/DynamicZone"
+import DynamicZone from "../../components/CMSContent/DynamicZone"
 
 const headers = {
 	Authorization: 'Bearer ' + process.env.NEXT_PUBLIC_CMS_TOKEN
