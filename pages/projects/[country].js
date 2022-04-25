@@ -19,6 +19,7 @@ import frFR from 'antd/lib/locale/fr_FR'
 import esES from 'antd/lib/locale/es_ES'
 import enUS from 'antd/lib/locale/en_US'
 import { formatCsvNumber } from "lib/numberFormatter"
+import { useConversionHooks } from "components/viz/conversionHooks"
 
 const DEBUG = true
 
@@ -35,6 +36,9 @@ export default function Projects() {
 	const numberFormatter = useNumberFormatter()
 	const [ filteredTableData, setFilteredTableData ] = useState( [] )
 	const [ locale, setLocale ] = useState( enUS )
+	const gwp = useSelector( redux => redux.gwp )
+	const { getCountryCurrentCO2, pageQuery, sourceNameFromId } = useConversionHooks()
+
 
 	const locales = new Map()
 	locales.set( "es", esES )
@@ -51,6 +55,19 @@ export default function Projects() {
 	} )
 
 	useEffect( () => {
+		const asyncEffect = async() => {
+			const ct = await getCountryCurrentCO2( country )
+			console.log( { ct } )
+			const EIA_SOURCE_ID = 2
+			dispatch( { type: 'COUNTRYTOTALCO2', payload: ct.find( c=>c.sourceId === EIA_SOURCE_ID )?.totalCO2 ?? null } )
+		}
+		asyncEffect()
+	}, [ country, gwp ] )
+	/*
+	const currentEmissions = currentProduction.find( e => e.sourceId === currentSourceId )
+		const _total = currentEmissions?.totalCO2 */
+
+	useEffect( () => {
 		const qCountry = router.query?.country
 		if( qCountry === null || qCountry === '-' || qCountry === 'null' ) return
 		DEBUG && console.info( 'useEffect PRELOAD country', { country, qCountry } )
@@ -62,11 +79,13 @@ export default function Projects() {
 		.sort( ( a, b ) => Math.sign( b.co2 - a.co2 ) )
 	, [ data?.getProjects?.nodes?.length ] )
 
+	const toPercentageString = ( co2 ) => countryTotalCO2 ? ( ( ( co2 / 1e9 ) / countryTotalCO2 )*100 ).toFixed( 2 ) : ""
+
 	const tableData = useMemo( ()=> projects.map( p => ( {
 		fuels: p.fuels,
 		co2: p.co2 / 1e9,
 		co2Formatted: numberFormatter( p.co2 / 1e9, 3 ),
-		co2Percentage: undefined, 
+		co2Percentage: toPercentageString( p.co2 ), 
 		projectIdentifier: p.projectIdentifier
 	} ) ),[ projects ] )
 
@@ -121,11 +140,11 @@ export default function Projects() {
 			dataIndex: "co2Formatted",
 			sorter: ( a, b ) =>  a.co2 - b.co2
 		},
-		/*{
-			title: 'co2 %',
+		{
+			title: 'CO2e [%]',
 			dataIndex: "co2Percentage",
 			sorter: ( a, b ) =>  a.co2 - b.co2
-		},*/
+		},
 	];
 
 	const onChange = ( pagination, filters, sorter, extra ) => {}
