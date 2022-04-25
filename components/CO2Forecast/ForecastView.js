@@ -81,7 +81,7 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 					</div>
 				</Col> }
 
-				{ production?.length > 0 &&
+				{ production?.length > 0 && production.map( p=>p.fossilFuelType ).includes( 'gas' ) &&
 				<Col xs={ 24 } md={ 12 } xxl={ 12 }>
 					<div className="graph-wrap">
 						<h4>{ getText( 'gas' ) + ' ' + getText( 'production' ) } e9m3</h4>
@@ -92,7 +92,7 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 					</div>
 				</Col> }
 
-				{ reserves?.length > 0 &&
+				{ reserves?.length > 0 && reserves.map( p=>p.fossilFuelType ).includes( 'gas' ) &&
 				<Col xs={ 24 } md={ 12 } xxl={ 12 }>
 					<div className="graph-wrap">
 						<h4>{ getText( 'gas' ) + ' ' + getText( 'reserves' ) } e9m3</h4>
@@ -103,7 +103,7 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 					</div>
 				</Col> }
 
-				{ production?.length > 0 &&
+				{ production?.length > 0 && production.map( p=>p.fossilFuelType ).includes( 'oil' ) &&
 				<Col xs={ 24 } md={ 12 } xxl={ 12 }>
 					<div className="graph-wrap">
 						<h4>{ getText( 'oil' ) + ' ' + getText( 'production' ) } e6bbl</h4>
@@ -114,7 +114,7 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 					</div>
 				</Col> }
 
-				{ reserves?.length > 0 &&
+				{ reserves?.length > 0 && reserves.map( p=>p.fossilFuelType ).includes( 'oil' ) &&
 				<Col xs={ 24 } md={ 12 } xxl={ 12 }>
 					<div className="graph-wrap">
 						<h4>{ getText( 'oil' ) + ' ' + getText( 'reserves' ) } e6bbl</h4>
@@ -125,7 +125,7 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 					</div>
 				</Col> }
 
-				{ production?.length > 0 &&
+				{ production?.length > 0 && production.map( p=>p.fossilFuelType ).includes( 'coal' ) &&
 				<Col xs={ 24 } md={ 12 } xxl={ 12 }>
 					<div className="graph-wrap">
 						<h4>{ getText( 'coal' ) + ' ' + getText( 'production' ) } e6ton</h4>
@@ -136,7 +136,7 @@ function ForecastView( { production, projection, reserves, projectedProduction, 
 					</div>
 				</Col> }
 
-				{ reserves?.length > 0 &&
+				{ reserves?.length > 0 && reserves.map( p=>p.fossilFuelType ).includes( 'coal' ) &&
 				<Col xs={ 24 } md={ 12 } xxl={ 12 }>
 					<div className="graph-wrap">
 						<h4>{ getText( 'coal' ) + ' ' + getText( 'reserves' ) } e6ton</h4>
