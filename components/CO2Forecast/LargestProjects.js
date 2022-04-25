@@ -95,7 +95,6 @@ export default function LargestProjects( { onPositions, onGeoClick } ) {
 					<table style={ { margin: '0 auto' } }>
 						<tbody>
 							{ largest.map( p => {
-								//console.info( { p: p.productionCo2E, countryTotalCO2 } )
 								return (
 									<tr key={ p.id }>
 
@@ -139,10 +138,8 @@ export default function LargestProjects( { onPositions, onGeoClick } ) {
 
 										<td align="right">
 											{
-											/* ( p.co2 / ( countryTotalCO2 * 1e7 ) ).toFixed( 0 ) }<small>%</small>*/
-												numberFormatter( p.co2 / 1e7 ) 
+												numberFormatter( p.co2 / 1e9, 2 ) 
 											}
-
 										</td>
 
 										<td style={ { paddingLeft: 12 } }>

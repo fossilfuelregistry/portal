@@ -18,6 +18,7 @@ import { NextSeo } from "next-seo"
 import frFR from 'antd/lib/locale/fr_FR'
 import esES from 'antd/lib/locale/es_ES'
 import enUS from 'antd/lib/locale/en_US'
+import { formatCsvNumber } from "lib/numberFormatter"
 
 const DEBUG = true
 
@@ -44,7 +45,6 @@ export default function Projects() {
 
 	const title = ( countryName ? countryName + ' - ' : '' ) + getText( 'largest_projects' )
 
-
 	const { data, loading, error } = useQuery( GQL_projects, {
 		variables: { iso3166_: country, iso31662_: region ?? '' },
 		skip: !country
@@ -62,18 +62,15 @@ export default function Projects() {
 		.sort( ( a, b ) => Math.sign( b.co2 - a.co2 ) )
 	, [ data?.getProjects?.nodes?.length ] )
 
-
 	const tableData = useMemo( ()=> projects.map( p => ( {
 		fuels: p.fuels,
-		co2: p.co2,
-		co2Formatted: numberFormatter( p.co2 / 1e6 ),
-		co2Percentage: undefined, //( p.co2 / ( countryTotalCO2 * 1e7 ) ).toFixed( 0 ),
+		co2: p.co2 / 1e9,
+		co2Formatted: numberFormatter( p.co2 / 1e9, 3 ),
+		co2Percentage: undefined, 
 		projectIdentifier: p.projectIdentifier
 	} ) ),[ projects ] )
 
-	
-
-	DEBUG && console.info( projects )
+	DEBUG && console.info( { projects, tableData }  )
 
 	useEffect( ( ) => {
 		const filteredData = tableData.filter( d => {
@@ -85,34 +82,18 @@ export default function Projects() {
 		setFilteredTableData( filteredData )
 	},[ tableData, filters ] )
 
-	useEffect( () => {
-		if( !( projects?.length > 0 ) ) return
-		//onPositions?.( projects.map( p => p.geoPosition ) )
-	}, [ projects ] )
-
 	const downloadableData = useMemo( ()=> {
 		return filteredTableData.map( p=>( {
-			fuels: p.fuels.join( ', ' ),
-			co2: p.co2Formatted ,
-			project: p.projectIdentifier
+			[ getText( 'fossil_fuel_type' ) ]: p.fuels.map( f=> getText( f ) ).join( ' ' ),
+			[ getText( 'm_mt_co2e' ) ]: formatCsvNumber( p.co2 ) ,
+			[ getText( 'project' ) ]: p.projectIdentifier
 		} ) )
 	},[ filteredTableData ] )
 
+	DEBUG && console.info( { downloadableData }  )
 
 	if( loading || error || !data ) return null
 	if( !projects.length ) return null
-
-	const largest = projects
-		.filter( p => {
-			let show = false
-			p.fuels?.forEach( f => {
-				if( filters[ f ] ) show = true
-			} )
-			return show
-		} )
-		.slice( 0, 9 )
-
-
 
 	const columns = [
 		{
@@ -136,7 +117,7 @@ export default function Projects() {
 			sorter: ( a, b ) =>  a.projectIdentifier.localeCompare( b.projectIdentifier )
 		},
 		{
-			title: 'co2',
+			title: getText( 'm_mt_co2e' ),
 			dataIndex: "co2Formatted",
 			sorter: ( a, b ) =>  a.co2 - b.co2
 		},
@@ -149,9 +130,6 @@ export default function Projects() {
 
 	const onChange = ( pagination, filters, sorter, extra ) => {}
 
-
-	
-	
 	return (
 		<>
 			<NextSeo
