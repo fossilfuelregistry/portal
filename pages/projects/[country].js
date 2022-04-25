@@ -21,7 +21,7 @@ import enUS from 'antd/lib/locale/en_US'
 import { formatCsvNumber } from "lib/numberFormatter"
 import { useConversionHooks } from "components/viz/conversionHooks"
 
-const DEBUG = true
+const DEBUG = false
 
 export default function Projects() {
 	const router = useRouter();

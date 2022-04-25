@@ -1,4 +1,4 @@
-import React, { /*useCallback, */ useMemo } from "react"
+import React, { /*useCallback, */ useEffect, useMemo } from "react"
 import { Group } from '@visx/group'
 import { AreaStack, LinePath } from '@visx/shape'
 import { AxisBottom, AxisRight } from '@visx/axis'
@@ -9,7 +9,7 @@ import { max } from 'd3-array'
 import { withParentSize } from "@visx/responsive"
 import useText from "lib/useText"
 import { combineOilAndGasAndCoal, sumOfCO2 } from "../CO2Forecast/calculate"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import CsvDownloader /*, { toCsv } */ from "react-csv-downloader"
 import settings from 'settings'
 import getConfig from "next/config"
@@ -44,6 +44,8 @@ function CO2ForecastGraphBase( {
 	const { currentUnit, costMultiplier } = useCO2CostConverter()
 	const numberFormatter =  useNumberFormatter()
 
+	const dispatch = useDispatch()
+
 	const height = parentHeight
 	const margin = { left: 0, top: 10 }
 
@@ -53,6 +55,43 @@ function CO2ForecastGraphBase( {
 	const getProjection = d => d.co2
 
 	let pReserves = false, cReserves = false
+
+	useEffect( ()=>{
+
+		const sourceIds = []
+		production.forEach( p=>{
+			if( !sourceIds.includes( p.sourceId ) ) 
+				sourceIds.push( p.sourceId )
+		} )
+
+		const sourcesWithData = []
+		sourceIds.forEach( sourceId => {
+			const obj = { sourceId }
+			const fuelsFromSource = production.
+				filter( p=>p.sourceId === sourceId ).
+				map( p=>p.fossilFuelType )
+
+			settings.supportedFuels.forEach( fuel => {
+				obj[ fuel ] = false;
+				if( fuelsFromSource.find( f => f === fuel ) )
+					obj[ fuel ] = true;
+			} )
+			sourcesWithData.push( obj )
+		} )
+		/* Format as 
+			[{
+				"sourceId": number,
+				oil: boolean,
+				coal: boolean,
+				gas: boolean,
+			}]
+		*/
+		dispatch( {
+			type: 'SOURCESWITHDATA',
+			payload: sourcesWithData
+		} )
+	}, [ production ] )
+
 
 	const productionData = combineOilAndGasAndCoal( production.filter( d => d.sourceId === productionSourceId ) )
 		.filter( d => d.year >= settings.year.start )
@@ -365,41 +404,41 @@ function CO2ForecastGraphBase( {
 								<div className="blob gas p"/>
 							</td>
 							<td>{ getText( 'gas' ) }: { getText( 'against_reserves' ) }</td>
-						</tr> }
+                     </tr> }
 						{ pReserves && <tr>
 							<td>
 								<div className="blob oil p"/>
 							</td>
 							<td>{ getText( 'oil' ) }: { getText( 'against_reserves' ) }</td>
-						</tr> }
+                     </tr> }
 						{ pReserves && <tr>
 							<td>
 								<div className="blob coal p"/>
 							</td>
 							<td>{ getText( 'coal' ) }: { getText( 'against_reserves' ) }</td>
-						</tr> }
+                     </tr> }
 						{ cReserves && <tr>
 							<td>
 								<div className="blob gas c"/>
 							</td>
 							<td>{ getText( 'gas' ) }: { getText( 'against_contingent' ) }</td>
-						</tr> }
+                     </tr> }
 						{ cReserves && <tr>
 							<td>
 								<div className="blob oil c"/>
 							</td>
 							<td>{ getText( 'oil' ) } : { getText( 'against_contingent' ) }</td>
-						</tr> }
+                     </tr> }
 						{ cReserves && <tr>
 							<td>
 								<div className="blob coal c"/>
 							</td>
 							<td>{ getText( 'coal' ) } : { getText( 'against_contingent' ) }</td>
-						</tr> }
+                     </tr> }
 						{ ( !cReserves && !pReserves ) && <tr>
 							<td/>
 							<td style={ { maxWidth: 200 } }>{ getText( 'no_reserves' ) }</td>
-						</tr> }
+                                        </tr> }
 					</tbody>
 				</table>
 

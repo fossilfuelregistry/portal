@@ -17,6 +17,7 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 	const dispatch = useDispatch()
 	const stateValue = useSelector( redux => redux[ stateKey ] )
 	const project = useSelector( redux => redux.project )
+	const sourcesWithData = useSelector( redux => redux.sourcesWithData )
 	const firstInitialize = useRef( true ) // Used to NOT clear settings before sources loaded.
 
 	const query = router.query
@@ -76,7 +77,7 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 		}
 	}, [ sources, sources?.length, loading, stateValue, project ] )
 
-	const uniqSource = {}
+	const uniqSource = {} 
 
 	return (
 		<div>
@@ -99,6 +100,13 @@ export default function SourceSelector( { sources, loading, stateKey, placeholde
 						if( s.sourceId === settings?.stableProductionSourceId && project?.dataType === 'sparse' ) return false
 						if( uniqSource[ s.sourceId ] ) return false
 						uniqSource[ s.sourceId ] = true
+						return true
+					} )
+					.filter( s => {
+						// Filter out sources with no production data available for oil
+						const sourceWithData = sourcesWithData.find( a => s.sourceId === a.sourceId )
+						if( !sourceWithData ) return true
+						if( !sourceWithData.oil ) return false
 						return true
 					} )
 					.map( s => {
