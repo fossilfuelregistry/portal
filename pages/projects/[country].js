@@ -56,8 +56,7 @@ export default function Projects() {
 
 	useEffect( () => {
 		const asyncEffect = async() => {
-			const ct = await getCountryCurrentCO2( country )
-			console.log( { ct } )
+			const ct = await getCountryCurrentCO2( country ) || []
 			const EIA_SOURCE_ID = 2
 			dispatch( { type: 'COUNTRYTOTALCO2', payload: ct.find( c=>c.sourceId === EIA_SOURCE_ID )?.totalCO2 ?? null } )
 		}
@@ -84,7 +83,7 @@ export default function Projects() {
 	const tableData = useMemo( ()=> projects.map( p => ( {
 		fuels: p.fuels,
 		co2: p.co2 / 1e9,
-		co2Formatted: numberFormatter( p.co2 / 1e9, 3 ),
+		co2Formatted: numberFormatter( p.co2 / 1e9, 2 ),
 		co2Percentage: toPercentageString( p.co2 ), 
 		projectIdentifier: p.projectIdentifier
 	} ) ),[ projects ] )
