@@ -50,3 +50,30 @@ query co2Costs {
   }
 }
 `
+
+export const GQL_projectsTableData = gql`
+query projectsTableData($iso3166:String!) {
+  projects(
+      orderBy: PRODUCTION_CO2E_DESC
+      condition: {iso3166: $iso3166}
+    ) {
+    nodes {
+      id
+      projectIdentifier
+      productionCo2E
+      fuels
+      dataYear
+      firstYear
+      lastYear
+      projectDataPoints {
+        nodes {
+          dataYear
+          fossilFuelType
+          volume
+          year
+          unit
+        }
+      }
+    }
+  }
+}`
