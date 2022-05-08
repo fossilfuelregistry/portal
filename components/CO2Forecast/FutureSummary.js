@@ -31,7 +31,6 @@ const _csvFormatter = s => {
 	} ) )
 }
 
-
 function FutureSummary( { dataset, limits, projectionSources } ) {
 	const { getText } = useText()
 	const { generateCsvTranslation } = useCsvDataTranslator()
@@ -42,11 +41,9 @@ function FutureSummary( { dataset, limits, projectionSources } ) {
 	const projectionSourceId = useSelector( redux => redux.projectionSourceId )
 	const { costMultiplier } = useCO2CostConverter()
 
-
-
 	if( !( dataset?.length > 0 ) ) return null
-	if( !stableProduction.oil || !stableProduction.gas || !stableProduction.coal ) return null
-
+	if( !( stableProduction.oil || stableProduction.gas || stableProduction.coal ) ) return null
+	
 	DEBUG && console.info( { projectionSourceId, allSources, limits, stableProduction, projectionSources } )
 
 	const stable = {
