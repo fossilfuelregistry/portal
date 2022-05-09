@@ -9,6 +9,7 @@ import { useQuery } from "@apollo/client"
 import { GQL_projects } from "../../queries/general"
 import { NextSeo } from "next-seo"
 import { useConversionHooks } from "components/viz/conversionHooks"
+import { Spin, Space } from 'antd';
 
 import ProjectsTable from "components/projects/ProjectsTable"
 
@@ -48,7 +49,15 @@ export default function Projects() {
 		if( qCountry !== country ) dispatch( { type: 'COUNTRY', payload: qCountry } )
 	}, [ router.query?.country ] )
 
-	if( loading || error || !data ) return null
+	if( loading ) {
+		return (
+			<Space size="middle">
+				<Spin size="large" />
+			</Space>
+		);
+	}
+
+	if( error || !data ) return null
 
 	return (
 		<>

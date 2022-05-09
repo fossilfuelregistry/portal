@@ -16,7 +16,9 @@ import enUS from 'antd/lib/locale/en_US'
 import { formatCsvNumber } from "lib/numberFormatter"
 import { useConversionHooks } from "components/viz/conversionHooks"
 
+
 const DEBUG = false
+const initialPageSize = 20
 
 const ProjectsTable = () => {
 	const { getText } = useText()
@@ -32,17 +34,30 @@ const ProjectsTable = () => {
 	const { getCountryCurrentCO2 } = useConversionHooks()
 	const globalLocale = useSelector( state => state.locale )
 
+	const [ offset, setOffset ] = useState( 0 )
+
+	const [ pagination, setPagination ] = useState( {
+		current: 1,
+		pageSize: initialPageSize,
+	} )
+
 	const locales = new Map()
 	locales.set( "es", esES )
 	locales.set( "fr", frFR )
 	locales.set( "en", enUS )
 	useEffect( ()=>setLocale( locales.get( language ) ),[ language ] )
 	
-	
 	const { data, loading, error } = useQuery( GQL_projectsTableData, {
-		variables: { iso3166: country },
+		variables: { iso3166: country, offset, limit: pagination.pageSize },
 		skip: !country
 	} )
+
+	const numberOfProjects = data?.projects.totalCount
+
+	useEffect(
+		() => setPagination( { ...pagination, total: numberOfProjects } ),
+		[ numberOfProjects ]
+	);
 
 	const projects = useMemo( ()=> (
 		data?.projects?.nodes?.map( n=>( {
@@ -90,7 +105,7 @@ const ProjectsTable = () => {
 		co2Percentage: toPercentageString( p.co2 ), 
 		projectIdentifier: p.projectIdentifier,
 		latest_year_production: p.projectDataPoints
-			.map( d=> `${getText( d.fossilFuelType )} ${ numberFormatter( d.volume )} ${d.unit} (${p.dataYear})` )
+			.map( d=> `${getText( d.fossilFuelType )} ${ numberFormatter( d.volume )} ${d.unit} ${p.dataYear ? `(${p.dataYear})`:''}` )
 			.reduce( ( prev,curr ) => `${prev}\n${curr}`, '' ),
 	} ) ),[ projects ] )
 
@@ -118,7 +133,7 @@ const ProjectsTable = () => {
 
 	DEBUG && console.info( { downloadableData }  )
 
-	if( loading || error || !data ) return null
+	if( error || !data ) return null
 
 	const columns = [
 		{
@@ -139,17 +154,14 @@ const ProjectsTable = () => {
 		{
 			title: getText( 'project' ),
 			dataIndex: "projectIdentifier",
-			sorter: ( a, b ) =>  a.projectIdentifier.localeCompare( b.projectIdentifier )
 		},
 		{
 			title: getText( 'm_mt_co2e' ),
 			dataIndex: "co2Formatted",
-			sorter: ( a, b ) =>  a.co2 - b.co2
 		},
 		{
 			title: 'CO2e [%]',
 			dataIndex: "co2Percentage",
-			sorter: ( a, b ) =>  a.co2 - b.co2
 		},
 		{
 			title: getText( 'latest_year_production' ),
@@ -159,47 +171,61 @@ const ProjectsTable = () => {
 		},
 	];
 
-	const onChange = ( pagination, filters, sorter, extra ) => {}
+	const onChange = ( pagination, filters, sorter, extra ) => {
+		setOffset( pagination.current * pagination.pageSize )
+		setPagination( pagination )
+	}
 
 	return (
 		<>
-			<Row justify="center" gutter={ 16 }>
-				{ settings.supportedFuels.map( fuel =>
-					<Col key={ fuel }>
+			<Row justify="center" gutter={16}>
+				{settings.supportedFuels.map( ( fuel ) => (
+					<Col key={fuel}>
 						<Checkbox
-							checked={ filters[ fuel ] !== false }
-							onChange={ e => {
-								console.log( e )
-								set_filters( { ...filters, [ fuel ]: e.target.checked } )
-							} }
+							checked={filters[ fuel ] !== false}
+							onChange={( e ) => {
+								console.log( e );
+								set_filters( { ...filters, [ fuel ]: e.target.checked } );
+							}}
 						>
-							<div style={ { display: 'inline-flex', opacity: ( filters[ fuel ] !== false ) ? 1 : 0.4 } }>
-								<FuelIcon fuel={ fuel } height={ 22 }/>
-								<div style={ { paddingLeft: 4 } }>{ getText( fuel ) }</div>
+							<div
+								style={{
+									display: "inline-flex",
+									opacity: filters[ fuel ] !== false ? 1 : 0.4,
+								}}
+							>
+								<FuelIcon fuel={fuel} height={22} />
+								<div style={{ paddingLeft: 4 }}>{getText( fuel )}</div>
 							</div>
 						</Checkbox>
 					</Col>
-
-				) }
+				) )}
 
 				<Col>
 					<CsvDownloader
-						datas={ downloadableData }
-						filename={ country + '_projects.csv' }
-						separator=';'
+						datas={downloadableData}
+						filename={country + "_projects.csv"}
+						separator=";"
 					>
-						<DownloadOutlined/>
+						<DownloadOutlined />
 					</CsvDownloader>
 				</Col>
 
 				<Col>
-					<HelpModal title="now_heading" content="now_heading_explanation"/>
+					<HelpModal title="now_heading" content="now_heading_explanation" />
 				</Col>
 			</Row>
-			<Divider style={ { marginTop: 12 } }/>	
-			<Table columns={columns} dataSource={filteredTableData} onChange={onChange} locale={locale}  />
+			<Divider style={{ marginTop: 12 }} />
+			<Table
+				columns={columns}
+				loading={loading}
+				dataSource={filteredTableData}
+				onChange={onChange}
+				locale={locale}
+				pagination={pagination}
+			/>
 		</>
-	)
+	);
 }
 
 export default ProjectsTable
