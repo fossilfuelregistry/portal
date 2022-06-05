@@ -1,10 +1,11 @@
 import React from "react"
 import { applyMiddleware, createStore } from 'redux'
 import { createWrapper, HYDRATE } from 'next-redux-wrapper'
+import { Store } from "./types"
 
 let hydrated = false
 
-const initialState = {
+const initialState: Store = {
 	ip: null,
 	ipLocation: {},
 	texts: {},
@@ -29,7 +30,8 @@ const initialState = {
 	co2Costs: [],
 	showCostInGraphs: false,
 	sourcesWithData: [],
-	locale: typeof window !== 'undefined' ? window?.navigator?.userLanguage || window?.navigator?.language || 'en-US' : "en-US"
+	locale: typeof window !== 'undefined' ? window?.navigator?.userLanguage || window?.navigator?.language || 'en-US' : "en-US",
+	language: null
 }
 
 const bindMiddleware = ( middleware ) => {
