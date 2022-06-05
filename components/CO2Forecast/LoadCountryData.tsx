@@ -9,6 +9,7 @@ import ForecastView from "./ForecastView"
 import { useConversionHooks } from "../viz/conversionHooks"
 import settings from "settings"
 import { prepareProductionDataset } from "./calculate"
+import { Store } from "lib/types"
 
 const DEBUG = false
 
@@ -18,13 +19,13 @@ function LoadCountryData( { projectionSources } ) {
 	const { getText } = useText()
 	const [ limits, set_limits ] = useState( {} )
 	const [ grades, set_grades ] = useState( {} )
-	const country = useSelector( redux => redux.country )
-	const region = useSelector( redux => redux.region )
-	const productionSourceId = useSelector( redux => redux.productionSourceId )
-	const projectionSourceId = useSelector( redux => redux.projectionSourceId )
-	const reservesSourceId = useSelector( redux => redux.reservesSourceId )
-	const stableProduction = useSelector( redux => redux.stableProduction )
-	const gwp = useSelector( redux => redux.gwp )
+	const country = useSelector( (redux: Store) => redux.country )
+	const region = useSelector( (redux: Store) => redux.region )
+	const productionSourceId = useSelector( (redux: Store) => redux.productionSourceId )
+	const projectionSourceId = useSelector( (redux: Store) => redux.projectionSourceId )
+	const reservesSourceId = useSelector( (redux: Store) => redux.reservesSourceId )
+	const stableProduction = useSelector( (redux: Store) => redux.stableProduction )
+	const gwp = useSelector( (redux: Store) => redux.gwp )
 
 	const _co2 = dataset => {
 		if( !( dataset?.length > 0 ) ) return []

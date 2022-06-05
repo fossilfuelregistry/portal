@@ -1,8 +1,32 @@
+import { FossilFuelType, ProductionData, Grades, ReservesData, Store } from "lib/types"
+import { NextRouter, Router } from "next/router"
 import settings from "settings"
 
-const DEBUG = false
+const DEBUG = true
 
-export function addToTotal( total, datapoint, optionalMultiplicationFactor = 1 ) {
+type Scenarios = [number, number, number]
+export type Fuel = {
+	scope1?: Scenarios
+	scope3?: Scenarios
+}
+
+type Range = 0 | 1 | 2
+
+
+export type Dataset = {
+	__typename?: string
+	fossilFuelType: FossilFuelType
+	id: number
+	quality: number
+	sourceId: number
+	subtype: string | null
+	unit: string
+	volume: number
+	year:number
+	grade?: any
+}
+
+export function addToTotal( total, datapoint, optionalMultiplicationFactor: number = 1 ) {
 	if( !total ) {
 		console.trace()
 		console.log( { datapoint } )
@@ -23,30 +47,32 @@ export function addToTotal( total, datapoint, optionalMultiplicationFactor = 1 )
 	} )
 }
 
-function _sumOfFuelCO2( fuel, range ) {
+function _sumOfFuelCO2( fuel: Fuel, range: Range ) {
 	try {
-		return fuel.scope1?.[ range ] + fuel.scope3?.[ range ]
+		return (fuel.scope1?.[ range ] ?? 0) + (fuel.scope3?.[ range ] ?? 0)
 	} catch( e ) {
 		console.info( fuel )
 		console.trace()
-		throw new Error( e.message + '\nCannot calculate CO2 of ' + JSON.stringify( fuel ) )
+		throw new Error( (e as Error).message + '\nCannot calculate CO2 of ' + JSON.stringify( fuel ) )
 	}
 }
 
-export function sumOfCO2( datapoint, range ) {
-	if( !datapoint ) {
-		console.trace()
-		return
-	}
-	if( datapoint.scope1 || datapoint.scope3 )
-		return _sumOfFuelCO2( datapoint, range )
+export function sumOfCO2(
+  datapoint: Fuel | undefined,
+  range: Range
+): number | undefined {
+  if (!datapoint) {
+    console.trace();
+    return;
+  }
+  if (datapoint.scope1 || datapoint.scope3)
+    return _sumOfFuelCO2(datapoint, range);
 
-	let co2 = 0
-	settings.supportedFuels.forEach( fuel => {
-		if( datapoint[ fuel ] )
-			co2 += _sumOfFuelCO2( datapoint[ fuel ], range )
-	} )
-	return co2
+  let co2 = 0;
+  settings.supportedFuels.forEach((fuel) => {
+    if (datapoint[fuel]) co2 += _sumOfFuelCO2(datapoint[fuel], range);
+  });
+  return co2;
 }
 
 export function __sumOfCO2( datapoint, range ) {
@@ -72,8 +98,9 @@ export function combineOilAndGasAndCoal( dataset ) {
 	return newDataset
 }
 
-export function getPreferredGrades( reserves, reservesSourceId ) {
+export function getPreferredGrades( reserves: ReservesData[], reservesSourceId: number ) : Grades {
 	let pGrade = -1, cGrade = -1
+	let _pGrade: string, _cGrade:string
 
 	reserves.forEach( r => {
 		if( r.sourceId !== reservesSourceId ) return
@@ -84,21 +111,26 @@ export function getPreferredGrades( reserves, reservesSourceId ) {
 			cGrade = Math.max( cGrade, settings.gradesPreferenceOrder.indexOf( r.grade?.[ 0 ] ) )
 		}
 	} )
-	DEBUG && console.log( {
+	DEBUG && console.info("getPreferredGrades", {
 		pGrade,
 		cGrade,
 		reservesSourceId,
 		reserves: reserves.filter( r => r.sourceId === reservesSourceId )
 	} )
-	if( pGrade < 0 ) pGrade = '--'
-	else pGrade = settings.gradesPreferenceOrder[ pGrade ] + 'p'
-	if( cGrade < 0 ) cGrade = '--'
-	else cGrade = settings.gradesPreferenceOrder[ cGrade ] + 'c'
-	return { pGrade, cGrade }
+	if( pGrade < 0 ) _pGrade = '--'
+	else _pGrade = settings.gradesPreferenceOrder[ pGrade ] + 'p'
+	if( cGrade < 0 ) _cGrade = '--'
+	else _cGrade = settings.gradesPreferenceOrder[ cGrade ] + 'c'
+
+	DEBUG && console.info("getPreferredGrades- after", {
+		_pGrade,
+		_cGrade,
+	} )
+	return { pGrade: _pGrade, cGrade: _cGrade }
 }
 
 // Get pref grade from the aggregated string in the get_reserves_sources backend function
-export function getPreferredReserveGrade( grades ) {
+export function getPreferredReserveGrade( grades ) :string {
 	if( !( grades?.length > 0 ) ) return ''
 	let pGrade = -1, cGrade = -1
 	grades.forEach( grade => {
@@ -117,7 +149,7 @@ export function getPreferredReserveGrade( grades ) {
 	return pGrade + '/' + cGrade
 }
 
-export async function co2PageUpdateQuery( store, router, parameter, value ) {
+export async function co2PageUpdateQuery( store:any, router: NextRouter, parameter?:any, value?:any ) {
 	const params = [ 'region', 'productionSourceId', 'projectionSourceId', 'reservesSourceId', 'gwp' ]
 	const DEBUG = false
 	const query = new URLSearchParams()
@@ -158,21 +190,27 @@ export async function co2PageUpdateQuery( store, router, parameter, value ) {
 	await router.replace( url, null, { shallow: true } )
 }
 
-export function getFullFuelType( datapoint ) {
-	let fullFuelType = datapoint.fossilFuelType
+type GetFullFuelTypeParams = {
+	fossilFuelType: FossilFuelType | null | ""
+	subtype: string | null
+}
+export function getFullFuelType( datapoint: GetFullFuelTypeParams) {
+	let fullFuelType: string | null = datapoint.fossilFuelType
+	// @ts-ignore
 	if( datapoint.fossilFuelType?.length > 0 )
+	// @ts-ignore
 		fullFuelType = datapoint.fossilFuelType + ( datapoint.subtype?.length > 0 ? settings.fuelTypeSeparator + datapoint.subtype.toLowerCase() : '' )
 	//console.info( 'fullFuelType', fullFuelType )
 	return fullFuelType
 }
 
-export function prepareProductionDataset( dataset ) {
+export function prepareProductionDataset( dataset: Dataset[] ) {
 
 	const onlySupportedFuelPoints = dataset.filter( datapoint => settings.supportedFuels.includes( datapoint.fossilFuelType ) )
 
 	// Now squash multiple year entries into one.
-	const singlePointPerYear = []
-	let aggregatePoint
+	const singlePointPerYear:Dataset[] = []
+	let aggregatePoint: Dataset
 
 	onlySupportedFuelPoints.forEach( datapoint => {
 		if( !aggregatePoint ) {
@@ -193,7 +231,7 @@ export function prepareProductionDataset( dataset ) {
 			throw new Error( 'Multiple data points for same fuel / source / year cannot have different units.' )
 		}
 
-		//console.info( 'Aggregating', { aggregatePoint, datapoint } )
+		console.info( 'Aggregating', { aggregatePoint, datapoint } )
 		aggregatePoint.subtype = null
 		aggregatePoint.volume += datapoint.volume
 	} )
@@ -206,4 +244,19 @@ export function prepareProductionDataset( dataset ) {
 	} )
 
 	return singlePointPerYear
+}
+
+
+
+
+export const getProductionData = (dataset: Dataset[]) => {
+	if( !( dataset?.length > 0 ) ) return []
+
+	const singlePointPerYearDataset =  prepareProductionDataset( dataset )
+
+	return singlePointPerYearDataset.map(data => {
+
+
+	})
+	
 }
