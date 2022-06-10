@@ -1,3 +1,4 @@
+import { Dataset } from "components/CO2Forecast/calculate";
 import Graph from "graph-data-structure";
 import settings from "../settings";
 
@@ -24,6 +25,17 @@ export type Source = {
   latestCurationAt: string | null;
 };
 
+
+export type ScopeKey = "scope1" | "scope3"
+type Scenarios = [number, number, number]
+export type CO2EScope = {
+  [scope in ScopeKey]: Scenarios;
+}
+
+export type FuelWithScope = {
+  [fuel in FossilFuelType]: CO2EScope
+}
+
 export type ProductionData = {
   id: number;
   fossilFuelType: FossilFuelType;
@@ -33,10 +45,7 @@ export type ProductionData = {
   subtype: string | null;
   sourceId: number;
   quality: number;
-  co2: {
-    scope1: [number, number, number];
-    scope3: [number, number, number];
-  };
+  co2: CO2EScope;
 };
 
 export type ProjectionData = {
@@ -47,10 +56,7 @@ export type ProjectionData = {
   subtype: string | null;
   sourceId: number;
   quality: number;
-  co2: {
-    scope1: [number, number, number];
-    scope3: [number, number, number];
-  };
+  co2: CO2EScope;
 };
 
 export type ReservesData = {
@@ -62,10 +68,7 @@ export type ReservesData = {
   sourceId: number;
   quality: number;
   grade: string;
-  co2: {
-    scope1: [number, number, number];
-    scope3: [number, number, number];
-  };
+  co2: CO2EScope
 };
 
 export type StableProduction = {
@@ -185,3 +188,15 @@ export type LastReservesType = {
     [f in "p" | "c"]: { year: number; value: number };
   };
 };
+
+
+export type CombinedPoint = {"year": number} & {[fuel in FossilFuelType]:Dataset}
+
+
+
+
+export type PrefixConversion = {
+  form_unit: string
+  to_unit: string
+  factor: string
+}
