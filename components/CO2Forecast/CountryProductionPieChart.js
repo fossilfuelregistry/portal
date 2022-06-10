@@ -48,7 +48,7 @@ export default function CountryProductionPieChart( { project, currentProduction,
 			.map( s => allSources.find( as => as.sourceId === s.sourceId ) )
 		set_sources( mySources )
 
-		console.info( "Sources", { mySources, sourceId } )
+		DEBUG && console.info( "Sources", { mySources, sourceId } )
 		let currentSourceId = sourceId
 		setSourceName( mySources.find( s=>s.sourceId === sourceId )?.name ?? "" )
 		

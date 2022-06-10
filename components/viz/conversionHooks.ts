@@ -32,7 +32,7 @@ import {
   buildGraphsFromFuels,
 } from "lib/calculations/conversions";
 
-const DEBUG = true;
+const DEBUG = false;
 
 let lastConversionPath: string[] = [];
 let lastConversionLoggedTimer: NodeJS.Timeout;
@@ -273,7 +273,7 @@ export const useConversionHooks = () => {
     { trailing: false }
   );
 
-  const co2FromVolume = (props: ProductionData, log: any | undefined) => {
+  const co2FromVolume = (props: ProductionData, log?: any | undefined) => {
     //console.info("co2FromVolume", {props, log})
     if (!props) return { scope1: [0, 0, 0], scope3: [0, 0, 0] };
 	// @ts-ignore

@@ -73,7 +73,7 @@ export const buildGraphFromFuel = (
   country: string,
   conversionConstants: ConversionFactorInStore[]
 ): BuildGraphFromFuel => {
-  console.info({ fuelType, country, conversionConstants });
+  //console.info({ fuelType, country, conversionConstants });
   const graph = Graph();
   const conversions: ConversionsList = {};
 
@@ -117,7 +117,7 @@ export const buildGraphFromFuel = (
       country: conv.country,
     };
   });
-  console.log({ graph, conversions });
+  //console.log({ graph, conversions });
   return { graph, conversions };
 };
 
