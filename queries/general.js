@@ -11,6 +11,30 @@ query conversions {
   }
 }`
 
+export const GQL_calculationConstants = gql`
+query calculationConstants {
+  calculationConstants {
+    nodes {
+      country
+      constantType
+      authority
+      description
+      factor
+      fossilFuelType
+      high
+      id
+      low
+      modifier
+      nodeId
+      projectId
+      quality
+      reference
+      subtype
+      unit
+    }
+  }
+}`
+
 export const GQL_productionCountries = gql`
 query producingCountries {
   getProducingIso3166 {
@@ -85,3 +109,16 @@ query projectsTableData($iso3166:String! $offset:Int! $limit:Int! ) {
     }
   }
 }`
+
+
+export const GQL_prefixConversions = gql`
+query prefixConversions {
+  prefixConversions {
+    nodes {
+      factor
+      fromPrefix
+      toPrefix
+    }
+  }
+}
+`

@@ -1,8 +1,8 @@
 import { ap } from "fp-ts/lib/Identity"
 import { pipe } from "fp-ts/lib/function"
 import { calculateCoalCO2ECombustionEmissions, calculateCoalCO2EProductionEmission, calculateCoalMethaneReleases, calculateTotalCoalCO2EEmissions, isoCoalCO2ECombustionEmissions, isoCoalCO2EProductionEmission, isoCoalMethaneEmissionsMidPoint, isoCoalMethaneReleases, isoCoalProduction, isoTonsCO2EPerTon } from "./coal"
-import { Scenarios } from "./utils"
-import { isoMethaneFactorisation } from "./methane"
+import { Scenarios } from "../utils"
+import { isoMethaneFactorisation } from "../methane"
 
 describe("COAL", () => {
   it(" Oil CO2E Combustion emissions", () => {

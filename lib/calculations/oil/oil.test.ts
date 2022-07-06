@@ -1,8 +1,29 @@
 import { pipe } from "fp-ts/lib/function"
 import { ap } from "fp-ts/lib/Identity"
-import { isoMethaneIntensity } from "./methane"
-import { calculateCombustionEmissions, calculateEnergyFromOil, calculateOilCO2ProductionEmissions, isoBarrelsPerTonne, isoOilCO2ECombustionEmissions, isoCombustionEnergyToEmissionFactors, isoCombustionMassToEnergyFactor, isoEIAOilNFURatio, isoEnergyFromOil, isoOilCO2ProductionEmissions, isoOilProduction, isoOilProductionCO2Factors, isoMethaneFactorisation, calculateOilCO2EOfMethane, isoOilCO2EOfMethane, calculateOilCO2EProductionEmissions, isoOilCO2EProductionEmissions, OilProduction, calculateOilMethaneReleases, isoOilMethaneReleases, calculateTotalOilCO2EEmissions, isoTotalOilCO2EEmissions } from "./oil"
-import { Scenarios } from "./utils"
+import { isoMethaneFactorisation, isoMethaneIntensity } from "../methane"
+import {
+  calculateCombustionEmissions,
+  calculateEnergyFromOil,
+  calculateOilCO2ProductionEmissions,
+  isoBarrelsPerTonne,
+  isoOilCO2ECombustionEmissions,
+  isoCombustionEnergyToEmissionFactors,
+  isoCombustionMassToEnergyFactor,
+  isoEIAOilNFURatio,
+  isoEnergyFromOil,
+  isoOilCO2ProductionEmissions,
+  isoOilProduction,
+  isoOilProductionCO2Factors,
+  calculateOilCO2EOfMethane,
+  isoOilCO2EOfMethane,
+  calculateOilCO2EProductionEmissions,
+  isoOilCO2EProductionEmissions,
+  calculateOilMethaneReleases,
+  isoOilMethaneReleases,
+  calculateTotalOilCO2EEmissions,
+  isoTotalOilCO2EEmissions,
+} from "./oil";
+import { Scenarios } from "../utils"
 
 describe('Oil', () => { 
     describe("Combustion emissions", ()=>{

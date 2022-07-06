@@ -1,6 +1,10 @@
 import { Dataset } from "components/CO2Forecast/calculate";
 import Graph from "graph-data-structure";
+import { GQL_countrySourcesRecord } from "queries/country-types";
+import { GQL_projectSourcesRecord } from "queries/general-types";
 import settings from "../settings";
+import { DatabaseRecord } from "./calculations/calculation-constants/types";
+import { PrefixRecord } from "./calculations/prefix-conversion";
 
 export type FossilFuelType = typeof settings.supportedFuels[number];
 
@@ -55,7 +59,7 @@ export type ProjectionData = {
   unit: string;
   subtype: string | null;
   sourceId: number;
-  quality: number;
+  quality: number | null;
   co2: CO2EScope;
 };
 
@@ -113,7 +117,7 @@ export type Store = {
   country: string | null;
   countryName: null | string;
   region: null | string;
-  project: unknown;
+  project?: {id: number};
   projectGeo: null;
   availableReserveSources: Array<any>;
   pGrade: null;
@@ -127,6 +131,8 @@ export type Store = {
   })[];
   locale: string;
   language: string | null;
+  calculationConstants: DatabaseRecord[] | null
+  prefixConversions: PrefixRecord[] | null
 };
 
 export type Conversion = {
@@ -200,3 +206,5 @@ export type PrefixConversion = {
   to_unit: string
   factor: string
 }
+
+export type RawSource = GQL_projectSourcesRecord | GQL_countrySourcesRecord

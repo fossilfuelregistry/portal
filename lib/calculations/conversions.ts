@@ -1,6 +1,5 @@
 import Graph from "graph-data-structure";
 import {
-  Conversion,
   ConversionFactorInStore,
   Conversions,
   ConvertVolume,

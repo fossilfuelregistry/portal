@@ -31,7 +31,9 @@ const initialState: Store = {
 	showCostInGraphs: false,
 	sourcesWithData: [],
 	locale: typeof window !== 'undefined' ? window?.navigator?.userLanguage || window?.navigator?.language || 'en-US' : "en-US",
-	language: null
+	language: null,
+	calculationConstants: null,
+	prefixConversions: null,
 }
 
 const bindMiddleware = ( middleware ) => {
@@ -87,6 +89,8 @@ const reducer = ( state = initialState, action ) => {
 				projectionSourceId: urlParams.projectionSourceId,
 				reservesSourceId: urlParams.reservesSourceId,
 				co2Costs: action.payload.co2Costs,
+				calculationConstants: action.payload.calculationConstants,
+				prefixConversions: action.payload.prefixConversions,
 			}
 		case 'IP':
 			return { ...state, ip: action.payload }
@@ -140,6 +144,10 @@ const reducer = ( state = initialState, action ) => {
 			return { ...state, co2Costs: action.payload }
 		case 'SOURCESWITHDATA':
 			return { ...state, sourcesWithData: action.payload }
+		case 'CALCULATION_CONSTANTS':
+			return {...state, calculationConstants: action.payload}
+		case 'PREFIX_CONVERSIONS':
+			return {...state, prefixConversions: action.payload }
 		default:
 			return state
 	}

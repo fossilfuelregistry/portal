@@ -1,9 +1,8 @@
 import { pipe } from "fp-ts/lib/function";
 import { ap } from "fp-ts/lib/Identity";
 import { iso, Newtype } from "newtype-ts";
-import { isoMethaneFactorisation, isoMethaneIntensity, MethaneFactorisation, MethaneIntensity } from "./methane";
-import { isoOilCO2EOfMethane } from "./oil";
-import { add, scalarAddition, scalarMultiply, Scenarios } from "./utils";
+import { isoMethaneFactorisation, isoMethaneIntensity, MethaneFactorisation, MethaneIntensity } from "../methane";
+import { add, scalarAddition, scalarMultiply, Scenarios } from "../utils";
 
 /** Volume */
 
