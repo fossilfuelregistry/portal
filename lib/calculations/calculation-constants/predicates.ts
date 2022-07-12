@@ -29,6 +29,5 @@ export const isMethaneFactorisation: Predicate<DatabaseRecord> = (a) =>
   a.constantType === Constant.METHANE_FACTORISATION;
 export const isCombustionEmissionCO2EFactor: Predicate<DatabaseRecord> = (a) =>
   a.constantType === Constant.COMBUSTION_EMISSIONS_CO2E_FACTOR;
-export const isBarrelsOfOilEquivalent: Predicate<DatabaseRecord> = (a) =>
-  a.constantType === Constant.BARRELS_OF_OIL_EQUIVALENT;
 export const isProject: Predicate<DatabaseRecord> = (a) => Boolean(a.projectId)
+

@@ -1,4 +1,4 @@
-import { TonsCO2EPerTon, CoalMethaneEmissionsMidPoint } from "../coal";
+import { TonsCO2EPerTon, CoalMethaneEmissionsMidPoint } from "../coal/coal";
 import {
   BarrelsOfOilEquivalent,
   BOEPere6m3,
@@ -55,7 +55,6 @@ const ConstantEnum = [
   "METHANE_INTENSITY",
   "METHANE_FACTORISATION",
   "COMBUSTION_EMISSIONS_CO2E_FACTOR",
-  "BARRELS_OF_OIL_EQUIVALENT",
 ] as const;
 
 export const Constant = {
@@ -70,7 +69,6 @@ export const Constant = {
   METHANE_INTENSITY: "METHANE_INTENSITY",
   METHANE_FACTORISATION: "METHANE_FACTORISATION",
   COMBUSTION_EMISSIONS_CO2E_FACTOR: "COMBUSTION_EMISSIONS_CO2_E_FACTOR",
-  BARRELS_OF_OIL_EQUIVALENT: "BARRELS_OF_OIL_EQUIVALENT",
 } as const;
 
 export type ConstantType = typeof Constant[keyof typeof Constant];

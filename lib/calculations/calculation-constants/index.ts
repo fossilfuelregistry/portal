@@ -12,7 +12,6 @@ import * as E from "fp-ts/lib/Either";
 import * as A from "fp-ts/Array";
 import * as O from "fp-ts/lib/Option";
 import {
-  isoBarrelsOfOilEquivalent,
   isoBOEPere6m3,
   isoEIAGasNFURatioGlobally,
   isoGasIPCCEnergyToEmissionsFactors,
@@ -34,7 +33,6 @@ import {
   isMethaneIntensity,
   isMethaneFactorisation,
   isCombustionEmissionCO2EFactor,
-  isBarrelsOfOilEquivalent,
 } from "./predicates";
 import {
   filterByFossilFuelType,
@@ -127,13 +125,7 @@ const methaneFactorisation = flow(
     () => new Error("Could not found any value for METHANE_FACTORISATION")
   )
 );
-const barrelsOfOilEquivalent = flow(
-  findFirst(isBarrelsOfOilEquivalent),
-  O.map((x) => x.factor),
-  E.fromOption(
-    () => new Error("Could not found any value for BARRELS_OF_OIL_EQUIVALENT")
-  )
-)
+
 const combustionEmissionCO2EFactor = flow(
   findFirst(isCombustionEmissionCO2EFactor),
   E.fromOption(
@@ -244,17 +236,12 @@ const generateGasVariables = (filteredRecords: DatabaseRecord[]) => {
       methaneFactorisation,
       E.map(isoMethaneFactorisation.wrap)
     ),
-    barrelsOfOilEquivalent: pipe(
-      gasRecords,
-      barrelsOfOilEquivalent,
-      E.map(isoBarrelsOfOilEquivalent.wrap)
-    )
   };
 };
 
 export type Filters = {
   country?: string | null;
-  projectId?: string | null;
+  projectId?: number | null;
   modifier: string;
 };
 const getCalculationConstants =

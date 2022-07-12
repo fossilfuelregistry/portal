@@ -35,7 +35,7 @@ function FutureSummary( { dataset, limits, projectionSources } ) {
 	const { getText } = useText()
 	const { generateCsvTranslation } = useCsvDataTranslator()
 	const country = useSelector( redux => redux.country )
-	const { co2FromVolume } = useConversionHooks()
+	const { __co2FromVolume: co2FromVolume } = useConversionHooks()
 	const stableProduction = useSelector( redux => redux.stableProduction )
 	const allSources = useSelector( redux => redux.allSources )
 	const projectionSourceId = useSelector( redux => redux.projectionSourceId )

@@ -1,5 +1,6 @@
 import { pipe } from "fp-ts/lib/function";
-import { ap } from "fp-ts/lib/Identity";
+import { ap, map } from "fp-ts/lib/Identity";
+import { CO2EScope } from "lib/types";
 import { CO2EEmissions } from "./types";
 
 export const add =
@@ -48,8 +49,13 @@ export const scopeAddition =
     total: pipe(add, ap(scope1.total), ap(scope3.total)),
   });
 
-export const generateScenarioFromSingleNumber = (value: number):Scenarios => ({
-  "p5": value,
-  "wa": value,
-  "p95": value,
-}) 
+export const generateScenarioFromSingleNumber = (value: number): Scenarios => ({
+  p5: value,
+  wa: value,
+  p95: value,
+});
+
+export const toVintageCO2ERepresentation = (e: CO2EEmissions): CO2EScope => ({
+  scope1: [e.scope1.total.p5/1e6, e.scope1.total.wa/1e6, e.scope1.total.p95/1e6],
+  scope3: [e.scope3.total.p5/1e6, e.scope3.total.wa/1e6, e.scope3.total.p95/1e6],
+});

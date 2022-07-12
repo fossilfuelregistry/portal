@@ -1,16 +1,16 @@
 import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
-import { useMemo } from "react";
+import { useCallback } from "react";
 import { useSelector } from "react-redux";
 import getCalculationConstants, { Filters } from ".";
 import { Store } from "../../types";
-export const useCalculationConstants = ({ country, projectId, modifier }: Filters) => {
+export const useCalculationConstants = () => {
   const calculationConstants = useSelector(
     (redux: Store) => redux.calculationConstants
   );
  
-  const constants = useMemo(
-    () =>
+  const getConstants = useCallback(
+    ({ country, projectId, modifier }: Filters) =>
       pipe(
         calculationConstants,
         O.fromNullable,
@@ -18,5 +18,7 @@ export const useCalculationConstants = ({ country, projectId, modifier }: Filter
       ),
     [calculationConstants]
   );
-  return  constants;
+  return  getConstants;
 };
+
+export type GetConstants = ReturnType<ReturnType<typeof useCalculationConstants>>

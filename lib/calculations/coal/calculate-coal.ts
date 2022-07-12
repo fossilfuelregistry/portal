@@ -43,22 +43,22 @@ export const calculateCoal = ({
     ap(constants.methaneFactorisation)
   );
 
-  const scope1 = {
+  const scope3 = {
     total: isoCoalCO2ECombustionEmissions.unwrap(coalCO2ECombustionEmissions),
     co2: isoCoalCO2ECombustionEmissions.unwrap(coalCO2ECombustionEmissions),
     ch4: generateScenarioFromSingleNumber(0),
   };
-  const scope3 = {
+  const scope1 = {
     total: pipe(
-        coalCO2EProductionEmission,
-        isoCoalCO2EProductionEmission.unwrap,
-        generateScenarioFromSingleNumber
+      coalCO2EProductionEmission,
+      isoCoalCO2EProductionEmission.unwrap,
+      generateScenarioFromSingleNumber
     ),
     co2: generateScenarioFromSingleNumber(0),
-    ch4:pipe(
-        coalCO2EProductionEmission,
-        isoCoalCO2EProductionEmission.unwrap,
-        generateScenarioFromSingleNumber
+    ch4: pipe(
+      coalCO2EProductionEmission,
+      isoCoalCO2EProductionEmission.unwrap,
+      generateScenarioFromSingleNumber
     ),
   };
   return {

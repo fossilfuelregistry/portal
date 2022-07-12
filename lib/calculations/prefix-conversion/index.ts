@@ -1,4 +1,4 @@
-import { pipe, flow } from "fp-ts/function";
+import { pipe } from "fp-ts/function";
 import Graph from "graph-data-structure";
 import { Store } from "lib/types";
 import { useCallback, useMemo } from "react";
@@ -16,9 +16,12 @@ export type PrefixRecord = {
 
 const prefixGraph = (rows: PrefixRecord[]) => {
   const g = Graph();
-  rows.forEach(({ fromPrefix, toPrefix, factor }) =>
-    g.addEdge(fromPrefix, toPrefix, factor)
-  );
+  rows.forEach(({ fromPrefix, toPrefix, factor }) => {
+    if (!g.hasEdge(fromPrefix, toPrefix))
+      g.addEdge(fromPrefix, toPrefix, factor);
+    if (!g.hasEdge(toPrefix, fromPrefix))
+      g.addEdge(toPrefix, fromPrefix, 1 / factor);
+  });
   return g;
 };
 
@@ -26,7 +29,8 @@ const getFactor =
   (graph: ReturnType<typeof Graph>) =>
   (from: string, to: string): number =>
     pipe(
-      graph.hasEdge(from, to),
+      // @ts-ignore
+      () => graph.hasEdge(from, to),
       B.match(
         () =>
           E.left(
@@ -50,8 +54,11 @@ export const usePrefixConversion = () => {
     [store]
   );
   const conversion = useCallback(
-    (from: string, to: string): number | null =>
-      !!graph ? getFactor(graph)(from, to) : null,
+    (from: string, to: string): number | null => {
+      if (!graph) return null;
+      if (from.trim() === to.trim()) return 1;
+      return getFactor(graph)(from.trim(), to.trim());
+    },
     [graph]
   );
 

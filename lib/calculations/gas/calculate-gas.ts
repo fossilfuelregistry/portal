@@ -4,6 +4,7 @@ import { CalculationConstants } from "../calculation-constants";
 import { CO2EEmissions } from "../types";
 import { generateScenarioFromSingleNumber, scopeAddition } from "../utils";
 import {
+  calculateBarrelsOfOilEquivalent,
   calculateGasCO2ECombustionEmissions,
   calculateGasCO2EOfMethane,
   calculateGasCO2EProductionEmissions,
@@ -44,15 +45,21 @@ export const calculateGas = ({
     ap(constants.gasIPCCEnergyToEmissionsFactors)
   );
 
+  const barrelsOfOilEquivalent = pipe(
+    calculateBarrelsOfOilEquivalent,
+    ap(gasProduction),
+    ap(constants.boePere6m3),
+  )
+
   const gasCO2ProductionEmissions = pipe(
     calculateGasCO2ProductionEmissions,
-    ap(constants.barrelsOfOilEquivalent),
+    ap(barrelsOfOilEquivalent),
     ap(constants.gasProductionCO2)
   );
 
   const gasMethaneReleases = pipe(
     calculateGasMethaneReleases,
-    ap(constants.barrelsOfOilEquivalent),
+    ap(barrelsOfOilEquivalent),
     ap(constants.methaneIntensity)
   );
 
@@ -74,13 +81,13 @@ export const calculateGas = ({
     ap(gasCO2EProductionEmissions)
   );
 
-  const scope1 = {
+  const scope3 = {
     co2: isoGasCO2ECombustionEmissions.unwrap(gasCO2ECombustionEmissions),
     ch4: generateScenarioFromSingleNumber(0),
     total: isoGasCO2ECombustionEmissions.unwrap(gasCO2ECombustionEmissions),
   };
 
-  const scope3 = {
+  const scope1 = {
     co2: isoGasCO2ProductionEmissions.unwrap(gasCO2ProductionEmissions),
     ch4: generateScenarioFromSingleNumber(
       isoGasCO2EOfMethane.unwrap(gasCO2EOfMethane)

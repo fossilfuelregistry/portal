@@ -106,11 +106,11 @@ export function sumOfCO2(
   if ("scope1" in datapoint || "scope3" in datapoint)
     return _sumOfFuelCO2(datapoint, range);
 
-  let co2 = 0;
+  let co2e = 0;
   settings.supportedFuels.forEach((fuel) => {
-    if (datapoint[fuel]) co2 += _sumOfFuelCO2(datapoint[fuel], range);
+    if (datapoint[fuel]) co2e += _sumOfFuelCO2(datapoint[fuel], range);
   });
-  return co2;
+  return co2e;
 }
 
 export function combineOilAndGasAndCoal(dataset: Dataset[]): CombinedPoint[] {

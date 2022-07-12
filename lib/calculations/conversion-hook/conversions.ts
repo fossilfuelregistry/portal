@@ -6,8 +6,9 @@ import {
   FossilFuelType,
   Graphs,
   ConversionsList,
+  Source,
 } from "lib/types";
-import settings from "../../settings";
+import settings from "../../../settings";
 
 type GetFullFuelTypeParams = {
   fossilFuelType: FossilFuelType | null | "";
@@ -150,7 +151,7 @@ export const convertVolume = (
     return factor * volume;
   } catch (e) {
     console.info(
-      `Conversion problem: ${volume} ${unit} ${fossilFuelType} -> ${toUnit}, ${e.message}`
+      `Conversion problem: ${volume} ${unit} ${fossilFuelType} -> ${toUnit}, ${(e as Error).message}`
     );
     return volume;
   }

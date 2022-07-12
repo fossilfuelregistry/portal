@@ -29,7 +29,10 @@ export type Source = {
   latestCurationAt: string | null;
 };
 
-
+/** 
+ * Scope 1 = production
+ * Scope 2 = combustion
+ */
 export type ScopeKey = "scope1" | "scope3"
 type Scenarios = [number, number, number]
 export type CO2EScope = {
@@ -208,3 +211,45 @@ export type PrefixConversion = {
 }
 
 export type RawSource = GQL_projectSourcesRecord | GQL_countrySourcesRecord
+
+
+export type ProjectDataPointRecord = {
+  "__typename": "ProjectDataPoint",
+  "dataType": "PRODUCTION" | "RESERVE"
+  "fossilFuelType": FossilFuelType
+  "quality": string | null
+  "sourceId": 15
+  "subtype": string | null
+  "unit": string | null
+  "volume": number | null
+  "year":  number | null
+  "grade": string | null
+  "dataYear":  number | null
+}
+
+export type ProjectDataRecord = {
+    "__typename": "Project"
+    "id": number
+    "dataYear": number | null
+    "description": string | null
+    "geoPosition": unknown | null
+    "iso3166": string | null
+    "iso31662": string
+    "linkUrl": string | null
+    "locationName": string | null
+    "methaneM3Ton": number | null
+    "ocOperatorId": string | null
+    "operatorName": string | null
+    "productionCo2E": number
+    "productionMethod": string | null
+    "productionType": string | null
+    "projectIdentifier": string | null
+    "projectType": string | null
+    "region": string | null
+    "sourceProjectId":  string | null
+    "sourceProjectName": string | null
+    "projectDataPoints": {
+      "__typename": "ProjectDataPointsConnection",
+      "nodes": ProjectDataPointRecord[]
+    }
+}

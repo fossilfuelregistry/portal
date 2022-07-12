@@ -25,17 +25,23 @@ import {
   ReservesData,
   ProjectionData,
   LastReservesType,
+  ProjectDataRecord,
 } from "lib/types";
 import {
   extractAllFuels,
   convertVolume as _convertVolume,
   buildGraphsFromFuels,
-} from "lib/calculations/conversions";
+} from "lib/calculations/conversion-hook/conversions";
 import { GQL_countryCurrentProductionRecord } from "queries/country-types";
-import { usePrefixConversion } from "lib/calculations/prefix-conversion";
 import notificationError from "lib/calculations/notification-error";
+import { useCalculate } from "lib/calculations/use-calculate";
+import { GetConstants, useCalculationConstants } from "lib/calculations/calculation-constants/use-calculation-constants";
 
-const DEBUG = true;
+import * as O from "fp-ts/Option"
+import { toVintageCO2ERepresentation } from "lib/calculations/utils";
+import { pipe } from "fp-ts/lib/function";
+
+const DEBUG = false;
 
 let lastConversionPath: string[] = [];
 let lastConversionLoggedTimer: NodeJS.Timeout;
@@ -65,6 +71,20 @@ export const useConversionHooks = () => {
   const store = useStore();
   const dispatch = useDispatch();
   const query = useRef({});
+  const calculate = useCalculate()
+
+  const getCalculationConstants = useCalculationConstants()
+
+  useEffect(() => {
+
+    const co = getCalculationConstants({"country":"au", "modifier":"GWP100"})
+
+    const testCalculation = calculate({"fossilFuelType": "coal", "unit": "e6ton", "volume":350}, co)
+    console.info({testCalculation})
+   
+  }, [getCalculationConstants, calculate])
+  
+
 
   // Parse query from URL - this avoids delay in query params by next js router
   useEffect(() => {
@@ -276,8 +296,8 @@ export const useConversionHooks = () => {
     { trailing: false }
   );
 
-  const co2FromVolume = (props: ProductionData | GQL_countryCurrentProductionRecord, log?: any | undefined) => {
-    console.info("co2FromVolume", {props, log})
+  const __co2FromVolume = (props: ProductionData | GQL_countryCurrentProductionRecord, log?: any | undefined) => {
+    //console.info("co2FromVolume", {props, log})
     if (!props) return { scope1: [0, 0, 0], scope3: [0, 0, 0] };
     // @ts-ignore
     const { volume, unit, fossilFuelType, subtype, methaneM3Ton, country } =
@@ -434,6 +454,43 @@ export const useConversionHooks = () => {
       console.info("");
     }
     return result;
+  };
+
+  const calculationConstants = getCalculationConstants({"country": country, "modifier": gwp ?? "GWP100"})
+
+
+  const co2FromVolume = 
+  (props: (ProductionData | GQL_countryCurrentProductionRecord)&{projectId?: number}) => {
+    if (!props) return { scope1: [0, 0, 0], scope3: [0, 0, 0] };
+    // @ts-ignore
+    const { volume, fossilFuelType, subtype, country: countryOverride, projectId } =
+      props;
+
+    const fullFuelType = getFullFuelType({ fossilFuelType, subtype });
+    if (!fullFuelType) {
+      console.error("No fuel type found", { fossilFuelType, subtype });
+      throw new Error("No fuel type found");
+    }
+
+    const constantsToUse = !!projectId
+      ? getCalculationConstants({ projectId, modifier: gwp ?? "GWP100", country: countryOverride ?? country })
+      : !!countryOverride
+      ? getCalculationConstants({
+          country: countryOverride,
+          modifier: gwp ?? "GWP100",
+        })
+      : calculationConstants;
+
+    if(!volume || !gwp) return { scope1: [0, 0, 0], scope3: [0, 0, 0] };
+
+    const result = calculate({...props, volume}, constantsToUse)
+
+    return pipe(
+      result,
+      O.fromNullable,
+      O.map(toVintageCO2ERepresentation),
+      O.getOrElseW(()=>({ scope1: [0, 0, 0], scope3: [0, 0, 0] }))
+    )
   };
 
 
@@ -594,7 +651,7 @@ export const useConversionHooks = () => {
   };
 
   const calcCountryProductionCO2 = (
-    prod: GQL_countryCurrentProductionRecord[]
+    prod: GQL_countryCurrentProductionRecord[],
   ) => {
     // Find available sources
     const sourceIds = prod.reduce((s, p) => {
@@ -635,6 +692,7 @@ export const useConversionHooks = () => {
       const fuelProduction = fuelProd.map((p) => ({
         ...p,
         co2: co2FromVolume(p),
+        co2e: calculate({...p}, {"country":country??"", "modifier": gwp}) 
       }));
       const totalCO2 = fuelProduction.reduce(
         (acc, p) => acc + p.co2?.scope1?.[1] + p.co2?.scope3?.[1],
@@ -642,6 +700,7 @@ export const useConversionHooks = () => {
       );
 
       DEBUG && console.info("fuelProduction", sid, fuelProduction);
+      console.info("fuelProduction", sid, fuelProduction);
 
       return {
         sourceId: sid,
@@ -653,12 +712,7 @@ export const useConversionHooks = () => {
   };
 
   const getCountryCurrentCO2 = async (iso3166: string | undefined | null) => {
-    if (!iso3166)
-      return notificationError([])(
-        new Error(
-          `No country code provided function call to getCountryCurrentCO2`
-        )
-      );
+    if (!iso3166) return null
 
     try {
       const q = await apolloClient.query({
@@ -679,8 +733,9 @@ export const useConversionHooks = () => {
     }
   };
 
-  const projectCO2 = (project) => {
-    const DEBUG = false;
+  const projectCO2 = (project: ProjectDataRecord) => {
+    console.info({project})
+    const DEBUG = true;
     const points = project?.projectDataPoints?.nodes ?? [];
     const productionPerFuel = { totalCO2: 0, fuels: [] };
 
@@ -704,6 +759,7 @@ export const useConversionHooks = () => {
       if (lastYearProd.year === 0) return;
       const co2 = co2FromVolume({
         ...lastYearProd,
+        projectId: project.id,
         methaneM3Ton: project.methaneM3Ton,
       });
       let targetUnit;
@@ -756,6 +812,7 @@ export const useConversionHooks = () => {
     sourceNameFromId,
     co2FromVolume,
     convertVolume,
+    __co2FromVolume,
     reservesProduction,
     calcCountryProductionCO2,
     getCountryCurrentCO2,
