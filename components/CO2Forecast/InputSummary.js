@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect } from "react"
 import useText from "lib/useText"
 import HelpModal from "../HelpModal"
 import { addToTotal, sumOfCO2 } from "./calculate"
@@ -25,6 +25,8 @@ function InputSummary( { dataset = [] } ) {
 	const costPerTonCO2 = useSelector( redux => redux.co2CostPerTon )
 	const { currentUnit, costMultiplier } = useCO2CostConverter()
 	const numberFormatter = useNumberFormatter()
+
+
 
 
 

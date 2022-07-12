@@ -30,5 +30,8 @@ module.exports = withAntdLess( {
 				permanent: false,
 			}
 		]
+	},
+	typescript: {
+		ignoreBuildErrors: true,
 	}
 } )

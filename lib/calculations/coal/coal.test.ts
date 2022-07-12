@@ -1,8 +1,19 @@
-import { ap } from "fp-ts/lib/Identity"
-import { pipe } from "fp-ts/lib/function"
-import { calculateCoalCO2ECombustionEmissions, calculateCoalCO2EProductionEmission, calculateCoalMethaneReleases, calculateTotalCoalCO2EEmissions, isoCoalCO2ECombustionEmissions, isoCoalCO2EProductionEmission, isoCoalMethaneEmissionsMidPoint, isoCoalMethaneReleases, isoCoalProduction, isoTonsCO2EPerTon } from "./coal"
-import { Scenarios } from "./utils"
-import { isoMethaneFactorisation } from "./methane"
+import { ap } from "fp-ts/lib/Identity";
+import { pipe } from "fp-ts/lib/function";
+import {
+  calculateCoalCO2ECombustionEmissions,
+  calculateCoalCO2EProductionEmission,
+  calculateCoalMethaneReleases,
+  calculateTotalCoalCO2EEmissions,
+  isoCoalCO2ECombustionEmissions,
+  isoCoalCO2EProductionEmission,
+  isoCoalMethaneEmissionsMidPoint,
+  isoCoalMethaneReleases,
+  isoCoalProduction,
+  isoTonsCO2EPerTon,
+  isoTotalCoalCO2EEmissions,
+} from "./coal";
+import { isoMethaneFactorisation } from "../methane";
 
 describe("COAL", () => {
   it(" Oil CO2E Combustion emissions", () => {
@@ -36,35 +47,32 @@ describe("COAL", () => {
   });
 
   it(" Coal CO2E Production emissions mid-point ", () => {
-    const coalProduction = isoCoalProduction.wrap(350000);
-    const coalMethaneEmissionsMidPoint =
-      isoCoalMethaneEmissionsMidPoint.wrap(3.49);
-    const methaneFactorisation = isoMethaneFactorisation.wrap(82.5);
+    const coalMethaneReleases = isoCoalMethaneReleases.wrap(1220020 )
+    const methaneFactorisation = isoMethaneFactorisation.wrap(29.8);
 
-    const expectedResult = 100773750;
+    const expectedResult = 36356596;
     const result = pipe(
       calculateCoalCO2EProductionEmission,
-      ap(coalProduction),
-      ap(coalMethaneEmissionsMidPoint),
+      ap(coalMethaneReleases),
       ap(methaneFactorisation),
       isoCoalCO2EProductionEmission.unwrap
     );
     expect(result.toFixed(0)).toBe(expectedResult.toString());
   });
 
-  it("Total coal emissions", ()=> {
-    const productionEmissions = isoCoalCO2EProductionEmission.wrap(100651631);
+  it("Total coal emissions", () => {
+    const productionEmissions = isoCoalCO2EProductionEmission.wrap(36356589);
     const combustionEmissions = isoCoalCO2ECombustionEmissions.wrap({
       p5: 770369675,
-      wa:  798824412,
-      p95:  827156957,
+      wa: 798824412,
+      p95: 863513546,
     });
-    const expectedResult = { p5: 871021306, wa: 899476043, p95: 927808588 };
-    const result = isoCoalCO2ECombustionEmissions.unwrap(
-        calculateTotalCoalCO2EEmissions(combustionEmissions)(productionEmissions)
+    const expectedResult = { p5: 806726264, wa: 835181001, p95: 899870135 };
+    const result = isoTotalCoalCO2EEmissions.unwrap(
+      calculateTotalCoalCO2EEmissions(combustionEmissions)(productionEmissions)
     );
     expect(result.p5.toFixed(0)).toBe(expectedResult.p5.toString());
     expect(result.wa.toFixed(0)).toBe(expectedResult.wa.toString());
     expect(result.p95.toFixed(0)).toBe(expectedResult.p95.toString());
-  })
+  });
 });

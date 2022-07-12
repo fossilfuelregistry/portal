@@ -3,9 +3,9 @@
 import { pipe } from "fp-ts/lib/function";
 import { ap } from "fp-ts/lib/Identity";
 import { iso, Newtype } from "newtype-ts";
-import { THOUSANDS_IN_A_MILLION_RATIO } from "./gas";
-import { isoMethaneFactorisation, MethaneFactorisation } from "./methane";
-import { scalarAddition, scalarMultiply, Scenarios } from "./utils";
+import { THOUSANDS_IN_A_MILLION_RATIO } from "../gas/gas";
+import { isoMethaneFactorisation, MethaneFactorisation } from "../methane";
+import { scalarAddition, scalarMultiply, Scenarios } from "../utils";
 
 /**  Coal Production [ KT ] */
 export interface CoalProduction extends Newtype<{ readonly CoalProduction: unique symbol }, number> {}
@@ -54,15 +54,13 @@ export const calculateCoalMethaneReleases = (coalProduction: CoalProduction) =>
 export interface CoalCO2EProductionEmission extends Newtype<{ readonly CoalCO2EProductionEmission: unique symbol }, number> {}
 export const isoCoalCO2EProductionEmission = iso<CoalCO2EProductionEmission>()
 
-export const calculateCoalCO2EProductionEmission = (coalProduction: CoalProduction) =>
-(coalMethaneEmissionsMidPoint: CoalMethaneEmissionsMidPoint)=>
+export const calculateCoalCO2EProductionEmission = (coalMethaneReleases: CoalMethaneReleases) =>
 (methaneFactorisation: MethaneFactorisation): CoalCO2EProductionEmission => {
-    const production = isoCoalProduction.unwrap(coalProduction)
-    const methaneEmissionsMidPoint = isoCoalMethaneEmissionsMidPoint.unwrap(coalMethaneEmissionsMidPoint)
+    const _coalMethaneReleases = isoCoalMethaneReleases.unwrap(coalMethaneReleases)
     const _methaneFactorisation = isoMethaneFactorisation.unwrap(methaneFactorisation)
 
     return pipe(
-        production * methaneEmissionsMidPoint * _methaneFactorisation,
+        _coalMethaneReleases * _methaneFactorisation,
         isoCoalCO2EProductionEmission.wrap
     )
 }

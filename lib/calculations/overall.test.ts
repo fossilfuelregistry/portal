@@ -1,8 +1,8 @@
 import { pipe } from "fp-ts/lib/function";
 import { ap } from "fp-ts/lib/Identity";
-import { isoTotalCoalCO2EEmissions } from "./coal";
-import { isoTotalGasCO2EEmissions } from "./gas";
-import { isoTotalOilCO2EEmissions } from "./oil";
+import { isoTotalCoalCO2EEmissions } from "./coal/coal";
+import { isoTotalGasCO2EEmissions } from "./gas/gas";
+import { isoTotalOilCO2EEmissions } from "./oil/oil";
 import { calculateTotalCO2EEmissions, isoTotalCO2EEmissions } from "./overall";
 
 describe("Overall calculation", ()=>{

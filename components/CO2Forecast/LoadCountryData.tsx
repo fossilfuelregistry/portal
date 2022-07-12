@@ -8,12 +8,13 @@ import { useDispatch, useSelector } from "react-redux"
 import ForecastView from "./ForecastView"
 import { useConversionHooks } from "../viz/conversionHooks"
 import settings from "settings"
-import { prepareProductionDataset } from "./calculate"
+import { MinimalDataset, prepareProductionDataset, RawDataset } from "./calculate"
 import { Store } from "lib/types"
+import { usePrefixConversion } from "lib/calculations/prefix-conversion"
 
-const DEBUG = false
+const DEBUG = true
 
-function LoadCountryData( { projectionSources } ) {
+function LoadCountryData( { projectionSources }:{projectionSources: RawDataset[]} ) {
 	const dispatch = useDispatch()
 	const { co2FromVolume, reservesProduction } = useConversionHooks()
 	const { getText } = useText()
@@ -26,8 +27,13 @@ function LoadCountryData( { projectionSources } ) {
 	const reservesSourceId = useSelector( (redux: Store) => redux.reservesSourceId )
 	const stableProduction = useSelector( (redux: Store) => redux.stableProduction )
 	const gwp = useSelector( (redux: Store) => redux.gwp )
+	
+	const prefixConversion = usePrefixConversion()
 
-	const _co2 = dataset => {
+	
+
+	const _co2 = (dataset: MinimalDataset[]) => {
+		console.info({dataset})
 		if( !( dataset?.length > 0 ) ) return []
 
 		try {

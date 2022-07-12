@@ -29,6 +29,16 @@ export type RawDataset = {
   grade?: any;
 };
 
+export type MinimalDataset = {
+  fossilFuelType: FossilFuelType;
+  quality: number;
+  sourceId: number;
+  subtype: string | null;
+  unit: string;
+  volume: number;
+  year: number;
+}
+
 export type Dataset = {
   fossilFuelType: FossilFuelType;
   id: number;
@@ -96,11 +106,11 @@ export function sumOfCO2(
   if ("scope1" in datapoint || "scope3" in datapoint)
     return _sumOfFuelCO2(datapoint, range);
 
-  let co2 = 0;
+  let co2e = 0;
   settings.supportedFuels.forEach((fuel) => {
-    if (datapoint[fuel]) co2 += _sumOfFuelCO2(datapoint[fuel], range);
+    if (datapoint[fuel]) co2e += _sumOfFuelCO2(datapoint[fuel], range);
   });
-  return co2;
+  return co2e;
 }
 
 export function combineOilAndGasAndCoal(dataset: Dataset[]): CombinedPoint[] {
@@ -215,7 +225,9 @@ export async function co2PageUpdateQuery(
     query.set(p, v);
   });
 
+  // @ts-ignore
   if (state.project === "loading" && router.query.project?.length > 0)
+  // @ts-ignore
     query.set("project", router.query.project);
   else if (state.project?.projectIdentifier)
     query.set("project", state.project?.projectIdentifier);
@@ -252,9 +264,7 @@ type GetFullFuelTypeParams = {
 };
 export function getFullFuelType(datapoint: GetFullFuelTypeParams) {
   let fullFuelType: string | null = datapoint.fossilFuelType;
-  // @ts-ignore
-  if (datapoint.fossilFuelType?.length > 0)
-    // @ts-ignore
+  if (datapoint.fossilFuelType && datapoint.fossilFuelType?.length > 0)
     fullFuelType =
       datapoint.fossilFuelType +
       (datapoint.subtype && datapoint.subtype?.length > 0
@@ -323,3 +333,5 @@ export const getProductionData = (
 
   return singlePointPerYearDataset.map((data) => {});
 };
+
+
