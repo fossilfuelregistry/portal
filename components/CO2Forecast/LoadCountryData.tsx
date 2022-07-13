@@ -12,7 +12,7 @@ import { MinimalDataset, prepareProductionDataset, RawDataset } from "./calculat
 import { Store } from "lib/types"
 import { usePrefixConversion } from "lib/calculations/prefix-conversion"
 
-const DEBUG = true
+const DEBUG = false
 
 function LoadCountryData( { projectionSources }:{projectionSources: RawDataset[]} ) {
 	const dispatch = useDispatch()

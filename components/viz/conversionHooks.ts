@@ -75,17 +75,6 @@ export const useConversionHooks = () => {
 
   const getCalculationConstants = useCalculationConstants()
 
-  useEffect(() => {
-
-    const co = getCalculationConstants({"country":"au", "modifier":"GWP100"})
-
-    const testCalculation = calculate({"fossilFuelType": "coal", "unit": "e6ton", "volume":350}, co)
-    console.info({testCalculation})
-   
-  }, [getCalculationConstants, calculate])
-  
-
-
   // Parse query from URL - this avoids delay in query params by next js router
   useEffect(() => {
     const urlQuery = new URLSearchParams(router.asPath.split("?")[1]);
@@ -735,7 +724,7 @@ export const useConversionHooks = () => {
 
   const projectCO2 = (project: ProjectDataRecord) => {
     console.info({project})
-    const DEBUG = true;
+    const DEBUG = false;
     const points = project?.projectDataPoints?.nodes ?? [];
     const productionPerFuel = { totalCO2: 0, fuels: [] };
 
@@ -750,7 +739,7 @@ export const useConversionHooks = () => {
       );
       const lastYearProd = fuelData.reduce(
         (last, point) => {
-          if (point.year > last.year) return point;
+          if (point.year && point.year > last.year) return point;
           else return last.year === 0 ? point : last; // for projects with year: null data.
         },
         { year: 0 }
