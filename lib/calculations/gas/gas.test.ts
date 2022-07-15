@@ -21,24 +21,26 @@ import {
   calculateGasCO2ProductionEmissions,
   calculateTotalGasCO2EEmissions,
   isoTotalGasCO2EEmissions,
+  isoBOEPere6m3,
+  calculateBarrelsOfOilEquivalent,
 } from "./gas";
 import { isoMethaneFactorisation, isoMethaneIntensity } from "../methane";
 import { Scenarios } from "../utils";
 
 describe("GAS", () => {
-  describe("Gas Production", () => {
+  describe("Combustion scope3", () => {
     it(" Gas energy", () => {
-      const gasProduction = isoGasProduction.wrap(111.51);
+      const gasProduction = isoGasProduction.wrap(100);
       const petajoulesPerMillionCubicMeterGas =
         isoPetajoulesPerMillionCubicMeterGas.wrap(36);
-      const expectedResult = 4014;
+      const expectedResult = 3600;
       const result = isoGasEnergy.unwrap(
         calculateGasEnergy(gasProduction)(petajoulesPerMillionCubicMeterGas)
       );
-      expect(result.toFixed(0)).toBe(expectedResult.toString());
+      expect(result).toBe(expectedResult);
     });
     it(" Gas CO2E Combustion emissions", () => {
-      const gasEnergy = isoGasEnergy.wrap(4014);
+      const gasEnergy = isoGasEnergy.wrap(3600);
       const eiaGasNFURatioGlobally = isoEIAGasNFURatioGlobally.wrap(0.03);
       const gasIPCCEnergyToEmissionsFactors =
         isoGasIPCCEnergyToEmissionsFactors.wrap({
@@ -47,39 +49,56 @@ describe("GAS", () => {
           p95: 58.3,
         });
       const expectedResult: Scenarios = {
-        p5: 211421394,
-        wa: 218429838,
-        p95: 226995714,
+        p5: 189615600,
+        wa: 195901200,
+        p95: 203583600,
       };
       const result = isoGasCO2ECombustionEmissions.unwrap(
         calculateGasCO2ECombustionEmissions(gasEnergy)(eiaGasNFURatioGlobally)(
           gasIPCCEnergyToEmissionsFactors
         )
       );
-      expect(result.p5.toFixed(0)).toBe(expectedResult.p5.toString());
-      expect(result.wa.toFixed(0)).toBe(expectedResult.wa.toString());
-      expect(result.p95.toFixed(0)).toBe(expectedResult.p95.toString());
+      expect(result.p5).toBe(expectedResult.p5);
+      expect(result.wa).toBe(expectedResult.wa);
+      expect(result.p95).toBe(expectedResult.p95);
     });
+  });
+
+  describe('Production scope1', () => {
+    it("Should calculate barrels of oil equivalent",()=>{
+      const expectedResult = 588300000;
+      const boePere6m3 = isoBOEPere6m3.wrap(5.8830)
+      const gasProduction = isoGasProduction.wrap(100);
+
+      const result = pipe(
+        calculateBarrelsOfOilEquivalent,
+        ap(gasProduction),
+        ap(boePere6m3),
+        isoBarrelsOfOilEquivalent.unwrap
+      )
+
+      expect(result).toEqual(expectedResult)
+    })
     it("Gas CO2 Production emissions", () => {
-      const barrelsOfOilEquivalent = isoBarrelsOfOilEquivalent.wrap(656000000);
+      const barrelsOfOilEquivalent = isoBarrelsOfOilEquivalent.wrap(588300000);
       const gasProductionCO2 = isoGasProductionCO2.wrap({
-        p5: 35.2,
-        wa: 64.51,
-        p95: 127.15,
+        p5: 21.1619712238,
+        wa: 42.9786330763,
+        p95: 118.1175874037,
       });
       const expectedResult: Scenarios = {
-        p5: 23091200,
-        wa: 42318560,
-        p95: 83410400,
+        p5: 12449587.6709682000,
+        wa: 25284329.8387980000,
+        p95: 69488576.6695970000,
       };
       const result = isoGasCO2ProductionEmissions.unwrap(
         calculateGasCO2ProductionEmissions(barrelsOfOilEquivalent)(
           gasProductionCO2
         )
       );
-      expect(result.p5.toFixed(0)).toBe(expectedResult.p5.toString());
-      expect(result.wa.toFixed(0)).toBe(expectedResult.wa.toString());
-      expect(result.p95.toFixed(0)).toBe(expectedResult.p95.toString());
+      expect(result.p5.toPrecision(10)).toBe(expectedResult.p5.toPrecision(10));
+      expect(result.wa.toPrecision(10)).toBe(expectedResult.wa.toPrecision(10));
+      expect(result.p95.toPrecision(10)).toBe(expectedResult.p95.toPrecision(10));
     });
   });
   describe("CH4", () => {

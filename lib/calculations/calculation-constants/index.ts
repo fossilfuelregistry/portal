@@ -41,6 +41,7 @@ import {
   applyCountryFilter,
   applyModifierFilter,
   applyProjectFilter,
+  orderByProjectOrCountry,
 } from "./filter";
 
 const barrelsPerTonne = flow(
@@ -167,6 +168,9 @@ const generateOilVariables = (filteredRecords: DatabaseRecord[]) => {
     ),
     oilProductionCO2Factors: pipe(
       oilRecords,
+      e=>{
+        console.info({e})
+        return e},
       productionCO2Factor,
       E.map(isoOilProductionCO2Factors.wrap)
     ),
@@ -256,6 +260,7 @@ const getCalculationConstants =
     const oil = pipe(
       filtered,
       filterByFossilFuelType("oil"),
+      A.sort(orderByProjectOrCountry),
       A.sort(orderByPriority),
       generateOilVariables,
       sequenceS(E.Apply)
@@ -263,6 +268,7 @@ const getCalculationConstants =
     const gas = pipe(
       filtered,
       filterByFossilFuelType("gas"),
+      A.sort(orderByProjectOrCountry),
       A.sort(orderByPriority),
       generateGasVariables,
       sequenceS(E.Apply)
@@ -270,6 +276,7 @@ const getCalculationConstants =
     const coal = pipe(
       filtered,
       filterByFossilFuelType("coal"),
+      A.sort(orderByProjectOrCountry),
       A.sort(orderByPriority),
       generateCoalVariables,
       sequenceS(E.Apply)

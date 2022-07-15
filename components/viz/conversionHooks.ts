@@ -469,7 +469,7 @@ export const useConversionHooks = () => {
           modifier: gwp ?? "GWP100",
         })
       : calculationConstants;
-
+    
     if(!volume || !gwp) return { scope1: [0, 0, 0], scope3: [0, 0, 0] };
 
     const result = calculate({...props, volume}, constantsToUse)

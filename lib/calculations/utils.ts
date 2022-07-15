@@ -55,7 +55,16 @@ export const generateScenarioFromSingleNumber = (value: number): Scenarios => ({
   p95: value,
 });
 
+/**
+ * Returns scope1 and scope3 in e6 ton co2e
+ */
 export const toVintageCO2ERepresentation = (e: CO2EEmissions): CO2EScope => ({
   scope1: [e.scope1.total.p5/1e6, e.scope1.total.wa/1e6, e.scope1.total.p95/1e6],
   scope3: [e.scope3.total.p5/1e6, e.scope3.total.wa/1e6, e.scope3.total.p95/1e6],
 });
+
+
+export const fpLogger = (...data: any[]) => <T>(val: T):T => {
+  console.info(data)
+  return val
+}

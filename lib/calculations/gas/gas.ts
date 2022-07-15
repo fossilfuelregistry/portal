@@ -117,7 +117,7 @@ export const calculateBarrelsOfOilEquivalent =
     const _boePere6m3 = isoBOEPere6m3.unwrap(boePere6m3);
 
     return isoBarrelsOfOilEquivalent.wrap(
-      _gasProduction * _boePere6m3 * THOUSANDS_IN_A_MILLION_RATIO
+      _gasProduction * _boePere6m3 * THOUSANDS_IN_A_MILLION_RATIO * THOUSANDS_IN_A_MILLION_RATIO
     );
   };
 

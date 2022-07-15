@@ -55,12 +55,20 @@ const ordNumberOrNull: Ord.Ord<number | null> = Ord.fromCompare((x, y) => {
   return 0;
 });
 
-export const orderByPriority: Ord.Ord<DatabaseRecord> = Ord.contramap(
+export const orderByPriority: Ord.Ord<DatabaseRecord> = Ord.reverse(Ord.contramap(
   (r: DatabaseRecord) => r.quality
-)(ordNumberOrNull);
+)(ordNumberOrNull));
 
-/*const orderByProjectOrCountry: Ord.Ord<DatabaseRecord> = Ord.fromCompare(
-  (a, b) => {
+export const orderByProjectOrCountry: Ord.Ord<DatabaseRecord> = Ord.reverse(
+  Ord.fromCompare((a, b) => {
+    if (a.projectId && b.projectId) return 0;
     if (a.projectId) return 1;
-  }
-);*/
+    if (b.projectId) return -1;
+
+    if (a.country && b.country) return 0;
+    if (a.country) return 1;
+    if (b.country) return -1;
+
+    return 0;
+  })
+);

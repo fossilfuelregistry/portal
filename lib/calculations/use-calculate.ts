@@ -18,6 +18,10 @@ type Datapoint = {
 export const useCalculate = () => {
   const prefixConversion = usePrefixConversion();
 
+
+  /**
+   * Return values in unit e3kg co2e
+   */
   const calculate = useCallback(
    (datapoint: Datapoint, calculationConstants:GetConstants ) => {
     const constants = pipe(
