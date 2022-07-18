@@ -27,6 +27,7 @@ export default function OpenCorporateCard( { reference } ) {
 				set_company( data?.results?.company )
 
 			} catch( e ) {
+				console.trace( e )
 				notification.error( {
 					message: "Failed to fetch OpenCorporate info",
 					description: e.message
