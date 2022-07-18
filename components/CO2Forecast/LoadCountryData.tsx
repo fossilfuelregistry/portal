@@ -27,15 +27,9 @@ function LoadCountryData( { projectionSources }:{projectionSources: RawDataset[]
 	const reservesSourceId = useSelector( (redux: Store) => redux.reservesSourceId )
 	const stableProduction = useSelector( (redux: Store) => redux.stableProduction )
 	const gwp = useSelector( (redux: Store) => redux.gwp )
-	
-	const prefixConversion = usePrefixConversion()
-
-	
 
 	const _co2 = (dataset: MinimalDataset[]) => {
-		console.info({dataset})
 		if( !( dataset?.length > 0 ) ) return []
-
 		try {
 			return prepareProductionDataset( dataset ).map( p => ( { ...p, co2: co2FromVolume( p ) } ) )
 		} catch( e ) {

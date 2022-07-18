@@ -52,8 +52,6 @@ export default function CO2ForecastPage() {
 
   const query = pageQuery();
 
- console.info({project})
-
   const { data: _countrySources, loading: cLoad } = useQuery(
     GQL_countrySources,
     {

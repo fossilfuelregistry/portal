@@ -168,9 +168,6 @@ const generateOilVariables = (filteredRecords: DatabaseRecord[]) => {
     ),
     oilProductionCO2Factors: pipe(
       oilRecords,
-      e=>{
-        console.info({e})
-        return e},
       productionCO2Factor,
       E.map(isoOilProductionCO2Factors.wrap)
     ),
