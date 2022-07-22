@@ -43,6 +43,7 @@ import {
 import * as O from "fp-ts/Option";
 import { toVintageCO2ERepresentation } from "lib/calculations/utils";
 import { pipe } from "fp-ts/lib/function";
+import { captureException } from "@sentry/nextjs";
 
 const DEBUG = false;
 
@@ -261,6 +262,17 @@ export const useConversionHooks = () => {
   // Avoid overloading browser with notifications when there is an error.
   const _throttled_notification = _trottle(
     (volume, unit, fossilFuelType, subtype, methaneM3Ton, country) => {
+      captureException({
+        message: "CO2 Calc, no unit graph available",
+        description: {
+          volume,
+          unit,
+          fossilFuelType,
+          subtype,
+          methaneM3Ton,
+          country,
+        },
+      })
       notification.warning({
         message: "CO2 Calc, no unit graph available",
         description: JSON.stringify({

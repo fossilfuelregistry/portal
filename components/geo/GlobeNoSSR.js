@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from "react"
 import { notification } from "antd"
 import { useRouter } from "next/router"
 import { withParentSize } from '@visx/responsive'
+import * as Sentry from "@sentry/nextjs"
 
 export default withParentSize(
 	function GlobeNoSSR( { year, dataKeyName = 'production', onGlobeReady, onCountryClick, parentWidth, parentHeight } ) {
@@ -20,6 +21,7 @@ export default withParentSize(
 					set_countries( data )
 					//console.info( data.find( d => d.isoA2 === 'GB' ) )
 				} catch( e ) {
+					Sentry.captureException( e )
 					notification.error( {
 						message: "Failed to fetch global dataset.",
 						description: e.message

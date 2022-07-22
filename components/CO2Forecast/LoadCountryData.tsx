@@ -10,7 +10,7 @@ import { useConversionHooks } from "../viz/conversionHooks"
 import settings from "settings"
 import { MinimalDataset, prepareProductionDataset, RawDataset } from "./calculate"
 import { Store } from "lib/types"
-import { usePrefixConversion } from "lib/calculations/prefix-conversion"
+import * as Sentry from "@sentry/nextjs";
 
 const DEBUG = false
 
@@ -33,6 +33,7 @@ function LoadCountryData( { projectionSources }:{projectionSources: RawDataset[]
 		try {
 			return prepareProductionDataset( dataset ).map( p => ( { ...p, co2: co2FromVolume( p ) } ) )
 		} catch( e ) {
+			Sentry.captureException( e )
 			notification.error( { message: 'LoadCountryData  error', description: e.message, duration: 20 } )
 			return dataset
 		}
@@ -80,6 +81,7 @@ function LoadCountryData( { projectionSources }:{projectionSources: RawDataset[]
 			} else
 				return _co2( projectionData?.countryDataPoints?.nodes )
 		} catch( e ) {
+			Sentry.captureException( e )
 			notification.error( { message: 'Error in calculation', description: e.message } )
 			return []
 		}
@@ -204,6 +206,7 @@ function LoadCountryData( { projectionSources }:{projectionSources: RawDataset[]
 		try {
 			return reservesProduction( projection, reserves, projectionSourceId, reservesSourceId, limits, grades )
 		} catch( e ) {
+			Sentry.captureException( e )
 			notification.error( {
 				message: 'Error in projected production calculation',
 				description: e.message,

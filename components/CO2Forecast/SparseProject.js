@@ -7,6 +7,7 @@ import { GQL_project } from "queries/country"
 import GraphQLStatus from "../GraphQLStatus"
 import { useConversionHooks } from "components/viz/conversionHooks"
 import OpenCorporateCard from "../OpenCorporateCard"
+import * as Sentry from "@sentry/nextjs";
 
 import { useRouter } from "next/router"
 import { ExportOutlined } from "@ant-design/icons"
@@ -83,6 +84,7 @@ function SparseProject( { borders, countryCurrentProduction } ) {
 				set_localeDescription( resp?.data?.translations?.[ 0 ]?.translatedText )
 			} catch( e ) {
 				console.info( e )
+				Sentry.captureException( e )
 				notification.error( {
 					message: "Failed to translate description",
 					description: e.message

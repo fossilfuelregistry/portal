@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux"
 import ForecastView from "./ForecastView"
 import { useConversionHooks } from "../viz/conversionHooks"
 import settings from "settings"
+import * as Sentry from "@sentry/nextjs";
 
 const DEBUG = false
 
@@ -36,6 +37,7 @@ function LoadProjectData( { projectionSources } ) {
 					return _d
 				} )
 		} catch( e ) {
+			Sentry.captureException( e )
 			notification.error( { message: 'LoadProjectData error', description: e.message } )
 			return dataset
 		}
@@ -83,6 +85,7 @@ function LoadProjectData( { projectionSources } ) {
 			} else
 				return _co2( projectionData?.projectDataPoints?.nodes )
 		} catch( e ) {
+			Sentry.captureException( e )
 			notification.error( { message: 'Error in calculation', description: e.message } )
 			return []
 		}
@@ -208,6 +211,7 @@ function LoadProjectData( { projectionSources } ) {
 		try {
 			return reservesProduction( projection, reserves, projectionSourceId, reservesSourceId, limits, grades )
 		} catch( e ) {
+			Sentry.captureException( e )
 			notification.error( {
 				message: 'Error in projected production calculation',
 				description: e.message,

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react"
+import * as Sentry from "@sentry/nextjs";
 import useText from "lib/useText"
 import { notification } from "antd"
 import settings from "../settings"
@@ -27,6 +28,7 @@ export default function OpenCorporateCard( { reference } ) {
 				set_company( data?.results?.company )
 
 			} catch( e ) {
+				Sentry.captureException( e )
 				console.trace( e )
 				notification.error( {
 					message: "Failed to fetch OpenCorporate info",
