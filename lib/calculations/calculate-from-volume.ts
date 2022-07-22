@@ -1,3 +1,4 @@
+import { captureException } from "@sentry/nextjs";
 import { FossilFuelType } from "lib/types";
 import { Scenarios } from "./utils";
 
@@ -85,6 +86,7 @@ const co2FromVolume = (props: ProductionData, log: any | undefined) => {
             graph: graph.serialize(),
           }
         );
+        captureException( e )
     }
 
     try {
@@ -97,6 +99,7 @@ const co2FromVolume = (props: ProductionData, log: any | undefined) => {
         fullFuelType,
         graph: graph.serialize(),
       });
+      captureException( e )
       throw new Error(
         "While looking for " +
           fullFuelType +

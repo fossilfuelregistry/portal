@@ -4,6 +4,7 @@ import { GQL_productionCountries } from "../queries/general"
 import GraphQLStatus from "../components/GraphQLStatus"
 import settings from "../settings"
 import { useConversionHooks } from "../components/viz/conversionHooks"
+import { captureException } from "@sentry/nextjs"
 
 export default function MapPage() {
 	const apolloClient = useApolloClient()
@@ -105,6 +106,7 @@ export default function MapPage() {
 				}
 			} catch( e ) {
 				console.log( e )
+				captureException( e )
 			}
 			set_fullCountries( allCountries )
 		}

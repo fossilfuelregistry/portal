@@ -11,6 +11,7 @@ import Sources from "./Sources"
 import LoadProjectData from "./LoadProjectData"
 import getConfig from "next/config"
 import MapLibre from "../geo/MapLibre"
+import { captureException } from "@sentry/nextjs"
 
 const DEBUG = false
 
@@ -107,6 +108,7 @@ function DenseProject( { countryCurrentProduction, borders, productionSources, p
 			</> )
 	} catch( e ) {
 		console.info( e )
+		captureException( e )
 		return <Alert message={ e.message } type="error" showIcon/>
 	}
 }

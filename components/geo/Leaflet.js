@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react"
 import Head from "next/head"
 import Spinner from "./Spinner"
+import { captureException } from "@sentry/nextjs"
 
 const DEBUG = false
 
@@ -109,6 +110,7 @@ export default function Leaflet( {
 		} catch( e ) {
 			console.info( e )
 			console.info( { outlineGeometry } )
+			captureException( e )
 		}
 	}, [ domRef.current, loaded, outlineGeometry ] )
 
@@ -133,6 +135,7 @@ export default function Leaflet( {
 		} catch( e ) {
 			console.info( e )
 			console.info( { highlightedProjects } )
+			captureException( e )
 		}
 	}, [ domRef.current, loaded, highlightedProjects ] )
 
@@ -155,6 +158,7 @@ export default function Leaflet( {
 		} catch( e ) {
 			console.info( e )
 			console.info( { projects } )
+			captureException( e )
 		}
 	}, [ domRef.current, loaded, projects ] )
 

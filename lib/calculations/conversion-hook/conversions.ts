@@ -1,3 +1,4 @@
+import { captureException } from "@sentry/nextjs";
 import Graph from "graph-data-structure";
 import {
   ConversionFactorInStore,
@@ -153,6 +154,7 @@ export const convertVolume = (
     console.info(
       `Conversion problem: ${volume} ${unit} ${fossilFuelType} -> ${toUnit}, ${(e as Error).message}`
     );
+    captureException( e )
     return volume;
   }
 };

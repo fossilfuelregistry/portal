@@ -374,6 +374,7 @@ export const useConversionHooks = () => {
             graph: graph.serialize(),
           }
         );
+        captureException( e )
     }
 
     try {

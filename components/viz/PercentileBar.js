@@ -7,6 +7,7 @@ import { Modal } from "antd"
 import ReactMarkdown from "react-markdown"
 import useText from "../../lib/useText"
 import useNumberFormatter from "../../lib/useNumberFormatter"
+import { captureException } from "@sentry/nextjs"
 //import palette from 'google-palette'
 
 const DEBUG = false
@@ -107,8 +108,10 @@ export default function PercentileBar( { low, mid, high, scale, height, x, y, wi
 					className="numeric" x={ textX } y={ textHighY } fontSize="14" fontWeight="bold" textAnchor="left"
 					fill="#aaaaaa"
 				>
-					<tspan dy={ 5 } onClick={ () => helpModal( getText( 'ranges' ), getText( 'P95' ) ) }
-						   style={ { cursor: 'help' } }>
+					<tspan
+						dy={ 5 } onClick={ () => helpModal( getText( 'ranges' ), getText( 'P95' ) ) }
+						   style={ { cursor: 'help' } }
+					>
 						{ toCustomPrecision( high ) }
 					</tspan>
 				</text>
@@ -132,6 +135,7 @@ export default function PercentileBar( { low, mid, high, scale, height, x, y, wi
 	} catch( e ) {
 		console.info( { lowVariance, highVariance, low, mid, high } )
 		console.info( e )
+		captureException( e )
 		return <text>PercentileBar calculations failed: { e.message }</text>
 	}
 }

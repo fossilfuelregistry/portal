@@ -5,6 +5,7 @@ import { Col, Input, Alert, Row, Select } from "antd"
 import CountrySelectorStandalone from "../navigation/CountrySelectorStandalone"
 import { useConversionHooks } from "../viz/conversionHooks"
 import ScopeBars from "../viz/ScopeBars"
+import { captureException } from "@sentry/nextjs"
 
 const DEBUG = false
 
@@ -128,6 +129,7 @@ export default function Calculator() {
 			</div> )
 	} catch( e ) {
 		console.log( e )
+		captureException( e )
 		return <Alert showIcon type="error" message={'Application error'} description={e.message} />
 	}
 }

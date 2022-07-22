@@ -17,6 +17,7 @@ import Sources from "./Sources"
 import getConfig from "next/config"
 import MapLibre from "../geo/MapLibre"
 import ScopeBars from "../viz/ScopeBars"
+import { captureException } from "@sentry/nextjs"
 
 const DEBUG = false
 
@@ -224,6 +225,7 @@ function SparseProject( { borders, countryCurrentProduction } ) {
 			</> )
 	} catch( e ) {
 		console.info( e )
+		captureException( e )
 		return <Alert message={ e.message } type="error" showIcon/>
 	}
 }

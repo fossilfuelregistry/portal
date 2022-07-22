@@ -29,6 +29,7 @@ import MapLibre from "../../components/geo/MapLibre";
 import CO2CostSelector from "../../components/navigation/CO2CostSelector";
 import { RawSource, Store } from "lib/types";
 import { GQL_projectSourcesRecord } from "queries/general-types";
+import { captureException } from "@sentry/nextjs";
 
 const DEBUG = false;
 
@@ -470,6 +471,7 @@ export default function CO2ForecastPage() {
       </>
     );
   } catch (e) {
+    captureException( e )
     return (
       <div className="page">
         <TopNavigation share={true} />

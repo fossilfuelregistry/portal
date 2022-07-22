@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react"
 import bbox from '@turf/bbox'
 import Loading from "../Loading"
 import getConfig from "next/config"
+import { captureException } from "@sentry/nextjs"
 
 const DEBUG = false
 
@@ -107,6 +108,7 @@ export default function MapLibre( {
 					map.current.removeLayer( 'borders' )
 					map.current.removeSource( 'borders' )
 				} catch( e ) {
+					captureException( e )
 				}
 			}
 
@@ -134,6 +136,7 @@ export default function MapLibre( {
 		} catch( e ) {
 			console.info( e )
 			console.info( { outlineGeometry } )
+			captureException( e )
 		}
 	}, [ domRef.current, loaded, outlineGeometry ] )
 
@@ -174,6 +177,7 @@ export default function MapLibre( {
 		} catch( e ) {
 			console.info( e )
 			console.info( { highlightedProjects } )
+			captureException( e )
 		}
 	}, [ domRef.current, loaded, highlightedProjects ] )
 
@@ -237,6 +241,7 @@ export default function MapLibre( {
 		} catch( e ) {
 			console.info( e )
 			console.info( { projects } )
+			captureException( e )
 		}
 	}, [ domRef.current, loaded, projects, projectsWithMarkers ] )
 
