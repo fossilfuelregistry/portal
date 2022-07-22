@@ -3,7 +3,7 @@ import React from "react"
 import { Modal } from "antd"
 import ReactMarkdown from "react-markdown"
 import getConfig from "next/config"
-import useText from "lib/useText"
+import useText from "../lib/useText"
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 

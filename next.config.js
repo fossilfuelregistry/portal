@@ -25,7 +25,8 @@ const sentryWebpackPluginOptions = {
 module.exports = withSentryConfig(
   withAntdLess({
     eslint: { ignoreDuringBuilds: true },
-    modifyVars: themeVariables,
+    //modifyVars: themeVariables,
+    lessVarsFilePath: './assets/app.less',
     publicRuntimeConfig: { themeVariables },
     webpack: (config) => {
       config.resolve.modules.push(path.resolve("./"));
