@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React from "react"
 import useText from "lib/useText"
 import HelpModal from "../HelpModal"
 import { addToTotal, sumOfCO2 } from "./calculate"
@@ -22,13 +22,8 @@ function InputSummary( { dataset = [] } ) {
 	const country = useSelector( redux => redux.country )
 	const productionSourceId = useSelector( redux => redux.productionSourceId )
 
-	const costPerTonCO2 = useSelector( redux => redux.co2CostPerTon )
-	const { currentUnit, costMultiplier } = useCO2CostConverter()
+	const {  costMultiplier } = useCO2CostConverter()
 	const numberFormatter = useNumberFormatter()
-
-
-
-
 
 	if( !( dataset?.length > 0 ) ) return null
 
@@ -41,8 +36,8 @@ function InputSummary( { dataset = [] } ) {
 	} )
 
 	const totalsInCO2OrCost = {}
-	 Object.entries( totals ).forEach( ( [ fuel, scopes ] ) => {
-		 totalsInCO2OrCost[ fuel ] = {}
+	Object.entries( totals ).forEach( ( [ fuel, scopes ] ) => {
+		totalsInCO2OrCost[ fuel ] = {}
 		Object.entries( scopes ).forEach( ( [ scope, value ] )=> {
 			totalsInCO2OrCost[ fuel ][ scope ] =  value.map( v=> v * costMultiplier )
 		} )

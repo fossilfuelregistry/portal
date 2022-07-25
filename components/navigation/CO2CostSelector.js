@@ -57,7 +57,7 @@ const CO2cCstSelector = () => {
 	return (
 		<>
 			<div>
-				<Switch onChange={()=>onTogglingCost( !showCostInGraphs )} value={showCostInGraphs} /> <span>{getText( 'menu_co2_cost_switch_label' )}</span>
+				<Switch onChange={()=>onTogglingCost( !showCostInGraphs )} checked={showCostInGraphs} /> <span>{getText( 'menu_co2_cost_switch_label' )}</span>
 			</div>
 			{
 				showCostInGraphs && (
