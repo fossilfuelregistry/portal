@@ -14,7 +14,7 @@ const DEBUG = false
 
 const theme = getConfig()?.publicRuntimeConfig?.themeVariables
 
-function helpModal( title, content ) {
+function helpModal( title:string, content: string ) {
 	return Modal.info( {
 		title,
 		content: ( <ReactMarkdown>{ content }</ReactMarkdown> )
@@ -22,7 +22,7 @@ function helpModal( title, content ) {
 }
 
 // Function to calculate percentile value from variance
-function percentile( variance, p, mean ) {
+function percentile( variance: number, p: number, mean:number ): number {
 	if( !( variance > 0 ) ) return 0
 	const d = gaussian( mean, variance ** 2 )
 	return d.ppf( p )
@@ -36,7 +36,9 @@ function percentile( variance, p, mean ) {
 }*/
 
 
-export default function PercentileBar( { low, mid, high, scale, height, x, y, width, color } ) {
+type PercentileBarParams = { low: number, mid: number, high:number, scale: number, height: number, x: number, y:number, width: number, color: any }
+
+export default function PercentileBar( { low, mid, high, scale, height, x, y, width, color }: PercentileBarParams ) {
 	const { getText } = useText()
 	const toCustomPrecision =	useNumberFormatter()
 
@@ -50,14 +52,14 @@ export default function PercentileBar( { low, mid, high, scale, height, x, y, wi
 	let lowVariance, highVariance
 	try {
 		// Find variance of two asymmetric distributions from known low/mid and mid/high points
-		lowVariance = solve( v => percentile( v, 0.05, mid ), low, ( mid - low ) / 2, 0.05, 100 )
-		highVariance = solve( v => percentile( v, 0.95, mid ), high, ( high - mid ) / 2, 0.05, 100 )
+		lowVariance = low === mid ? low : solve( v => percentile( v, 0.05, mid ), low, ( mid - low ) / 2, 0.05, 100 )
+		highVariance = high === mid ? high : solve( v => percentile( v, 0.95, mid ), high, ( high - mid ) / 2, 0.05, 100 )
 
-		const lowDistribution = gaussian( mid, lowVariance ** 2 )
-		const highDistribution = gaussian( mid, highVariance ** 2 )
+		const lowDistribution = gaussian( mid, ( lowVariance??low ) ** 2 )
+		const highDistribution = gaussian( mid, ( highVariance??high ) ** 2 )
 
 		// Vector of full p05 -- p95 range values
-		const percentilePoints = []
+		const percentilePoints:number[] = []
 		for( let percent = 5; percent <= 95; percent += 5 ) {
 			if( percent <= 50 )
 				percentilePoints.push( lowDistribution.ppf( percent / 100 ) )
@@ -69,19 +71,19 @@ export default function PercentileBar( { low, mid, high, scale, height, x, y, wi
 		//const tolSeq = palette( 'tol-sq', 11 )
 		// const tolSeq = [ '#0A99FF', '#008FF5', '#0083E0', '#0077CC', '#006BB8', '#005FA3', '#005694', '#00477A', '#003C66', '#003052', '#00243D' ]
 
-		let colSeq = []
+		const colSeq = []
 		for( let c = 0; c <= 10; c++ ) {
 			colSeq.push( Color( color ).darken( ( 10 - c ) / 30 ).desaturate( c / 20 ).lighten( c / 7 ).hex() )
 		}
 		const colSeqRev = [ ...colSeq ].reverse()
 		const tileColors = [ ...colSeqRev, ...colSeq ]//.map( c => '#' + c )
 		DEBUG && console.info( tileColors )
-		const scaleY = v => height * ( 1 - v / scale )
+		const scaleY = ( v:number ) => height * ( 1 - v / scale )
 
 		
 		const textX = x + width + 2
 		let textHighY = scaleY( high )
-		let textMidY = scaleY( mid )
+		const textMidY = scaleY( mid )
 		let textLowY = scaleY( low )
 
 		// De-clutter (Positive Y downwards!)
@@ -110,7 +112,7 @@ export default function PercentileBar( { low, mid, high, scale, height, x, y, wi
 				>
 					<tspan
 						dy={ 5 } onClick={ () => helpModal( getText( 'ranges' ), getText( 'P95' ) ) }
-						   style={ { cursor: 'help' } }
+						style={{ cursor: 'help' }}
 					>
 						{ toCustomPrecision( high ) }
 					</tspan>
@@ -136,6 +138,6 @@ export default function PercentileBar( { low, mid, high, scale, height, x, y, wi
 		console.info( { lowVariance, highVariance, low, mid, high } )
 		console.info( e )
 		captureException( e )
-		return <text>PercentileBar calculations failed: { e.message }</text>
+		return <text>PercentileBar calculations failed: { ( e as Error ).message }</text>
 	}
 }
