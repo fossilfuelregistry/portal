@@ -1,5 +1,6 @@
 // .storybook/preview.js
-import "../assets/app.less";
+
+import "../assets/new.less";
 
 export const parameters = {
   actions: { argTypesRegex: "^on[A-Z].*" },
