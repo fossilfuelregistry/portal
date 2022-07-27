@@ -5,8 +5,6 @@ const fs = require("fs");
 const file = fs.readFileSync(path.join(__dirname, "..", "assets", "new-antd-custom.less"), {"encoding": "utf8"})
 const themeVariables = lessToJS(file, {stripPrefix: true, resolveVariables: true,});
 
-console.log({themeVariables})
-
 module.exports = {
   stories: [
     "../**/stories.@(js|jsx|ts|tsx)",

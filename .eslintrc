@@ -65,7 +65,6 @@
     "react/no-unused-prop-types": "error",
     "react/no-unused-state": "error",
     "react/prefer-stateless-function": "warn",
-    "react/require-default-props": "error",
     "react/self-closing-comp": "error",
     "react/sort-prop-types": "warn",
     "react/style-prop-object": "error",

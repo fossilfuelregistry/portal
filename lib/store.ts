@@ -1,4 +1,3 @@
-import React from "react"
 import { applyMiddleware, createStore } from 'redux'
 import { createWrapper, HYDRATE } from 'next-redux-wrapper'
 import { Store } from "./types"
